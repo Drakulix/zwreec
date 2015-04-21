@@ -1,0 +1,7 @@
+[package]
+name = "zwreec"
+version = "0.0.1"
+authors = ["..."]
+
+[[bin]]
+name = "zwreec_bin"
