@@ -17,7 +17,7 @@ fn main() {
     let output_file_name: &str;
     
     if args.len() == 1 {
-        input_file_name = "../README.md";
+        input_file_name = "README.md";
         output_file_name = "file_does_not_exist.zcode";
     } else if args.len() == 3 {
         println!("argument 1 {}", args[1]);
