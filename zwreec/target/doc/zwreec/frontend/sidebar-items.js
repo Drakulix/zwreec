@@ -1,1 +1,0 @@
-initSidebarItems({"fn":[["temp_hello",""]]});

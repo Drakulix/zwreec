@@ -1,1 +1,0 @@
-initSidebarItems({"fn":[["open_source_file","Read Text File"],["temp_hello",""],["temp_print_current_directory_files",""]]});
