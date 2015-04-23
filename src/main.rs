@@ -21,7 +21,10 @@ fn main() {
             input_file_name = &args[1];
             output_file_name = &args[2];
         },
-        _ => help()
+        _ => {
+            help();
+            return;
+        }
     };
 
     // call library
