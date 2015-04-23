@@ -14,7 +14,7 @@ use std::path::Path;
 ///
 /// # Examples
 ///
-/// ```
+/// ```ignore
 /// use zwreec::file;
 ///
 /// let stringContent = file::open_source_file("../README.md");
