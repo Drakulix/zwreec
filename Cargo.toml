@@ -1,4 +1,7 @@
 [package]
 name = "zwreec"
 version = "0.0.1"
-authors = ["name <mail@mail.com>"]
+authors = ["..."]
+
+[[bin]]
+name = "zwreec_bin"
