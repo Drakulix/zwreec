@@ -22,7 +22,7 @@ fn main() {
             output_file_name = &args[2];
         },
         _ => help()
-    }
+    };
 
     // call library
     zwreec::compile(input_file_name, output_file_name);
