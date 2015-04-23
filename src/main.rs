@@ -1,7 +1,3 @@
-// only becouse without the following line there will be warnings
-// while testing :(
-#![allow(dead_code)]
-
 use std::env;
 
 extern crate zwreec;
@@ -15,7 +11,7 @@ fn main() {
 
     let input_file_name: &str;
     let output_file_name: &str;
-    
+
     if args.len() == 1 {
         input_file_name = "README.md";
         output_file_name = "file_does_not_exist.zcode";
