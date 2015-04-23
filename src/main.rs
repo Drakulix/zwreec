@@ -9,21 +9,19 @@ fn main() {
     // handling commandline parameters
     let args: Vec<String> = env::args().collect();
 
-    let input_file_name: &str;
-    let output_file_name: &str;
+    let mut input_file_name: &str;
+    let mut output_file_name: &str;
 
-    if args.len() == 1 {
-        input_file_name = "README.md";
-        output_file_name = "file_does_not_exist.zcode";
-    } else if args.len() == 3 {
-        println!("argument 1 {}", args[1]);
-        println!("argument 2 {}", args[2]);
-
-        input_file_name = &args[1];
-        output_file_name = &args[2];
-    } else {
-        help();
-        return;
+    match args.len() {
+        1 => {
+            input_file_name = "a.in";
+            output_file_name = "a.out";
+        },
+        3 => {
+            input_file_name = &args[1];
+            output_file_name = &args[2];
+        },
+        _ => help()
     }
 
     // call library
