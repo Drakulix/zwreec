@@ -1,0 +1,33 @@
+use std::error::Error;
+use std::fs::File;
+use std::io::prelude::*;
+use std::path::Path;
+use std::env;
+
+fn main() {
+	let args: Vec<String> = env::args().collect();
+	let pathname: &str;
+	if args.len() == 2 {
+		pathname = &args[1];
+	} else {
+		println!("no input file");
+		return;
+	}
+	r
+}
+
+fn readFile(pathname:&str){
+    let path = Path::new(pathname);
+    let display = path.display();
+    let mut file = match File::open(&path) { //read only
+        Err(why) => panic!("couldn't open {}: {}", display,
+                                                   Error::description(&why)),
+        Ok(file) => file,
+    };
+    let mut s = String::new();
+    match file.read_to_string(&mut s) {
+        Err(why) => panic!("couldn't read {}: {}", display,
+                                                   Error::description(&why)),
+        Ok(_) => print!("{} contains:\n{}", display, s),
+    }
+}
