@@ -1,7 +1,0 @@
-use std::collec::hashmap::HashMap;
-fn main() {
-    let mut map = HashMap::<uint,uint>::new();
-    let k = 1;
-    map.insert_or_update_with(k, k, |_, v| *v+=k);
-    map.insert_or_update_with(k, k, |_, v| *v+=k);
-}
