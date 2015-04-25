@@ -125,7 +125,7 @@ pub fn try_log(level: LogLevel, args: fmt::Arguments) {
 ///
 /// # Examples
 /// '''
-/// error!("This is bad!");
+/// log_error!("This is bad!");
 /// '''
 macro_rules! log_error {
     ($($arg:tt)*) => (::utils::log::try_log(::utils::log::LogLevel::ERROR, format_args!($($arg)*)));
