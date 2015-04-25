@@ -1,5 +1,8 @@
 use std::env;
 
+#[macro_use]
+pub mod utils;
+
 extern crate zwreec;
 
 
