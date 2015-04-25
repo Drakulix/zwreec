@@ -7,7 +7,7 @@ extern crate zwreec;
 
 
 fn main() {
-    println!("#main started");
+    info!("main started");
 
     // handling commandline parameters
     let args: Vec<String> = env::args().collect();
@@ -34,13 +34,14 @@ fn main() {
     zwreec::compile(input_file_name, output_file_name);
 
     // only for testing
-    println!("(1) {}", zwreec::frontend::temp_hello());
-    println!("(2) {}", zwreec::backend::temp_hello());
-    println!("(3) {}", zwreec::file::temp_hello());
+    verbose!("(1) {}", zwreec::frontend::temp_hello());
+    verbose!("(2) {}", zwreec::backend::temp_hello());
+    verbose!("(3) {}", zwreec::file::temp_hello());
 
-    println!("#main finished");
+    info!("main finished");
 }
 
 fn help() {
-    println!("usage:\n    zwreec <input_file> <output_file>");
+    error!("invalid arguments");
+    info!("usage:\n    zwreec <input_file> <output_file>");
 }
