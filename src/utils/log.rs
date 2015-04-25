@@ -135,7 +135,7 @@ macro_rules! log_error {
 ///
 /// # Examples
 /// '''
-/// error!("This is maybe bad?!");
+/// log_warn!("This is maybe bad?!");
 /// '''
 macro_rules! log_warn {
     ($($arg:tt)*) => (::utils::log::try_log(::utils::log::LogLevel::WARN, format_args!($($arg)*)));
@@ -145,7 +145,7 @@ macro_rules! log_warn {
 ///
 /// # Examples
 /// '''
-/// error!("This is just to let you know!");
+/// log_info!("This is just to let you know!");
 /// '''
 macro_rules! log_info {
     ($($arg:tt)*) => (::utils::log::try_log(::utils::log::LogLevel::INFO, format_args!($($arg)*)));
@@ -155,7 +155,7 @@ macro_rules! log_info {
 ///
 /// # Examples
 /// '''
-/// error!("You must really like spam!");
+/// log_verbose!("You must really like spam!");
 /// '''
 macro_rules! log_verbose {
     ($($arg:tt)*) => (::utils::log::try_log(::utils::log::LogLevel::VERBOSE, format_args!($($arg)*)));
