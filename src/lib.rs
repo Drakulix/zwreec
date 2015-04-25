@@ -9,8 +9,8 @@ pub mod utils;
 
 
 pub fn compile(input_file_name: &str, output_file_name: &str) {
-    info!("inputFile: {}", input_file_name);
-    info!("outputFile: {}", output_file_name);
+    log_info!("inputFile: {}", input_file_name);
+    log_info!("outputFile: {}", output_file_name);
 
     // open file
     file::open_source_file(input_file_name);

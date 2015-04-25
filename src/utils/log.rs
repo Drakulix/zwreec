@@ -127,7 +127,7 @@ pub fn try_log(level: LogLevel, args: fmt::Arguments) {
 /// '''
 /// error!("This is bad!");
 /// '''
-macro_rules! error {
+macro_rules! log_error {
     ($($arg:tt)*) => (::utils::log::try_log(::utils::log::LogLevel::ERROR, format_args!($($arg)*)));
 }
 
@@ -137,7 +137,7 @@ macro_rules! error {
 /// '''
 /// error!("This is maybe bad?!");
 /// '''
-macro_rules! warn {
+macro_rules! log_warn {
     ($($arg:tt)*) => (::utils::log::try_log(::utils::log::LogLevel::WARN, format_args!($($arg)*)));
 }
 
@@ -147,7 +147,7 @@ macro_rules! warn {
 /// '''
 /// error!("This is just to let you know!");
 /// '''
-macro_rules! info {
+macro_rules! log_info {
     ($($arg:tt)*) => (::utils::log::try_log(::utils::log::LogLevel::INFO, format_args!($($arg)*)));
 }
 
@@ -157,14 +157,14 @@ macro_rules! info {
 /// '''
 /// error!("You must really like spam!");
 /// '''
-macro_rules! verbose {
+macro_rules! log_verbose {
     ($($arg:tt)*) => (::utils::log::try_log(::utils::log::LogLevel::VERBOSE, format_args!($($arg)*)));
 }
 
 
 #[test]
 fn test() {
-    info!("Test!");
+    log_info!("Test!");
 }
 
 //To-Do add a way to check the result automatically
@@ -173,7 +173,7 @@ fn multi_thread_test() {
     let mut joins = Vec::new();
     for _ in 0..10 {
         joins.push(std::thread::spawn(move || {
-            info!("No corruption should happen in this ultra-extra-super-long string output even if run in multiple threads.");
+            log_info!("No corruption should happen in this ultra-extra-super-long string output even if run in multiple threads.");
         }));
     }
     for handle in joins {
