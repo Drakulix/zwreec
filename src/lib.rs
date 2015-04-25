@@ -15,8 +15,8 @@ pub fn compile(input_file_name: &str, output_file_name: &str) {
 
     // compile
 
-
-    // save file
+    backend::zcode::temp_create_hello_world_zcode();
+    
 }
 
 #[test]
