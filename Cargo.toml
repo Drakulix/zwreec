@@ -5,3 +5,6 @@ authors = ["..."]
 
 [[bin]]
 name = "zwreec_bin"
+
+[dependencies]
+time = "*"
