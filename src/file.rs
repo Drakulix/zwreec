@@ -46,7 +46,6 @@ pub fn open_source_file(source_file_name: &str) -> String {
 }
 
 pub fn save_bytes_to_file(target_file_name: &str, bytes: &[u8]) {
-//pub fn save_bytes_to_file(target_file_name: &str, bytes: Vec<u8>) {
     // saving
     println!("save to file: {}", target_file_name);
 
