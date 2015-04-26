@@ -13,6 +13,9 @@ pub static ALPHA: [char; 78] = [
     '\0', '^', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '.',
     ',', '!', '?', '_', '#', '\'','"', '/', '\\','-', ':', '(', ')'];
 
+
+/// encodes an string to z-characters
+/// and returns the length of the used bytes
 pub fn encode(data: &mut Bytes, content: &str) -> u16 {
     let string_bytes = content.to_string().into_bytes();
 

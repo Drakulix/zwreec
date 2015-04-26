@@ -45,6 +45,7 @@ pub fn open_source_file(source_file_name: &str) -> String {
     content
 }
 
+/// saves bytes to an file
 pub fn save_bytes_to_file(target_file_name: &str, bytes: &[u8]) {
     // saving
     println!("save to file: {}", target_file_name);

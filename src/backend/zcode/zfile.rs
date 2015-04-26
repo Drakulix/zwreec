@@ -10,8 +10,6 @@ pub struct Zfile {
 }
 
 
-
-
 impl Zfile {
 
     pub fn new() -> Zfile {
@@ -21,6 +19,7 @@ impl Zfile {
         }
     }
 
+    /// creates the header of a zfile
     pub fn create_header(&mut self) {
 
         let alpha_addr: u16 = 0x40;
@@ -89,7 +88,7 @@ impl Zfile {
         self.data.write_bytes(&tmp, dictionary_addr as usize);
     }
 
-    // writes the alphabet to index
+    /// writes the alphabet to index
     fn write_alphabet(&mut self, index: usize) {
         // TODO: is it possible to do this with map?
         let mut alpha_tmp: [u8; 78] = [0; 78];
@@ -99,6 +98,7 @@ impl Zfile {
         self.data.write_bytes(&alpha_tmp, index);
     }
 
+    /// writes the object-name to an index
     fn write_object_name(&mut self, name: &str, index: usize) {
         let mut text_bytes: Bytes = Bytes{bytes: Vec::new()};
         let length: u16 = ztext::encode(&mut text_bytes, name);
@@ -109,13 +109,14 @@ impl Zfile {
         self.data.write_bytes(&text_bytes.bytes, index + 1);
     }
 
+    /// start of an zcode programm
+    /// fills everying < program_addr with zeros
     pub fn start(&mut self) {
         self.data.write_zero_until(self.program_addr as usize);
     }
 
 
     // ops
-
     pub fn op_print(&mut self, content: &str) {
         let index: usize = self.data.bytes.len() as usize;
         self.data.write_byte(0xb2, index);
