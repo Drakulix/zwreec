@@ -1,10 +1,13 @@
 use std::env;
 
+#[macro_use]
+pub mod utils;
+
 extern crate zwreec;
 
 
 fn main() {
-    println!("#main started");
+    log_info!("main started");
 
     // handling commandline parameters
     let args: Vec<String> = env::args().collect();
@@ -31,13 +34,14 @@ fn main() {
     zwreec::compile(input_file_name, output_file_name);
 
     // only for testing
-    println!("(1) {}", zwreec::frontend::temp_hello());
-    println!("(2) {}", zwreec::backend::temp_hello());
-    println!("(3) {}", zwreec::file::temp_hello());
+    log_verbose!("(1) {}", zwreec::frontend::temp_hello());
+    log_verbose!("(2) {}", zwreec::backend::temp_hello());
+    log_verbose!("(3) {}", zwreec::file::temp_hello());
 
-    println!("#main finished");
+    log_info!("main finished");
 }
 
 fn help() {
-    println!("usage:\n    zwreec <input_file> <output_file>");
+    log_error!("invalid arguments");
+    log_info!("usage:\n    zwreec <input_file> <output_file>");
 }
