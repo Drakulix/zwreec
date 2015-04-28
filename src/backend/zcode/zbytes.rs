@@ -1,4 +1,4 @@
-//! The `zbyte` module contains ...
+//! The `zbyte` module contains code
 //! to deal with opcodes and zcode
 
 pub struct Bytes {
@@ -14,11 +14,6 @@ impl Bytes {
     /// if vector isn't large enough:
     ///     fills everything until index with zero
     pub fn write_byte(&mut self, byte: u8, index: usize) {
-        /*if index >= self.len() {
-            for _ in 0..(index - self.len() + 1) {
-                self.bytes.push(0);
-            }
-        }*/
         while self.len() <= index {
             self.bytes.push(0);
         }
@@ -39,7 +34,7 @@ impl Bytes {
         }
     }
 
-    /// fills everything with zeros until the index
+    /// fills everything with zeros until but not including the index
     /// => [index-1] == 0; [index] == nil;
     pub fn write_zero_until(&mut self, index: usize) {
         while self.len() < index {

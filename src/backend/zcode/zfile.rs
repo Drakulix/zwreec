@@ -1,4 +1,4 @@
-//! The `zfile` module contains ...
+//! The `zfile` module contains functionality to create a zcode file
 //! 
 
 pub use super::zbytes::Bytes;
@@ -77,10 +77,6 @@ impl Zfile {
         // ...
 
         // object tabelle name
-        //data.write_u16(object_addr, 0x0c);
-        //let tmp: [u8; 6] = [0x04, 0x50, 0xef, 0xa9, 0x19, 0x00];
-        //data.write_bytes(&tmp, 770);
-        //self.op_print("object", 770);
         self.write_object_name("object", 770);
 
         // dictionary

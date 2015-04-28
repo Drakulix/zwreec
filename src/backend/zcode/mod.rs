@@ -31,7 +31,7 @@ pub fn temp_create_hello_world_zcode() {
     zfile.op_quit();
 
 
-    file::save_bytes_to_file("helloworld.z8", &*zfile.data.bytes);
+    file::save_bytes_to_file("helloworld.z8", &(*zfile.data.bytes));
 }
 
 pub fn temp_hello() -> String {

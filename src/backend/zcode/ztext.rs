@@ -1,4 +1,4 @@
-//! The `ztext` module contains ...
+//! The `ztext` module contains encoding functions to encode text in z-ascii characters.
 //! 
 
 pub use super::zbytes::Bytes;
@@ -16,6 +16,7 @@ pub static ALPHA: [char; 78] = [
 
 /// encodes an string to z-characters
 /// and returns the length of the used bytes
+/// TODO: Only works with lower case letters
 pub fn encode(data: &mut Bytes, content: &str) -> u16 {
     let string_bytes = content.to_string().into_bytes();
 
@@ -28,7 +29,7 @@ pub fn encode(data: &mut Bytes, content: &str) -> u16 {
         two_bytes |= (pos as u16) << shift(i as u8);
 
         if i % 3 == 2 {
-            data.write_u16(two_bytes, pos_to_index(i)/*((i / 3) as usize) * 2*/);
+            data.write_u16(two_bytes, pos_to_index(i));
             two_bytes = 0;
         }
 
@@ -51,10 +52,12 @@ pub fn encode(data: &mut Bytes, content: &str) -> u16 {
         }
     }
 
+    // Shifts the data for the corresponding position in the 2-byte array
     fn shift(position: u8) -> u8 {
         10 - (position % 3) * 5
     }
 
+    // Returns the location of the character of the specified index in the zcode character array
     fn pos_in_alpha(letter: u8) -> i8 {
         for i in 0..ALPHA.len() {
             if ALPHA[i] as u8 == letter {
