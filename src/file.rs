@@ -4,10 +4,12 @@
 
 
 use std::io::prelude::Read;
+use std::io::prelude::Write;
 use std::error::Error;
 use std::fs::File;
 use std::fs;
 use std::path::Path;
+
 
 
 /// Read Text File
@@ -41,6 +43,31 @@ pub fn open_source_file(source_file_name: &str) -> String {
     }
 
     content
+}
+
+/// saves bytes to an file
+pub fn save_bytes_to_file(target_file_name: &str, bytes: &[u8]) {
+    // saving
+    println!("save to file: {}", target_file_name);
+
+    let path = Path::new(target_file_name);
+    let display = path.display();
+
+    // Open a file in write-only mode, returns `io::Result<File>`
+    let mut file = match File::create(&path) {
+        Err(why) => panic!("couldn't create {}: {}",
+                           display,
+                           Error::description(&why)),
+        Ok(file) => file,
+    };
+
+    match file.write_all(bytes) {
+        Err(why) => {
+            panic!("couldn't write to {}: {}", display,
+                                               Error::description(&why))
+        },
+        Ok(_) => println!("successfully wrote to {}", display),
+    }
 }
 
 pub fn save_target_file(target_file_name: &str) {

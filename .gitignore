@@ -48,6 +48,7 @@ Temporary Items
 
 
 # Project Specific
+*.z8
 
 # Default input file
 a.in
