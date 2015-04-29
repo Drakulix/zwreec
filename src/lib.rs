@@ -16,7 +16,7 @@ pub fn compile(input_file_name: &str, output_file_name: &str) {
 
     // compile
 
-    backend::zcode::temp_create_hello_world_zcode();
+    backend::zcode::temp_create_zcode_example();
     
 }
 

@@ -4,6 +4,12 @@
 pub use super::zbytes::Bytes;
 pub use super::ztext;
 
+pub enum JumpType {
+    JUMP,
+    BRANCH,
+    ROUTINE
+}
+
 pub struct Zfile {
     pub data: Bytes,
     program_addr: u16,
@@ -13,12 +19,14 @@ pub struct Zfile {
 
 struct Zjump {
     pub from_addr: u16,
-    pub name: String
+    pub name: String,
+    pub jump_type: JumpType
 }
+
 struct Zlabel {
     pub to_addr: u16,
     pub name: String,
-    pub is_routine: bool
+    //pub is_routine: bool
 }
 
 
@@ -117,33 +125,37 @@ impl Zfile {
         self.data.write_byte(length as u8, index);
 
         self.data.write_bytes(&text_bytes.bytes, index + 1);
-    }    
+    }
 
     /// saves the addresses of the labels to the positions of the jump-ops
     fn write_jumps(&mut self) {
         for jump in self.jumps.iter_mut() {
             for label in self.labels.iter_mut() {
                 if label.name == jump.name {
-                    if label.is_routine {
-                        // routine jump, packed address
-                        self.data.write_u16(label.to_addr / 8, jump.from_addr as usize);
-                    } else {
-                        // branch jump
-                        let mut new_addr: i32 = label.to_addr as i32 - jump.from_addr as i32;
-                        new_addr &= 0x3fff;
-                        new_addr |= 0x8000;
-                        self.data.write_u16(new_addr as u16, jump.from_addr as usize);
+                    match jump.jump_type {
+                        JumpType::ROUTINE => {
+                            self.data.write_u16(label.to_addr / 8, jump.from_addr as usize);
+                        },
+                        JumpType::BRANCH => {
+                            let mut new_addr: i32 = label.to_addr as i32 - jump.from_addr as i32;
+                            new_addr &= 0x3fff;
+                            new_addr |= 0x8000;
+                            self.data.write_u16(new_addr as u16, jump.from_addr as usize);
+                        },
+                        JumpType::JUMP => {
+                            let new_addr: i32 = label.to_addr as i32 - jump.from_addr as i32;
+                            self.data.write_u16(new_addr as u16, jump.from_addr as usize);
+                        }
                     }
-                    
                 }
             }
         }
     }
 
     /// adds jump to write the jump-addresses after reading all commands
-    fn add_jump(&mut self, name: String) {
+    fn add_jump(&mut self, name: String, jump_type: JumpType) {
         let from_addr: u16 = self.data.bytes.len() as u16;
-        let jump: Zjump = Zjump{ from_addr: from_addr, name: name};
+        let jump: Zjump = Zjump{ from_addr: from_addr, name: name, jump_type: jump_type};
         self.jumps.push(jump);
 
         // spacer for the adress where the to-jump-label will be written
@@ -151,8 +163,8 @@ impl Zfile {
     }
 
     /// adds label
-    fn add_label(&mut self, name: String, to_addr: u16, is_routine: bool) {
-        let label: Zlabel = Zlabel{ name: name, to_addr: to_addr, is_routine: is_routine};
+    fn add_label(&mut self, name: String, to_addr: u16) {
+        let label: Zlabel = Zlabel{ name: name, to_addr: to_addr };
         self.labels.push(label);
     }
 
@@ -187,14 +199,14 @@ impl Zfile {
             panic!("adress of a routine must start at address % 8 == 0");
         }
 
-        self.add_label(name.to_string(), index as u16, true);
+        self.add_label(name.to_string(), index as u16);
         self.data.write_byte(count_variables, index);
     }
 
     /// creates an label
     pub fn label(&mut self, name: &str) {
         let index: usize = self.data.bytes.len();
-        self.add_label(name.to_string(), index as u16, false);
+        self.add_label(name.to_string(), index as u16);
     }
 
 
@@ -219,7 +231,7 @@ impl Zfile {
     /// call_1n is 1OP
     pub fn op_call_1n(&mut self, jump_to_label: &str) {
         self.op_1_op(0x0f);
-        self.add_jump(jump_to_label.to_string());
+        self.add_jump(jump_to_label.to_string(), JumpType::ROUTINE);
     }
 
     /// read_char is VAROP
@@ -240,6 +252,10 @@ impl Zfile {
         self.data.append_byte(local_var_id);
     }
 
+    pub fn op_jump(&mut self, jump_to_label: &str) {
+        self.op_1_op(0x0c);
+        self.add_jump(jump_to_label.to_string(), JumpType::JUMP);
+    }
 
     /// is an 2OP, but with small constant and variable
     pub fn op_je(&mut self, local_var_id: u8, equal_to_const: u8, jump_to_label: &str) {
@@ -255,7 +271,7 @@ impl Zfile {
         self.data.append_byte(equal_to_const);
 
         // jump
-        self.add_jump(jump_to_label.to_string());
+        self.add_jump(jump_to_label.to_string(), JumpType::BRANCH);
     }
     
 
