@@ -139,7 +139,8 @@ impl Zfile {
         }
     }
 
-    fn add_jump(&mut self, name: String, from_addr: u16) {
+    fn add_jump(&mut self, name: String) {
+        let from_addr: u16 = self.data.bytes.len() as u16;
         let jump: Zjump = Zjump{ from_addr: from_addr, name: name};
         self.jumps.push(jump);
 
@@ -191,15 +192,14 @@ impl Zfile {
 
     // call_1n is 1OP
     pub fn op_call_1n(&mut self, name: &str) {
-        let index: usize = self.data.bytes.len() as usize;
-        self.op_1_op(0x0f, index);
-        self.add_jump(name.to_string(), index as u16 + 1);
+        self.op_1_op(0x0f);
+        self.add_jump(name.to_string());
     }
 
     // print is 0OP
     pub fn op_print(&mut self, content: &str) {
-        let index: usize = self.data.bytes.len() as usize;
-        self.op_0_op(0x02, index);
+        let index: usize = self.data.bytes.len();
+        self.op_0_op(0x02);
 
         let mut text_bytes: Bytes = Bytes{bytes: Vec::new()};
         ztext::encode(&mut text_bytes, content);
@@ -208,21 +208,19 @@ impl Zfile {
 
     // quit is 0OP
     pub fn op_quit(&mut self) {
-        let index: usize = self.data.bytes.len() as usize;
-        println!("index2: {:?}", index);
-        self.op_0_op(0x0a, index);
+        self.op_0_op(0x0a);
     }
 
     // =====================================
     // general ops
 
-    fn op_0_op(&mut self, value: u8, index: usize) {
+    fn op_0_op(&mut self, value: u8) {
         let byte = value | 0xb0;
-        self.data.write_byte(byte, index);
+        self.data.append_byte(byte);
     }
      
-    fn op_1_op(&mut self, value: u8, index: usize) {
+    fn op_1_op(&mut self, value: u8) {
         let byte = value | 0x80;
-        self.data.write_byte(byte, index);
+        self.data.append_byte(byte);
     }
 }

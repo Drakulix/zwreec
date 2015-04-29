@@ -21,10 +21,20 @@ impl Bytes {
         self.bytes[index] = byte;
     }
 
+    pub fn append_byte(&mut self, byte: u8) {
+        let index: usize = self.bytes.len();
+        self.write_byte(byte, index);
+    }
+
     /// writes u16 in two bytes
     pub fn write_u16(&mut self, value: u16, index: usize) {
         self.write_byte((value >> 8) as u8, index);
         self.write_byte((value & 0xff) as u8, index + 1);
+    }
+
+    pub fn append_u16(&mut self, value: u16) {
+        let index: usize = self.bytes.len();
+        self.write_u16(value, index);
     }
 
     /// writes multiple bytes
