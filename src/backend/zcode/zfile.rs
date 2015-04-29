@@ -6,7 +6,19 @@ pub use super::ztext;
 
 pub struct Zfile {
     pub data: Bytes,
-    program_addr: u16
+    program_addr: u16,
+    jumps: Vec<Zjump>,
+    labels: Vec<Zlabel>
+}
+
+struct Zjump {
+    pub from_addr: u16,
+    pub name: String
+}
+struct Zlabel {
+    pub to_addr: u16,
+    pub name: String,
+    pub is_routine: bool
 }
 
 
@@ -15,7 +27,9 @@ impl Zfile {
     pub fn new() -> Zfile {
         Zfile {
             data: Bytes{bytes: Vec::new()}, 
-            program_addr: 0x800
+            program_addr: 0x800,
+            jumps: Vec::new(),
+            labels: Vec::new()
         }
     }
 
@@ -105,26 +119,110 @@ impl Zfile {
         self.data.write_bytes(&text_bytes.bytes, index + 1);
     }
 
+    
+
+    /// saves the addresses of the labels to the positions of the jump-ops
+    fn write_jumps(&mut self) {
+        for jump in self.jumps.iter_mut() {
+            for label in self.labels.iter_mut() {
+                if label.name == jump.name {
+                    println!("addr: {:?} - {:?}", label.to_addr, jump.from_addr);
+                    if label.is_routine {
+                        // packed address
+                        self.data.write_u16(label.to_addr / 8, jump.from_addr as usize);
+                    } else {
+                        self.data.write_u16(label.to_addr, jump.from_addr as usize);
+                    }
+                    
+                }
+            }
+        }
+    }
+
+    fn add_jump(&mut self, name: String, from_addr: u16) {
+        let jump: Zjump = Zjump{ from_addr: from_addr, name: name};
+        self.jumps.push(jump);
+
+        // spacer for the adress of to-jump-label
+        self.data.write_u16(0x0000, from_addr as usize);
+    }
+
+    fn add_label(&mut self, name: String, to_addr: u16, is_routine: bool) {
+        let label: Zlabel = Zlabel{ name: name, to_addr: to_addr, is_routine: is_routine};
+        self.labels.push(label);
+    }
+
+    /// returns the routine address, should be adress % 8 == 0
+    fn routine_address(&self, adress: usize) -> usize {
+        adress + adress % 8
+    }
+
+    // =====================================
+    // no op-commands
+
     /// start of an zcode programm
     /// fills everying < program_addr with zeros
     pub fn start(&mut self) {
         self.data.write_zero_until(self.program_addr as usize);
     }
 
+    // writes all stuff that couldn't written directly
+    pub fn end(&mut self) {
+        self.write_jumps();
+    }
 
-    // ops
+    pub fn routine(&mut self, name: &str, count_variables: u8) {    
+        let index: usize = self.routine_address(self.data.bytes.len() as usize);// as usize + index % 8;
+        //index = index + index % 8;
+        println!("compare: {:?} - {:?}", self.data.bytes.len(), index);
+        if count_variables != 0 {
+            panic!("variables are not implemented until now");
+        }
+        if index % 8 != 0 {
+            panic!("adress of a routine must start at address % 8 == 0");
+        }
+
+        self.add_label(name.to_string(), index as u16, true);
+        self.data.write_byte(count_variables, index);
+    }
+
+    // =====================================
+    // specific ops
+
+    // call_1n is 1OP
+    pub fn op_call_1n(&mut self, name: &str) {
+        let index: usize = self.data.bytes.len() as usize;
+        self.op_1_op(0x0f, index);
+        self.add_jump(name.to_string(), index as u16 + 1);
+    }
+
+    // print is 0OP
     pub fn op_print(&mut self, content: &str) {
         let index: usize = self.data.bytes.len() as usize;
-        self.data.write_byte(0xb2, index);
+        self.op_0_op(0x02, index);
 
         let mut text_bytes: Bytes = Bytes{bytes: Vec::new()};
         ztext::encode(&mut text_bytes, content);
-
         self.data.write_bytes(&text_bytes.bytes, index + 1);
     }
 
+    // quit is 0OP
     pub fn op_quit(&mut self) {
         let index: usize = self.data.bytes.len() as usize;
-        self.data.write_byte(0xb0 | 0x0a as u8, index);
+        println!("index2: {:?}", index);
+        self.op_0_op(0x0a, index);
+    }
+
+    // =====================================
+    // general ops
+
+    fn op_0_op(&mut self, value: u8, index: usize) {
+        let byte = value | 0xb0;
+        self.data.write_byte(byte, index);
+    }
+     
+    fn op_1_op(&mut self, value: u8, index: usize) {
+        let byte = value | 0x80;
+        self.data.write_byte(byte, index);
     }
 }

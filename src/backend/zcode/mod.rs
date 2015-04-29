@@ -27,8 +27,12 @@ pub fn temp_create_hello_world_zcode() {
 
     // hello world program
     zfile.start();
-    zfile.op_print("myhelloworldtext");
+    zfile.op_call_1n("main");
     zfile.op_quit();
+    zfile.routine("main", 0);
+    zfile.op_print("hellofrommain");
+    zfile.op_quit();
+    zfile.end();
 
 
     file::save_bytes_to_file("helloworld.z8", &(*zfile.data.bytes));
