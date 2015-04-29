@@ -24,9 +24,10 @@ pub fn encode(data: &mut Bytes, content: &str) -> u16 {
     let len = string_bytes.len();
     for i in 0..len {
         let letter = string_bytes[i];
-        let pos = pos_in_alpha(letter as u8) + 6;
+        let zasci_id = pos_in_alpha(letter as u8) % 26 + 6;
+        println!("zasci_id: {:?}", zasci_id);
 
-        two_bytes |= (pos as u16) << shift(i as u8);
+        two_bytes |= (zasci_id as u16) << shift(i as u8);
 
         if i % 3 == 2 {
             data.write_u16(two_bytes, pos_to_index(i));
