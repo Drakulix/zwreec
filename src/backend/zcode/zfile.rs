@@ -173,7 +173,7 @@ impl Zfile {
     }
 
     pub fn routine(&mut self, name: &str, count_variables: u8) {    
-        let index: usize = self.routine_address(self.data.bytes.len() as usize);// as usize + index % 8;
+        let index: usize = self.routine_address(self.data.bytes.len());
         //index = index + index % 8;
         println!("compare: {:?} - {:?}", self.data.bytes.len(), index);
         if count_variables != 0 {
@@ -187,14 +187,13 @@ impl Zfile {
         self.data.write_byte(count_variables, index);
     }
 
+    pub fn label(&mut self, name: &str) {
+        let index: usize = self.data.bytes.len();
+        self.add_label(name.to_string(), index as u16, true);
+    }
+
     // =====================================
     // specific ops
-
-    // call_1n is 1OP
-    pub fn op_call_1n(&mut self, name: &str) {
-        self.op_1_op(0x0f);
-        self.add_jump(name.to_string());
-    }
 
     // print is 0OP
     pub fn op_print(&mut self, content: &str) {
@@ -211,6 +210,39 @@ impl Zfile {
         self.op_0_op(0x0a);
     }
 
+    // call_1n is 1OP
+    pub fn op_call_1n(&mut self, name: &str) {
+        self.op_1_op(0x0f);
+        self.add_jump(name.to_string());
+    }
+
+    // read_char is VAROP
+    pub fn op_read_char(&mut self, local_var_id: u8) {
+        self.op_var(0x16);
+
+        // type of following arguments
+        // first argument has value 0 to detect value from keyboard
+        // => 0x01, becouse of constant < 255
+        // "zero the other 3 arguments"
+        let byte = 0x01 << 6 | 0x03 << 4 | 0x03 << 2 | 0x03 << 0;
+        self.data.append_byte(byte);
+
+        // write argument value
+        self.data.append_byte(0x00);
+
+        // write varible id
+        self.data.append_byte(local_var_id);
+    }
+
+
+    // 
+    /*pub fn op_call_je(&mut self, name: &str) {
+        self.op_1_op(0x0f);
+        self.add_jump(name.to_string());
+    } */   
+
+    
+
     // =====================================
     // general ops
 
@@ -222,5 +254,13 @@ impl Zfile {
     fn op_1_op(&mut self, value: u8) {
         let byte = value | 0x80;
         self.data.append_byte(byte);
+    }
+
+    // only one variable is supportet at the moment
+    fn op_var(&mut self, value: u8) {
+        let byte = value | 0xe0;
+        self.data.append_byte(byte);
+
+        
     }
 }

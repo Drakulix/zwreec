@@ -30,7 +30,9 @@ pub fn temp_create_hello_world_zcode() {
     zfile.op_call_1n("main");
     zfile.op_quit();
     zfile.routine("main", 0);
+    zfile.label("repeat");
     zfile.op_print("hellofrommain");
+    zfile.op_read_char(0x03);
     zfile.op_quit();
     zfile.end();
 
