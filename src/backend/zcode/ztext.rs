@@ -25,7 +25,6 @@ pub fn encode(data: &mut Bytes, content: &str) -> u16 {
     for i in 0..len {
         let letter = string_bytes[i];
         let zasci_id = pos_in_alpha(letter as u8) % 26 + 6;
-        println!("zasci_id: {:?}", zasci_id);
 
         two_bytes |= (zasci_id as u16) << shift(i as u8);
 

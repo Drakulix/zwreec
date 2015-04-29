@@ -14,8 +14,6 @@ pub fn temp_create_zcode_example() {
     
     let mut zfile: Zfile = zfile::Zfile::new();
 
-    zfile.create_header();
-
     zfile.start();
     zfile.op_call_1n("main");
     zfile.op_quit();

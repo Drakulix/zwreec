@@ -180,6 +180,7 @@ impl Zfile {
     /// start of an zcode programm
     /// fills everying < program_addr with zeros
     pub fn start(&mut self) {
+        self.create_header();
         self.data.write_zero_until(self.program_addr as usize);
     }
 
@@ -213,6 +214,7 @@ impl Zfile {
     // ================================
     // specific ops
 
+    /// print strings
     /// print is 0OP
     pub fn op_print(&mut self, content: &str) {
         let index: usize = self.data.bytes.len();
@@ -223,17 +225,20 @@ impl Zfile {
         self.data.write_bytes(&text_bytes.bytes, index + 1);
     }
 
+    /// exits the program
     /// quit is 0OP
     pub fn op_quit(&mut self) {
         self.op_0_op(0x0a);
     }
 
+    /// calls a routine
     /// call_1n is 1OP
     pub fn op_call_1n(&mut self, jump_to_label: &str) {
         self.op_1_op(0x0f);
         self.add_jump(jump_to_label.to_string(), JumpType::ROUTINE);
     }
 
+    /// reads keys from the keyboard and saves the asci-value in local_var_id
     /// read_char is VAROP
     pub fn op_read_char(&mut self, local_var_id: u8) {
         self.op_var(0x16);
@@ -252,11 +257,13 @@ impl Zfile {
         self.data.append_byte(local_var_id);
     }
 
+    /// jumps to a label
     pub fn op_jump(&mut self, jump_to_label: &str) {
         self.op_1_op(0x0c);
         self.add_jump(jump_to_label.to_string(), JumpType::JUMP);
     }
 
+    /// jumps to a label if the value of local_var_id is equal to const
     /// is an 2OP, but with small constant and variable
     pub fn op_je(&mut self, local_var_id: u8, equal_to_const: u8, jump_to_label: &str) {
 
@@ -278,16 +285,19 @@ impl Zfile {
     // ================================
     // general ops
 
+    /// op-codes with 0 operators
     fn op_0_op(&mut self, value: u8) {
         let byte = value | 0xb0;
         self.data.append_byte(byte);
     }
     
+    /// op-codes with 1 operator
     fn op_1_op(&mut self, value: u8) {
         let byte = value | 0x80;
         self.data.append_byte(byte);
     }
 
+    /// op-codes with variable operators
     /// only one variable is supportet at the moment
     fn op_var(&mut self, value: u8) {
         let byte = value | 0xe0;
