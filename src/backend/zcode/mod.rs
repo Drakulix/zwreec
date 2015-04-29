@@ -33,6 +33,7 @@ pub fn temp_create_hello_world_zcode() {
     zfile.label("repeat");
     zfile.op_print("hellofrommain");
     zfile.op_read_char(0x03);
+    zfile.op_je(0x03, '1' as u8, "repeat");
     zfile.op_quit();
     zfile.end();
 

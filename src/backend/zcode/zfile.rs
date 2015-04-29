@@ -126,12 +126,15 @@ impl Zfile {
         for jump in self.jumps.iter_mut() {
             for label in self.labels.iter_mut() {
                 if label.name == jump.name {
-                    println!("addr: {:?} - {:?}", label.to_addr, jump.from_addr);
                     if label.is_routine {
-                        // packed address
+                        // routine jump, packed address
                         self.data.write_u16(label.to_addr / 8, jump.from_addr as usize);
                     } else {
-                        self.data.write_u16(label.to_addr, jump.from_addr as usize);
+                        // branch jump
+                        let mut new_addr: i32 = label.to_addr as i32 - jump.from_addr as i32;
+                        new_addr &= 0x3fff;
+                        new_addr |= 0x8000;
+                        self.data.write_u16(new_addr as u16, jump.from_addr as usize);
                     }
                     
                 }
@@ -139,26 +142,29 @@ impl Zfile {
         }
     }
 
+    /// adds jump to write the jump-addresses after reading all commands
     fn add_jump(&mut self, name: String) {
         let from_addr: u16 = self.data.bytes.len() as u16;
         let jump: Zjump = Zjump{ from_addr: from_addr, name: name};
         self.jumps.push(jump);
 
-        // spacer for the adress of to-jump-label
+        // spacer for the adress where the to-jump-label will be written
         self.data.write_u16(0x0000, from_addr as usize);
     }
 
+    /// adds label
     fn add_label(&mut self, name: String, to_addr: u16, is_routine: bool) {
         let label: Zlabel = Zlabel{ name: name, to_addr: to_addr, is_routine: is_routine};
         self.labels.push(label);
     }
 
-    /// returns the routine address, should be adress % 8 == 0
+    /// returns the routine address, should be adress % 8 == 0 (becouse its an packed address)
     fn routine_address(&self, adress: usize) -> usize {
         adress + adress % 8
     }
 
-    // =====================================
+
+    // ================================
     // no op-commands
 
     /// start of an zcode programm
@@ -167,15 +173,15 @@ impl Zfile {
         self.data.write_zero_until(self.program_addr as usize);
     }
 
-    // writes all stuff that couldn't written directly
+    /// writes all stuff that couldn't written directly
     pub fn end(&mut self) {
         self.write_jumps();
     }
 
+    /// creates an routine-start
     pub fn routine(&mut self, name: &str, count_variables: u8) {    
         let index: usize = self.routine_address(self.data.bytes.len());
-        //index = index + index % 8;
-        println!("compare: {:?} - {:?}", self.data.bytes.len(), index);
+        
         if count_variables != 0 {
             panic!("variables are not implemented until now");
         }
@@ -187,15 +193,17 @@ impl Zfile {
         self.data.write_byte(count_variables, index);
     }
 
+    /// creates an label
     pub fn label(&mut self, name: &str) {
         let index: usize = self.data.bytes.len();
-        self.add_label(name.to_string(), index as u16, true);
+        self.add_label(name.to_string(), index as u16, false);
     }
 
-    // =====================================
+
+    // ================================
     // specific ops
 
-    // print is 0OP
+    /// print is 0OP
     pub fn op_print(&mut self, content: &str) {
         let index: usize = self.data.bytes.len();
         self.op_0_op(0x02);
@@ -205,15 +213,15 @@ impl Zfile {
         self.data.write_bytes(&text_bytes.bytes, index + 1);
     }
 
-    // quit is 0OP
+    /// quit is 0OP
     pub fn op_quit(&mut self) {
         self.op_0_op(0x0a);
     }
 
-    // call_1n is 1OP
-    pub fn op_call_1n(&mut self, name: &str) {
+    /// call_1n is 1OP
+    pub fn op_call_1n(&mut self, jump_to_label: &str) {
         self.op_1_op(0x0f);
-        self.add_jump(name.to_string());
+        self.add_jump(jump_to_label.to_string());
     }
 
     // read_char is VAROP
@@ -235,32 +243,40 @@ impl Zfile {
     }
 
 
-    // 
-    /*pub fn op_call_je(&mut self, name: &str) {
-        self.op_1_op(0x0f);
-        self.add_jump(name.to_string());
-    } */   
+    // is an 2OP, but with small constant and variable
+    pub fn op_je(&mut self, local_var_id: u8, equal_to_const: u8, jump_to_label: &str) {
 
+        // 0x01: variable; 0x00: constant; 0x01: je-opcode
+        let op_coding = 0x01 << 6 | 0x00 << 5 | 0x01;
+        self.data.append_byte(op_coding);
+        
+        // variable id
+        self.data.append_byte(local_var_id);
+
+        // const
+        self.data.append_byte(equal_to_const);
+
+        // jump
+        self.add_jump(jump_to_label.to_string());
+    }
     
 
-    // =====================================
+    // ================================
     // general ops
 
     fn op_0_op(&mut self, value: u8) {
         let byte = value | 0xb0;
         self.data.append_byte(byte);
     }
-     
+    
     fn op_1_op(&mut self, value: u8) {
         let byte = value | 0x80;
         self.data.append_byte(byte);
     }
 
-    // only one variable is supportet at the moment
+    /// only one variable is supportet at the moment
     fn op_var(&mut self, value: u8) {
         let byte = value | 0xe0;
         self.data.append_byte(byte);
-
-        
     }
 }
