@@ -5,8 +5,6 @@ pub mod file;
 #[macro_use]
 pub mod utils;
 
-//use self::file;
-
 
 pub fn compile(input_file_name: &str, output_file_name: &str) {
     log_info!("inputFile: {}", input_file_name);

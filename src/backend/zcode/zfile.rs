@@ -117,9 +117,7 @@ impl Zfile {
         self.data.write_byte(length as u8, index);
 
         self.data.write_bytes(&text_bytes.bytes, index + 1);
-    }
-
-    
+    }    
 
     /// saves the addresses of the labels to the positions of the jump-ops
     fn write_jumps(&mut self) {
@@ -224,7 +222,7 @@ impl Zfile {
         self.add_jump(jump_to_label.to_string());
     }
 
-    // read_char is VAROP
+    /// read_char is VAROP
     pub fn op_read_char(&mut self, local_var_id: u8) {
         self.op_var(0x16);
 
@@ -243,7 +241,7 @@ impl Zfile {
     }
 
 
-    // is an 2OP, but with small constant and variable
+    /// is an 2OP, but with small constant and variable
     pub fn op_je(&mut self, local_var_id: u8, equal_to_const: u8, jump_to_label: &str) {
 
         // 0x01: variable; 0x00: constant; 0x01: je-opcode

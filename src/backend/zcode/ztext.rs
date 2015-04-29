@@ -1,7 +1,7 @@
 //! The `ztext` module contains encoding functions to encode text in z-ascii characters.
 //! 
 
-pub use super::zbytes::Bytes;
+use super::zbytes::Bytes;
 
 pub static ALPHA: [char; 78] = [
     'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
@@ -52,12 +52,12 @@ pub fn encode(data: &mut Bytes, content: &str) -> u16 {
         }
     }
 
-    // Shifts the data for the corresponding position in the 2-byte array
+    /// Shifts the data for the corresponding position in the 2-byte array
     fn shift(position: u8) -> u8 {
         10 - (position % 3) * 5
     }
 
-    // Returns the location of the character of the specified index in the zcode character array
+    /// Returns the location of the character of the specified index in the zcode character array
     fn pos_in_alpha(letter: u8) -> i8 {
         for i in 0..ALPHA.len() {
             if ALPHA[i] as u8 == letter {
@@ -68,6 +68,7 @@ pub fn encode(data: &mut Bytes, content: &str) -> u16 {
         return -1
     }
 
+    /// position in the vector from the position of an character in the string
     fn pos_to_index(position: usize) -> usize {
         2 * (position / 3)
     }

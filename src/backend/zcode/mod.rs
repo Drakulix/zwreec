@@ -6,34 +6,25 @@ pub mod zfile;
 pub mod ztext;
 
 use file;
-pub use self::zbytes::Bytes;
-pub use self::zfile::Zfile;
-//pub use Bytes;
-
-
-
-// NEXT
-// function die berechnet aus wieviele bytes ein string besteht
-// op_print auslagern in eine function die den string als vector zurückgibt
-// und damit allgeim genutzt werden kann
+use self::zfile::Zfile;
 
 
 pub fn temp_create_hello_world_zcode() {
     
-    //let mut data: zbytes::Bytes = zbytes::Bytes{bytes: Vec::new()};
     let mut zfile: Zfile = zfile::Zfile::new();
 
     zfile.create_header();
 
-    // hello world program
+    // endless loop hello world program
     zfile.start();
     zfile.op_call_1n("main");
     zfile.op_quit();
     zfile.routine("main", 0);
     zfile.label("repeat");
     zfile.op_print("hellofrommain");
-    zfile.op_read_char(0x03);
-    zfile.op_je(0x03, '1' as u8, "repeat");
+    let local_var_id = 0x03;
+    zfile.op_read_char(local_var_id);
+    zfile.op_je(local_var_id, '1' as u8, "repeat");
     zfile.op_quit();
     zfile.end();
 
