@@ -170,9 +170,11 @@ fn test() {
 //To-Do add a way to check the result automatically
 #[test]
 fn multi_thread_test() {
+    use std::thread;
+
     let mut joins = Vec::new();
     for _ in 0..10 {
-        joins.push(std::thread::spawn(move || {
+        joins.push(thread::spawn(move || {
             log_info!("No corruption should happen in this ultra-extra-super-long string output even if run in multiple threads.");
         }));
     }
