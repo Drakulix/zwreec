@@ -21,6 +21,7 @@ impl Bytes {
         self.bytes[index] = byte;
     }
 
+    /// adds an byte after the last byte of "bytes"
     pub fn append_byte(&mut self, byte: u8) {
         let index: usize = self.bytes.len();
         self.write_byte(byte, index);
@@ -32,6 +33,7 @@ impl Bytes {
         self.write_byte((value & 0xff) as u8, index + 1);
     }
 
+    /// adds an 2 bytes after the last byte of "bytes"
     pub fn append_u16(&mut self, value: u16) {
         let index: usize = self.bytes.len();
         self.write_u16(value, index);

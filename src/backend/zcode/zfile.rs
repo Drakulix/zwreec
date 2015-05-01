@@ -4,7 +4,7 @@
 pub use super::zbytes::Bytes;
 pub use super::ztext;
 
-pub enum JumpType {
+enum JumpType {
     JUMP,
     BRANCH,
     ROUTINE
@@ -43,6 +43,8 @@ impl Zfile {
 
     /// creates the header of a zfile
     pub fn create_header(&mut self) {
+        
+        assert!(self.data.len() == 0, "create_header should run at the beginning of the op-codes");
 
         let alpha_addr: u16 = 0x40;
         let extension_addr: u16 = alpha_addr + 78;
@@ -110,16 +112,16 @@ impl Zfile {
     fn write_alphabet(&mut self, index: usize) {
         // TODO: is it possible to do this with map?
         let mut alpha_tmp: [u8; 78] = [0; 78];
-        for i in 0..ztext::ALPHA.len() {
-            alpha_tmp[i] = ztext::ALPHA[i] as u8;
+        for i in 0..ztext::ALPHABET.len() {
+            alpha_tmp[i] = ztext::ALPHABET[i] as u8;
         }
         self.data.write_bytes(&alpha_tmp, index);
     }
 
     /// writes the object-name to an index
     /// # Examples
-    /// '''
-    /// write_object_name(name: "obj", index: 10)
+    /// '''ignore
+    /// write_object_name(name: 3, index: 10)
     /// '''
     fn write_object_name(&mut self, name: &str, index: usize) {
         let mut text_bytes: Bytes = Bytes{bytes: Vec::new()};
@@ -132,13 +134,16 @@ impl Zfile {
     }
 
     /// saves the addresses of the labels to the positions of the jump-ops
+    /// goes through all jumps and labels, if they have the same name:
+    ///  write the "where to jump"-adress of the label to the position of the jump
     fn write_jumps(&mut self) {
         for jump in self.jumps.iter_mut() {
             for label in self.labels.iter_mut() {
                 if label.name == jump.name {
                     match jump.jump_type {
                         JumpType::ROUTINE => {
-                            self.data.write_u16(label.to_addr / 8, jump.from_addr as usize);
+                            let new_addr: u16 = label.to_addr / 8;
+                            self.data.write_u16(new_addr, jump.from_addr as usize);
                         },
                         JumpType::BRANCH => {
                             let mut new_addr: i32 = label.to_addr as i32 - jump.from_addr as i32;
@@ -166,54 +171,50 @@ impl Zfile {
         self.data.write_u16(0x0000, from_addr as usize);
     }
 
-    /// adds label
+    /// adds label to the labels-vector. we need them later
     fn add_label(&mut self, name: String, to_addr: u16) {
         let label: Zlabel = Zlabel{ name: name, to_addr: to_addr };
+        for other_label in self.labels.iter() {
+            if other_label.name == label.name {
+                panic!("label has to be unique, but \"{}\" isn't.", other_label.name);
+            }
+        }
         self.labels.push(label);
     }
-
-    /// returns the routine address, should be adress % 8 == 0 (becouse its an packed address)
-    fn routine_address(&self, adress: usize) -> usize {
-        adress + adress % 8
-    }
-
 
     // ================================
     // no op-commands
 
     /// start of an zcode programm
     /// fills everying < program_addr with zeros
+    /// should called as the first commend
     pub fn start(&mut self) {
         self.create_header();
         self.data.write_zero_until(self.program_addr as usize);
     }
 
     /// writes all stuff that couldn't written directly
+    /// should called as the last commend
     pub fn end(&mut self) {
         self.write_jumps();
     }
 
-    /// creates an routine-start
+    /// command to create a routine
     pub fn routine(&mut self, name: &str, count_variables: u8) {    
-        let index: usize = self.routine_address(self.data.bytes.len());
+        let index: u16 = routine_address(self.data.bytes.len() as u16);
         
-        if count_variables != 0 {
-            panic!("variables are not implemented until now");
-        }
-        if index % 8 != 0 {
-            panic!("adress of a routine must start at address % 8 == 0");
-        }
+        assert!(count_variables == 0, "variables are not implemented until now");
+        assert!(index % 8 == 0, "adress of a routine must start at address % 8 == 0");
 
-        self.add_label(name.to_string(), index as u16);
-        self.data.write_byte(count_variables, index);
+        self.add_label(name.to_string(), index);
+        self.data.write_byte(count_variables, index as usize);
     }
 
-    /// creates an label
+    /// command to create a label
     pub fn label(&mut self, name: &str) {
         let index: usize = self.data.bytes.len();
         self.add_label(name.to_string(), index as u16);
     }
-
 
     // ================================
     // specific ops
@@ -307,4 +308,9 @@ impl Zfile {
         let byte = value | 0xe0;
         self.data.append_byte(byte);
     }
+}
+
+/// returns the routine address, should be adress % 8 == 0 (becouse its an packed address)
+fn routine_address(adress: u16) -> u16 {
+    adress + adress % 8
 }

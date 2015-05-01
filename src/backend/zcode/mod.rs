@@ -47,8 +47,3 @@ pub fn temp_create_zcode_example() {
 pub fn temp_hello() -> String {
     "hello from zcode".to_string()
 }
-
-#[test]
-fn it_works() {
-
-}
