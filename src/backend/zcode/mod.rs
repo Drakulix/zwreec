@@ -6,39 +6,44 @@ pub mod zfile;
 pub mod ztext;
 
 use file;
-pub use self::zbytes::Bytes;
-pub use self::zfile::Zfile;
-//pub use Bytes;
+use self::zfile::Zfile;
 
 
+/// an example to show the current status of the z-code implementation
+pub fn temp_create_zcode_example() {
 
-// NEXT
-// function die berechnet aus wieviele bytes ein string besteht
-// op_print auslagern in eine function die den string als vector zurückgibt
-// und damit allgeim genutzt werden kann
-
-
-pub fn temp_create_hello_world_zcode() {
-    
-    //let mut data: zbytes::Bytes = zbytes::Bytes{bytes: Vec::new()};
     let mut zfile: Zfile = zfile::Zfile::new();
 
-    zfile.create_header();
-
-    // hello world program
     zfile.start();
-    zfile.op_print("myhelloworldtext");
+    zfile.op_call_1n("main");
     zfile.op_quit();
 
+    zfile.routine("main", 0);
+    zfile.op_print("main");
+
+    zfile.label("loop");
+    let local_var_id = 1;
+    zfile.op_read_char(local_var_id);
+    zfile.op_je(local_var_id, '1' as u8, "one");
+    zfile.op_je(local_var_id, '2' as u8, "two");
+    zfile.op_je(local_var_id, '3' as u8, "end");
+    zfile.op_jump("loop");
+
+    zfile.label("one");
+    zfile.op_print("one");
+    zfile.op_jump("loop");
+
+    zfile.label("two");
+    zfile.op_print("two");
+    zfile.op_jump("loop");
+
+    zfile.label("end");
+    zfile.op_quit();
+    zfile.end();
 
     file::save_bytes_to_file("helloworld.z8", &(*zfile.data.bytes));
 }
 
 pub fn temp_hello() -> String {
     "hello from zcode".to_string()
-}
-
-#[test]
-fn it_works() {
-
 }

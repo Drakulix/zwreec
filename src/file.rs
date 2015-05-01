@@ -1,7 +1,4 @@
 //! This is documentation for the `file` module.
-//!
-//! # Examples
-
 
 use std::io::prelude::Read;
 use std::io::prelude::Write;
@@ -9,7 +6,6 @@ use std::error::Error;
 use std::fs::File;
 use std::fs;
 use std::path::Path;
-
 
 
 /// Read Text File
