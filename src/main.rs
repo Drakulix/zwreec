@@ -1,9 +1,10 @@
+extern crate zwreec;
+extern crate getopts;
+
 use std::env;
 
 #[macro_use]
 pub mod utils;
-
-extern crate zwreec;
 
 
 fn main() {

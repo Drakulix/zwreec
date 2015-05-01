@@ -8,3 +8,4 @@ name = "zwreec_bin"
 
 [dependencies]
 time = "*"
+getopts = "0.2.10"
