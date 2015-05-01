@@ -5,6 +5,7 @@ use std::io;
 use std::io::{Error, Write};
 use std::cmp::{Ord, Ordering};
 
+
 pub enum LogLevel {
     ERROR,
     WARN,
