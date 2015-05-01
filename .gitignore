@@ -4,7 +4,7 @@
 *.so
 *.rlib
 *.dll
-
+/examples/target/
 # Executables
 *.exe
 
