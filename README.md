@@ -6,9 +6,19 @@ Twee to Z-Code Compiler written in the Rust programming language. This is intend
 # Usage
 *This uses rust beta 3 and will be updated to future beta versions and the official 1.0 release.*
 
-`cargo run`
+```
+Usage: target/debug/zwreec_bin [-h] [-v] [-o OUTPUT] INPUT
 
-Install dependencies and run the application.
+Options:
+    -h --help           display this help and exit
+    -v --verbose        be more verbose
+    -o FILE             name of the output file
+```
+
+## Build Steps
+`cargo build`
+
+Install dependencies and build the application.
 
 `cargo test`
 
