@@ -11,7 +11,7 @@ use self::zfile::Zfile;
 
 /// an example to show the current status of the z-code implementation
 pub fn temp_create_zcode_example() {
-    
+
     let mut zfile: Zfile = zfile::Zfile::new();
 
     zfile.start();
@@ -36,7 +36,7 @@ pub fn temp_create_zcode_example() {
     zfile.label("two");
     zfile.op_print("two");
     zfile.op_jump("loop");
-    
+
     zfile.label("end");
     zfile.op_quit();
     zfile.end();

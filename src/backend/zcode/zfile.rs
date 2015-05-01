@@ -100,7 +100,7 @@ impl Zfile {
         // global variables
         // ...
 
-        // object tabelle name
+        // object table name
         self.write_object_name("object", 770);
 
         // dictionary
@@ -136,6 +136,7 @@ impl Zfile {
     /// saves the addresses of the labels to the positions of the jump-ops
     /// goes through all jumps and labels, if they have the same name:
     ///  write the "where to jump"-adress of the label to the position of the jump
+    /// TODO: Error handling for nonexistant labels
     fn write_jumps(&mut self) {
         for jump in self.jumps.iter_mut() {
             for label in self.labels.iter_mut() {
@@ -194,7 +195,7 @@ impl Zfile {
     }
 
     /// writes all stuff that couldn't written directly
-    /// should called as the last commend
+    /// should be called as the last commend
     pub fn end(&mut self) {
         self.write_jumps();
     }
@@ -303,7 +304,7 @@ impl Zfile {
     }
 
     /// op-codes with variable operators
-    /// only one variable is supportet at the moment
+    /// only one variable is supported at the moment
     fn op_var(&mut self, value: u8) {
         let byte = value | 0xe0;
         self.data.append_byte(byte);
