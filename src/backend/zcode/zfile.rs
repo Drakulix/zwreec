@@ -25,13 +25,13 @@ struct Zjump {
 
 struct Zlabel {
     pub to_addr: u16,
-    pub name: String,
-    //pub is_routine: bool
+    pub name: String
 }
 
 
 impl Zfile {
 
+    /// creates a new zfile
     pub fn new() -> Zfile {
         Zfile {
             data: Bytes{bytes: Vec::new()}, 
@@ -117,6 +117,10 @@ impl Zfile {
     }
 
     /// writes the object-name to an index
+    /// # Examples
+    /// '''
+    /// write_object_name(name: "obj", index: 10)
+    /// '''
     fn write_object_name(&mut self, name: &str, index: usize) {
         let mut text_bytes: Bytes = Bytes{bytes: Vec::new()};
         let length: u16 = ztext::encode(&mut text_bytes, name);
