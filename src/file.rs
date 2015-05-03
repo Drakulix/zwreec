@@ -35,7 +35,7 @@ pub fn open_source_file(source_file_name: &str) -> String {
     match file.read_to_string(&mut content) {
         Err(why) => panic!("couldn't read {}: {}", display,
                                                    Error::description(&why)),
-        Ok(_) => print!("{} contains:\n-------\n{}\n----\n", display, content),
+        Ok(_) => debug!("{} contains:\n-------\n{}\n----", display, content),
     }
 
     content
@@ -44,7 +44,7 @@ pub fn open_source_file(source_file_name: &str) -> String {
 /// saves bytes to an file
 pub fn save_bytes_to_file(target_file_name: &str, bytes: &[u8]) {
     // saving
-    println!("save to file: {}", target_file_name);
+    info!("save to file: {}", target_file_name);
 
     let path = Path::new(target_file_name);
     let display = path.display();
@@ -62,20 +62,20 @@ pub fn save_bytes_to_file(target_file_name: &str, bytes: &[u8]) {
             panic!("couldn't write to {}: {}", display,
                                                Error::description(&why))
         },
-        Ok(_) => println!("successfully wrote to {}", display),
+        Ok(_) => info!("successfully wrote to {}", display),
     }
 }
 
 pub fn save_target_file(target_file_name: &str) {
     // saving
-    println!("save to file: {}", target_file_name)
+    info!("save to file: {}", target_file_name)
 }
 
 pub fn temp_print_current_directory_files() {
     let paths = fs::read_dir(&Path::new(".")).unwrap();
 
     for path in paths {
-        println!("Name: {}", path.unwrap().path().display())
+        debug!("Name: {}", path.unwrap().path().display())
     }
 }
 
