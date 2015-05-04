@@ -15,7 +15,7 @@ use self::utils::logger;
 // shorthand to display program usage
 macro_rules! print_usage {
     ($prog:ident, $opts:ident) => {{
-        print_stderr!("{}", $opts.usage(&format!("Usage: {} [-h] [-vq] [-l [LOGFILE]] [-o OUTPUT] INPUT", $prog)));
+        print_stderr!("{}", $opts.usage(&format!("Usage: {} [-hV] [-vq] [-l [LOGFILE]] [-o OUTPUT] INPUT", $prog)));
     }}
 }
 
@@ -40,11 +40,12 @@ fn main() {
 
     // define options
     let mut opts = getopts::Options::new();
-    opts.optflag("h", "help", "display this help and exit");
     opts.optflagmulti("v", "verbose", "be more verbose. can be used multiple times.");
     opts.optflag("q", "quiet", "be quiet");
     opts.optflagopt("l", "logfile", "specify log file (default zwreec.log)", "LOGFILE");
     opts.optopt("o", "", "name of the output file", "FILE");
+    opts.optflag("h", "help", "display this help and exit");
+    opts.optflag("V", "version", "display version");
 
     let parsed_opts = match opts.parse(&args[1..]) {
         Ok(m)  => { m }
@@ -63,6 +64,20 @@ fn main() {
         // parsed "-h|--help"
         // display usage and return
         print_usage!(program, opts);
+        return;
+    }
+
+    if parsed_opts.opt_present("V") {
+        // parsed "-V|--version"
+        // display current version
+        println!("{} {}", program, match option_env!("CFG_VERSION") {
+            Some(s) => s.to_string(),
+            None => format!("{}.{}.{}{}",
+                            env!("CARGO_PKG_VERSION_MAJOR"),
+                            env!("CARGO_PKG_VERSION_MINOR"),
+                            env!("CARGO_PKG_VERSION_PATCH"),
+                            option_env!("CARGO_PKG_VERSION_PRE").unwrap_or(""))
+        });
         return;
     }
 
