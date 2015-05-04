@@ -19,7 +19,7 @@ macro_rules! print_usage {
     }}
 }
 
-// Found in:
+// found in:
 // http://stackoverflow.com/a/27590832
 macro_rules! print_stderr(
     ($($arg:tt)*) => (
@@ -33,14 +33,14 @@ macro_rules! print_stderr(
 fn main() {
     //early init
 
-    // handling commandline parameters
+    // handling command line parameters
     let args: Vec<String> = env::args().collect();
     let ref program = args[0];
     let mut loggers: Vec<Box<logger::SharedLogger>> = vec![];
 
     // define options
     let mut opts = getopts::Options::new();
-    opts.optflagmulti("v", "verbose", "be more verbose. can be used multiple times.");
+    opts.optflagmulti("v", "verbose", "be more verbose. Can be used multiple times.");
     opts.optflag("q", "quiet", "be quiet");
     opts.optflagopt("l", "logfile", "specify log file (default zwreec.log)", "LOGFILE");
     opts.optopt("o", "", "name of the output file", "FILE");
@@ -59,7 +59,7 @@ fn main() {
         }
     };
 
-    // examinate options
+    // examine options
     if parsed_opts.opt_present("h") {
         // parsed "-h|--help"
         // display usage and return
@@ -83,7 +83,7 @@ fn main() {
 
     if parsed_opts.opt_present("v") {
         // parsed "-v|--verbose"
-        // set loglevel to verbose
+        // set log level to verbose
         loggers.push(logger::TermLogger::new(
                 match parsed_opts.opt_count("v") {
                     1 => logger::LogLevelFilter::Info, 
@@ -92,11 +92,11 @@ fn main() {
                 }));
     } else if parsed_opts.opt_present("q") {
         // parsed "-q|--quiet"
-        // set loglevel to error
+        // set log level to error
         loggers.push(logger::TermLogger::new(logger::LogLevelFilter::Error));
     } else {
         // default
-        // set loglevel to warn
+        // set log level to warn
         loggers.push(logger::TermLogger::new(logger::LogLevelFilter::Warn));
     }
 
@@ -119,7 +119,7 @@ fn main() {
         // set of to filename
         file
     } else {
-        // NOTE: string manipulation in rust is stil weird.
+        // NOTE: string manipulation in rust is still weird.
         let mut s = String::new();
         s.push_str("a.out");
         s
@@ -139,12 +139,10 @@ fn main() {
     // activate logger
     // NOTE: I am not sure, if there is a *good* way to do this earlier
 
-    //let _ = SimpleLogger::init(LogLevelFilter::Info);
     let _ = logger::CombinedLogger::init(loggers);
 
     debug!("parsed command line options");
     info!("main started");
-    warn!("WARN");
 
     // call library
     zwreec::compile(&infile, &outfile);
