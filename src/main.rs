@@ -13,11 +13,11 @@ mod utils;
 use self::utils::logger;
 
 // shorthand to display program usage
-macro_rules! print_usage {
-    ($prog:ident, $opts:ident) => {{
-        print_stderr!("{}", $opts.usage(&format!("Usage: {} [-hV] [-vq] [-l [LOGFILE]] [-o OUTPUT] INPUT", $prog)));
-    }}
-}
+macro_rules! print_usage(
+    ($prog:ident, $opts:ident) => (
+    print_stderr!("{}", $opts.usage(&format!("Usage: {} [-hV] [-vq] [-l [LOGFILE]] [-o OUTPUT] INPUT", $prog)));
+    )
+);
 
 // found in:
 // http://stackoverflow.com/a/27590832
@@ -119,10 +119,8 @@ fn main() {
         // set of to filename
         file
     } else {
-        // NOTE: string manipulation in rust is still weird.
-        let mut s = String::new();
-        s.push_str("a.out");
-        s
+        // assume default
+        "a.out".to_string()
     };
 
     let infile = if parsed_opts.free.len() == 1 {
@@ -137,8 +135,6 @@ fn main() {
     };
 
     // activate logger
-    // NOTE: I am not sure, if there is a *good* way to do this earlier
-
     let _ = logger::CombinedLogger::init(loggers);
 
     debug!("parsed command line options");
