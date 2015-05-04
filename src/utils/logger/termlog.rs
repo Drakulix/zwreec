@@ -1,3 +1,5 @@
+//! Module providing the TermLogger Implementation
+
 use log::{LogLevel, LogLevelFilter, LogMetadata, LogRecord, SetLoggerError, set_logger, Log};
 use time;
 use term;
@@ -5,6 +7,7 @@ use term::{StderrTerminal, StdoutTerminal, color};
 use std::sync::Mutex;
 use super::SharedLogger;
 
+/// The TermLogger struct. Provides a stderr/stdout based Logger implementation
 pub struct TermLogger {
     level: LogLevelFilter,
     stderr: Mutex<Box<StderrTerminal>>,
@@ -13,6 +16,15 @@ pub struct TermLogger {
 
 impl TermLogger {
 
+    /// init function. Globally initializes the TermLogger as the one and only used log facility.
+    ///
+    /// Takes the desired LogLevel as argument. It cannot be changed later on.
+    /// Fails if another Logger was already initialized.
+    ///
+    /// # Examples
+    /// '''
+    /// let _ = TermLogger::init(LogLevelFilter::Info);
+    /// '''
     #[allow(dead_code)]
     pub fn init(log_level: LogLevelFilter) -> Result<(), SetLoggerError> {
         set_logger(|max_log_level| {
@@ -21,6 +33,17 @@ impl TermLogger {
         })
     }
 
+    /// allows to create a new logger, that can be independently used, no matter whats globally set.
+    ///
+    /// no macros are provided for easy logging in this case and you probably
+    /// dont want to use this function, but init().
+    ///
+    /// Takes the desired LogLevel as argument. It cannot be changed later on.
+    ///
+    /// # Examples
+    /// '''
+    /// let term_logger = TermLogger::new(LogLevelFilter::Info);
+    /// '''
     #[allow(dead_code)]
     pub fn new(log_level: LogLevelFilter) -> Box<TermLogger> {
         Box::new(TermLogger { level: log_level, stderr: Mutex::new(term::stderr().unwrap()), stdout: Mutex::new(term::stdout().unwrap()) })
@@ -123,7 +146,11 @@ impl Log for TermLogger {
 impl SharedLogger for TermLogger {
 
     fn level(&self) -> LogLevelFilter {
-        return self.level;
+        self.level
+    }
+
+    fn as_log(self: Box<Self>) -> Box<Log> {
+        Box::new(*self)
     }
 
 }
