@@ -76,4 +76,8 @@ impl SharedLogger for FileLogger {
         return self.level;
     }
 
+    fn as_log(self: Box<Self>) -> Box<Log> {
+        Box::new(*self)
+    }
+
 }

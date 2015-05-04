@@ -88,6 +88,10 @@ impl SharedLogger for SimpleLogger {
         return self.level;
     }
 
+    fn as_log(self: Box<Self>) -> Box<Log> {
+        Box::new(*self)
+    }
+
 }
 
 #[cfg(test)]

@@ -13,4 +13,6 @@ use log::Log;
 
 pub trait SharedLogger: Log {
     fn level(&self) -> LogLevelFilter;
+    
+    fn as_log(self: Box<Self>) -> Box<Log>;
 }

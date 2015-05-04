@@ -3,7 +3,7 @@ use super::SharedLogger;
 
 pub struct CombinedLogger {
     level: LogLevelFilter,
-    logger: Vec<Box<SharedLogger>>,
+    logger: Vec<Box<Log>>,
 }
 
 impl CombinedLogger {
@@ -20,12 +20,12 @@ impl CombinedLogger {
             }
             max_log_level.set(log_level.clone());
 
-            CombinedLogger::new(log_level, logger)
+            CombinedLogger::new(log_level, logger.into_iter().map(|logger| logger.as_log()).collect())
         })
     }
 
     #[allow(dead_code)]
-    pub fn new(log_level: LogLevelFilter, logger: Vec<Box<SharedLogger>>) -> Box<CombinedLogger> {
+    pub fn new(log_level: LogLevelFilter, logger: Vec<Box<Log>>) -> Box<CombinedLogger> {
         Box::new(CombinedLogger { level: log_level, logger: logger })
     }
 
