@@ -53,6 +53,9 @@ Temporary Items
 # Default input file
 a.in
 
+# Default log file
+zwreec.log
+
 ### SublimeText ###
 # cache files for sublime text
 *.tmlanguage.cache

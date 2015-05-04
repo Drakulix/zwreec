@@ -1,4 +1,4 @@
-# zwreec
+# zwreec [![Build Status](https://travis-ci.org/Drakulix/zwreec.svg?branch=master)](https://travis-ci.org/Drakulix/zwreec)
 *This is currently in heavy development and does not work.*
 
 Twee to Z-Code Compiler written in the Rust programming language. This is intended to compile [interactive fiction](http://en.wikipedia.org/wiki/Interactive_fiction) in the Twee format (created by the [Twine software](http://en.wikipedia.org/wiki/Twine_(software))) to [Z-Machine](http://en.wikipedia.org/wiki/Z-machine) instructions that can be run with Z-Code interpreters like [frotz](http://frotz.sourceforge.net).

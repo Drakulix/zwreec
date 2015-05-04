@@ -8,4 +8,6 @@ name = "zwreec_bin"
 
 [dependencies]
 time = "*"
+log = "*"
+term = "0.2"
 getopts = "0.2.10"

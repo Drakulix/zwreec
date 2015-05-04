@@ -1,0 +1,5 @@
+language: rust
+rust: 1.0.0-beta.3
+notifications:
+  slack:
+    secure: QpFHoGnFmO56Dc7PZzYEqeVbT0II7QCAYc7V0Xm4cV4NKLcz2DjBw523G+cCa7cewWVdhOooUKA14H6wjCHdqReMR7xO7iOGQm/p7iSMgU9eMlIvem0jBDGqxo/8R5GtA/OVZ6SB93ja+BaZiYaapsaQcTfxNxxeopecKus0z44=

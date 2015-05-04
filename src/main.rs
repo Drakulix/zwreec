@@ -1,11 +1,14 @@
 extern crate zwreec;
 extern crate getopts;
+#[macro_use] extern crate log;
+extern crate time;
+extern crate term;
 
 use std::env;
+use std::fs::File;
 
-#[macro_use]
-pub mod utils;
-
+mod utils;
+use self::utils::logger;
 
 // shorthand to display program usage
 macro_rules! print_usage {
@@ -16,8 +19,17 @@ macro_rules! print_usage {
 
 
 fn main() {
-    // set default log level
-    // utils::log::LOG_LEVEL = utils::log::LogLevel::WARN;
+    //early init
+
+    //let _ = SimpleLogger::init(LogLevelFilter::Info);
+    let _ = logger::CombinedLogger::init(
+        vec![
+            logger::FileLogger::new(logger::LogLevelFilter::Trace, File::create("zwreec.log").unwrap()),
+            logger::TermLogger::new(logger::LogLevelFilter::Info),
+        ]
+    );
+
+    info!("main started");
 
     // handling commandline parameters
     let args: Vec<String> = env::args().collect();
@@ -82,9 +94,9 @@ fn main() {
     zwreec::compile(&infile, &outfile);
 
     // only for testing
-    log_verbose!("(1) {}", zwreec::frontend::temp_hello());
-    log_verbose!("(2) {}", zwreec::backend::temp_hello());
-    log_verbose!("(3) {}", zwreec::file::temp_hello());
+    debug!("(1) {}", zwreec::frontend::temp_hello());
+    debug!("(2) {}", zwreec::backend::temp_hello());
+    debug!("(3) {}", zwreec::file::temp_hello());
 
-    log_info!("main finished");
+    info!("main finished");
 }
