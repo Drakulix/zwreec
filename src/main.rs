@@ -1,13 +1,26 @@
 use std::env;
+use std::fs::File;
 
-#[macro_use]
-pub mod utils;
+mod utils;
+use self::utils::logger;
 
 extern crate zwreec;
-
+#[macro_use] extern crate log;
+extern crate time;
+extern crate term;
 
 fn main() {
-    log_info!("main started");
+    //early init
+
+    //let _ = SimpleLogger::init(LogLevelFilter::Info);
+    let _ = logger::CombinedLogger::init(
+        vec![
+            logger::FileLogger::new(logger::LogLevelFilter::Trace, File::create("zwreec.log").unwrap()),
+            logger::TermLogger::new(logger::LogLevelFilter::Info),
+        ]
+    );
+
+    info!("main started");
 
     // handling commandline parameters
     let args: Vec<String> = env::args().collect();
@@ -34,14 +47,14 @@ fn main() {
     zwreec::compile(input_file_name, output_file_name);
 
     // only for testing
-    log_verbose!("(1) {}", zwreec::frontend::temp_hello());
-    log_verbose!("(2) {}", zwreec::backend::temp_hello());
-    log_verbose!("(3) {}", zwreec::file::temp_hello());
+    debug!("(1) {}", zwreec::frontend::temp_hello());
+    debug!("(2) {}", zwreec::backend::temp_hello());
+    debug!("(3) {}", zwreec::file::temp_hello());
 
-    log_info!("main finished");
+    info!("main finished");
 }
 
 fn help() {
-    log_error!("invalid arguments");
-    log_info!("usage:\n    zwreec <input_file> <output_file>");
+    error!("invalid arguments");
+    info!("usage:\n    zwreec <input_file> <output_file>");
 }
