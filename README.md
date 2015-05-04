@@ -7,12 +7,16 @@ Twee to Z-Code Compiler written in the Rust programming language. This is intend
 *This uses rust beta 3 and will be updated to future beta versions and the official 1.0 release.*
 
 ```
-Usage: target/debug/zwreec_bin [-h] [-v] [-o OUTPUT] INPUT
+Usage: target/debug/zwreec_bin [-hV] [-vq] [-l [LOGFILE]] [-o OUTPUT] INPUT
 
 Options:
-    -h --help           display this help and exit
-    -v --verbose        be more verbose
+    -v --verbose        be more verbose. can be used multiple times.
+    -q --quiet          be quiet
+    -l --logfile [LOGFILE]
+                        specify log file (default zwreec.log)
     -o FILE             name of the output file
+    -h --help           display this help and exit
+    -V --version        display version
 ```
 
 ## Build Steps
