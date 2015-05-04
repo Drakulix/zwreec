@@ -85,7 +85,7 @@ impl Log for SimpleLogger {
 impl SharedLogger for SimpleLogger {
 
     fn level(&self) -> LogLevelFilter {
-        return self.level;
+        self.level
     }
 
     fn as_log(self: Box<Self>) -> Box<Log> {

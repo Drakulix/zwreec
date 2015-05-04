@@ -123,7 +123,7 @@ impl Log for TermLogger {
 impl SharedLogger for TermLogger {
 
     fn level(&self) -> LogLevelFilter {
-        return self.level;
+        self.level
     }
 
     fn as_log(self: Box<Self>) -> Box<Log> {

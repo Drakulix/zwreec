@@ -73,7 +73,7 @@ impl Log for FileLogger {
 impl SharedLogger for FileLogger {
 
     fn level(&self) -> LogLevelFilter {
-        return self.level;
+        self.level
     }
 
     fn as_log(self: Box<Self>) -> Box<Log> {
