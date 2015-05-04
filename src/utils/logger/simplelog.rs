@@ -1,14 +1,26 @@
+//! Module providing the SimpleLogger Implementation
+
 use std::io::{stderr, stdout, Write};
 use log::{LogLevel, LogLevelFilter, LogMetadata, LogRecord, SetLoggerError, set_logger, Log};
 use time;
 use super::SharedLogger;
 
+/// The SimpleLogger struct. Provides a very basic Logger implementation
 pub struct SimpleLogger {
     level: LogLevelFilter,
 }
 
 impl SimpleLogger {
 
+    /// init function. Globally initializes the SimpleLogger as the one and only used log facility.
+    ///
+    /// Takes the desired LogLevel as argument. It cannot be changed later on.
+    /// Fails if another Logger was already initialized.
+    ///
+    /// # Examples
+    /// '''
+    /// let _ = SimpleLogger::init(LogLevelFilter::Info);
+    /// '''
     #[allow(dead_code)]
     pub fn init(log_level: LogLevelFilter) -> Result<(), SetLoggerError> {
         set_logger(|max_log_level| {
@@ -17,6 +29,17 @@ impl SimpleLogger {
         })
     }
 
+    /// allows to create a new logger, that can be independently used, no matter whats globally set.
+    ///
+    /// no macros are provided for easy logging in this case and you probably
+    /// dont want to use this function, but init().
+    ///
+    /// Takes the desired LogLevel as argument. It cannot be changed later on.
+    ///
+    /// # Examples
+    /// '''
+    /// let simple_logger = SimpleLogger::new(LogLevelFilter::Info);
+    /// '''
     #[allow(dead_code)]
     pub fn new(log_level: LogLevelFilter) -> Box<SimpleLogger> {
         Box::new(SimpleLogger { level: log_level })

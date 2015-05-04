@@ -1,3 +1,5 @@
+//! Module providing the FileLogger Implementation
+
 use log::{LogLevel, LogLevelFilter, LogMetadata, LogRecord, SetLoggerError, set_logger, Log};
 use time;
 use std::fs::File;
@@ -5,6 +7,7 @@ use std::io::Write;
 use std::sync::Mutex;
 use super::SharedLogger;
 
+/// The FileLogger struct. Provides a file based Logger implementation
 pub struct FileLogger {
     level: LogLevelFilter,
     file: Mutex<File>,
@@ -12,6 +15,15 @@ pub struct FileLogger {
 
 impl FileLogger {
 
+    /// init function. Globally initializes the FileLogger as the one and only used log facility.
+    ///
+    /// Takes the desired LogLevel and File object (std::fs::File in any write-mode) as argument. They cannot be changed later on.
+    /// Fails if another Logger was already initialized.
+    ///
+    /// # Examples
+    /// '''
+    /// let _ = FileLogger::init(LogLevelFilter::Info, File::create("my_rust_bin.log").unwrap());
+    /// '''
     #[allow(dead_code)]
     pub fn init(log_level: LogLevelFilter, file: File) -> Result<(), SetLoggerError> {
         set_logger(|max_log_level| {
@@ -20,6 +32,17 @@ impl FileLogger {
         })
     }
 
+    /// allows to create a new logger, that can be independently used, no matter whats globally set.
+    ///
+    /// no macros are provided for easy logging in this case and you probably
+    /// dont want to use this function, but init().
+    ///
+    /// Takes the desired LogLevel and File object (std::fs::File in any write-mode) as argument. They cannot be changed later on.
+    ///
+    /// # Examples
+    /// '''
+    /// let file_logger = fileLogger::new(LogLevelFilter::Info, File::create("my_rust_bin.log").unwrap());
+    /// '''
     #[allow(dead_code)]
     pub fn new(log_level: LogLevelFilter, file: File) -> Box<FileLogger> {
         Box::new(FileLogger { level: log_level, file: Mutex::new(file) })
