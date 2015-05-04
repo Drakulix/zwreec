@@ -5,7 +5,9 @@ extern crate time;
 extern crate term;
 
 use std::env;
+use std::vec::Vec;
 use std::fs::File;
+use std::io::Write;
 
 mod utils;
 use self::utils::logger;
@@ -13,32 +15,35 @@ use self::utils::logger;
 // shorthand to display program usage
 macro_rules! print_usage {
     ($prog:ident, $opts:ident) => {{
-        print!("{}", $opts.usage(&format!("Usage: {} [-h] [-v] [-o OUTPUT] INPUT", $prog)));
+        print_stderr!("{}", $opts.usage(&format!("Usage: {} [-h] [-vq] [-l [LOGFILE]] [-o OUTPUT] INPUT", $prog)));
     }}
 }
 
+// Found in:
+// http://stackoverflow.com/a/27590832
+macro_rules! print_stderr(
+    ($($arg:tt)*) => (
+        match write!(&mut ::std::io::stderr(), $($arg)* ) {
+            Ok(_) => {},
+            Err(x) => panic!("Unable to write to stderr: {}", x),
+        }
+    )
+);
 
 fn main() {
     //early init
 
-    //let _ = SimpleLogger::init(LogLevelFilter::Info);
-    let _ = logger::CombinedLogger::init(
-        vec![
-            logger::FileLogger::new(logger::LogLevelFilter::Trace, File::create("zwreec.log").unwrap()),
-            logger::TermLogger::new(logger::LogLevelFilter::Info),
-        ]
-    );
-
-    info!("main started");
-
     // handling commandline parameters
     let args: Vec<String> = env::args().collect();
     let ref program = args[0];
+    let mut loggers: Vec<Box<logger::SharedLogger>> = vec![];
 
     // define options
     let mut opts = getopts::Options::new();
     opts.optflag("h", "help", "display this help and exit");
-    opts.optflag("v", "verbose", "be more verbose");
+    opts.optflagmulti("v", "verbose", "be more verbose. can be used multiple times.");
+    opts.optflag("q", "quiet", "be quiet");
+    opts.optflagopt("l", "logfile", "specify log file (default zwreec.log)", "LOGFILE");
     opts.optopt("o", "", "name of the output file", "FILE");
 
     let parsed_opts = match opts.parse(&args[1..]) {
@@ -46,7 +51,7 @@ fn main() {
         Err(f) => {
             // parsing error
             // display usage and return
-            println!("{}", f.to_string());
+            print_stderr!("{}\n", f.to_string());
             print_usage!(program, opts);
             // TODO: figure out a way to set exit code
             return;
@@ -64,7 +69,34 @@ fn main() {
     if parsed_opts.opt_present("v") {
         // parsed "-v|--verbose"
         // set loglevel to verbose
-        // utils::log::LOG_LEVEL = utils::log::LogLevel::VERBOSE;
+        loggers.push(logger::TermLogger::new(
+                match parsed_opts.opt_count("v") {
+                    1 => logger::LogLevelFilter::Info, 
+                    2 => logger::LogLevelFilter::Debug, 
+                    _ => logger::LogLevelFilter::Trace,
+                }));
+    } else if parsed_opts.opt_present("q") {
+        // parsed "-q|--quiet"
+        // set loglevel to error
+        loggers.push(logger::TermLogger::new(logger::LogLevelFilter::Error));
+    } else {
+        // default
+        // set loglevel to warn
+        loggers.push(logger::TermLogger::new(logger::LogLevelFilter::Warn));
+    }
+
+    if parsed_opts.opt_present("l") {
+        // parsed "-l|--logfile"
+        // sets a logger to output to logfile
+        let name = if let Some(n) = parsed_opts.opt_str("l") {
+            n
+        } else {
+            "zwreec.log".to_string()
+        };
+        loggers.push(logger::FileLogger::new(
+                        logger::LogLevelFilter::Trace, 
+                        File::create(name).unwrap())
+            );
     }
 
     let outfile = if let Some(file) = parsed_opts.opt_str("o") { 
@@ -83,12 +115,21 @@ fn main() {
          // one free parameter is the input file name
          parsed_opts.free[0].clone()
     } else {
-        println!("Input file name missing");
+        print_stderr!("Input file name missing\n");
         print_usage!(program, opts);
         // TODO: figure out a way to set exit code
         return;
     };
 
+    // activate logger
+    // NOTE: I am not sure, if there is a *good* way to do this earlier
+
+    //let _ = SimpleLogger::init(LogLevelFilter::Info);
+    let _ = logger::CombinedLogger::init(loggers);
+
+    debug!("parsed command line options");
+    info!("main started");
+    warn!("WARN");
 
     // call library
     zwreec::compile(&infile, &outfile);
