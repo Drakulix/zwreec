@@ -8,6 +8,7 @@ use std::env;
 use std::vec::Vec;
 use std::fs::File;
 use std::io::Write;
+use std::process::exit;
 
 mod utils;
 use self::utils::logger;
@@ -54,8 +55,7 @@ fn main() {
             // display usage and return
             print_stderr!("{}\n", f.to_string());
             print_usage!(program, opts);
-            // TODO: figure out a way to set exit code
-            return;
+            exit(1);
         }
     };
 
@@ -64,7 +64,7 @@ fn main() {
         // parsed "-h|--help"
         // display usage and return
         print_usage!(program, opts);
-        return;
+        exit(1);
     }
 
     if parsed_opts.opt_present("V") {
@@ -78,7 +78,7 @@ fn main() {
                             env!("CARGO_PKG_VERSION_PATCH"),
                             option_env!("CARGO_PKG_VERSION_PRE").unwrap_or(""))
         });
-        return;
+        exit(1);
     }
 
     if parsed_opts.opt_present("v") {
@@ -131,7 +131,7 @@ fn main() {
         print_stderr!("Input file name missing\n");
         print_usage!(program, opts);
         // TODO: figure out a way to set exit code
-        return;
+        exit(1);
     };
 
     // activate logger
