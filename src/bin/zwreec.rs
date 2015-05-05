@@ -10,8 +10,7 @@ use std::fs::File;
 use std::io::Write;
 use std::process::exit;
 
-mod utils;
-use self::utils::logger;
+mod logger;
 
 // shorthand to display program usage
 macro_rules! print_usage(

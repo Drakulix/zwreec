@@ -4,7 +4,8 @@ version = "0.0.1"
 authors = ["..."]
 
 [[bin]]
-name = "zwreec_bin"
+name = "zwreec"
+path = "src/bin/zwreec.rs"
 
 [dependencies]
 time = "*"
