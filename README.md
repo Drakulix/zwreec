@@ -3,12 +3,26 @@
 
 Twee to Z-Code Compiler written in the Rust programming language. This is intended to compile [interactive fiction](http://en.wikipedia.org/wiki/Interactive_fiction) in the Twee format (created by the [Twine software](http://en.wikipedia.org/wiki/Twine_(software))) to [Z-Machine](http://en.wikipedia.org/wiki/Z-machine) instructions that can be run with Z-Code interpreters like [frotz](http://frotz.sourceforge.net).
 
-# Usage
+## Usage
 *This uses rust beta 3 and will be updated to future beta versions and the official 1.0 release.*
 
-`cargo run`
+```
+Usage: target/debug/zwreec_bin [-hV] [-vq] [-l [LOGFILE]] [-o OUTPUT] INPUT
 
-Install dependencies and run the application.
+Options:
+    -v --verbose        be more verbose. can be used multiple times.
+    -q --quiet          be quiet
+    -l --logfile [LOGFILE]
+                        specify log file (default zwreec.log)
+    -o FILE             name of the output file
+    -h --help           display this help and exit
+    -V --version        display version
+```
+
+### Build Steps
+`cargo build`
+
+Install dependencies and build the application.
 
 `cargo test`
 
