@@ -12,9 +12,15 @@ repository = "https://github.com/Drakulix/zwreec"
 readme = "README.md"
 license = "BSD-2-Clause"
 
+[lib]
+name = "zwreec"
+path = "src/lib.rs"
+
 [[bin]]
 name = "zwreec"
 path = "src/bin/zwreec.rs"
+test = false
+doc = false
 
 [dependencies]
 time = "*"
