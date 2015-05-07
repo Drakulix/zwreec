@@ -10,8 +10,7 @@ use std::fs::File;
 use std::io::Write;
 use std::process::exit;
 
-mod utils;
-use self::utils::logger;
+mod logger;
 
 // shorthand to display program usage
 macro_rules! print_usage(
@@ -146,7 +145,7 @@ fn main() {
     // only for testing
     debug!("(1) {}", zwreec::frontend::temp_hello());
     debug!("(2) {}", zwreec::backend::temp_hello());
-    debug!("(3) {}", zwreec::file::temp_hello());
+    debug!("(3) {}", zwreec::utils::file::temp_hello());
 
     info!("main finished");
 }

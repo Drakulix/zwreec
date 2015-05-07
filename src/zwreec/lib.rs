@@ -4,7 +4,7 @@ extern crate term;
 
 pub mod frontend;
 pub mod backend;
-pub mod file;
+pub mod utils;
 
 
 pub fn compile(input_file_name: &str, output_file_name: &str) {

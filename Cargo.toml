@@ -1,10 +1,26 @@
 [package]
 name = "zwreec"
 version = "0.0.1"
-authors = ["..."]
+authors = [
+    "victor.brekenfeld@fu-berlin.de", "franz.greiling@fu-berlin.de",
+    "kai.lueke@fu-berlin.de", "irina.makarenko@fu-berlin.de",
+    "papierschiff@zedat.fu-berlin.de", "berikobama@zedat.fu-berlin.de",
+    "finn.wilke@fu-berlin.de", "b.zengin@fu-berlin.de"
+]
+description = "Twee to Z-Code Compiler in Rust"
+repository = "https://github.com/Drakulix/zwreec"
+readme = "README.md"
+license = "BSD-2-Clause"
+
+[lib]
+name = "zwreec"
+path = "src/zwreec/lib.rs"
 
 [[bin]]
-name = "zwreec_bin"
+name = "zwreec"
+path = "src/bin/zwreec.rs"
+test = false
+doc = false
 
 [dependencies]
 time = "*"
