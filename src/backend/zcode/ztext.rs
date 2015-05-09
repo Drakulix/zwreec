@@ -29,7 +29,7 @@ pub fn encode(data: &mut Bytes, content: &str) -> u16 {
     let mut temp: Vec<i8> = Vec::new();
     for i in string_bytes{
         let t_index = pos_in_alpha(i as u8);
-        if(t_index <27){
+        if t_index <27 {
             temp.push(t_index % 26 + 6);
         } else {
             temp.push(0x04 as i8);
