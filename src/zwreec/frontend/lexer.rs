@@ -6,13 +6,64 @@ use self::Token::{
 	TokLogOp, TokText, TokFormatBold, TokFormatItalic,
 	TokFormatUnder,	TokFormatStrike, TokFormatSub, TokFormatSup,
 	TokFormatMonoStart,	TokFormatMonoEnd, TokString, TokBracketOpen,
-	TokBracketClose, TokIf, TokElse, TokEndIf, TokPassageLink
+	TokBracketClose, TokIf, TokElse, TokEndIf, TokPassageLink,
+	TokFormatBulList, TokFormatNumbList, TokFormatIndent,
+	TokFormatIndentDouble, TokFormatIndentBlock, TokFormatHeading
 };
 
 pub fn lex(input :String) -> Vec<Token> {
-   	let inp = BufReader::new(input.as_bytes());
+	let processed = preprocess(input);
+	println!("Processed Text is:\n{:?}", processed);
+   	let inp = BufReader::new(processed.as_bytes());
 	let lexer = TweeLexer::new(inp);
 	lexer.collect()
+}
+
+fn preprocess(input :String) -> String {
+	let mut comment = false;
+	let mut suspect_start = false;
+	let mut suspect_end = false;
+	let mut processed = String::new();
+
+	for c in input.chars() {
+		if !comment && !suspect_start && c == '/' {
+			suspect_start = true;
+			continue;
+		}
+
+		if suspect_start {
+			if c == '%' {
+				comment = true;
+				suspect_start = false;
+			} else {
+				suspect_start = false;
+				processed.push('/');
+			}
+
+			continue;
+		} 
+
+		if c == '%' && comment {
+			suspect_end = true;
+			continue;
+		}
+
+		if suspect_end {
+			if c == '/' {
+				comment = false;
+				suspect_end = false;
+			} else {
+				suspect_end = false;
+			}
+			continue;
+		}
+
+		if !comment {
+			processed.push(c);
+		}
+	}
+
+	processed
 }
 
 #[derive(PartialEq,Debug)]
@@ -31,6 +82,12 @@ pub enum Token {
 	TokFormatSup,
 	TokFormatMonoStart,
 	TokFormatMonoEnd,
+	TokFormatBulList,
+	TokFormatNumbList,
+	TokFormatIndent,
+	TokFormatIndentDouble,
+	TokFormatIndentBlock,
+	TokFormatHeading (usize),
 	TokMakroStart,
 	TokMakroEnd,
 	TokBracketOpen,
@@ -54,7 +111,7 @@ rustlex! TweeLexer {
 	let LETTER_S = ['a'-'z'];
 	let LETTER_L = ['A'-'Z'];
 	let LETTER = (LETTER_S|LETTER_L);
-	let SPECIAL = ["'._$"];
+	let SPECIAL = ["'.$"] | ('_' [^'_']) | ["äöüÄÖÜß"];
 	let SPACE = ' ';
 	let UNDERSCORE = '_';
 	let NEWLINE = '\n';
@@ -63,8 +120,8 @@ rustlex! TweeLexer {
 	let WORD = CHAR CHAR*;
 
 	// TODO what is allowed?
-	let TEXT = (LETTER | DIGIT | SPACE | NEWLINE)+;
-	let TEXTLINES = (LETTER | DIGIT | SPACE | NEWLINE)+;
+	let TEXT = (CHAR | SPACE)+;
+	let TEXTLINES = (CHAR | SPACE | NEWLINE)+;
 	
 
 	let PASSAGE_CHAR = SPACE | LETTER_S | LETTER_L | DIGIT | SPECIAL;
@@ -84,6 +141,14 @@ rustlex! TweeLexer {
 	let FORMAT_SUP = "^^";
 	let FORMAT_MONO_START = "{{{";
 	let FORMAT_MONO_END = "}}}";
+
+	let FORMAT_BUL_LIST = "*";
+	let FORMAT_NUMB_LIST = "#";
+	let FORMAT_INDENT = ">";
+	let FORMAT_DOUBLE_INDENT = ">>";
+	let FORMAT_INDENT_BLOCK = "<<<";
+
+	let FORMAT_HEADING = "!" | "!!" | "!!!" | "!!!!" | "!!!!!";
 
 	let MAKRO_START = "<<";
 	let MAKRO_END = ">>";
@@ -147,13 +212,18 @@ rustlex! TweeLexer {
 		FORMAT_SUP => |_:&mut TweeLexer<R>| Some(TokFormatSup)
 		FORMAT_MONO_START => |_:&mut TweeLexer<R>| Some(TokFormatMonoStart)
 		FORMAT_MONO_END => |_:&mut TweeLexer<R>| Some(TokFormatMonoEnd)
+		FORMAT_BUL_LIST =>  |_:&mut TweeLexer<R>| Some(TokFormatBulList)
+		FORMAT_NUMB_LIST =>  |_:&mut TweeLexer<R>| Some(TokFormatNumbList)
+		FORMAT_INDENT  =>  |_:&mut TweeLexer<R>| Some(TokFormatIndent)
+		FORMAT_DOUBLE_INDENT  =>  |_:&mut TweeLexer<R>| Some(TokFormatIndentDouble)
+		FORMAT_INDENT_BLOCK  =>  |_:&mut TweeLexer<R>| Some(TokFormatIndentBlock)
+		FORMAT_HEADING  =>  |lexer:&mut TweeLexer<R>| Some(TokFormatHeading(lexer.yystr().len()))
 
 		TEXTLINES => |lexer:&mut TweeLexer<R>| Some(TokText(lexer.yystr()))
 	}
 
 	PASSAGE {
-		// TODO trim()
-		PASSAGE_NAME => |lexer:&mut TweeLexer<R>| Some(TokPassageName(lexer.yystr()))
+		PASSAGE_NAME => |lexer:&mut TweeLexer<R>| Some(TokPassageName(lexer.yystr().trim().to_string()))
 		TAG_START => |lexer:&mut TweeLexer<R>| {
 			lexer.TAGS();
 			Some(TokTagStart)
