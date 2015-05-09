@@ -26,12 +26,21 @@ pub static ALPHABET: [char; 78] = [
 /// ```
 pub fn encode(data: &mut Bytes, content: &str) -> u16 {
     let string_bytes = content.to_string().into_bytes();
+    let mut temp: Vec<i8> = Vec::new();
+    for i in string_bytes{
+        let t_index = pos_in_alpha(i as u8);
+        if(t_index <27){
+            temp.push(t_index % 26 + 6);
+        } else {
+            temp.push(0x04 as i8);
+            temp.push(t_index % 26 + 6);
+        } 
+    }
 
     let mut two_bytes: u16 = 0;
-    let len = string_bytes.len();
+    let len = temp.len();
     for i in 0..len {
-        let letter = string_bytes[i];
-        let zasci_id = pos_in_alpha(letter as u8) % 26 + 6;
+        let zasci_id =temp[i];
 
         //two_bytes |= (zasci_id as u16) << shift(i as u8);
         two_bytes |= shift(zasci_id as u16, i as u8);
@@ -42,7 +51,7 @@ pub fn encode(data: &mut Bytes, content: &str) -> u16 {
         }
 
         // end of string
-        if i == string_bytes.len() -1 {
+        if i == len -1 {
             if i % 3 != 2 {
                 for j in (i % 3) + 1..3 {
                     //two_bytes |= (0x05 as u16) << shift(j as u8);
