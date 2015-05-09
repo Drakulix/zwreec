@@ -1,3 +1,7 @@
+#![feature(plugin)]
+#![plugin(rustlex)]
+#[allow(plugin_as_library)]
+extern crate rustlex;
 #[macro_use] extern crate log;
 extern crate time;
 extern crate term;
@@ -5,7 +9,6 @@ extern crate term;
 pub mod frontend;
 pub mod backend;
 pub mod utils;
-
 
 pub fn compile(input_file_name: &str, output_file_name: &str) {
     info!("inputFile: {}", input_file_name);
