@@ -18,7 +18,7 @@ pub fn temp_create_zcode_example() {
     zfile.op_quit();
 
     zfile.routine("main", 0);
-    zfile.op_print("HELLOworld");
+    zfile.op_print("HELLOworld12345");
 
     zfile.end();
 
