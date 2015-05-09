@@ -1,12 +1,12 @@
 use std::io::BufReader;
 use self::Token::{
 	TokPassageName, TokTagStart, TokTagEnd, TokTag, 
-	TokEmpty, TokMakroStart, TokMakroEnd, TokVariable,
+	TokMakroStart, TokMakroEnd, TokVariable,
 	TokSet, TokAssign, TokInt, TokFloat, TokNumOp, TokCompOp,
 	TokLogOp, TokText, TokFormatBold, TokFormatItalic,
 	TokFormatUnder,	TokFormatStrike, TokFormatSub, TokFormatSup,
 	TokFormatMonoStart,	TokFormatMonoEnd, TokString, TokBracketOpen,
-	TokBracketClose, TokIf, TokElse, TokEndIf
+	TokBracketClose, TokIf, TokElse, TokEndIf, TokPassageLink
 };
 
 pub fn lex(input :String) -> Vec<Token> {
@@ -20,6 +20,7 @@ pub enum Token {
 	TokPassageName (String),
 	TokTagStart,
 	TokTagEnd,
+	TokPassageLink (String, String), 
 	TokTag (String),
 	TokText (String),
 	TokFormatBold,
@@ -45,8 +46,7 @@ pub enum Token {
 	TokLogOp (String),
 	TokIf,
 	TokElse,
-	TokEndIf,
-	TokEmpty
+	TokEndIf
 }
 
 rustlex! TweeLexer {
@@ -61,6 +61,10 @@ rustlex! TweeLexer {
 
 	let CHAR = LETTER_S | LETTER_L | DIGIT | SPECIAL;
 	let WORD = CHAR CHAR*;
+
+	// TODO what is allowed?
+	let TEXT = (LETTER | DIGIT | SPACE | NEWLINE)+;
+	let TEXTLINES = (LETTER | DIGIT | SPACE | NEWLINE)+;
 	
 
 	let PASSAGE_CHAR = SPACE | LETTER_S | LETTER_L | DIGIT | SPECIAL;
@@ -69,8 +73,8 @@ rustlex! TweeLexer {
 	let TAG_START = '[';
 	let TAG_END = ']';
 
-	// TODO what is allowed?
-	let TEXT = (LETTER | DIGIT | SPACE | NEWLINE)+;
+	let LINK_SIMPLE = "[[" PASSAGE_NAME "]]";
+	let LINK_LABELED = "[[" TEXT "|" PASSAGE_NAME "]]";
 
 	let FORMAT_ITALIC = "//";
 	let FORMAT_BOLD = '"';
@@ -108,14 +112,31 @@ rustlex! TweeLexer {
 	let LOG_OP = "and" | "or" | "not";
 
 	INITIAL {
-		PASSAGE_START => |lexer:&mut TweeLexer<R>| {
+		PASSAGE_START => |lexer:&mut TweeLexer<R>| -> Option<Token>{
 			lexer.PASSAGE();
-			Some(TokEmpty)
+			None
 		}
 
 		MAKRO_START => |lexer:&mut TweeLexer<R>| {
 			lexer.MAKRO();
 			Some(TokMakroStart)
+		}
+
+		LINK_SIMPLE =>  |lexer:&mut TweeLexer<R>| {
+			let s =  lexer.yystr();
+			let trimmed = &s[2 .. s.len()-2];
+			let name = &trimmed.to_string();
+			Some(TokPassageLink(name.clone(), name.clone()))
+		}
+
+		LINK_LABELED =>  |lexer:&mut TweeLexer<R>| {
+			let s =  lexer.yystr();
+			let trimmed = &s[2 .. s.len()-2];
+			let matches = &trimmed.split("|").collect::<Vec<&str>>();
+			assert_eq!(matches.len(), 2);
+			let text = matches[0].to_string();
+			let name = matches[1].to_string();
+			Some(TokPassageLink(text, name))
 		}
 
 		FORMAT_ITALIC => |_:&mut TweeLexer<R>| Some(TokFormatItalic)
@@ -127,7 +148,7 @@ rustlex! TweeLexer {
 		FORMAT_MONO_START => |_:&mut TweeLexer<R>| Some(TokFormatMonoStart)
 		FORMAT_MONO_END => |_:&mut TweeLexer<R>| Some(TokFormatMonoEnd)
 
-		TEXT => |lexer:&mut TweeLexer<R>| Some(TokText(lexer.yystr()))
+		TEXTLINES => |lexer:&mut TweeLexer<R>| Some(TokText(lexer.yystr()))
 	}
 
 	PASSAGE {
@@ -137,9 +158,9 @@ rustlex! TweeLexer {
 			lexer.TAGS();
 			Some(TokTagStart)
 		}
-		NEWLINE => |lexer:&mut TweeLexer<R>| {
+		NEWLINE => |lexer:&mut TweeLexer<R>| -> Option<Token>{
 			lexer.INITIAL();
-			Some(TokEmpty)
+			None
 		}
 	}
 
