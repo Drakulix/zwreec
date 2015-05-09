@@ -25,36 +25,13 @@ pub static ALPHABET: [char; 78] = [
 /// let byteLength = data.encode("hello");
 /// ```
 pub fn encode(data: &mut Bytes, content: &str) -> u16 {
-    let string_bytes = content.to_string().into_bytes();
-    let mut temp: Vec<i8> = Vec::new();
-    for i in string_bytes{
-        let t_index = pos_in_alpha(i as u8);
-        if i == 0x0A {
-            println!("newline");
-        } else if i == 0x20 {
-            temp.push(0x05 as i8);  
-            temp.push(0);
-        } 
-        else {
-            if t_index >52 {
-                temp.push(0x05 as i8);  
-                temp.push(t_index % 26 + 6);
-            } else if t_index <27 {
-                temp.push(t_index % 26 + 6);
-            }
-             else {
-                temp.push(0x04 as i8);
-                temp.push(t_index % 26 + 6);
-            } 
-        }
-    }
+    let temp: Vec<i8> = stringtozchar(content);
 
     let mut two_bytes: u16 = 0;
     let len = temp.len();
     for i in 0..len {
         let zasci_id =temp[i];
 
-        //two_bytes |= (zasci_id as u16) << shift(i as u8);
         two_bytes |= shift(zasci_id as u16, i as u8);
 
         if i % 3 == 2 {
@@ -66,7 +43,6 @@ pub fn encode(data: &mut Bytes, content: &str) -> u16 {
         if i == len -1 {
             if i % 3 != 2 {
                 for j in (i % 3) + 1..3 {
-                    //two_bytes |= (0x05 as u16) << shift(j as u8);
                     two_bytes |= shift(0x05 as u16, j as u8);
                 }
 
@@ -83,6 +59,34 @@ pub fn encode(data: &mut Bytes, content: &str) -> u16 {
     }
 
     data.bytes.len() as u16
+}
+
+/// reads the content and converts it to a zasci vector
+fn stringtozchar(content: &str) -> Vec<i8> {
+    let string_bytes = content.to_string().into_bytes();
+        let mut temp: Vec<i8> = Vec::new();
+        for i in string_bytes{
+            let t_index = pos_in_alpha(i as u8);
+            if i == 0x0A {
+                println!("newline");
+            } else if i == 0x20 {
+                temp.push(0x05 as i8);  
+                temp.push(0);
+            } 
+            else {
+                if t_index >52 {
+                    temp.push(0x05 as i8);  
+                    temp.push(t_index % 26 + 6);
+                } else if t_index <27 {
+                    temp.push(t_index % 26 + 6);
+                }
+                 else {
+                    temp.push(0x04 as i8);
+                    temp.push(t_index % 26 + 6);
+                } 
+            }
+        }
+    temp
 }
 
 /// shifts the z-char in a 2 bytes-array to the right position
