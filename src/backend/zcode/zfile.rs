@@ -237,6 +237,10 @@ impl Zfile {
         self.op_0_op(0x0a);
     }
 
+    pub fn op_newline(&mut self) {
+        self.op_0_op(0x0b);
+    }
+
     /// calls a routine
     /// call_1n is 1OP
     pub fn op_call_1n(&mut self, jump_to_label: &str) {

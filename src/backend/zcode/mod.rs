@@ -18,7 +18,18 @@ pub fn temp_create_zcode_example() {
     zfile.op_quit();
 
     zfile.routine("main", 0);
-    zfile.op_print("HELLOworld    1234    1234");
+    zfile.op_print("Z-char 6789abcdef0123456789abcdef");
+    zfile.op_newline();
+    zfile.op_print("current   --------------------------");
+    zfile.op_newline();
+    zfile.op_print("A0      abcdefghijklmnopqrstuvwxyz");
+    zfile.op_newline();
+    zfile.op_print("A1      ABCDEFGHIJKLMNOPQRSTUVWXYZ");
+    zfile.op_newline();
+    zfile.op_print("A2       0123456789.,!?_#'\"/\\-:()");
+    zfile.op_newline();
+    zfile.op_print("          --------------------------");
+    zfile.op_newline();
 
     zfile.op_quit();
     zfile.end();

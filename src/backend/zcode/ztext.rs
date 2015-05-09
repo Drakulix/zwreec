@@ -68,7 +68,7 @@ fn stringtozchar(content: &str) -> Vec<i8> {
         for i in string_bytes{
             let t_index = pos_in_alpha(i as u8);
             if i == 0x0A {
-                println!("newline");
+               info!("newline");
             } else if i == 0x20 {
                 temp.push(0x05 as i8);  
                 temp.push(0);
