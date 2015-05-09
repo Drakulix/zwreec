@@ -6,7 +6,7 @@ extern crate zwreec;
 
 #[test]
 fn file_test() {
-    assert_eq!("hello from file", zwreec::file::temp_hello());
+    assert_eq!("hello from file", zwreec::utils::file::temp_hello());
 }
 
 #[test]

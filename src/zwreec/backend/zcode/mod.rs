@@ -5,7 +5,7 @@ pub mod zbytes;
 pub mod zfile;
 pub mod ztext;
 
-use file;
+use utils::file;
 use self::zfile::Zfile;
 
 
