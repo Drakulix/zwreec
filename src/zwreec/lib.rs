@@ -20,6 +20,14 @@ pub fn compile(input_file_name: &str, output_file_name: &str) {
 
     // compile
 
+    let input = utils::file::open_source_file(input_file_name);
+
+    let tokens = frontend::lexer::lex(input);
+
+    for token in tokens.iter() {
+    	debug!("{:?}", token);
+    }
+
     backend::zcode::temp_create_zcode_example();
 
 }

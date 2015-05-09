@@ -1,7 +1,7 @@
 pub mod lexer;
 
-pub fn temp_hello() -> String {
-    lexer::temp_hello()
+pub fn lex<T: Iterator>(input :String)-> Vec<lexer::Token> {
+    lexer::lex(input)
 }
 
 

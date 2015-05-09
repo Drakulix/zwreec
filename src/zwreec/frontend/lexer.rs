@@ -9,14 +9,10 @@ use self::Token::{
 	TokBracketClose, TokIf, TokElse, TokEndIf
 };
 
-pub fn temp_hello() -> String {
-   	let str = ":: Passage1 [ stylesheet ]\n~~Random Text~~\nwith << set $makro = \"Hello:\" + $var + (5 - 1.3 )* -2. >> which does something\n";
-	let inp = BufReader::new(str.as_bytes());
+pub fn lex(input :String) -> Vec<Token> {
+   	let inp = BufReader::new(input.as_bytes());
 	let lexer = TweeLexer::new(inp);
-	for tok in lexer {
-		println!("{:?}", tok);
-	}
-	"temp_hello".to_string()
+	lexer.collect()
 }
 
 #[derive(PartialEq,Debug)]
