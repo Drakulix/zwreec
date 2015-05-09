@@ -10,7 +10,7 @@ pub static ALPHABET: [char; 78] = [
     'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
     'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
 
-    ' ', '^', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '.',
+    '\0', '^', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '.',
     ',', '!', '?', '_', '#', '\'','"', '/', '\\','-', ':', '(', ')'];
 
 
@@ -32,7 +32,8 @@ pub fn encode(data: &mut Bytes, content: &str) -> u16 {
         if i == 0x0A {
             println!("newline");
         } else if i == 0x20 {
-            println!("blank");
+            temp.push(0x05 as i8);  
+            temp.push(0);
         } 
         else {
             if t_index >52 {

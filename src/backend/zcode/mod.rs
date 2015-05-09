@@ -18,8 +18,9 @@ pub fn temp_create_zcode_example() {
     zfile.op_quit();
 
     zfile.routine("main", 0);
-    zfile.op_print("HELLOworld     22  12 \n 123123");
+    zfile.op_print("HELLOworld    1234    1234");
 
+    zfile.op_quit();
     zfile.end();
 
     file::save_bytes_to_file("helloworld.z8", &(*zfile.data.bytes));
