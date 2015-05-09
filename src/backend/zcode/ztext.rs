@@ -10,7 +10,7 @@ pub static ALPHABET: [char; 78] = [
     'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
     'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
 
-    '\0', '^', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '.',
+    ' ', '^', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '.',
     ',', '!', '?', '_', '#', '\'','"', '/', '\\','-', ':', '(', ')'];
 
 
@@ -29,16 +29,23 @@ pub fn encode(data: &mut Bytes, content: &str) -> u16 {
     let mut temp: Vec<i8> = Vec::new();
     for i in string_bytes{
         let t_index = pos_in_alpha(i as u8);
-        if t_index >52 {
-            temp.push(0x05 as i8);
-            temp.push(t_index % 26 + 6);
-        } else if t_index <27 {
-            temp.push(t_index % 26 + 6);
-        }
-         else {
-            temp.push(0x04 as i8);
-            temp.push(t_index % 26 + 6);
+        if i == 0x0A {
+            println!("newline");
+        } else if i == 0x20 {
+            println!("blank");
         } 
+        else {
+            if t_index >52 {
+                temp.push(0x05 as i8);  
+                temp.push(t_index % 26 + 6);
+            } else if t_index <27 {
+                temp.push(t_index % 26 + 6);
+            }
+             else {
+                temp.push(0x04 as i8);
+                temp.push(t_index % 26 + 6);
+            } 
+        }
     }
 
     let mut two_bytes: u16 = 0;
