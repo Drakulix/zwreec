@@ -18,15 +18,21 @@ pub fn temp_create_zcode_example() {
     zfile.op_quit();
 
     zfile.routine("main", 0);
+    zfile.op_set_text_style(zfile::TextStyle::UNDERLINE);
     zfile.op_print("Z-char 6789abcdef0123456789abcdef");
+    zfile.op_set_text_style(zfile::TextStyle::NORMAL);
     zfile.op_newline();
     zfile.op_print("current   --------------------------");
+    zfile.op_set_text_style(zfile::TextStyle::BOLD);
     zfile.op_newline();
-    zfile.op_print("A0      abcdefghijklmnopqrstuvwxyz");
+    zfile.op_print("A0      abcdefghijklmnop\nqrstuvwxyz");
+    zfile.op_set_text_style(zfile::TextStyle::NORMAL);
     zfile.op_newline();
     zfile.op_print("A1      ABCDEFGHIJKLMNOPQRSTUVWXYZ");
+    zfile.op_set_text_style(zfile::TextStyle::FP);
     zfile.op_newline();
-    zfile.op_print("A2       0123456789.,!?_#'\"/\\-:()");
+    zfile.op_print("A2      ^0123456789.,!?_#'\"/\\-:()");
+    zfile.op_set_text_style(zfile::TextStyle::REVERSE);
     zfile.op_newline();
     zfile.op_print("          --------------------------");
     zfile.op_newline();

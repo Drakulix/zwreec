@@ -74,10 +74,10 @@ fn stringtozchar(content: &str) -> Vec<i8> {
                 temp.push(0);
             } 
             else {
-                if t_index >52 {
+                if t_index >51 {
                     temp.push(0x05 as i8);  
                     temp.push(t_index % 26 + 6);
-                } else if t_index <27 {
+                } else if t_index <26 {
                     temp.push(t_index % 26 + 6);
                 }
                  else {
