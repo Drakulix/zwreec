@@ -263,7 +263,7 @@ impl Zfile {
         let mut style_byte : u8;
         match style {
                         TextStyle::BOLD => {
-                            style_byte = 0x02  ;
+                            style_byte = 0x02;
                         },
                         TextStyle::REVERSE => {
                             style_byte = 0x01;

@@ -25,12 +25,12 @@ pub static ALPHABET: [char; 78] = [
 /// let byteLength = data.encode("hello");
 /// ```
 pub fn encode(data: &mut Bytes, content: &str) -> u16 {
-    let temp: Vec<i8> = stringtozchar(content);
+    let zchars: Vec<i8> = string_to_zchar(content);
 
     let mut two_bytes: u16 = 0;
-    let len = temp.len();
+    let len = zchars.len();
     for i in 0..len {
-        let zasci_id =temp[i];
+        let zasci_id =zchars[i];
 
         two_bytes |= shift(zasci_id as u16, i as u8);
 
@@ -62,31 +62,31 @@ pub fn encode(data: &mut Bytes, content: &str) -> u16 {
 }
 
 /// reads the content and converts it to a zasci vector
-fn stringtozchar(content: &str) -> Vec<i8> {
+fn string_to_zchar(content: &str) -> Vec<i8> {
     let string_bytes = content.to_string().into_bytes();
-        let mut temp: Vec<i8> = Vec::new();
+        let mut zchars: Vec<i8> = Vec::new();
         for i in string_bytes{
             let t_index = pos_in_alpha(i as u8);
             if i == 0x0A {
                info!("newline");
             } else if i == 0x20 {
-                temp.push(0x05 as i8);  
-                temp.push(0);
+                zchars.push(0x05 as i8);  
+                zchars.push(0);
             } 
             else {
                 if t_index >51 {
-                    temp.push(0x05 as i8);  
-                    temp.push(t_index % 26 + 6);
+                    zchars.push(0x05 as i8);  
+                    zchars.push(t_index % 26 + 6);
                 } else if t_index <26 {
-                    temp.push(t_index % 26 + 6);
+                    zchars.push(t_index % 26 + 6);
                 }
                  else {
-                    temp.push(0x04 as i8);
-                    temp.push(t_index % 26 + 6);
+                    zchars.push(0x04 as i8);
+                    zchars.push(t_index % 26 + 6);
                 } 
             }
         }
-    temp
+    zchars
 }
 
 /// shifts the z-char in a 2 bytes-array to the right position
