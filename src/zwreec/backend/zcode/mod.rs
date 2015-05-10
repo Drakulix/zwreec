@@ -18,6 +18,7 @@ pub fn temp_create_zcode_example() {
     zfile.op_quit();
 
     zfile.routine("main", 0);
+    zfile.op_set_color(0x02, 0x03);
     zfile.op_set_text_style(zfile::TextStyle::UNDERLINE);
     zfile.op_print("Z-char 6789abcdef0123456789abcdef");
     zfile.op_set_text_style(zfile::TextStyle::NORMAL);

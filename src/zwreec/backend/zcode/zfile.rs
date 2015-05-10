@@ -255,6 +255,14 @@ impl Zfile {
         self.op_1_op(0x0f);
         self.add_jump(jump_to_label.to_string(), JumpType::ROUTINE);
     }
+    /// sets the colors of the foreground (font) and background
+    pub fn op_set_color(&mut self, fg:u8, bg:u8){
+        let op_coding = 0x00 << 6 | 0x00 << 5 | 0x1B;
+        self.data.append_byte(op_coding);
+        self.data.append_byte(fg);
+        self.data.append_byte(bg);
+    }
+
     /// set the style of the text
     pub fn op_set_text_style(&mut self, style: TextStyle){
         self.op_var(0x11);
