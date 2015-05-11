@@ -5,6 +5,7 @@ extern crate term;
 pub mod frontend;
 pub mod backend;
 pub mod utils;
+pub mod parsetree;
 
 
 pub fn compile(input_file_name: &str, output_file_name: &str) {
@@ -16,6 +17,7 @@ pub fn compile(input_file_name: &str, output_file_name: &str) {
     //file::open_source_file(input_file_name);
 
     // compile
+    parsetree::temp_create_syntax_tree();
 
     backend::zcode::temp_create_zcode_example();
 
