@@ -143,7 +143,6 @@ fn main() {
     zwreec::compile(&infile, &outfile);
 
     // only for testing
-    debug!("(1) {}", zwreec::frontend::temp_hello());
     debug!("(2) {}", zwreec::backend::temp_hello());
     debug!("(3) {}", zwreec::utils::file::temp_hello());
 
