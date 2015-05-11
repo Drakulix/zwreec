@@ -8,13 +8,16 @@ use self::Token::{
 	TokFormatMonoStart,	TokFormatMonoEnd, TokString, TokBracketOpen,
 	TokBracketClose, TokIf, TokElse, TokEndIf, TokPassageLink,
 	TokFormatBulList, TokFormatNumbList, TokFormatIndent,
-	TokFormatIndentDouble, TokFormatIndentBlock, TokFormatHeading
+	TokFormatIndentDouble, TokFormatIndentBlock, TokFormatHeading,
+	TokVarSetStart,	TokVarSetEnd, TokSemiColon, TokPrint, TokDisplay,
+	TokBoolean, TokFunction , TokColon, TokArgsEnd, TokSilently,
+	TokEndSilently, TokArrayStart, TokArrayEnd
 };
 
 pub fn lex(input :String) -> Vec<Token> {
 	let processed = preprocess(input);
-	println!("Processed Text is:\n{:?}", processed);
    	let inp = BufReader::new(processed.as_bytes());
+   	print!("Nicht in Tokens verarbeitete Zeichen: ");
 	let lexer = TweeLexer::new(inp);
 	lexer.collect()
 }
@@ -71,6 +74,8 @@ pub enum Token {
 	TokPassageName (String),
 	TokTagStart,
 	TokTagEnd,
+	TokVarSetStart,
+	TokVarSetEnd,
 	TokPassageLink (String, String), 
 	TokTag (String),
 	TokText (String),
@@ -96,14 +101,25 @@ pub enum Token {
 	TokInt (i32),
 	TokFloat (f32),
 	TokString (String),
+	TokBoolean (String),
+	TokFunction (String),
+	TokColon,
+	TokArgsEnd,
+	TokArrayStart,
+	TokArrayEnd,
 	TokSet,
 	TokAssign,
 	TokNumOp (String),
 	TokCompOp (String),
 	TokLogOp (String),
+	TokSemiColon,
 	TokIf,
 	TokElse,
-	TokEndIf
+	TokEndIf,
+	TokPrint,
+	TokDisplay,
+	TokSilently,
+	TokEndSilently
 }
 
 rustlex! TweeLexer {
@@ -111,7 +127,7 @@ rustlex! TweeLexer {
 	let LETTER_S = ['a'-'z'];
 	let LETTER_L = ['A'-'Z'];
 	let LETTER = (LETTER_S|LETTER_L);
-	let SPECIAL = ["'.$"] | ('_' [^'_']) | ["äöüÄÖÜß"];
+	let SPECIAL = [";?%()+-\".$,"] | ('_' [^'_']) | ('/' [^'/']) | ("'" [^"'"]) | (':' [^':']) | ["äöüÄÖÜß"];
 	let SPACE = ' ';
 	let UNDERSCORE = '_';
 	let NEWLINE = '\n';
@@ -130,8 +146,11 @@ rustlex! TweeLexer {
 	let TAG_START = '[';
 	let TAG_END = ']';
 
-	let LINK_SIMPLE = "[[" PASSAGE_NAME "]]";
-	let LINK_LABELED = "[[" TEXT "|" PASSAGE_NAME "]]";
+	let LINK_SIMPLE = "[[" PASSAGE_NAME "]";
+	let LINK_LABELED = "[[" TEXT "|" PASSAGE_NAME "]";
+
+	let LINK_OPEN = '[';
+	let LINK_CLOSE = ']';
 
 	let FORMAT_ITALIC = "//";
 	let FORMAT_BOLD = "''";
@@ -156,6 +175,9 @@ rustlex! TweeLexer {
 	let BR_OPEN = '(';
 	let BR_CLOSE = ')';
 
+	let ARRAY_START = '[';
+	let ARRAY_END = ']';
+
 	let VAR_CHAR = LETTER | DIGIT | UNDERSCORE;
 	let VAR_NAME = '$' (LETTER | UNDERSCORE) VAR_CHAR*;
 
@@ -166,12 +188,23 @@ rustlex! TweeLexer {
 
 	let STRING = ('"' [^'"']* '"') | ("'" [^"'"]* "'");
 
+	let BOOL = "true" | "false";
+
+	let COLON = ',';
+
+	let FUNCTION = LETTER_S+ '(';
+
 	let SET = "set";
-	let ASSIGN = "=" | "to";
 	let IF = "if";
 	let ELSE = "else";
 	let END_IF = "endif";
+	let PRINT = "print";
+	let DISPLAY = "display";
+	let SILENTLY = "silently";
+	let END_SILENTLY = "endsilently";
 
+	let ASSIGN = "=" | "to";
+	let SEMI_COLON = ';';
 	let NUM_OP = ["+-*/%"];
 	let COMP_OP = "is" | "==" | "eq" | "neq" | ">" | "gt" | ">=" | "gte" | "<" | "lt" | "<=" | "lte";
 	let LOG_OP = "and" | "or" | "not";
@@ -188,15 +221,17 @@ rustlex! TweeLexer {
 		}
 
 		LINK_SIMPLE =>  |lexer:&mut TweeLexer<R>| {
+			lexer.LINK_VAR_CHECK();
 			let s =  lexer.yystr();
-			let trimmed = &s[2 .. s.len()-2];
+			let trimmed = &s[2 .. s.len()-1];
 			let name = &trimmed.to_string();
 			Some(TokPassageLink(name.clone(), name.clone()))
 		}
 
 		LINK_LABELED =>  |lexer:&mut TweeLexer<R>| {
+			lexer.LINK_VAR_CHECK();
 			let s =  lexer.yystr();
-			let trimmed = &s[2 .. s.len()-2];
+			let trimmed = &s[2 .. s.len()-1];
 			let matches = &trimmed.split("|").collect::<Vec<&str>>();
 			assert_eq!(matches.len(), 2);
 			let text = matches[0].to_string();
@@ -243,24 +278,142 @@ rustlex! TweeLexer {
 	}
 
 	MAKRO {
+		SET =>  |lexer:&mut TweeLexer<R>| {
+			lexer.MAKRO_CONTENT();
+			Some(TokSet)
+		}
+		IF =>  |lexer:&mut TweeLexer<R>| {
+			lexer.MAKRO_CONTENT();
+			Some(TokIf)
+		}
+		ELSE =>  |lexer:&mut TweeLexer<R>| {
+			lexer.MAKRO_CONTENT();
+			Some(TokElse)
+		}
+		END_IF =>  |lexer:&mut TweeLexer<R>| {
+			lexer.MAKRO_CONTENT();
+			Some(TokEndIf)
+		}
+		PRINT =>  |lexer:&mut TweeLexer<R>| {
+			lexer.MAKRO_CONTENT();
+			Some(TokPrint)
+		}
+		DISPLAY =>  |lexer:&mut TweeLexer<R>| {
+			lexer.DISPLAY_CONTENT();
+			Some(TokDisplay)
+		}
+		SILENTLY =>  |lexer:&mut TweeLexer<R>| {
+			lexer.MAKRO_CONTENT();
+			Some(TokSilently)
+		}
+		END_SILENTLY =>  |lexer:&mut TweeLexer<R>| {
+			lexer.MAKRO_CONTENT();
+			Some(TokEndSilently)
+		}
+	}
+
+	MAKRO_CONTENT {
 		MAKRO_END => |lexer:&mut TweeLexer<R>| {
 			lexer.INITIAL();
 			Some(TokMakroEnd)
 		}
+
+		
+		FUNCTION =>  |lexer:&mut TweeLexer<R>| {
+			let s =  lexer.yystr();
+			let trimmed = &s[0 .. s.len()-1];
+			let name = &trimmed.to_string();
+			lexer.FUNCTION_ARGS();
+			Some(TokFunction(name.clone()))
+		}
+
+		// Expression Stuff
 		VAR_NAME =>  |lexer:&mut TweeLexer<R>| Some(TokVariable(lexer.yystr()))
 		FLOAT =>  |lexer:&mut TweeLexer<R>| Some(TokFloat(lexer.yystr()[..].parse().unwrap()))
 		INT =>  |lexer:&mut TweeLexer<R>| Some(TokInt(lexer.yystr()[..].parse().unwrap()))
 		STRING =>  |lexer:&mut TweeLexer<R>| Some(TokString(lexer.yystr()))
-		SET =>  |_:&mut TweeLexer<R>| Some(TokSet)
-		ASSIGN =>  |_:&mut TweeLexer<R>| Some(TokAssign)
-		IF =>  |_:&mut TweeLexer<R>| Some(TokIf)
-		ELSE =>  |_:&mut TweeLexer<R>| Some(TokElse)
-		END_IF =>  |_:&mut TweeLexer<R>| Some(TokEndIf)
+		BOOL =>  |lexer:&mut TweeLexer<R>| Some(TokBoolean(lexer.yystr()))
 		NUM_OP =>  |lexer:&mut TweeLexer<R>| Some(TokNumOp(lexer.yystr()))
 		COMP_OP =>  |lexer:&mut TweeLexer<R>| Some(TokCompOp(lexer.yystr()))
 		LOG_OP =>  |lexer:&mut TweeLexer<R>| Some(TokLogOp(lexer.yystr()))
 		BR_OPEN =>  |_:&mut TweeLexer<R>| Some(TokBracketOpen)
 		BR_CLOSE =>  |_:&mut TweeLexer<R>| Some(TokBracketClose)
+		SEMI_COLON =>  |_:&mut TweeLexer<R>| Some(TokSemiColon)
+		ASSIGN =>  |_:&mut TweeLexer<R>| Some(TokAssign)
+		ARRAY_START =>  |_:&mut TweeLexer<R>| Some(TokArrayStart)
+		COLON =>  |_:&mut TweeLexer<R>| Some(TokColon)
+		ARRAY_END =>  |_:&mut TweeLexer<R>| Some(TokArrayEnd)
+		// Expression Stuff End
+	}
+
+	// Currently doesn't support brackets 
+	FUNCTION_ARGS {
+		COLON =>  |_:&mut TweeLexer<R>| Some(TokColon)
+		VAR_NAME =>  |lexer:&mut TweeLexer<R>| Some(TokVariable(lexer.yystr()))
+		FLOAT =>  |lexer:&mut TweeLexer<R>| Some(TokFloat(lexer.yystr()[..].parse().unwrap()))
+		INT =>  |lexer:&mut TweeLexer<R>| Some(TokInt(lexer.yystr()[..].parse().unwrap()))
+		STRING =>  |lexer:&mut TweeLexer<R>| Some(TokString(lexer.yystr()))
+		BOOL =>  |lexer:&mut TweeLexer<R>| Some(TokBoolean(lexer.yystr()))
+		NUM_OP =>  |lexer:&mut TweeLexer<R>| Some(TokNumOp(lexer.yystr()))
+		COMP_OP =>  |lexer:&mut TweeLexer<R>| Some(TokCompOp(lexer.yystr()))
+		LOG_OP =>  |lexer:&mut TweeLexer<R>| Some(TokLogOp(lexer.yystr()))
+		ARRAY_START =>  |_:&mut TweeLexer<R>| Some(TokArrayStart)
+		ARRAY_END =>  |_:&mut TweeLexer<R>| Some(TokArrayEnd)
+		BR_CLOSE =>  |lexer:&mut TweeLexer<R>| {
+			lexer.MAKRO_CONTENT();
+			Some(TokArgsEnd)
+		}
+	}
+
+	DISPLAY_CONTENT {
+		MAKRO_END => |lexer:&mut TweeLexer<R>| {
+			lexer.INITIAL();
+			Some(TokMakroEnd)
+		}
+
+		VAR_NAME =>  |lexer:&mut TweeLexer<R>| Some(TokVariable(lexer.yystr()))
+		PASSAGE_NAME => |lexer:&mut TweeLexer<R>| Some(TokPassageName(lexer.yystr().trim().to_string()))
+	}
+
+	LINK_VAR_CHECK {
+		LINK_CLOSE => |lexer:&mut TweeLexer<R>| -> Option<Token> {
+			lexer.INITIAL();
+			None
+		}
+
+		LINK_OPEN => |lexer:&mut TweeLexer<R>| -> Option<Token> {
+			lexer.LINK_VAR_SET();
+			Some(TokVarSetStart)
+		}
+	}
+
+	LINK_VAR_SET {
+		// Expression Stuff
+		VAR_NAME =>  |lexer:&mut TweeLexer<R>| Some(TokVariable(lexer.yystr()))
+		FLOAT =>  |lexer:&mut TweeLexer<R>| Some(TokFloat(lexer.yystr()[..].parse().unwrap()))
+		INT =>  |lexer:&mut TweeLexer<R>| Some(TokInt(lexer.yystr()[..].parse().unwrap()))
+		STRING =>  |lexer:&mut TweeLexer<R>| Some(TokString(lexer.yystr()))
+		BOOL =>  |lexer:&mut TweeLexer<R>| Some(TokBoolean(lexer.yystr()))
+		NUM_OP =>  |lexer:&mut TweeLexer<R>| Some(TokNumOp(lexer.yystr()))
+		COMP_OP =>  |lexer:&mut TweeLexer<R>| Some(TokCompOp(lexer.yystr()))
+		LOG_OP =>  |lexer:&mut TweeLexer<R>| Some(TokLogOp(lexer.yystr()))
+		BR_OPEN =>  |_:&mut TweeLexer<R>| Some(TokBracketOpen)
+		BR_CLOSE =>  |_:&mut TweeLexer<R>| Some(TokBracketClose)
+		SEMI_COLON =>  |_:&mut TweeLexer<R>| Some(TokSemiColon)
+		ASSIGN =>  |_:&mut TweeLexer<R>| Some(TokAssign)
+		// Expression Stuff End
+
+		LINK_CLOSE => |lexer:&mut TweeLexer<R>| -> Option<Token> {
+			lexer.LINK_WAIT_CLOSE();
+			Some(TokVarSetEnd)
+		}
+	}
+
+	LINK_WAIT_CLOSE {
+		LINK_CLOSE => |lexer:&mut TweeLexer<R>| -> Option<Token> {
+			lexer.INITIAL();
+			None
+		}
 	}
 	
 }
