@@ -134,7 +134,7 @@ rustlex! TweeLexer {
 	let LINK_LABELED = "[[" TEXT "|" PASSAGE_NAME "]]";
 
 	let FORMAT_ITALIC = "//";
-	let FORMAT_BOLD = '"';
+	let FORMAT_BOLD = "''";
 	let FORMAT_UNDER = "__";
 	let FORMAT_STRIKE = "==";
 	let FORMAT_SUB = "~~";
