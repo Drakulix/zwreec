@@ -123,7 +123,6 @@ impl NodeType {
     // adds a node to the childs in path
     pub fn add_child_at(&mut self, path: &[usize], child: NodeType) {
         match self {
-
             &mut NodeType::NonTerminal (ref mut node) => {
                 if let Some(index) = path.first() {
                     let mut new_path: Vec<usize> = path.to_vec();
@@ -162,11 +161,20 @@ impl SyntaxTree {
             root: NodeType::new_non_terminal(NonTerminalType::S)
         }
     }
+
+    // adds one nodes to childs at the path
+    pub fn add_one_node(&mut self, child: NodeType, to_add_path: &Vec<usize>) {
+        self.root.add_child_at(&to_add_path, child);
+    }
+
+    // adds two nodes to childs at the path
+    pub fn add_two_nodes(&mut self, child1: NodeType, child2: NodeType, to_add_path: &Vec<usize>) {
+        self.root.add_child_at(&to_add_path, child1);
+        self.root.add_child_at(&to_add_path, child2);
+    }
 }
 
 pub fn temp_create_parse_tree(tokens: Vec<Token>) {
-    debug!("temp_create_syntax_tree");
-
     let mut tree: SyntaxTree = SyntaxTree::new();
     let mut stack: Vec<Vec<usize>> = Vec::new();
 
@@ -196,11 +204,7 @@ pub fn temp_create_parse_tree(tokens: Vec<Token>) {
             let to_add_path: Vec<usize> = top_path.to_vec();
             match tree.root.get_non_terminal(top_path) {
                 &NonTerminalType::S => {
-                    let child1 = NodeType::new_non_terminal(NonTerminalType::Passage);
-                    let child2 = NodeType::new_non_terminal(NonTerminalType::S2);
-                    tree.root.add_child_at(&to_add_path, child1);
-                    tree.root.add_child_at(&to_add_path, child2);
-
+                    tree.add_two_nodes(NodeType::new_non_terminal(NonTerminalType::Passage), NodeType::new_non_terminal(NonTerminalType::S2), &to_add_path);
                     add_two_to_stack(&mut stack, to_add_path);
 
                 },
@@ -209,8 +213,7 @@ pub fn temp_create_parse_tree(tokens: Vec<Token>) {
                     if let Some(token) = tokens.get(token_index) {
                         match token {
                             &Token::TokPassageName (_) => {
-                                let child = NodeType::new_non_terminal(NonTerminalType::S);
-                                tree.root.add_child_at(&to_add_path, child);
+                                tree.add_one_node(NodeType::new_non_terminal(NonTerminalType::S), &to_add_path);
                                 add_one_to_stack(&mut stack, to_add_path);
                             },
                             _ => { }
@@ -222,33 +225,27 @@ pub fn temp_create_parse_tree(tokens: Vec<Token>) {
                         match token {
                             &Token::TokPassageName (ref name) => {
                                 let new_token: Token = Token::TokPassageName(name.clone());
-                                let child1 = NodeType::new_terminal(new_token);
-                                tree.root.add_child_at(&to_add_path, child1);
-
+                                tree.add_two_nodes(NodeType::new_terminal(new_token), NodeType::new_non_terminal(NonTerminalType::PassageContent), &to_add_path);
+                                add_two_to_stack(&mut stack, to_add_path);
                             },
                             _ => { }
                         }
                     }
-                    let child2 = NodeType::new_non_terminal(NonTerminalType::PassageContent);
-                    tree.root.add_child_at(&to_add_path, child2);
+                    
 
-                    add_two_to_stack(&mut stack, to_add_path);
+                    
                 },
                 &NonTerminalType::PassageContent => {
                      if let Some(token) = tokens.get(token_index) {
                         match token {
                             &Token::TokText (ref text) => {
                                 let new_token: Token = Token::TokText(text.clone());
-                                let child1 = NodeType::new_terminal(new_token);
-                                tree.root.add_child_at(&to_add_path, child1);
+                                tree.add_two_nodes(NodeType::new_terminal(new_token), NodeType::new_non_terminal(NonTerminalType::B), &to_add_path);
+                                add_two_to_stack(&mut stack, to_add_path);
                             },
                             _ => { }
                         }
                     }
-                    let child2 = NodeType::new_non_terminal(NonTerminalType::B);
-                    tree.root.add_child_at(&to_add_path, child2);
-
-                    add_two_to_stack(&mut stack, to_add_path);
                 },
                 &NonTerminalType::B => {
                     /*
@@ -271,6 +268,7 @@ pub fn temp_create_parse_tree(tokens: Vec<Token>) {
         }
     }
 
+    debug!("Parse Tree");
     tree.root.print(0);
 }
 
