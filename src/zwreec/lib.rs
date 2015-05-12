@@ -20,8 +20,6 @@ pub fn compile(input_file_name: &str, output_file_name: &str) {
     //file::open_source_file(input_file_name);
 
     // compile
-    parsetree::temp_create_syntax_tree();
-
     let input = utils::file::open_source_file(input_file_name);
 
     let tokens = frontend::lexer::lex(input);
@@ -30,6 +28,8 @@ pub fn compile(input_file_name: &str, output_file_name: &str) {
     for token in tokens.iter() {
     	debug!("{:?}", token);
     }
+
+    parsetree::temp_create_parse_tree(tokens);
 
     backend::zcode::temp_create_zcode_example();
 
