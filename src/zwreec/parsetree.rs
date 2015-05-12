@@ -179,25 +179,26 @@ pub fn temp_create_parse_tree(tokens: Vec<Token>) {
     let mut stack: Vec<Vec<usize>> = Vec::new();
 
     stack.push(vec![]);
-    let mut token_index = 0;
+    let mut lookahead = 0;
     
     // stack parser...
     while !stack.is_empty() {
-        //println!("stack loop");
         let mut is_terminal;
         let top_path;
 
+        // check if the top-element of the stack is a terminal or non terminal
         if let Some(top) = stack.last() {
             is_terminal = tree.root.is_terminal( top.to_vec() );
             top_path = top.to_vec();
         } else {
-            panic!("error")
+            panic!("error");
         }
 
         stack.pop();
 
         if is_terminal {
-            token_index = token_index + 1;
+            // lookahead looks to the next token
+            lookahead = lookahead + 1;
 
         } else {
             // parse table in code
@@ -210,7 +211,7 @@ pub fn temp_create_parse_tree(tokens: Vec<Token>) {
                 },
                 &NonTerminalType::S2 => {
                     // check follow...
-                    if let Some(token) = tokens.get(token_index) {
+                    if let Some(token) = tokens.get(lookahead) {
                         match token {
                             &Token::TokPassageName (_) => {
                                 tree.add_one_node(NodeType::new_non_terminal(NonTerminalType::S), &to_add_path);
@@ -221,7 +222,7 @@ pub fn temp_create_parse_tree(tokens: Vec<Token>) {
                     }
                 },
                 &NonTerminalType::Passage => {
-                    if let Some(token) = tokens.get(token_index) {
+                    if let Some(token) = tokens.get(lookahead) {
                         match token {
                             &Token::TokPassageName (ref name) => {
                                 let new_token: Token = Token::TokPassageName(name.clone());
@@ -236,7 +237,7 @@ pub fn temp_create_parse_tree(tokens: Vec<Token>) {
                     
                 },
                 &NonTerminalType::PassageContent => {
-                     if let Some(token) = tokens.get(token_index) {
+                     if let Some(token) = tokens.get(lookahead) {
                         match token {
                             &Token::TokText (ref text) => {
                                 let new_token: Token = Token::TokText(text.clone());
@@ -248,21 +249,7 @@ pub fn temp_create_parse_tree(tokens: Vec<Token>) {
                     }
                 },
                 &NonTerminalType::B => {
-                    /*
-                    debug!("B: {}", token_index);
-
-                    don't supportet at the moment
-                    // check follow...
-                    if let Some(token) = tokens.get(token_index) {
-                        match token {
-                            &Token::TokText (_) | &Token::TokFormatBold => {
-                                let child = NodeType::new_non_terminal(NonTerminalType::PassageContent);
-                                tree.root.add_child_at(&to_add_path, child);
-                                add_one_to_stack(&mut stack, to_add_path);
-                            },
-                            _ => { }
-                        }
-                    }*/
+                    // not implemented
                 }
             }
         }
@@ -272,8 +259,7 @@ pub fn temp_create_parse_tree(tokens: Vec<Token>) {
     tree.root.print(0);
 }
 
-// save the path to the node in the tree in the stack
-// todo: add_child_at should return the path
+// save the path of the nodes in the tree to the stack
 // the right part of the production
 // should be on the stack in reverse order
 fn add_two_to_stack(stack: &mut Vec<Vec<usize>>, to_add_path: Vec<usize>) {
