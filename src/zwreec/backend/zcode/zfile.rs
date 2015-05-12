@@ -10,14 +10,6 @@ enum JumpType {
     ROUTINE
 }
 
-pub enum TextStyle {
-    NORMAL,
-    BOLD,
-    FP,
-    UNDERLINE,
-    REVERSE
-}
-
 pub struct Zfile {
     pub data: Bytes,
     program_addr: u16,
@@ -264,29 +256,24 @@ impl Zfile {
     }
 
     /// set the style of the text
-    pub fn op_set_text_style(&mut self, style: TextStyle){
+    pub fn op_set_text_style(&mut self, bold: bool, reverse: bool, fp: bool, underline: bool){
         self.op_var(0x11);
         let byte = 0x01 << 6 | 0x03 << 4 | 0x03 << 2 | 0x03 << 0;
         self.data.append_byte(byte);
         let mut style_byte : u8;
-        match style {
-                        TextStyle::BOLD => {
-                            style_byte = 0x02;
-                        },
-                        TextStyle::REVERSE => {
-                            style_byte = 0x01;
-                        },
-                        TextStyle::FP => {
-                            style_byte = 0x08;
-                        },
-                        TextStyle::UNDERLINE => {
-                            style_byte = 0x04;
-                        },
-                        TextStyle::NORMAL => {
-                            style_byte = 0x00;
-                        }
-
-                    }
+        style_byte = 0x00;
+        if bold {
+            style_byte |=0x02
+        }
+         if reverse {
+            style_byte |=0x01
+        }
+         if fp {
+            style_byte |=0x08
+        }
+         if underline {
+            style_byte |=0x04
+        }
         self.data.append_byte(style_byte);
     }
 
