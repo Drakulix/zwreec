@@ -325,7 +325,7 @@ impl Zfile {
         self.data.append_byte(0x0b);
         let byte = 0x01 << 6 | 0x03 << 4 | 0x03 << 2 | 0x03 << 0;
         self.data.append_byte(byte);
-        self.data.append_byte(0xe4);
+        self.data.append_byte(value);
     }
 
     // ================================
