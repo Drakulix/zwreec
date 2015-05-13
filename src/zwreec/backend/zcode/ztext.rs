@@ -68,7 +68,8 @@ fn string_to_zchar(content: &str) -> Vec<i8> {
         for i in string_bytes{
             let t_index = pos_in_alpha(i as u8);
             if i == 0x0A {
-               info!("newline");
+               zchars.push(0x05 as i8);
+               zchars.push(7);
             } else if i == 0x20 {
                 zchars.push(0x05 as i8);  
                 zchars.push(0);
