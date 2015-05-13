@@ -9,7 +9,6 @@ extern crate term;
 pub mod frontend;
 pub mod backend;
 pub mod utils;
-pub mod parsetree;
 
 pub fn compile(input_file_name: &str, output_file_name: &str) {
     info!("inputFile: {}", input_file_name);
@@ -29,7 +28,7 @@ pub fn compile(input_file_name: &str, output_file_name: &str) {
     	debug!("{:?}", token);
     }
 
-    parsetree::temp_create_parse_tree(tokens);
+    frontend::parser::temp_create_parse_tree(tokens);
 
     backend::zcode::temp_create_zcode_example();
 
