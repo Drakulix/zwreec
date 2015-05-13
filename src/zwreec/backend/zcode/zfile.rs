@@ -319,7 +319,14 @@ impl Zfile {
         // jump
         self.add_jump(jump_to_label.to_string(), JumpType::BRANCH);
     }
-    
+    /// prints an unicode char to the current stream
+    pub fn op_print_unicode_char(&mut self, value: u8){
+        self.op_1_op(0xbe);
+        self.data.append_byte(0x0b);
+        let byte = 0x01 << 6 | 0x03 << 4 | 0x03 << 2 | 0x03 << 0;
+        self.data.append_byte(byte);
+        self.data.append_byte(0xe4);
+    }
 
     // ================================
     // general ops

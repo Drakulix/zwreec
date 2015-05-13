@@ -21,6 +21,7 @@ pub fn temp_create_zcode_example() {
     zfile.op_set_color(0x02, 0x03);
     zfile.op_set_text_style(true, false,false,false);
     zfile.op_print("Z-char 6789abcdef0123456789abcdef");
+    zfile.op_print_unicode_char(0x24);
     zfile.op_set_text_style(false, false,false,false);
     zfile.op_newline();
     zfile.op_print("current   --------------------------");
