@@ -43,7 +43,8 @@ pub use frontend::lexer::Token;
 //==============================
 // grammar
 
-#[derive(Debug)]
+//#[derive(Debug)]
+#[derive(Debug, Copy, Clone)]
 enum NonTerminalType {
     S,
     S2,
@@ -51,6 +52,11 @@ enum NonTerminalType {
     PassageContent,
     B
 }
+/*impl Copy for NonTerminalType {}
+impl Clone for NonTerminalType {
+    fn clone(&self) -> NonTerminalType { *self }
+}*/
+//impl Clone for NonTerminalType {}
 
 
 pub fn temp_create_parse_tree(tokens: Vec<Token>) {
@@ -101,60 +107,45 @@ impl Parser {
                 self.next_token();
 
             } else {
-                
                 let to_add_path: Vec<usize> = top_path.to_vec();
 
+                let current_token;
+                if let Some(token) = self.tokens.get(self.lookahead) {
+                    current_token = token
+                } else {
+                    // no token left
+                    // only ɛ-productions could be here
+                    // these productions should be poped of the stack
+                    continue;
+                }
+                
                 // parse table in code
-                match self.tree.root.get_non_terminal(top_path) {
-                    &NonTerminalType::S => {
-                        if let Some(token) = self.tokens.get(self.lookahead) {
-                            match token {
-                                &Token::TokPassageName (_) => {
-                                    self.tree.add_two_nodes(NodeType::new_non_terminal(NonTerminalType::Passage), NodeType::new_non_terminal(NonTerminalType::S2), &to_add_path);
-                                    self.stack.push_path(2, to_add_path);
-                                },
-                                _ => { }
-                            }
-                        }
+                let from_to: (NonTerminalType, &Token) = (self.tree.root.get_non_terminal(top_path).clone(), current_token);
+
+                match from_to {
+                    (NonTerminalType::S, &Token::TokPassageName (_)) => {
+                        self.tree.add_two_nodes(NodeType::new_non_terminal(NonTerminalType::Passage), NodeType::new_non_terminal(NonTerminalType::S2), &to_add_path);
+                        self.stack.push_path(2, to_add_path);
                     },
-                    &NonTerminalType::S2 => {
-                        // check follow...
-                        if let Some(token) = self.tokens.get(self.lookahead) {
-                            match token {
-                                &Token::TokPassageName (_) => {
-                                    self.tree.add_one_node(NodeType::new_non_terminal(NonTerminalType::S), &to_add_path);
-                                    self.stack.push_path(1, to_add_path);
-                                },
-                                _ => { }
-                            }
-                        }
+                    (NonTerminalType::S2, &Token::TokPassageName (_)) => {
+                        self.tree.add_one_node(NodeType::new_non_terminal(NonTerminalType::S), &to_add_path);
+                        self.stack.push_path(1, to_add_path);
                     },
-                    &NonTerminalType::Passage => {
-                        if let Some(token) = self.tokens.get(self.lookahead) {
-                            match token {
-                                &Token::TokPassageName (ref name) => {
-                                    let new_token: Token = Token::TokPassageName(name.clone());
-                                    self.tree.add_two_nodes(NodeType::new_terminal(new_token), NodeType::new_non_terminal(NonTerminalType::PassageContent), &to_add_path);
-                                    self.stack.push_path(2, to_add_path);
-                                },
-                                _ => { }
-                            }
-                        }
+                    (NonTerminalType::Passage, &Token::TokPassageName (ref name)) => {
+                        let new_token: Token = Token::TokPassageName(name.clone());
+                        self.tree.add_two_nodes(NodeType::new_terminal(new_token), NodeType::new_non_terminal(NonTerminalType::PassageContent), &to_add_path);
+                        self.stack.push_path(2, to_add_path);
                     },
-                    &NonTerminalType::PassageContent => {
-                         if let Some(token) = self.tokens.get(self.lookahead) {
-                            match token {
-                                &Token::TokText (ref text) => {
-                                    let new_token: Token = Token::TokText(text.clone());
-                                    self.tree.add_two_nodes(NodeType::new_terminal(new_token), NodeType::new_non_terminal(NonTerminalType::B), &to_add_path);
-                                    self.stack.push_path(2, to_add_path);
-                                },
-                                _ => { }
-                            }
-                        }
+                    (NonTerminalType::PassageContent, &Token::TokText (ref text)) => {
+                        let new_token: Token = Token::TokText(text.clone());
+                        self.tree.add_two_nodes(NodeType::new_terminal(new_token), NodeType::new_non_terminal(NonTerminalType::B), &to_add_path);
+                        self.stack.push_path(2, to_add_path);
                     },
-                    &NonTerminalType::B => {
+                    (NonTerminalType::B, _) => {
                         // not implemented
+                    }
+                    _ => {
+
                     }
                 }
             }
