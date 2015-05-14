@@ -40,6 +40,7 @@ empty                   | empty                         | ACCEPT                
 */
 
 pub use frontend::lexer::Token;
+pub use frontend::ast;
 
 pub fn parse_tokens(tokens: Vec<Token>) -> ParseTree {
     let mut parser: Parser = Parser::new(tokens);    
@@ -91,8 +92,8 @@ impl Parser {
             }
         }
 
-        debug!("Parse Tree");
-        self.tree.root.print(0);
+        debug!("Parse Tree: ");
+        self.tree.print();
     }
 
     /// apply the ll(1) grammar
@@ -207,6 +208,15 @@ impl ParseTree {
             self.root.add_child_at(to_add_path, child);
         }
     }
+
+    /// prints the tree
+    pub fn print(&self) {
+        self.root.print(0);
+    }
+
+    pub fn create_ast(&self, ast: &mut ast::AST) {
+        self.root.create_ast(ast);
+    }
 }
 
 //==============================
@@ -302,6 +312,42 @@ impl PNode {
         }
 
         false
+    }
+
+    pub fn create_ast(&self, ast: &mut ast::AST) {
+
+        match self {
+            &PNode::NonTerminal(ref node) => {
+                /*match node.category {
+                    NonTerminalType::S => {
+                        println!("S");
+                    },
+                    _ => {
+                        println!("_");
+                    }
+                }*/
+                for child in &node.childs {
+                    child.create_ast(ast);
+                }
+                
+
+            },
+            &PNode::Terminal(ref node) => {
+                match node.category {
+                    Token::TokPassageName(ref name) => {
+                        let new_token: Token = Token::TokPassageName(name.clone());
+                        ast.add_passage(new_token);
+                    },
+                    Token::TokText(ref text) => {
+                        let new_token: Token = Token::TokText(text.clone());
+                        ast.add_leaf(new_token);
+                    },
+                    _ => {
+                        println!("_");
+                    }
+                }
+            }
+        }
     }
 }
 
