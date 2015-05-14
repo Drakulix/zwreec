@@ -1,6 +1,6 @@
 use std::io::BufReader;
 use self::Token::{
-	TokPassageName, TokTagStart, TokTagEnd, TokTag, 
+	TokPassageName, TokTagStart, TokTagEnd, TokTag,
 	TokMakroStart, TokMakroEnd, TokVariable,
 	TokSet, TokAssign, TokInt, TokFloat, TokNumOp, TokCompOp,
 	TokLogOp, TokText, TokFormatBold, TokFormatItalic,
@@ -41,10 +41,11 @@ fn preprocess(input :String) -> String {
 			} else {
 				suspect_start = false;
 				processed.push('/');
+				processed.push(c);
 			}
 
 			continue;
-		} 
+		}
 
 		if c == '%' && comment {
 			suspect_end = true;
@@ -76,7 +77,7 @@ pub enum Token {
 	TokTagEnd,
 	TokVarSetStart,
 	TokVarSetEnd,
-	TokPassageLink (String, String), 
+	TokPassageLink (String, String),
 	TokTag (String),
 	TokText (String),
 	TokFormatBold,
@@ -138,7 +139,7 @@ rustlex! TweeLexer {
 	// TODO what is allowed?
 	let TEXT = (CHAR | SPACE)+;
 	let TEXTLINES = (CHAR | SPACE | NEWLINE)+;
-	
+
 
 	let PASSAGE_CHAR = SPACE | LETTER_S | LETTER_L | DIGIT | SPECIAL;
 	let PASSAGE_START = "::";
@@ -181,7 +182,7 @@ rustlex! TweeLexer {
 	let VAR_CHAR = LETTER | DIGIT | UNDERSCORE;
 	let VAR_NAME = '$' (LETTER | UNDERSCORE) VAR_CHAR*;
 
-	let NUMBER = DIGIT DIGIT*; 
+	let NUMBER = DIGIT DIGIT*;
 	let INT = '-'? NUMBER;
 	// TODO exact definition of float in twee
 	let FLOAT = (INT "." NUMBER?) | ("." NUMBER);
@@ -318,7 +319,7 @@ rustlex! TweeLexer {
 			Some(TokMakroEnd)
 		}
 
-		
+
 		FUNCTION =>  |lexer:&mut TweeLexer<R>| {
 			let s =  lexer.yystr();
 			let trimmed = &s[0 .. s.len()-1];
@@ -346,7 +347,7 @@ rustlex! TweeLexer {
 		// Expression Stuff End
 	}
 
-	// Currently doesn't support brackets 
+	// Currently doesn't support brackets
 	FUNCTION_ARGS {
 		COLON =>  |_:&mut TweeLexer<R>| Some(TokColon)
 		VAR_NAME =>  |lexer:&mut TweeLexer<R>| Some(TokVariable(lexer.yystr()))
@@ -415,7 +416,7 @@ rustlex! TweeLexer {
 			None
 		}
 	}
-	
+
 }
 
 
