@@ -9,17 +9,21 @@
 Grammatik:
 
 LL(1)
-----------------------------------------|
-S -> Passage S2                         |
-S2 -> S                                 |
-S2 -> ɛ                                 |
-Passage -> PassageName PassageContent   |
-PassageContent -> TextPassage B         |
-PassageContent -> Formatting B          |
-PassageContent -> Newline B             |
-B -> PassageContent                     |
-B -> ɛ                                  |
-----------------------------------------|
+------------------------------------------------------------|
+S -> Passage S2                                             |
+S2 -> S                                                     |
+S2 -> ɛ                                                     |
+Passage -> PassageName PassageContent                       |
+PassageContent -> TextPassage B                             |
+PassageContent -> Formatting B                              |
+PassageContent -> Newline B                                 |
+B -> PassageContent                                         |
+B -> ɛ                                                      |
+Formating -> BoldFormatting                                 |
+Formating -> ItalicFormatting                               |
+BoldFormatting -> FormatBold PassageContent FormatBold      |
+ItalicFormatting -> FormatItalic PassageContent FormatItalic|
+------------------------------------------------------------|
 
 
 Hello World im LL(1)-Parser:
@@ -329,8 +333,6 @@ impl PNode {
                 for child in &node.childs {
                     child.create_ast(ast);
                 }
-                
-
             },
             &PNode::Terminal(ref node) => {
                 match node.category {
