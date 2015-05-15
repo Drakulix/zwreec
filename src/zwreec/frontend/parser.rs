@@ -109,6 +109,8 @@ impl Parser {
     /// apply the ll(1) grammar
     /// the match-statement simulates the parsing-table behavior
     /// 
+    /// it creates the parse tree (from the ll(1) grammar)
+    /// and the ast from the sdd
     fn apply_grammar(&mut self, top_path: Vec<usize>) {
         if let Some(token) = self.tokens.get_mut(self.lookahead) {
 
