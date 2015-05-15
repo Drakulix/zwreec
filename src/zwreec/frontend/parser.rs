@@ -70,7 +70,7 @@ struct Parser {
     tree: ParseTree,
     ast: ast::AST,
     stack: Stack,
-    ast_stack: Vec<usize>,
+    ast_path: Vec<usize>,
     tokens: Vec<Token>,
     lookahead: usize
 }
@@ -81,7 +81,7 @@ impl Parser {
             tree: ParseTree::new(),
             ast: ast::AST::new(),
             stack: Stack::new(),
-            ast_stack: Vec::new(),
+            ast_path: Vec::new(),
             tokens: tokens,
             lookahead: 0
         }
@@ -129,11 +129,11 @@ impl Parser {
                     new_nodes.push(PNode::new_non_terminal(NonTerminalType::PassageContent));
 
                     // ast
-                    self.ast_stack.clear();
-                    let ast_count_passages = self.ast.cound_childs(self.ast_stack.to_vec());
+                    self.ast_path.clear();
+                    let ast_count_passages = self.ast.cound_childs(self.ast_path.to_vec());
                     let new_token2: Token = Token::TokPassageName(name.clone());
                     self.ast.add_passage(new_token2);
-                    self.ast_stack.push(ast_count_passages);
+                    self.ast_path.push(ast_count_passages);
                 },
                 (NonTerminalType::PassageContent, &Token::TokText(ref text)) => {
                     let new_token: Token = Token::TokText(text.clone());
@@ -142,7 +142,7 @@ impl Parser {
 
                     // ast
                     let new_token2: Token = Token::TokText(text.clone());
-                    self.ast.add_leaf(&self.ast_stack, new_token2);
+                    self.ast.add_child(&self.ast_path, new_token2);
                 },
                 (NonTerminalType::PassageContent, &Token::TokFormatBold) | (NonTerminalType::PassageContent, &Token::TokFormatItalic) => {
                     new_nodes.push(PNode::new_non_terminal(NonTerminalType::Formating));
@@ -160,10 +160,10 @@ impl Parser {
                     new_nodes.push(PNode::new_terminal(Token::TokFormatBold));
 
                     // ast
-                    let ast_count_passages = self.ast.cound_childs(self.ast_stack.to_vec());
+                    let ast_count_passages = self.ast.cound_childs(self.ast_path.to_vec());
                     let ast_token: Token = Token::TokFormatBold;
-                    self.ast.add_child(&self.ast_stack, ast_token);
-                    self.ast_stack.push(ast_count_passages);
+                    self.ast.add_child(&self.ast_path, ast_token);
+                    self.ast_path.push(ast_count_passages);
                 },
                 (NonTerminalType::ItalicFormatting, &Token::TokFormatItalic) => {
                     new_nodes.push(PNode::new_terminal(Token::TokFormatItalic));
@@ -171,10 +171,10 @@ impl Parser {
                     new_nodes.push(PNode::new_terminal(Token::TokFormatItalic));
 
                     // ast
-                    let ast_count_passages = self.ast.cound_childs(self.ast_stack.to_vec());
+                    let ast_count_passages = self.ast.cound_childs(self.ast_path.to_vec());
                     let ast_token: Token = Token::TokFormatItalic;
-                    self.ast.add_child(&self.ast_stack, ast_token);
-                    self.ast_stack.push(ast_count_passages);
+                    self.ast.add_child(&self.ast_path, ast_token);
+                    self.ast_path.push(ast_count_passages);
                 },
                 (NonTerminalType::BoldContent, &Token::TokText(ref text)) => {
                     let new_token: Token = Token::TokText(text.clone());
@@ -183,7 +183,7 @@ impl Parser {
 
                     // ast
                     let ast_token: Token = Token::TokText(text.clone());
-                    self.ast.add_leaf(&self.ast_stack, ast_token);
+                    self.ast.add_child(&self.ast_path, ast_token);
                 },
                 (NonTerminalType::ItalicContent, &Token::TokText(ref text)) => {
                     let new_token: Token = Token::TokText(text.clone());
@@ -192,7 +192,7 @@ impl Parser {
 
                     // ast
                     let ast_token: Token = Token::TokText(text.clone());
-                    self.ast.add_leaf(&self.ast_stack, ast_token);
+                    self.ast.add_child(&self.ast_path, ast_token);
                 },
                 (NonTerminalType::BoldContent, &Token::TokFormatItalic) => {
                     new_nodes.push(PNode::new_terminal(Token::TokFormatItalic));
@@ -211,11 +211,11 @@ impl Parser {
 
                 (NonTerminalType::BoldContent, &Token::TokFormatBold) => {
                     // jump one ast-level higher
-                    self.ast_stack.pop();
+                    self.ast_path.pop();
                 },
                 (NonTerminalType::ItalicContent, &Token::TokFormatItalic) => {
                     // jump one ast-level higher
-                    self.ast_stack.pop();
+                    self.ast_path.pop();
                 },
                 _ => {
 

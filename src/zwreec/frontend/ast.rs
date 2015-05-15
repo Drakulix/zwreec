@@ -34,18 +34,6 @@ impl AST {
         self.passages.push(node);
     }
 
-    /// adds a leaf to the path in the ast
-    pub fn add_leaf(&mut self, path: &Vec<usize>, token: Token) {
-        if let Some(index) = path.first() {
-            let mut new_path: Vec<usize> = path.to_vec();
-            new_path.remove(0);
-            
-            self.passages[*index].add_leaf(new_path, token)
-        } else {
-            panic!("leaf should add at the tree-path")
-        }
-    }
-
     /// adds a child to the path in the ast
     pub fn add_child(&mut self, path: &Vec<usize>, token: Token) {
         if let Some(index) = path.first() {
@@ -76,8 +64,7 @@ impl AST {
 // node types
 enum NodeType {
     Default (NodeDefault),
-    Passage (NodePassage),
-    Leaf (NodeLeaf)
+    Passage (NodePassage)
 }
 
 struct NodePassage {
@@ -91,31 +78,7 @@ struct NodeDefault {
     childs: Vec<NodeType>
 }
 
-struct NodeLeaf {
-    category: Token
-}
-
 impl NodeType {
-    /// adds an leaf to the path in the ast
-    pub fn add_leaf(&mut self, path: Vec<usize>, token: Token) {
-        if let Some(index) = path.first() {
-            let mut new_path: Vec<usize> = path.to_vec();
-            new_path.remove(0);
-
-            match self {
-                &mut NodeType::Default(ref mut node) => node.childs[*index].add_leaf(new_path, token),
-                &mut NodeType::Passage(ref mut node) => node.content[*index].add_leaf(new_path, token),
-                &mut NodeType::Leaf(_) => { panic!("error, leaf has no other leaf") }
-            }
-        } else {
-            match self {
-                &mut NodeType::Default(ref mut node) => node.childs.push(NodeType::Leaf(NodeLeaf { category: token } )),
-                &mut NodeType::Passage(ref mut node) => node.content.push(NodeType::Leaf(NodeLeaf { category: token } )),
-                &mut NodeType::Leaf(_) => { panic!("error, leaf has no other leaf") }
-            }
-        }
-    }
-
     /// adds an child to the path in the ast
     pub fn add_child(&mut self, path: Vec<usize>, token: Token) {
         if let Some(index) = path.first() {
@@ -124,14 +87,12 @@ impl NodeType {
 
             match self {
                 &mut NodeType::Default(ref mut node) => node.childs[*index].add_child(new_path, token),
-                &mut NodeType::Passage(ref mut node) => node.content.push(NodeType::Default(NodeDefault { category: token, childs: Vec::new() } )),
-                &mut NodeType::Leaf(_) => { panic!("error, leaf has no childs") }
+                &mut NodeType::Passage(ref mut node) => node.content[*index].add_child(new_path, token),
             }
         } else {
             match self {
                 &mut NodeType::Default(ref mut node) => node.childs.push(NodeType::Default(NodeDefault { category: token, childs: Vec::new() } )),
                 &mut NodeType::Passage(ref mut node) => node.content.push(NodeType::Default(NodeDefault { category: token, childs: Vec::new() } )),
-                &mut NodeType::Leaf(_) => { panic!("error, leaf has no childs") }
             }
         }
     }
@@ -145,13 +106,11 @@ impl NodeType {
             match self {
                 &NodeType::Default(ref node) => node.childs[*index].cound_childs(new_path),
                 &NodeType::Passage(ref node) => node.content[*index].cound_childs(new_path),
-                &NodeType::Leaf(_) => { panic!("error, leaf has no childs") }
             }
         } else {
             match self {
                 &NodeType::Default(ref node) => node.childs.len(),
                 &NodeType::Passage(ref node) => node.content.len(),
-                &NodeType::Leaf(_) => { panic!("error, leaf has no childs") }
             }
         }
     }
@@ -175,8 +134,7 @@ impl NodeType {
                 for child in &t.childs {
                     child.print(indent+2);
                 }
-            },
-            &NodeType::Leaf(ref t) => { debug!("{}|- {:?}", spaces, t.category); }
+            }
         }
     }
 }
