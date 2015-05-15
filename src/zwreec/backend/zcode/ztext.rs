@@ -25,15 +25,13 @@ pub static ALPHABET: [char; 78] = [
 /// let byteLength = data.encode("hello");
 /// ```
 pub fn encode(data: &mut Bytes, content: &str) -> u16 {
-    let string_bytes = content.to_string().into_bytes();
+    let zchars: Vec<i8> = string_to_zchar(content);
 
     let mut two_bytes: u16 = 0;
-    let len = string_bytes.len();
+    let len = zchars.len();
     for i in 0..len {
-        let letter = string_bytes[i];
-        let zasci_id = pos_in_alpha(letter as u8) % 26 + 6;
+        let zasci_id =zchars[i];
 
-        //two_bytes |= (zasci_id as u16) << shift(i as u8);
         two_bytes |= shift(zasci_id as u16, i as u8);
 
         if i % 3 == 2 {
@@ -42,10 +40,9 @@ pub fn encode(data: &mut Bytes, content: &str) -> u16 {
         }
 
         // end of string
-        if i == string_bytes.len() -1 {
+        if i == len -1 {
             if i % 3 != 2 {
                 for j in (i % 3) + 1..3 {
-                    //two_bytes |= (0x05 as u16) << shift(j as u8);
                     two_bytes |= shift(0x05 as u16, j as u8);
                 }
 
@@ -62,6 +59,35 @@ pub fn encode(data: &mut Bytes, content: &str) -> u16 {
     }
 
     data.bytes.len() as u16
+}
+
+/// reads the content and converts it to a zasci vector
+fn string_to_zchar(content: &str) -> Vec<i8> {
+    let string_bytes = content.to_string().into_bytes();
+        let mut zchars: Vec<i8> = Vec::new();
+        for i in string_bytes{
+            let t_index = pos_in_alpha(i as u8);
+            if i == 0x0A {
+               zchars.push(0x05 as i8);
+               zchars.push(7);
+            } else if i == 0x20 {
+                zchars.push(0x05 as i8);  
+                zchars.push(0);
+            } 
+            else {
+                if t_index >51 {
+                    zchars.push(0x05 as i8);  
+                    zchars.push(t_index % 26 + 6);
+                } else if t_index <26 {
+                    zchars.push(t_index % 26 + 6);
+                }
+                 else {
+                    zchars.push(0x04 as i8);
+                    zchars.push(t_index % 26 + 6);
+                } 
+            }
+        }
+    zchars
 }
 
 /// shifts the z-char in a 2 bytes-array to the right position
