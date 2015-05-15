@@ -2,10 +2,14 @@
 //! to parse tokens from the lexer (and creating the parsetree
 //! and the ast)
 //! its an predictiv parser for a LL(1) grammar
+//! for more info about the parser: look in the Compiler Dragonbook,
+//! Chapter 4.4.4, "Nonrecursive Predictive Parsing"
 
 pub use frontend::lexer::Token;
 pub use frontend::ast;
 pub use frontend::parsetree::{ParseTree, PNode};
+use self::NonTerminalType::*;
+use frontend::lexer::Token::{TokPassageName, TokText, TokFormatItalic, TokFormatBold};
 
 /*
 
@@ -115,105 +119,106 @@ impl Parser {
             let state_first: (NonTerminalType, &Token) = (self.tree.get_non_terminal(top_path).clone(), token);
 
             let mut new_nodes = Vec::new();
+            //use self::*;
             match state_first {
-                (NonTerminalType::S, &Token::TokPassageName(_)) => {
-                    new_nodes.push(PNode::new_non_terminal(NonTerminalType::Passage));
-                    new_nodes.push(PNode::new_non_terminal(NonTerminalType::S2));
+                (S, &TokPassageName(_)) => {
+                    new_nodes.push(PNode::new_non_terminal(Passage));
+                    new_nodes.push(PNode::new_non_terminal(S2));
                 },
-                (NonTerminalType::S2, &Token::TokPassageName(_)) => {
-                    new_nodes.push(PNode::new_non_terminal(NonTerminalType::S));
+                (S2, &TokPassageName(_)) => {
+                    new_nodes.push(PNode::new_non_terminal(S));
                 },
-                (NonTerminalType::Passage, &Token::TokPassageName(ref name)) => {
-                    let new_token: Token = Token::TokPassageName(name.clone());
+                (Passage, &TokPassageName(ref name)) => {
+                    let new_token: Token = TokPassageName(name.clone());
                     new_nodes.push(PNode::new_terminal(new_token));
-                    new_nodes.push(PNode::new_non_terminal(NonTerminalType::PassageContent));
+                    new_nodes.push(PNode::new_non_terminal(PassageContent));
 
                     // ast
                     self.ast_path.clear();
                     let ast_count_passages = self.ast.cound_childs(self.ast_path.to_vec());
-                    let new_token2: Token = Token::TokPassageName(name.clone());
+                    let new_token2: Token = TokPassageName(name.clone());
                     self.ast.add_passage(new_token2);
                     self.ast_path.push(ast_count_passages);
                 },
-                (NonTerminalType::PassageContent, &Token::TokText(ref text)) => {
-                    let new_token: Token = Token::TokText(text.clone());
+                (PassageContent, &TokText(ref text)) => {
+                    let new_token: Token = TokText(text.clone());
                     new_nodes.push(PNode::new_terminal(new_token));
-                    new_nodes.push(PNode::new_non_terminal(NonTerminalType::PassageContent));
+                    new_nodes.push(PNode::new_non_terminal(PassageContent));
 
                     // ast
-                    let new_token2: Token = Token::TokText(text.clone());
+                    let new_token2: Token = TokText(text.clone());
                     self.ast.add_child(&self.ast_path, new_token2);
                 },
-                (NonTerminalType::PassageContent, &Token::TokFormatBold) | (NonTerminalType::PassageContent, &Token::TokFormatItalic) => {
-                    new_nodes.push(PNode::new_non_terminal(NonTerminalType::Formating));
-                    new_nodes.push(PNode::new_non_terminal(NonTerminalType::PassageContent));
+                (PassageContent, &TokFormatBold) | (PassageContent, &TokFormatItalic) => {
+                    new_nodes.push(PNode::new_non_terminal(Formating));
+                    new_nodes.push(PNode::new_non_terminal(PassageContent));
                 },
-                (NonTerminalType::Formating, &Token::TokFormatBold) => {
-                    new_nodes.push(PNode::new_non_terminal(NonTerminalType::BoldFormatting));
+                (Formating, &TokFormatBold) => {
+                    new_nodes.push(PNode::new_non_terminal(BoldFormatting));
                 },
-                (NonTerminalType::Formating, &Token::TokFormatItalic) => {
-                    new_nodes.push(PNode::new_non_terminal(NonTerminalType::ItalicFormatting));
+                (Formating, &TokFormatItalic) => {
+                    new_nodes.push(PNode::new_non_terminal(ItalicFormatting));
                 },
-                (NonTerminalType::BoldFormatting, &Token::TokFormatBold) => {
-                    new_nodes.push(PNode::new_terminal(Token::TokFormatBold));
-                    new_nodes.push(PNode::new_non_terminal(NonTerminalType::BoldContent));
-                    new_nodes.push(PNode::new_terminal(Token::TokFormatBold));
+                (BoldFormatting, &TokFormatBold) => {
+                    new_nodes.push(PNode::new_terminal(TokFormatBold));
+                    new_nodes.push(PNode::new_non_terminal(BoldContent));
+                    new_nodes.push(PNode::new_terminal(TokFormatBold));
 
                     // ast
                     let ast_count_passages = self.ast.cound_childs(self.ast_path.to_vec());
-                    let ast_token: Token = Token::TokFormatBold;
+                    let ast_token: Token = TokFormatBold;
                     self.ast.add_child(&self.ast_path, ast_token);
                     self.ast_path.push(ast_count_passages);
                 },
-                (NonTerminalType::ItalicFormatting, &Token::TokFormatItalic) => {
-                    new_nodes.push(PNode::new_terminal(Token::TokFormatItalic));
-                    new_nodes.push(PNode::new_non_terminal(NonTerminalType::ItalicContent));
-                    new_nodes.push(PNode::new_terminal(Token::TokFormatItalic));
+                (ItalicFormatting, &TokFormatItalic) => {
+                    new_nodes.push(PNode::new_terminal(TokFormatItalic));
+                    new_nodes.push(PNode::new_non_terminal(ItalicContent));
+                    new_nodes.push(PNode::new_terminal(TokFormatItalic));
 
                     // ast
                     let ast_count_passages = self.ast.cound_childs(self.ast_path.to_vec());
-                    let ast_token: Token = Token::TokFormatItalic;
+                    let ast_token: Token = TokFormatItalic;
                     self.ast.add_child(&self.ast_path, ast_token);
                     self.ast_path.push(ast_count_passages);
                 },
-                (NonTerminalType::BoldContent, &Token::TokText(ref text)) => {
-                    let new_token: Token = Token::TokText(text.clone());
+                (BoldContent, &TokText(ref text)) => {
+                    let new_token: Token = TokText(text.clone());
                     new_nodes.push(PNode::new_terminal(new_token));
-                    new_nodes.push(PNode::new_non_terminal(NonTerminalType::BoldContent));
+                    new_nodes.push(PNode::new_non_terminal(BoldContent));
 
                     // ast
-                    let ast_token: Token = Token::TokText(text.clone());
+                    let ast_token: Token = TokText(text.clone());
                     self.ast.add_child(&self.ast_path, ast_token);
                 },
-                (NonTerminalType::ItalicContent, &Token::TokText(ref text)) => {
-                    let new_token: Token = Token::TokText(text.clone());
+                (ItalicContent, &TokText(ref text)) => {
+                    let new_token: Token = TokText(text.clone());
                     new_nodes.push(PNode::new_terminal(new_token));
-                    new_nodes.push(PNode::new_non_terminal(NonTerminalType::ItalicContent));
+                    new_nodes.push(PNode::new_non_terminal(ItalicContent));
 
                     // ast
-                    let ast_token: Token = Token::TokText(text.clone());
+                    let ast_token: Token = TokText(text.clone());
                     self.ast.add_child(&self.ast_path, ast_token);
                 },
-                (NonTerminalType::BoldContent, &Token::TokFormatItalic) => {
-                    new_nodes.push(PNode::new_terminal(Token::TokFormatItalic));
-                    new_nodes.push(PNode::new_non_terminal(NonTerminalType::BoldItalicContent));
-                    new_nodes.push(PNode::new_terminal(Token::TokFormatItalic));
+                (BoldContent, &TokFormatItalic) => {
+                    new_nodes.push(PNode::new_terminal(TokFormatItalic));
+                    new_nodes.push(PNode::new_non_terminal(BoldItalicContent));
+                    new_nodes.push(PNode::new_terminal(TokFormatItalic));
                 },
-                (NonTerminalType::ItalicContent, &Token::TokFormatBold) => {
-                    new_nodes.push(PNode::new_terminal(Token::TokFormatBold));
-                    new_nodes.push(PNode::new_non_terminal(NonTerminalType::BoldItalicContent));
-                    new_nodes.push(PNode::new_terminal(Token::TokFormatBold));
+                (ItalicContent, &TokFormatBold) => {
+                    new_nodes.push(PNode::new_terminal(TokFormatBold));
+                    new_nodes.push(PNode::new_non_terminal(BoldItalicContent));
+                    new_nodes.push(PNode::new_terminal(TokFormatBold));
                 },
-                (NonTerminalType::BoldItalicContent, &Token::TokText(ref text)) => {
-                    let new_token: Token = Token::TokText(text.clone());
+                (BoldItalicContent, &TokText(ref text)) => {
+                    let new_token: Token = TokText(text.clone());
                     new_nodes.push(PNode::new_terminal(new_token));
                 },
 
-                (NonTerminalType::BoldContent, &Token::TokFormatBold) => {
+                (BoldContent, &TokFormatBold) => {
                     // jump one ast-level higher
                     self.ast_path.pop();
                 },
-                (NonTerminalType::ItalicContent, &Token::TokFormatItalic) => {
+                (ItalicContent, &TokFormatItalic) => {
                     // jump one ast-level higher
                     self.ast_path.pop();
                 },

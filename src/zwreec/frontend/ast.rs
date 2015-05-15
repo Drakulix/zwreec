@@ -9,7 +9,7 @@ pub use frontend::lexer::Token;
 // ast
 
 pub struct AST {
-    passages: Vec<NodeType>
+    passages: Vec<ASTNode>
 }
 
 impl AST {
@@ -30,7 +30,7 @@ impl AST {
 
     /// adds a passage to the path in the ast
     pub fn add_passage(&mut self, token: Token) {
-        let node = NodeType::Passage(NodePassage { category: token, content: Vec::new() });
+        let node = ASTNode::Passage(NodePassage { category: token, childs: Vec::new() });
         self.passages.push(node);
     }
 
@@ -42,7 +42,7 @@ impl AST {
             
             self.passages[*index].add_child(new_path, token)
         } else {
-            self.passages.push(NodeType::Default(NodeDefault { category: token, childs: Vec::new() }));
+            self.passages.push(ASTNode::Default(NodeDefault { category: token, childs: Vec::new() }));
         }
     }
 
@@ -57,28 +57,27 @@ impl AST {
             self.passages.len()
         }
     }
-
 }
 
 // ================================
 // node types
-enum NodeType {
+enum ASTNode {
     Default (NodeDefault),
     Passage (NodePassage)
 }
 
 struct NodePassage {
     category: Token,
-    pub content: Vec<NodeType>,
-    /*tags: Vec<NodeType>*/
+    pub childs: Vec<ASTNode>,
+    /*tags: Vec<ASTNode>*/
 }
 
 struct NodeDefault {
     category: Token,
-    childs: Vec<NodeType>
+    childs: Vec<ASTNode>
 }
 
-impl NodeType {
+impl ASTNode {
     /// adds an child to the path in the ast
     pub fn add_child(&mut self, path: Vec<usize>, token: Token) {
         if let Some(index) = path.first() {
@@ -86,13 +85,13 @@ impl NodeType {
             new_path.remove(0);
 
             match self {
-                &mut NodeType::Default(ref mut node) => node.childs[*index].add_child(new_path, token),
-                &mut NodeType::Passage(ref mut node) => node.content[*index].add_child(new_path, token),
+                &mut ASTNode::Default(ref mut node) => node.childs[*index].add_child(new_path, token),
+                &mut ASTNode::Passage(ref mut node) => node.childs[*index].add_child(new_path, token),
             }
         } else {
             match self {
-                &mut NodeType::Default(ref mut node) => node.childs.push(NodeType::Default(NodeDefault { category: token, childs: Vec::new() } )),
-                &mut NodeType::Passage(ref mut node) => node.content.push(NodeType::Default(NodeDefault { category: token, childs: Vec::new() } )),
+                &mut ASTNode::Default(ref mut node) => node.childs.push(ASTNode::Default(NodeDefault { category: token, childs: Vec::new() } )),
+                &mut ASTNode::Passage(ref mut node) => node.childs.push(ASTNode::Default(NodeDefault { category: token, childs: Vec::new() } )),
             }
         }
     }
@@ -104,13 +103,13 @@ impl NodeType {
             new_path.remove(0);
 
             match self {
-                &NodeType::Default(ref node) => node.childs[*index].cound_childs(new_path),
-                &NodeType::Passage(ref node) => node.content[*index].cound_childs(new_path),
+                &ASTNode::Default(ref node) => node.childs[*index].cound_childs(new_path),
+                &ASTNode::Passage(ref node) => node.childs[*index].cound_childs(new_path),
             }
         } else {
             match self {
-                &NodeType::Default(ref node) => node.childs.len(),
-                &NodeType::Passage(ref node) => node.content.len(),
+                &ASTNode::Default(ref node) => node.childs.len(),
+                &ASTNode::Passage(ref node) => node.childs.len(),
             }
         }
     }
@@ -123,13 +122,13 @@ impl NodeType {
         }
 
         match self {
-            &NodeType::Passage(ref t) => {
+            &ASTNode::Passage(ref t) => {
                 debug!("{}|- : {:?}", spaces, t.category);
-                for child in &t.content {
+                for child in &t.childs {
                     child.print(indent+2);
                 }
             },
-            &NodeType::Default(ref t) => {
+            &ASTNode::Default(ref t) => {
                 debug!("{}|- : {:?}", spaces, t.category);
                 for child in &t.childs {
                     child.print(indent+2);
