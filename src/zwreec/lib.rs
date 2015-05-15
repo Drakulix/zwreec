@@ -6,9 +6,14 @@ extern crate rustlex;
 extern crate time;
 extern crate term;
 
+pub use backend::zcode::zfile;
+
+
 pub mod frontend;
 pub mod backend;
 pub mod utils;
+use utils::file;
+
 
 pub fn compile(input_file_name: &str, output_file_name: &str) {
     info!("inputFile: {}", input_file_name);
@@ -30,6 +35,22 @@ pub fn compile(input_file_name: &str, output_file_name: &str) {
 
     let ast = frontend::parser::parse_tokens(tokens);
     ast.print();
+
+
+
+    let mut zfile: zfile::Zfile = zfile::Zfile::new();
+    zfile.start();
+    zfile.op_call_1n("main");
+    zfile.op_quit();
+    zfile.routine("main", 0);
+    ast.to_zcode(&mut zfile);
+    zfile.op_quit();
+    zfile.end();
+    file::save_bytes_to_file("test.z8", &(*zfile.data.bytes));
+
+
+
+
 
     backend::zcode::temp_create_zcode_example();
 

@@ -3,7 +3,7 @@
 
 pub use frontend::parser;
 pub use frontend::lexer::Token;
-
+pub use backend::zcode::zfile;
 
 //==============================
 // ast
@@ -11,8 +11,63 @@ pub use frontend::lexer::Token;
 pub struct AST {
     passages: Vec<ASTNode>
 }
+/// add zcode based on tokens
+fn stuff(nide: &ASTNode,mut out: &mut zfile::Zfile){
+         match nide {
+            &ASTNode::Passage(ref t) => {
+                println!("{:?}", t.category);
+                match &t.category{
+                    &Token::TokText(ref s) => {
+                        out.op_print(s);
+                    },
+                    &Token::TokFormatBold => {
+                        out.op_set_text_style(true, false, false, false);
+                    },
+                     &Token::TokFormatItalic => {
+                        out.op_set_text_style(false, false, false, true);
+                    },
+                    _ => {
+                        println!("no match 1");
+                    }
+                };
+                for child in &t.childs {
+                    stuff(child, out);
+                }
+                out.op_set_text_style(false, false, false, false);
+            },
+            &ASTNode::Default(ref t) => {
+                match &t.category{
+                    &Token::TokText(ref s) => {
+                        out.op_print(s);
+                    },
+                    &Token::TokFormatBold => {
+                        out.op_set_text_style(true, false, false, false);
+                    },
+                     &Token::TokFormatItalic => {
+                        out.op_set_text_style(false, false, false, true);
+                    },
+                    _ => {
+                        println!("no match 2");
+                    }
+                };
+                for child in &t.childs {
+                    stuff(child, out);
+                }
+                out.op_set_text_style(false, false, false, false);
+            }
+        };
+    }
 
 impl AST {
+
+    /// convert ast to zcode
+    pub fn to_zcode(&self,  out: &mut zfile::Zfile){
+        for child in &self.passages {
+            stuff(child, out);
+        }
+    }
+
+
     pub fn new() -> AST {
         AST {
             passages: Vec::new()
