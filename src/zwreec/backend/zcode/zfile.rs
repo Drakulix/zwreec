@@ -237,11 +237,44 @@ impl Zfile {
         self.op_0_op(0x0a);
     }
 
+    pub fn op_newline(&mut self) {
+        self.op_0_op(0x0b);
+    }
+
     /// calls a routine
     /// call_1n is 1OP
     pub fn op_call_1n(&mut self, jump_to_label: &str) {
         self.op_1_op(0x0f);
         self.add_jump(jump_to_label.to_string(), JumpType::ROUTINE);
+    }
+    /// sets the colors of the foreground (font) and background
+    pub fn op_set_color(&mut self, fg:u8, bg:u8){
+        let op_coding = 0x00 << 6 | 0x00 << 5 | 0x1B;
+        self.data.append_byte(op_coding);
+        self.data.append_byte(fg);
+        self.data.append_byte(bg);
+    }
+
+    /// set the style of the text
+    pub fn op_set_text_style(&mut self, bold: bool, reverse: bool, fp: bool, underline: bool){
+        self.op_var(0x11);
+        let byte = 0x01 << 6 | 0x03 << 4 | 0x03 << 2 | 0x03 << 0;
+        self.data.append_byte(byte);
+        let mut style_byte : u8;
+        style_byte = 0x00;
+        if bold {
+            style_byte |=0x02
+        }
+         if reverse {
+            style_byte |=0x01
+        }
+         if fp {
+            style_byte |=0x08
+        }
+         if underline {
+            style_byte |=0x04
+        }
+        self.data.append_byte(style_byte);
     }
 
     /// reads keys from the keyboard and saves the asci-value in local_var_id
@@ -286,7 +319,14 @@ impl Zfile {
         // jump
         self.add_jump(jump_to_label.to_string(), JumpType::BRANCH);
     }
-    
+    /// prints an unicode char to the current stream
+    pub fn op_print_unicode_char(&mut self, value: u8){
+        self.op_1_op(0xbe);
+        self.data.append_byte(0x0b);
+        let byte = 0x01 << 6 | 0x03 << 4 | 0x03 << 2 | 0x03 << 0;
+        self.data.append_byte(byte);
+        self.data.append_byte(value);
+    }
 
     // ================================
     // general ops
