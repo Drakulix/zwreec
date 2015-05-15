@@ -119,7 +119,7 @@ fn main() {
         file
     } else {
         // assume default
-        "a.out".to_string()
+        "a.z8".to_string()
     };
 
     let infile = if parsed_opts.free.len() == 1 {

@@ -12,20 +12,19 @@ pub use backend::zcode::zfile;
 pub mod frontend;
 pub mod backend;
 pub mod utils;
-use utils::file;
+use frontend::codegen;
 
 
 pub fn compile(input_file_name: &str, output_file_name: &str) {
     info!("inputFile: {}", input_file_name);
     info!("outputFile: {}", output_file_name);
 
-    // TODO: Uncomment when arguments are used
-    // open file
-    //file::open_source_file(input_file_name);
-
     // compile
+
+    // read file
     let input = utils::file::open_source_file(input_file_name);
 
+    // tokenize
     let tokens = frontend::lexer::lex(input);
 
     println!("");
@@ -33,26 +32,16 @@ pub fn compile(input_file_name: &str, output_file_name: &str) {
     	debug!("{:?}", token);
     }
 
+    // parse tokens and create ast
     let ast = frontend::parser::parse_tokens(tokens);
     ast.print();
 
+    // create code
+    codegen::generate_zcode(ast, output_file_name);
 
+    
 
-    let mut zfile: zfile::Zfile = zfile::Zfile::new();
-    zfile.start();
-    zfile.op_call_1n("main");
-    zfile.op_quit();
-    zfile.routine("main", 0);
-    ast.to_zcode(&mut zfile);
-    zfile.op_quit();
-    zfile.end();
-    file::save_bytes_to_file("test.z8", &(*zfile.data.bytes));
-
-
-
-
-
-    backend::zcode::temp_create_zcode_example();
+    //backend::zcode::temp_create_zcode_example();
 
 }
 
