@@ -28,8 +28,8 @@ pub fn compile(input_file_name: &str, output_file_name: &str) {
     	debug!("{:?}", token);
     }
 
-    let parse_tree = frontend::parser::parse_tokens(tokens);
-    frontend::ast::create_ast(&parse_tree);
+    let ast = frontend::parser::parse_tokens(tokens);
+    ast.print();
 
     backend::zcode::temp_create_zcode_example();
 
