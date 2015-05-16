@@ -1,8 +1,8 @@
 //! The `parsetree` module contains a lot of useful functionality
 //! to create and walk through the parsetree
 
-pub use frontend::lexer::Token;
-pub use frontend::parser::{NonTerminalType};
+use frontend::lexer::Token;
+use frontend::parser::{NonTerminalType};
 
 //==============================
 // parsetree
@@ -32,6 +32,7 @@ impl ParseTree {
         debug!("");
     }
 
+    /// checks if 
     pub fn is_terminal(&self, path: Vec<usize>) -> bool {
         self.root.is_terminal(path)
     }

@@ -5,9 +5,9 @@
 //! for more info about the parser: look in the Compiler Dragonbook,
 //! Chapter 4.4.4, "Nonrecursive Predictive Parsing"
 
-pub use frontend::lexer::Token;
-pub use frontend::ast;
-pub use frontend::parsetree::{ParseTree, PNode};
+use frontend::lexer::Token;
+use frontend::ast;
+use frontend::parsetree::{ParseTree, PNode};
 use self::NonTerminalType::*;
 use frontend::lexer::Token::{TokPassageName, TokText, TokFormatItalic, TokFormatBold};
 
