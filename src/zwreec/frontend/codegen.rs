@@ -35,15 +35,12 @@ impl Codegen {
         self.zfile.op_quit();
 
         self.zfile.end();
-
-        
     }
 
     pub fn zfile_bytes(&self) -> &Vec<u8> {
         &self.zfile.data.bytes
     }
 }
-
 
 #[test]
 fn it_works() {

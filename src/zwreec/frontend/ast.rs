@@ -16,7 +16,6 @@ pub struct AST {
 fn stuff(node: &ASTNode, mut out: &mut zfile::Zfile) {
      match node {
         &ASTNode::Passage(ref t) => {
-            debug!("{:?}", t.category);
             match &t.category{
                 _ => {
                     debug!("no match 1");
@@ -42,7 +41,6 @@ fn stuff(node: &ASTNode, mut out: &mut zfile::Zfile) {
                     debug!("no match 2");
                 }
             };
-
             for child in &t.childs {
                 stuff(child, out);
             }

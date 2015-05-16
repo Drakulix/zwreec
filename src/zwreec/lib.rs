@@ -39,10 +39,7 @@ pub fn compile(input_file_name: &str, output_file_name: &str) {
     // create code
     codegen::generate_zcode(ast, output_file_name);
 
-    
-
     //backend::zcode::temp_create_zcode_example();
-
 }
 
 #[test]
