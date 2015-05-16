@@ -18,16 +18,6 @@ fn stuff(node: &ASTNode, mut out: &mut zfile::Zfile) {
         &ASTNode::Passage(ref t) => {
             debug!("{:?}", t.category);
             match &t.category{
-                /*&Token::TokText(ref s) => {
-
-                    //out.op_print(s);
-                },
-                &Token::TokFormatBold => {
-                    out.op_set_text_style(true, false, false, false);
-                },
-                 &Token::TokFormatItalic => {
-                    out.op_set_text_style(false, false, false, true);
-                },*/
                 _ => {
                     debug!("no match 1");
                 }
@@ -103,12 +93,12 @@ impl AST {
     }
 
     /// counts the childs of the path in the asts
-    pub fn cound_childs(&self, path: Vec<usize>) -> usize {
+    pub fn count_childs(&self, path: Vec<usize>) -> usize {
         if let Some(index) = path.first() {
             let mut new_path: Vec<usize> = path.to_vec();
             new_path.remove(0);
             
-            self.passages[*index].cound_childs(new_path)
+            self.passages[*index].count_childs(new_path)
         } else {
             self.passages.len()
         }
@@ -153,14 +143,14 @@ impl ASTNode {
     }
 
     /// counts the childs of the current path in the ast
-    pub fn cound_childs(&self, path: Vec<usize>) -> usize {
+    pub fn count_childs(&self, path: Vec<usize>) -> usize {
         if let Some(index) = path.first() {
             let mut new_path: Vec<usize> = path.to_vec();
             new_path.remove(0);
 
             match self {
-                &ASTNode::Default(ref node) => node.childs[*index].cound_childs(new_path),
-                &ASTNode::Passage(ref node) => node.childs[*index].cound_childs(new_path),
+                &ASTNode::Default(ref node) => node.childs[*index].count_childs(new_path),
+                &ASTNode::Passage(ref node) => node.childs[*index].count_childs(new_path),
             }
         } else {
             match self {
