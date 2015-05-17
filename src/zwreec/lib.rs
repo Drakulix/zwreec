@@ -2,19 +2,17 @@
 #![plugin(rustlex)]
 #[allow(plugin_as_library)]
 extern crate rustlex;
-#[macro_use]
-extern crate log;
+#[macro_use] extern crate log;
 extern crate time;
 extern crate term;
+
+pub use backend::zcode::zfile;
+
 
 pub mod frontend;
 pub mod backend;
 pub mod utils;
-
 use frontend::codegen;
-
-// only for the temp_create_zcode_example-method
-//use backend::zcode::zfile;
 
 
 pub fn compile(input_file_name: &str, output_file_name: &str) {
@@ -41,7 +39,6 @@ pub fn compile(input_file_name: &str, output_file_name: &str) {
     // create code
     codegen::generate_zcode(ast, output_file_name);
 
-    
     //backend::zcode::temp_create_zcode_example();
 }
 

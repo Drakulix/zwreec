@@ -137,7 +137,7 @@ impl Parser {
 
                     // ast
                     self.ast_path.clear();
-                    let ast_count_passages = self.ast.cound_childs(self.ast_path.to_vec());
+                    let ast_count_passages = self.ast.count_childs(self.ast_path.to_vec());
                     let new_token2: Token = TokPassageName(name.clone());
                     self.ast.add_passage(new_token2);
                     self.ast_path.push(ast_count_passages);
@@ -167,7 +167,7 @@ impl Parser {
                     new_nodes.push(PNode::new_terminal(TokFormatBold));
 
                     // ast
-                    let ast_count_passages = self.ast.cound_childs(self.ast_path.to_vec());
+                    let ast_count_passages = self.ast.count_childs(self.ast_path.to_vec());
                     let ast_token: Token = TokFormatBold;
                     self.ast.add_child(&self.ast_path, ast_token);
                     self.ast_path.push(ast_count_passages);
@@ -178,7 +178,7 @@ impl Parser {
                     new_nodes.push(PNode::new_terminal(TokFormatItalic));
 
                     // ast
-                    let ast_count_passages = self.ast.cound_childs(self.ast_path.to_vec());
+                    let ast_count_passages = self.ast.count_childs(self.ast_path.to_vec());
                     let ast_token: Token = TokFormatItalic;
                     self.ast.add_child(&self.ast_path, ast_token);
                     self.ast_path.push(ast_count_passages);

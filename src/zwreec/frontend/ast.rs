@@ -11,30 +11,25 @@ pub struct AST {
     passages: Vec<ASTNode>
 }
 
+struct formatting_state{
+    bold: bool,
+    mono: bool,
+    italic: bool,
+    inverted: bool
+}
+
 /// add zcode based on tokens
-fn stuff(node: &ASTNode, mut out: &mut zfile::Zfile) {
+fn stuff(node: &ASTNode,mut state: &Vec<formatting_state> , mut out: &mut zfile::Zfile) {
      match node {
         &ASTNode::Passage(ref t) => {
-            debug!("{:?}", t.category);
             match &t.category{
-                /*&Token::TokText(ref s) => {
-
-                    //out.op_print(s);
-                },
-                &Token::TokFormatBold => {
-                    out.op_set_text_style(true, false, false, false);
-                },
-                 &Token::TokFormatItalic => {
-                    out.op_set_text_style(false, false, false, true);
-                },*/
                 _ => {
                     debug!("no match 1");
                 }
             };
             for child in &t.childs {
-                stuff(child, out);
+                stuff(child, state, out);
             }
-            out.op_set_text_style(false, false, false, false);
         },
         &ASTNode::Default(ref t) => {
             match &t.category{
@@ -51,9 +46,8 @@ fn stuff(node: &ASTNode, mut out: &mut zfile::Zfile) {
                     debug!("no match 2");
                 }
             };
-
             for child in &t.childs {
-                stuff(child, out);
+                stuff(child, state, out);
             }
             out.op_set_text_style(false, false, false, false);
         }
@@ -63,8 +57,11 @@ fn stuff(node: &ASTNode, mut out: &mut zfile::Zfile) {
 impl AST {
     /// convert ast to zcode
     pub fn to_zcode(&self,  out: &mut zfile::Zfile){
+        let mut state:Vec<formatting_state> = Vec::new();
+        let base = formatting_state {bold: false, italic: false, mono: false, inverted: false};
+        state.push(base);
         for child in &self.passages {
-            stuff(child, out);
+            stuff(child, &state, out);
         }
     }
 
@@ -102,12 +99,12 @@ impl AST {
     }
 
     /// counts the childs of the path in the asts
-    pub fn cound_childs(&self, path: Vec<usize>) -> usize {
+    pub fn count_childs(&self, path: Vec<usize>) -> usize {
         if let Some(index) = path.first() {
             let mut new_path: Vec<usize> = path.to_vec();
             new_path.remove(0);
             
-            self.passages[*index].cound_childs(new_path)
+            self.passages[*index].count_childs(new_path)
         } else {
             self.passages.len()
         }
@@ -152,14 +149,14 @@ impl ASTNode {
     }
 
     /// counts the childs of the current path in the ast
-    pub fn cound_childs(&self, path: Vec<usize>) -> usize {
+    pub fn count_childs(&self, path: Vec<usize>) -> usize {
         if let Some(index) = path.first() {
             let mut new_path: Vec<usize> = path.to_vec();
             new_path.remove(0);
 
             match self {
-                &ASTNode::Default(ref node) => node.childs[*index].cound_childs(new_path),
-                &ASTNode::Passage(ref node) => node.childs[*index].cound_childs(new_path),
+                &ASTNode::Default(ref node) => node.childs[*index].count_childs(new_path),
+                &ASTNode::Passage(ref node) => node.childs[*index].count_childs(new_path),
             }
         } else {
             match self {
