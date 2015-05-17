@@ -33,10 +33,10 @@ fn gen_zcode(node: &ASTNode, state: &Vec<FormattingState>, mut out: &mut zfile::
                 &Token::TokNewLine => {
                     out.op_newline();
                 },
-                &Token::TokFormatBold => {
+                &Token::TokFormatBoldStart => {
                     out.op_set_text_style(true, false, false, false);
                 },
-                &Token::TokFormatItalic => {
+                &Token::TokFormatItalicStart => {
                     out.op_set_text_style(false, false, false, true);
                 },
                 _ => {

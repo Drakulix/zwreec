@@ -9,7 +9,7 @@ use frontend::lexer::Token;
 use frontend::ast;
 use frontend::parsetree::{ParseTree, PNode};
 use self::NonTerminalType::*;
-use frontend::lexer::Token::{TokPassageName, TokText, TokNewLine, TokFormatItalic, TokFormatBold};
+use frontend::lexer::Token::{TokPassageName, TokText, TokNewLine, TokFormatItalicStart, TokFormatItalicEnd, TokFormatBoldStart, TokFormatBoldEnd};
 
 /*
 
@@ -159,35 +159,35 @@ impl Parser {
                     // ast
                     self.ast.add_child(&self.ast_path, TokNewLine);
                 },
-                (PassageContent, &TokFormatBold) | (PassageContent, &TokFormatItalic) => {
+                (PassageContent, &TokFormatBoldStart) | (PassageContent, &TokFormatItalicStart) => {
                     new_nodes.push(PNode::new_non_terminal(Formating));
                     new_nodes.push(PNode::new_non_terminal(PassageContent));
                 },
-                (Formating, &TokFormatBold) => {
+                (Formating, &TokFormatBoldStart) => {
                     new_nodes.push(PNode::new_non_terminal(BoldFormatting));
                 },
-                (Formating, &TokFormatItalic) => {
+                (Formating, &TokFormatItalicStart) => {
                     new_nodes.push(PNode::new_non_terminal(ItalicFormatting));
                 },
-                (BoldFormatting, &TokFormatBold) => {
-                    new_nodes.push(PNode::new_terminal(TokFormatBold));
+                (BoldFormatting, &TokFormatBoldStart) => {
+                    new_nodes.push(PNode::new_terminal(TokFormatBoldStart));
                     new_nodes.push(PNode::new_non_terminal(BoldContent));
-                    new_nodes.push(PNode::new_terminal(TokFormatBold));
+                    new_nodes.push(PNode::new_terminal(TokFormatBoldEnd));
 
                     // ast
                     let ast_count_passages = self.ast.count_childs(self.ast_path.to_vec());
-                    let ast_token: Token = TokFormatBold;
+                    let ast_token: Token = TokFormatBoldStart;
                     self.ast.add_child(&self.ast_path, ast_token);
                     self.ast_path.push(ast_count_passages);
                 },
-                (ItalicFormatting, &TokFormatItalic) => {
-                    new_nodes.push(PNode::new_terminal(TokFormatItalic));
+                (ItalicFormatting, &TokFormatItalicStart) => {
+                    new_nodes.push(PNode::new_terminal(TokFormatItalicStart));
                     new_nodes.push(PNode::new_non_terminal(ItalicContent));
-                    new_nodes.push(PNode::new_terminal(TokFormatItalic));
+                    new_nodes.push(PNode::new_terminal(TokFormatItalicEnd));
 
                     // ast
                     let ast_count_passages = self.ast.count_childs(self.ast_path.to_vec());
-                    let ast_token: Token = TokFormatItalic;
+                    let ast_token: Token = TokFormatItalicStart;
                     self.ast.add_child(&self.ast_path, ast_token);
                     self.ast_path.push(ast_count_passages);
                 },
@@ -209,26 +209,26 @@ impl Parser {
                     let ast_token: Token = TokText(text.clone());
                     self.ast.add_child(&self.ast_path, ast_token);
                 },
-                (BoldContent, &TokFormatItalic) => {
-                    new_nodes.push(PNode::new_terminal(TokFormatItalic));
+                (BoldContent, &TokFormatItalicStart) => {
+                    new_nodes.push(PNode::new_terminal(TokFormatItalicStart));
                     new_nodes.push(PNode::new_non_terminal(BoldItalicContent));
-                    new_nodes.push(PNode::new_terminal(TokFormatItalic));
+                    new_nodes.push(PNode::new_terminal(TokFormatItalicEnd));
                 },
-                (ItalicContent, &TokFormatBold) => {
-                    new_nodes.push(PNode::new_terminal(TokFormatBold));
+                (ItalicContent, &TokFormatBoldStart) => {
+                    new_nodes.push(PNode::new_terminal(TokFormatBoldEnd));
                     new_nodes.push(PNode::new_non_terminal(BoldItalicContent));
-                    new_nodes.push(PNode::new_terminal(TokFormatBold));
+                    new_nodes.push(PNode::new_terminal(TokFormatBoldStart));
                 },
                 (BoldItalicContent, &TokText(ref text)) => {
                     let new_token: Token = TokText(text.clone());
                     new_nodes.push(PNode::new_terminal(new_token));
                 },
 
-                (BoldContent, &TokFormatBold) => {
+                (BoldContent, &TokFormatBoldEnd) => {
                     // jump one ast-level higher
                     self.ast_path.pop();
                 },
-                (ItalicContent, &TokFormatItalic) => {
+                (ItalicContent, &TokFormatItalicEnd) => {
                     // jump one ast-level higher
                     self.ast_path.pop();
                 },
