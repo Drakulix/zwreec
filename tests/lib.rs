@@ -11,7 +11,6 @@ fn file_test() {
 
 #[test]
 fn frontend_test() {
-    assert_eq!("hello from frontend", zwreec::frontend::temp_hello());
 }
 
 #[test]
