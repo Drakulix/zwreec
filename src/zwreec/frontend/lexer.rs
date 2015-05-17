@@ -41,7 +41,12 @@ pub fn lex(input :String) -> Vec<Token> {
 	        	}
 	           
 	        },
-	        None => { break }
+	        None => { 
+	        	if current_text != "" {
+	        		tokens.push(TokText(current_text));
+	        	}
+	        	break 
+	        }
 	    }
 	}
 	tokens
