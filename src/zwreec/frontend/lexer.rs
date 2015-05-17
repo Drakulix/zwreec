@@ -157,6 +157,7 @@ rustlex! TweeLexer {
 	property format_strike_open:bool = false;
 	property format_sub_open:bool = false;
 	property format_sup_open:bool = false;
+	property function_brackets:usize = 0;
 
 	// Regular Expressions
 	let WHITESPACE = ' ' | '\t';
@@ -506,6 +507,7 @@ rustlex! TweeLexer {
 			let s =  lexer.yystr();
 			let trimmed = &s[0 .. s.len()-1];
 			let name = &trimmed.to_string();
+			lexer.function_brackets = 1;
 			lexer.FUNCTION_ARGS();
 			Some(TokFunction(name.clone()))
 		}
@@ -527,7 +529,6 @@ rustlex! TweeLexer {
 		// Expression Stuff End
 	}
 
-	// Currently doesn't support brackets
 	FUNCTION_ARGS {
 		COLON =>  |_:&mut TweeLexer<R>| Some(TokColon)
 		VAR_NAME =>  |lexer:&mut TweeLexer<R>| Some(TokVariable(lexer.yystr()))
@@ -538,9 +539,18 @@ rustlex! TweeLexer {
 		NUM_OP =>  |lexer:&mut TweeLexer<R>| Some(TokNumOp(lexer.yystr()))
 		COMP_OP =>  |lexer:&mut TweeLexer<R>| Some(TokCompOp(lexer.yystr()))
 		LOG_OP =>  |lexer:&mut TweeLexer<R>| Some(TokLogOp(lexer.yystr()))
+		BR_OPEN =>  |lexer:&mut TweeLexer<R>| {
+			lexer.function_brackets += 1;
+			Some(TokBracketOpen)
+		}
 		BR_CLOSE =>  |lexer:&mut TweeLexer<R>| {
-			lexer.MAKRO_CONTENT();
-			Some(TokArgsEnd)
+			lexer.function_brackets -= 1;
+			if lexer.function_brackets == 0 {
+				lexer.MAKRO_CONTENT();
+				Some(TokArgsEnd)
+			} else {
+				Some(TokBracketClose)
+			}
 		}
 	}
 
