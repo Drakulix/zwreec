@@ -15,6 +15,7 @@ license = "BSD-2-Clause"
 [lib]
 name = "zwreec"
 path = "src/zwreec/lib.rs"
+doctest = false
 
 [[bin]]
 name = "zwreec"
