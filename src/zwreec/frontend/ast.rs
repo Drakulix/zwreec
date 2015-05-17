@@ -3,6 +3,7 @@
 
 use frontend::lexer::Token;
 use backend::zcode::zfile;
+use backend::zcode::zfile::{FormattingState};
 
 //==============================
 // ast
@@ -11,15 +12,8 @@ pub struct AST {
     passages: Vec<ASTNode>
 }
 
-struct formatting_state{
-    bold: bool,
-    mono: bool,
-    italic: bool,
-    inverted: bool
-}
-
 /// add zcode based on tokens
-fn stuff(node: &ASTNode,mut state: &Vec<formatting_state> , mut out: &mut zfile::Zfile) {
+fn gen_zcode(node: &ASTNode, state: &Vec<FormattingState>, mut out: &mut zfile::Zfile) {
      match node {
         &ASTNode::Passage(ref t) => {
             match &t.category{
@@ -28,7 +22,7 @@ fn stuff(node: &ASTNode,mut state: &Vec<formatting_state> , mut out: &mut zfile:
                 }
             };
             for child in &t.childs {
-                stuff(child, state, out);
+                gen_zcode(child, state, out);
             }
         },
         &ASTNode::Default(ref t) => {
@@ -47,7 +41,7 @@ fn stuff(node: &ASTNode,mut state: &Vec<formatting_state> , mut out: &mut zfile:
                 }
             };
             for child in &t.childs {
-                stuff(child, state, out);
+                gen_zcode(child, state, out);
             }
             out.op_set_text_style(false, false, false, false);
         }
@@ -57,11 +51,11 @@ fn stuff(node: &ASTNode,mut state: &Vec<formatting_state> , mut out: &mut zfile:
 impl AST {
     /// convert ast to zcode
     pub fn to_zcode(&self,  out: &mut zfile::Zfile){
-        let mut state:Vec<formatting_state> = Vec::new();
-        let base = formatting_state {bold: false, italic: false, mono: false, inverted: false};
+        let mut state:Vec<FormattingState> = Vec::new();
+        let base = FormattingState {bold: false, italic: false, mono: false, inverted: false};
         state.push(base);
         for child in &self.passages {
-            stuff(child, &state, out);
+            gen_zcode(child, &state, out);
         }
     }
 

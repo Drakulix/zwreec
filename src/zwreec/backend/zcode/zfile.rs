@@ -28,6 +28,13 @@ struct Zlabel {
     pub name: String
 }
 
+pub struct FormattingState {
+    pub bold: bool,
+    pub mono: bool,
+    pub italic: bool,
+    pub inverted: bool
+}
+
 
 impl Zfile {
 
