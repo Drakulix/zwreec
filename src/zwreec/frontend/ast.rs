@@ -1,7 +1,6 @@
 //! The `ast` module contains a lot of useful functionality
 //! to create and walk through the ast (abstract syntaxtree)
 
-use frontend::parser;
 use frontend::lexer::Token;
 use backend::zcode::zfile;
 
