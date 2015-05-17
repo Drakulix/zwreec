@@ -30,16 +30,20 @@ fn gen_zcode(node: &ASTNode, state: &Vec<FormattingState>, mut out: &mut zfile::
                 &Token::TokText(ref s) => {
                     out.op_print(s);
                 },
+                &Token::TokNewLine => {
+                    out.op_newline();
+                },
                 &Token::TokFormatBold => {
                     out.op_set_text_style(true, false, false, false);
                 },
-                 &Token::TokFormatItalic => {
+                &Token::TokFormatItalic => {
                     out.op_set_text_style(false, false, false, true);
                 },
                 _ => {
                     debug!("no match 2");
                 }
             };
+
             for child in &t.childs {
                 gen_zcode(child, state, out);
             }

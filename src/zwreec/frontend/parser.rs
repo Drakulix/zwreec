@@ -9,7 +9,7 @@ use frontend::lexer::Token;
 use frontend::ast;
 use frontend::parsetree::{ParseTree, PNode};
 use self::NonTerminalType::*;
-use frontend::lexer::Token::{TokPassageName, TokText, TokFormatItalic, TokFormatBold};
+use frontend::lexer::Token::{TokPassageName, TokText, TokNewLine, TokFormatItalic, TokFormatBold};
 
 /*
 
@@ -121,7 +121,8 @@ impl Parser {
             let state_first: (NonTerminalType, &Token) = (self.tree.get_non_terminal(top_path).clone(), token);
 
             let mut new_nodes = Vec::new();
-            //use self::*;
+
+            //println!("match {:?}", state_first);
             match state_first {
                 (S, &TokPassageName(_)) => {
                     new_nodes.push(PNode::new_non_terminal(Passage));
@@ -150,6 +151,13 @@ impl Parser {
                     // ast
                     let new_token2: Token = TokText(text.clone());
                     self.ast.add_child(&self.ast_path, new_token2);
+                },
+                (PassageContent, &TokNewLine) => {
+                    new_nodes.push(PNode::new_terminal(TokNewLine));
+                    new_nodes.push(PNode::new_non_terminal(PassageContent));
+
+                    // ast
+                    self.ast.add_child(&self.ast_path, TokNewLine);
                 },
                 (PassageContent, &TokFormatBold) | (PassageContent, &TokFormatItalic) => {
                     new_nodes.push(PNode::new_non_terminal(Formating));
