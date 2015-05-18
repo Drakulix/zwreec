@@ -15,6 +15,7 @@ license = "BSD-2-Clause"
 [lib]
 name = "zwreec"
 path = "src/zwreec/lib.rs"
+doctest = false
 
 [[bin]]
 name = "zwreec"
@@ -26,4 +27,8 @@ doc = false
 time = "*"
 log = "*"
 term = "0.2"
+
 getopts = "0.2.10"
+
+[dependencies.rustlex]
+git = "https://github.com/kali/rustlex.git"
