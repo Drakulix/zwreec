@@ -1,27 +1,58 @@
 use std::io::BufReader;
 use self::Token::{
-	TokPassageName, TokTagStart, TokTagEnd, TokTag, 
+	TokPassageName, TokTagStart, TokTagEnd, TokTag,
 	TokMakroStart, TokMakroEnd, TokVariable,
 	TokSet, TokAssign, TokInt, TokFloat, TokNumOp, TokCompOp,
-	TokLogOp, TokText, TokFormatBold, TokFormatItalic,
-	TokFormatUnder,	TokFormatStrike, TokFormatSub, TokFormatSup,
-	TokFormatMonoStart,	TokFormatMonoEnd, TokString, TokBracketOpen,
-	TokBracketClose, TokIf, TokElse, TokEndIf, TokPassageLink,
-	TokFormatBulList, TokFormatNumbList, TokFormatIndent,
-	TokFormatIndentDouble, TokFormatIndentBlock, TokFormatHeading,
-	TokVarSetStart,	TokVarSetEnd, TokSemiColon, TokPrint, TokDisplay,
-	TokBoolean, TokFunction , TokColon, TokArgsEnd, TokSilently,
-	TokEndSilently, TokArrayStart, TokArrayEnd
+	TokLogOp, TokText, 	TokFormatBoldStart, TokFormatBoldEnd,
+	TokFormatItalicStart, TokFormatItalicEnd, TokFormatUnderStart, 
+	TokFormatUnderEnd,	TokFormatStrikeStart, TokFormatStrikeEnd,
+	TokFormatSubStart, TokFormatSubEnd, TokFormatSupStart, 
+	TokFormatSupEnd, TokFormatMonoStart, TokFormatMonoEnd, 
+	TokString, TokBracketOpen, TokBracketClose, TokIf, TokElse, 
+	TokEndIf, TokPassageLink, TokFormatBulList, TokFormatNumbList, 
+	TokFormatIndentBlock, TokFormatHeading, TokVarSetStart, 
+	TokVarSetEnd, TokSemiColon, TokPrint, TokDisplay, TokBoolean,
+	TokFunction , TokColon, TokArgsEnd, TokSilently, TokEndSilently,
+	TokArrayStart, TokArrayEnd, TokNewLine, TokFormatHorizontalLine
 };
 
 pub fn lex(input :String) -> Vec<Token> {
 	let processed = preprocess(input);
    	let inp = BufReader::new(processed.as_bytes());
    	print!("Nicht in Tokens verarbeitete Zeichen: ");
-	let lexer = TweeLexer::new(inp);
-	lexer.collect()
+	let mut lexer = TweeLexer::new(inp);
+	let mut current_text = "".to_string();
+	// Unify TokText's next to each other to a single TokText
+	let mut tokens = vec![];
+	loop {
+	    match lexer.next() {
+	        Some(x) => {
+	        	match x {
+	        		TokText(text) => {
+	        			current_text = current_text + &text;
+	        		},
+	        		_ => {
+	        			if current_text != "" {
+	        				tokens.push(TokText(current_text));
+	        				current_text = "".to_string();
+	        			}
+	        			tokens.push(x);
+	        		}
+	        	}
+	           
+	        },
+	        None => { 
+	        	if current_text != "" {
+	        		tokens.push(TokText(current_text));
+	        	}
+	        	break 
+	        }
+	    }
+	}
+	tokens
 }
 
+// TODO do not remove if in passage name, monospace etc. 
 fn preprocess(input :String) -> String {
 	let mut comment = false;
 	let mut suspect_start = false;
@@ -41,10 +72,11 @@ fn preprocess(input :String) -> String {
 			} else {
 				suspect_start = false;
 				processed.push('/');
+				processed.push(c);
 			}
 
 			continue;
-		} 
+		}
 
 		if c == '%' && comment {
 			suspect_end = true;
@@ -76,22 +108,20 @@ pub enum Token {
 	TokTagEnd,
 	TokVarSetStart,
 	TokVarSetEnd,
-	TokPassageLink (String, String), 
+	TokPassageLink (String, String),
 	TokTag (String),
 	TokText (String),
-	TokFormatBold,
-	TokFormatItalic,
-	TokFormatUnder,
-	TokFormatStrike,
-	TokFormatSub,
-	TokFormatSup,
-	TokFormatMonoStart,
-	TokFormatMonoEnd,
+	TokFormatBoldStart, TokFormatBoldEnd,
+	TokFormatItalicStart, TokFormatItalicEnd,
+	TokFormatUnderStart, TokFormatUnderEnd,
+	TokFormatStrikeStart, TokFormatStrikeEnd,
+	TokFormatSubStart, TokFormatSubEnd,
+	TokFormatSupStart, TokFormatSupEnd,
+	TokFormatMonoStart,	TokFormatMonoEnd,
 	TokFormatBulList,
 	TokFormatNumbList,
-	TokFormatIndent,
-	TokFormatIndentDouble,
 	TokFormatIndentBlock,
+	TokFormatHorizontalLine,
 	TokFormatHeading (usize),
 	TokMakroStart,
 	TokMakroEnd,
@@ -119,38 +149,46 @@ pub enum Token {
 	TokPrint,
 	TokDisplay,
 	TokSilently,
-	TokEndSilently
+	TokEndSilently,
+	TokNewLine
 }
 
 rustlex! TweeLexer {
-	let DIGIT = ['0'-'9'];
-	let LETTER_S = ['a'-'z'];
-	let LETTER_L = ['A'-'Z'];
-	let LETTER = (LETTER_S|LETTER_L);
-	let SPECIAL = [";?%()+-\".$,"] | ('_' [^'_']) | ('/' [^'/']) | ("'" [^"'"]) | (':' [^':']) | ["äöüÄÖÜß"];
-	let SPACE = ' ';
+	// Properties
+	property new_line:bool = true;
+	property format_bold_open:bool = false;
+	property format_italic_open:bool = false;
+	property format_under_open:bool = false;
+	property format_strike_open:bool = false;
+	property format_sub_open:bool = false;
+	property format_sup_open:bool = false;
+	property function_brackets:usize = 0;
+
+	// Regular Expressions
+	let WHITESPACE = ' ' | '\t';
 	let UNDERSCORE = '_';
 	let NEWLINE = '\n';
 
-	let CHAR = LETTER_S | LETTER_L | DIGIT | SPECIAL;
-	let WORD = CHAR CHAR*;
+	let INITIAL_START_CHAR = [^":"'\n'] | ':' [^":"'\n'];
+	let INITIAL_CHAR = [^'\n'];
+	let TEXT_INITIAL = INITIAL_START_CHAR INITIAL_CHAR*;
 
-	// TODO what is allowed?
-	let TEXT = (CHAR | SPACE)+;
-	let TEXTLINES = (CHAR | SPACE | NEWLINE)+;
-	
+	// If for example // is at a beginning of a line, then // is matched and not just /
+	let TEXT_START_CHAR = [^"*!>#"'\n'];
+	let TEXT_CHAR = [^"/'_=~^{@<[" '\n'];
+	let TEXT = TEXT_CHAR+ | ["/'_=^{@<["];
 
-	let PASSAGE_CHAR = SPACE | LETTER_S | LETTER_L | DIGIT | SPECIAL;
-	let PASSAGE_START = "::";
-	let PASSAGE_NAME = PASSAGE_CHAR PASSAGE_CHAR*;
+	let TEXT_MONO_CHAR = [^"}"'\n'];
+	let TEXT_MONO = TEXT_MONO_CHAR+ | "}" | "}}";
+
+	let PASSAGE_START = "::" ':'*;
+	let PASSAGE_CHAR_NORMAL = [^"[]$<>:|" '\n'];
+	let PASSAGE_CHAR = PASSAGE_CHAR_NORMAL | ':' PASSAGE_CHAR_NORMAL;
+	let PASSAGE_NAME = PASSAGE_CHAR_NORMAL PASSAGE_CHAR* ':'?;
+
+	let TAG = ['a'-'z''A'-'Z''0'-'9''.''_']+;
 	let TAG_START = '[';
 	let TAG_END = ']';
-
-	let LINK_SIMPLE = "[[" PASSAGE_NAME "]";
-	let LINK_LABELED = "[[" TEXT "|" PASSAGE_NAME "]";
-
-	let LINK_OPEN = '[';
-	let LINK_CLOSE = ']';
 
 	let FORMAT_ITALIC = "//";
 	let FORMAT_BOLD = "''";
@@ -161,13 +199,15 @@ rustlex! TweeLexer {
 	let FORMAT_MONO_START = "{{{";
 	let FORMAT_MONO_END = "}}}";
 
-	let FORMAT_BUL_LIST = "*";
-	let FORMAT_NUMB_LIST = "#";
-	let FORMAT_INDENT = ">";
-	let FORMAT_DOUBLE_INDENT = ">>";
-	let FORMAT_INDENT_BLOCK = "<<<";
+	//TODO ignore content
+	let FORMAT_INLINE = "@@";
 
-	let FORMAT_HEADING = "!" | "!!" | "!!!" | "!!!!" | "!!!!!";
+	let FORMAT_BUL_LIST = "*" WHITESPACE*;
+	let FORMAT_NUMB_LIST = "#" WHITESPACE*;
+	let FORMAT_INDENT_BLOCK = "<<<" NEWLINE;
+	let FORMAT_HORIZONTAL_LINE = "----" NEWLINE;
+
+	let FORMAT_HEADING = ("!" | "!!" | "!!!" | "!!!!" | "!!!!!") WHITESPACE*;
 
 	let MAKRO_START = "<<";
 	let MAKRO_END = ">>";
@@ -175,16 +215,13 @@ rustlex! TweeLexer {
 	let BR_OPEN = '(';
 	let BR_CLOSE = ')';
 
-	let ARRAY_START = '[';
-	let ARRAY_END = ']';
-
+	let DIGIT = ['0'-'9'];
+	let LETTER = ['a'-'z''A'-'Z'];
 	let VAR_CHAR = LETTER | DIGIT | UNDERSCORE;
 	let VAR_NAME = '$' (LETTER | UNDERSCORE) VAR_CHAR*;
 
-	let NUMBER = DIGIT DIGIT*; 
-	let INT = '-'? NUMBER;
-	// TODO exact definition of float in twee
-	let FLOAT = (INT "." NUMBER?) | ("." NUMBER);
+	let INT = "-"? DIGIT+;
+	let FLOAT = "-"? (DIGIT+ "." DIGIT*) | "-"? (DIGIT* "." DIGIT+) | "-"? "Infinity";
 
 	let STRING = ('"' [^'"']* '"') | ("'" [^"'"]* "'");
 
@@ -192,7 +229,7 @@ rustlex! TweeLexer {
 
 	let COLON = ',';
 
-	let FUNCTION = LETTER_S+ '(';
+	let FUNCTION = LETTER+ '(';
 
 	let SET = "set";
 	let IF = "if";
@@ -209,7 +246,34 @@ rustlex! TweeLexer {
 	let COMP_OP = "is" | "==" | "eq" | "neq" | ">" | "gt" | ">=" | "gte" | "<" | "lt" | "<=" | "lte";
 	let LOG_OP = "and" | "or" | "not";
 
+
+	let LINK_OPEN = '[';
+	let LINK_CLOSE = ']';
+	let LINK_TEXT = [^'\n'"|[]"]+;
+
+	let LINK_SIMPLE = "[[" (PASSAGE_NAME | VAR_NAME) "]";
+	let LINK_LABELED = "[[" LINK_TEXT "|" (PASSAGE_NAME | VAR_NAME) "]";
+
 	INITIAL {
+		PASSAGE_START => |lexer:&mut TweeLexer<R>| -> Option<Token> {
+			lexer.PASSAGE();
+			None
+		}
+		TEXT_INITIAL =>  |lexer:&mut TweeLexer<R>| -> Option<Token> {
+			lexer.INITIAL_NON_NEWLINE();
+			None
+		}
+
+	}
+
+	INITIAL_NON_NEWLINE {
+		NEWLINE =>  |lexer:&mut TweeLexer<R>| -> Option<Token> {
+			lexer.INITIAL();
+			None
+		}
+	}
+
+	NEWLINE {
 		PASSAGE_START => |lexer:&mut TweeLexer<R>| -> Option<Token>{
 			lexer.PASSAGE();
 			None
@@ -217,6 +281,7 @@ rustlex! TweeLexer {
 
 		MAKRO_START => |lexer:&mut TweeLexer<R>| {
 			lexer.MAKRO();
+			lexer.new_line = true;
 			Some(TokMakroStart)
 		}
 
@@ -239,22 +304,136 @@ rustlex! TweeLexer {
 			Some(TokPassageLink(text, name))
 		}
 
-		FORMAT_ITALIC => |_:&mut TweeLexer<R>| Some(TokFormatItalic)
-		FORMAT_BOLD => |_:&mut TweeLexer<R>| Some(TokFormatBold)
-		FORMAT_UNDER => |_:&mut TweeLexer<R>| Some(TokFormatUnder)
-		FORMAT_STRIKE => |_:&mut TweeLexer<R>| Some(TokFormatStrike)
-		FORMAT_SUB => |_:&mut TweeLexer<R>| Some(TokFormatSub)
-		FORMAT_SUP => |_:&mut TweeLexer<R>| Some(TokFormatSup)
-		FORMAT_MONO_START => |_:&mut TweeLexer<R>| Some(TokFormatMonoStart)
-		FORMAT_MONO_END => |_:&mut TweeLexer<R>| Some(TokFormatMonoEnd)
-		FORMAT_BUL_LIST =>  |_:&mut TweeLexer<R>| Some(TokFormatBulList)
-		FORMAT_NUMB_LIST =>  |_:&mut TweeLexer<R>| Some(TokFormatNumbList)
-		FORMAT_INDENT  =>  |_:&mut TweeLexer<R>| Some(TokFormatIndent)
-		FORMAT_DOUBLE_INDENT  =>  |_:&mut TweeLexer<R>| Some(TokFormatIndentDouble)
+		FORMAT_ITALIC => |lexer:&mut TweeLexer<R>| {
+			lexer.NON_NEWLINE();
+			lexer.format_italic_open = !lexer.format_italic_open;
+			if lexer.format_italic_open {Some(TokFormatItalicStart)} 
+			else {Some(TokFormatItalicEnd)}
+		}
+		FORMAT_BOLD => |lexer:&mut TweeLexer<R>| {
+			lexer.NON_NEWLINE();
+			lexer.format_bold_open = !lexer.format_bold_open;
+			if lexer.format_bold_open {Some(TokFormatBoldStart)} 
+			else {Some(TokFormatBoldEnd)}
+		}
+		FORMAT_UNDER => |lexer:&mut TweeLexer<R>| {
+			lexer.NON_NEWLINE();
+			lexer.format_under_open = !lexer.format_under_open;
+			if lexer.format_under_open {Some(TokFormatUnderStart)} 
+			else {Some(TokFormatUnderEnd)}
+		}
+		FORMAT_STRIKE => |lexer:&mut TweeLexer<R>| {
+			lexer.NON_NEWLINE();
+			lexer.format_strike_open = !lexer.format_strike_open;
+			if lexer.format_strike_open {Some(TokFormatStrikeStart)} 
+			else {Some(TokFormatStrikeEnd)}
+		}
+		FORMAT_SUB => |lexer:&mut TweeLexer<R>| {
+			lexer.NON_NEWLINE();
+			lexer.format_sub_open = !lexer.format_sub_open;
+			if lexer.format_sub_open {Some(TokFormatSubStart)} 
+			else {Some(TokFormatSubEnd)}
+		}
+		FORMAT_SUP => |lexer:&mut TweeLexer<R>| {
+			lexer.NON_NEWLINE();
+			lexer.format_sup_open = !lexer.format_sup_open;
+			if lexer.format_sup_open {Some(TokFormatSupStart)} 
+			else {Some(TokFormatSupEnd)}
+		}
+		FORMAT_MONO_START => |lexer:&mut TweeLexer<R>| {
+			lexer.MONO_TEXT();
+			Some(TokFormatMonoStart)
+		}
+		FORMAT_BUL_LIST =>  |lexer:&mut TweeLexer<R>| {
+			lexer.NON_NEWLINE();
+			Some(TokFormatBulList)
+		}
+		FORMAT_NUMB_LIST =>  |lexer:&mut TweeLexer<R>| {
+			lexer.NON_NEWLINE();
+			Some(TokFormatNumbList)
+		}
+		FORMAT_HEADING  =>  |lexer:&mut TweeLexer<R>| {
+			lexer.NON_NEWLINE();
+			Some(TokFormatHeading(lexer.yystr().len()))
+		}
+		TEXT_START_CHAR => |lexer:&mut TweeLexer<R>| {
+			lexer.NON_NEWLINE();
+			Some(TokText(lexer.yystr()))
+		}
+		FORMAT_HORIZONTAL_LINE  =>  |_:&mut TweeLexer<R>| Some(TokFormatHorizontalLine)
 		FORMAT_INDENT_BLOCK  =>  |_:&mut TweeLexer<R>| Some(TokFormatIndentBlock)
-		FORMAT_HEADING  =>  |lexer:&mut TweeLexer<R>| Some(TokFormatHeading(lexer.yystr().len()))
 
-		TEXTLINES => |lexer:&mut TweeLexer<R>| Some(TokText(lexer.yystr()))
+		NEWLINE => |_:&mut TweeLexer<R>| Some(TokNewLine)
+	}
+
+	NON_NEWLINE {
+
+		MAKRO_START => |lexer:&mut TweeLexer<R>| {
+			lexer.MAKRO();
+			lexer.new_line = false;
+			Some(TokMakroStart)
+		}
+
+		LINK_SIMPLE =>  |lexer:&mut TweeLexer<R>| {
+			lexer.LINK_VAR_CHECK();
+			let s =  lexer.yystr();
+			let trimmed = &s[2 .. s.len()-1];
+			let name = &trimmed.to_string();
+			Some(TokPassageLink(name.clone(), name.clone()))
+		}
+
+		LINK_LABELED =>  |lexer:&mut TweeLexer<R>| {
+			lexer.LINK_VAR_CHECK();
+			let s =  lexer.yystr();
+			let trimmed = &s[2 .. s.len()-1];
+			let matches = &trimmed.split("|").collect::<Vec<&str>>();
+			assert_eq!(matches.len(), 2);
+			let text = matches[0].to_string();
+			let name = matches[1].to_string();
+			Some(TokPassageLink(text, name))
+		}
+
+		FORMAT_ITALIC => |lexer:&mut TweeLexer<R>| {
+			lexer.format_italic_open = !lexer.format_italic_open;
+			if lexer.format_italic_open {Some(TokFormatItalicStart)} 
+			else {Some(TokFormatItalicEnd)}
+		}
+		FORMAT_BOLD => |lexer:&mut TweeLexer<R>| {
+			lexer.format_bold_open = !lexer.format_bold_open;
+			if lexer.format_bold_open {Some(TokFormatBoldStart)} 
+			else {Some(TokFormatBoldEnd)}
+		}
+		FORMAT_UNDER => |lexer:&mut TweeLexer<R>| {
+			lexer.format_under_open = !lexer.format_under_open;
+			if lexer.format_under_open {Some(TokFormatUnderStart)} 
+			else {Some(TokFormatUnderEnd)}
+		}
+		FORMAT_STRIKE => |lexer:&mut TweeLexer<R>| {
+			lexer.format_strike_open = !lexer.format_strike_open;
+			if lexer.format_strike_open {Some(TokFormatStrikeStart)} 
+			else {Some(TokFormatStrikeEnd)}
+		}
+		FORMAT_SUB => |lexer:&mut TweeLexer<R>| {
+			lexer.format_sub_open = !lexer.format_sub_open;
+			if lexer.format_sub_open {Some(TokFormatSubStart)} 
+			else {Some(TokFormatSubEnd)}
+		}
+		FORMAT_SUP => |lexer:&mut TweeLexer<R>| {
+			lexer.format_sup_open = !lexer.format_sup_open;
+			if lexer.format_sup_open {Some(TokFormatSupStart)} 
+			else {Some(TokFormatSupEnd)}
+		}
+		FORMAT_MONO_START => |lexer:&mut TweeLexer<R>| {
+			lexer.MONO_TEXT();
+			Some(TokFormatMonoStart)
+		}
+
+		NEWLINE =>  |lexer:&mut TweeLexer<R>| {
+			lexer.NEWLINE();
+			Some(TokNewLine)
+		}
+
+		TEXT =>  |lexer:&mut TweeLexer<R>| Some(TokText(lexer.yystr()))
 	}
 
 	PASSAGE {
@@ -264,17 +443,27 @@ rustlex! TweeLexer {
 			Some(TokTagStart)
 		}
 		NEWLINE => |lexer:&mut TweeLexer<R>| -> Option<Token>{
-			lexer.INITIAL();
+			lexer.NEWLINE();
 			None
 		}
 	}
 
 	TAGS {
-		WORD => |lexer:&mut TweeLexer<R>| Some(TokTag(lexer.yystr()))
+		TAG => |lexer:&mut TweeLexer<R>| Some(TokTag(lexer.yystr()))
+		WHITESPACE =>  |_:&mut TweeLexer<R>| -> Option<Token> { None }
 		TAG_END => |lexer:&mut TweeLexer<R>| {
 			lexer.PASSAGE();
 			Some(TokTagEnd)
 		}
+	}
+
+	MONO_TEXT {
+		TEXT_MONO =>  |lexer:&mut TweeLexer<R>| Some(TokText(lexer.yystr()))
+		FORMAT_MONO_END => |lexer:&mut TweeLexer<R>| {
+			lexer.NON_NEWLINE();
+			Some(TokFormatMonoEnd)
+		}
+		NEWLINE =>  |_:&mut TweeLexer<R>| -> Option<Token> { None }
 	}
 
 	MAKRO {
@@ -314,15 +503,16 @@ rustlex! TweeLexer {
 
 	MAKRO_CONTENT {
 		MAKRO_END => |lexer:&mut TweeLexer<R>| {
-			lexer.INITIAL();
+			if lexer.new_line { lexer.NEWLINE() } else { lexer.NON_NEWLINE() };
 			Some(TokMakroEnd)
 		}
 
-		
+
 		FUNCTION =>  |lexer:&mut TweeLexer<R>| {
 			let s =  lexer.yystr();
 			let trimmed = &s[0 .. s.len()-1];
 			let name = &trimmed.to_string();
+			lexer.function_brackets = 1;
 			lexer.FUNCTION_ARGS();
 			Some(TokFunction(name.clone()))
 		}
@@ -340,13 +530,10 @@ rustlex! TweeLexer {
 		BR_CLOSE =>  |_:&mut TweeLexer<R>| Some(TokBracketClose)
 		SEMI_COLON =>  |_:&mut TweeLexer<R>| Some(TokSemiColon)
 		ASSIGN =>  |_:&mut TweeLexer<R>| Some(TokAssign)
-		ARRAY_START =>  |_:&mut TweeLexer<R>| Some(TokArrayStart)
 		COLON =>  |_:&mut TweeLexer<R>| Some(TokColon)
-		ARRAY_END =>  |_:&mut TweeLexer<R>| Some(TokArrayEnd)
 		// Expression Stuff End
 	}
 
-	// Currently doesn't support brackets 
 	FUNCTION_ARGS {
 		COLON =>  |_:&mut TweeLexer<R>| Some(TokColon)
 		VAR_NAME =>  |lexer:&mut TweeLexer<R>| Some(TokVariable(lexer.yystr()))
@@ -357,17 +544,24 @@ rustlex! TweeLexer {
 		NUM_OP =>  |lexer:&mut TweeLexer<R>| Some(TokNumOp(lexer.yystr()))
 		COMP_OP =>  |lexer:&mut TweeLexer<R>| Some(TokCompOp(lexer.yystr()))
 		LOG_OP =>  |lexer:&mut TweeLexer<R>| Some(TokLogOp(lexer.yystr()))
-		ARRAY_START =>  |_:&mut TweeLexer<R>| Some(TokArrayStart)
-		ARRAY_END =>  |_:&mut TweeLexer<R>| Some(TokArrayEnd)
+		BR_OPEN =>  |lexer:&mut TweeLexer<R>| {
+			lexer.function_brackets += 1;
+			Some(TokBracketOpen)
+		}
 		BR_CLOSE =>  |lexer:&mut TweeLexer<R>| {
-			lexer.MAKRO_CONTENT();
-			Some(TokArgsEnd)
+			lexer.function_brackets -= 1;
+			if lexer.function_brackets == 0 {
+				lexer.MAKRO_CONTENT();
+				Some(TokArgsEnd)
+			} else {
+				Some(TokBracketClose)
+			}
 		}
 	}
 
 	DISPLAY_CONTENT {
 		MAKRO_END => |lexer:&mut TweeLexer<R>| {
-			lexer.INITIAL();
+			if lexer.new_line { lexer.NEWLINE() } else { lexer.NON_NEWLINE() };
 			Some(TokMakroEnd)
 		}
 
@@ -377,7 +571,7 @@ rustlex! TweeLexer {
 
 	LINK_VAR_CHECK {
 		LINK_CLOSE => |lexer:&mut TweeLexer<R>| -> Option<Token> {
-			lexer.INITIAL();
+			lexer.NON_NEWLINE();
 			None
 		}
 
@@ -411,11 +605,11 @@ rustlex! TweeLexer {
 
 	LINK_WAIT_CLOSE {
 		LINK_CLOSE => |lexer:&mut TweeLexer<R>| -> Option<Token> {
-			lexer.INITIAL();
+			lexer.NON_NEWLINE();
 			None
 		}
 	}
-	
+
 }
 
 

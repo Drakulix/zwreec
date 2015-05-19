@@ -13,31 +13,32 @@ use self::zfile::Zfile;
 pub fn temp_create_zcode_example() {
 
     let mut zfile: Zfile = zfile::Zfile::new();
-
     zfile.start();
     zfile.op_call_1n("main");
     zfile.op_quit();
 
     zfile.routine("main", 0);
-    zfile.op_print("main");
+    zfile.op_set_color(0x02, 0x03);
+    zfile.op_set_text_style(true, false,false,false);
+    zfile.op_print("Z-char 6789abcdef0     1234567\n89abcdef");
+    zfile.op_print_unicode_char(0x24);
+    zfile.op_set_text_style(false, false,false,false);
+    zfile.op_newline();
+    zfile.op_print("current   --------------------------");
+    zfile.op_set_text_style(false, false,false,false);
+    zfile.op_newline();
+    zfile.op_print("A0      abcdefghijklmnop\nqrstuvwxyz");
+    zfile.op_set_text_style(false, true,false,false);
+    zfile.op_newline();
+    zfile.op_print("A1      ABCDEFGHIJKLMNOPQRSTUVWXYZ");
+    zfile.op_set_text_style(false, false,false,false);
+    zfile.op_newline();
+    zfile.op_print("A2      ^0123456789.,!?_#'\"/\\-:()");
+    zfile.op_set_text_style(false, false,true,false);
+    zfile.op_newline();
+    zfile.op_print("          --------------------------");
+    zfile.op_newline();
 
-    zfile.label("loop");
-    let local_var_id = 1;
-    zfile.op_read_char(local_var_id);
-    zfile.op_je(local_var_id, '1' as u8, "one");
-    zfile.op_je(local_var_id, '2' as u8, "two");
-    zfile.op_je(local_var_id, '3' as u8, "end");
-    zfile.op_jump("loop");
-
-    zfile.label("one");
-    zfile.op_print("one");
-    zfile.op_jump("loop");
-
-    zfile.label("two");
-    zfile.op_print("two");
-    zfile.op_jump("loop");
-
-    zfile.label("end");
     zfile.op_quit();
     zfile.end();
 
