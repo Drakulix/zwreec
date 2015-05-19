@@ -28,6 +28,13 @@ struct Zlabel {
     pub name: String
 }
 
+pub struct FormattingState {
+    pub bold: bool,
+    pub mono: bool,
+    pub italic: bool,
+    pub inverted: bool
+}
+
 
 impl Zfile {
 
@@ -256,7 +263,7 @@ impl Zfile {
     }
 
     /// set the style of the text
-    pub fn op_set_text_style(&mut self, bold: bool, reverse: bool, fp: bool, underline: bool){
+    pub fn op_set_text_style(&mut self, bold: bool, reverse: bool, monospace: bool, italic: bool){
         self.op_var(0x11);
         let byte = 0x01 << 6 | 0x03 << 4 | 0x03 << 2 | 0x03 << 0;
         self.data.append_byte(byte);
@@ -268,10 +275,10 @@ impl Zfile {
          if reverse {
             style_byte |=0x01
         }
-         if fp {
+         if monospace {
             style_byte |=0x08
         }
-         if underline {
+         if italic {
             style_byte |=0x04
         }
         self.data.append_byte(style_byte);

@@ -1,6 +1,6 @@
 [package]
 name = "zwreec"
-version = "0.0.1"
+version = "0.0.2"
 authors = [
     "victor.brekenfeld@fu-berlin.de", "franz.greiling@fu-berlin.de",
     "kai.lueke@fu-berlin.de", "irina.makarenko@fu-berlin.de",
