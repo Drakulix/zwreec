@@ -87,8 +87,8 @@ fn main() {
         // set log level to verbose
         loggers.push(logger::TermLogger::new(
                 match parsed_opts.opt_count("v") {
-                    1 => logger::LogLevelFilter::Info, 
-                    2 => logger::LogLevelFilter::Debug, 
+                    1 => logger::LogLevelFilter::Info,
+                    2 => logger::LogLevelFilter::Debug,
                     _ => logger::LogLevelFilter::Trace,
                 }));
     } else if parsed_opts.opt_present("q") {
@@ -110,7 +110,7 @@ fn main() {
             "zwreec.log".to_string()
         };
         loggers.push(logger::FileLogger::new(
-                        logger::LogLevelFilter::Trace, 
+                        logger::LogLevelFilter::Trace,
                         File::create(name).unwrap())
             );
     }
@@ -176,10 +176,6 @@ fn main() {
 
     // call library
     zwreec::compile(&mut infile, &mut outfile);
-
-    // only for testing
-    debug!("(2) {}", zwreec::backend::temp_hello());
-    debug!("(3) {}", zwreec::utils::file::temp_hello());
 
     info!("main finished");
 }

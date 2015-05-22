@@ -34,7 +34,3 @@ pub fn compile<R: Read, W: Write>(input: &mut R, output: &mut W) {
     // create code
     codegen::generate_zcode(ast, output);
 }
-
-#[test]
-fn it_works() {
-}

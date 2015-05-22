@@ -78,12 +78,3 @@ pub fn temp_print_current_directory_files() {
         debug!("Name: {}", path.unwrap().path().display())
     }
 }
-
-pub fn temp_hello() -> String {
-    "hello from file".to_string()
-}
-
-#[test]
-fn it_works() {
-    assert!(true);
-}
