@@ -6,23 +6,18 @@ extern crate rustlex;
 extern crate time;
 extern crate term;
 
-pub use backend::zcode::zfile;
-
-
 pub mod frontend;
 pub mod backend;
+pub use backend::zcode::zfile;
 pub mod utils;
+
 use frontend::codegen;
 
+use std::io::{Read,Write};
 
-pub fn compile(input_file_name: &str, output_file_name: &str) {
-    info!("inputFile: {}", input_file_name);
-    info!("outputFile: {}", output_file_name);
 
+pub fn compile<R: Read, W: Write>(input: &mut R, output: &mut W) {
     // compile
-
-    // read file
-    let input = utils::file::open_source_file(input_file_name);
 
     // tokenize
     let tokens = frontend::lexer::lex(input);
@@ -37,9 +32,7 @@ pub fn compile(input_file_name: &str, output_file_name: &str) {
     ast.print();
 
     // create code
-    codegen::generate_zcode(ast, output_file_name);
-
-    //backend::zcode::temp_create_zcode_example();
+    codegen::generate_zcode(ast, output);
 }
 
 #[test]
