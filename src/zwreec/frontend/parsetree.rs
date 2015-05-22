@@ -32,7 +32,7 @@ impl ParseTree {
         debug!("");
     }
 
-    /// checks if 
+    /// checks if
     pub fn is_terminal(&self, path: Vec<usize>) -> bool {
         self.root.is_terminal(path)
     }
@@ -72,7 +72,7 @@ impl PNode {
     /// prints a node
     pub fn print(&self, indent: usize) {
         let mut spaces = "".to_string();
-        for _ in 0..indent { 
+        for _ in 0..indent {
             spaces.push_str(" ");
         }
 
@@ -136,12 +136,4 @@ impl PNode {
 
         false
     }
-}
-
-//==============================
-// 
-
-#[test]
-fn it_works() {
-
 }
