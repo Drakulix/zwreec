@@ -1,4 +1,3 @@
-use std::error::Error;
 use std::io::{BufReader,Read};
 use self::Token::{
 	TokPassageName, TokTagStart, TokTagEnd, TokTag,
@@ -18,17 +17,8 @@ use self::Token::{
 };
 
 pub fn lex<R: Read>(input: &mut R) -> Vec<Token> {
-    // TODO: Instead of reading the entire input, work on BufRead or Read directly
-    let mut content = String::new();
-    match input.read_to_string(&mut content) {
-        Err(why) => panic!("could not read from input: {}", Error::description(&why)),
-        Ok(_) => debug!("read input to buffer"),
-    };
-
-	let processed = preprocess(content);
-   	let inp = BufReader::new(processed.as_bytes());
-   	print!("Nicht in Tokens verarbeitete Zeichen: ");
-	let mut lexer = TweeLexer::new(inp);
+    print!("Nicht in Tokens verarbeitete Zeichen: ");
+	let mut lexer = TweeLexer::new(BufReader::new(input));
 	let mut current_text = "".to_string();
 	// Unify TokText's next to each other to a single TokText
 	let mut tokens = vec![];
@@ -58,56 +48,6 @@ pub fn lex<R: Read>(input: &mut R) -> Vec<Token> {
 	    }
 	}
 	tokens
-}
-
-// TODO: do not remove if in passage name, monospace etc.
-// TODO: Work on Read or BufRead instead of Strings
-fn preprocess(input: String) -> String {
-	let mut comment = false;
-	let mut suspect_start = false;
-	let mut suspect_end = false;
-	let mut processed = String::new();
-
-	for c in input.chars() {
-		if !comment && !suspect_start && c == '/' {
-			suspect_start = true;
-			continue;
-		}
-
-		if suspect_start {
-			if c == '%' {
-				comment = true;
-				suspect_start = false;
-			} else {
-				suspect_start = false;
-				processed.push('/');
-				processed.push(c);
-			}
-
-			continue;
-		}
-
-		if c == '%' && comment {
-			suspect_end = true;
-			continue;
-		}
-
-		if suspect_end {
-			if c == '/' {
-				comment = false;
-				suspect_end = false;
-			} else {
-				suspect_end = false;
-			}
-			continue;
-		}
-
-		if !comment {
-			processed.push(c);
-		}
-	}
-
-	processed
 }
 
 #[derive(PartialEq,Debug)]

@@ -19,10 +19,13 @@ use std::io::{Read,Write};
 pub fn compile<R: Read, W: Write>(input: &mut R, output: &mut W) {
     // compile
 
-    // tokenize
-    let tokens = frontend::lexer::lex(input);
+    //screen
+    let mut clean_input = frontend::screener::screen(input);
 
-    println!("");
+    // tokenize
+    let tokens = frontend::lexer::lex(&mut clean_input);
+
+    debug!("");
     for token in tokens.iter() {
     	debug!("{:?}", token);
     }
