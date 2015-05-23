@@ -1,4 +1,9 @@
+use std::any::Any;
+use std::collections::VecDeque;
 use std::io::{BufReader,Read};
+
+use utils::extensions::{QueuedScanExtension, QueuedScan};
+
 use self::Token::{
 	TokPassageName, TokTagStart, TokTagEnd, TokTag,
 	TokMakroStart, TokMakroEnd, TokVariable,
@@ -16,38 +21,47 @@ use self::Token::{
 	TokArrayStart, TokArrayEnd, TokNewLine, TokFormatHorizontalLine
 };
 
-pub fn lex<R: Read>(input: &mut R) -> Vec<Token> {
+pub fn lex<R: Read>(input: &mut R) -> QueuedScan<TweeLexer<BufReader<&mut R>>, String, fn(&mut String, Option<Token>, VecDeque<Token>) -> bool>  {
     print!("Nicht in Tokens verarbeitete Zeichen: ");
 	let mut lexer = TweeLexer::new(BufReader::new(input));
-	let mut current_text = "".to_string();
-	// Unify TokText's next to each other to a single TokText
-	let mut tokens = vec![];
-	loop {
-	    match lexer.next() {
-	        Some(x) => {
-	        	match x {
-	        		TokText(text) => {
-	        			current_text = current_text + &text;
-	        		},
-	        		_ => {
-	        			if current_text != "" {
-	        				tokens.push(TokText(current_text));
-	        				current_text = "".to_string();
-	        			}
-	        			tokens.push(x);
-	        		}
-	        	}
 
-	        },
-	        None => {
-	        	if current_text != "" {
-	        		tokens.push(TokText(current_text));
-	        	}
-	        	break
-	        }
-	    }
-	}
-	tokens
+	// Unify TokText's next to each other to a single TokText
+
+	//using a closure does not work, because closure have currently no fixed compile size
+	//fn does implement "Sized"
+	//we can also not use generics, because then the closure would need to be provided.
+	//we cannot implement a fixed static closure for a dynamic generic type
+	//at least that block nearly looks like a closure
+	lexer.queued_scan(String::new(), {
+		fn scan(current_text: &mut String, maybe_token: Option<Token>, queue: VecDeque<Token>) -> bool {
+			match maybe_token {
+		        Some(token) => {
+		        	match token {
+		        		TokText(text) => {
+		        			current_text.push_str(&text);
+		        		},
+		        		_ => {
+		        			if current_text != "" {
+		        				queue.push_back(TokText(current_text.clone()));
+		        				current_text.clear();
+		        			}
+		        			queue.push_back(token);
+		        		}
+		        	}
+					true
+		        },
+		        None => {
+		        	if current_text != "" {
+						queue.push_back(TokText(current_text.clone()));
+						true
+		        	} else {
+						false
+					}
+		        }
+		    }
+		}
+		scan
+	})
 }
 
 #[derive(PartialEq,Debug)]
