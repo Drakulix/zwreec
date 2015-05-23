@@ -1,7 +1,14 @@
 use std::io::{Cursor, Read};
 use std::error::Error;
+use utils::extensions::{QueuedScanExtension, QueuedScan};
 
 // TODO: do not remove if in passage name, monospace etc.
+
+struct ScanState {
+    comment: bool,
+    suspect_start: bool,
+    suspect_end: bool,
+}
 
 pub fn screen<R: Read>(input: &mut R) -> Cursor<Vec<u8>> {
 
@@ -16,47 +23,55 @@ pub fn screen<R: Read>(input: &mut R) -> Cursor<Vec<u8>> {
 	let mut suspect_end = false;
 	let mut processed = String::new();
 
-    //I really would have loved to use the chars iterator and filter or scan to perform this operation.
-    //Sadly the comment blocks pervent this, as they depend on more then one chars to start
-    //"fold" would have been possible, but is not more efficient then this old-school variant.
-	for c in content.chars() {
-		if !comment && !suspect_start && c == '/' {
-			suspect_start = true;
-			continue;
-		}
+    Cursor::new(content.chars().queued_scan(
+        ScanState {
+            comment: false,
+            suspect_start: false,
+            suspect_end: false
+        },
+        |&mut state, maybe_char, queue| {
+            match maybe_char {
+                Some(c) => {
+                    if !state.comment && !state.suspect_start && c == '/' {
+                        state.suspect_start = true;
+            			return true;
+            		}
 
-		if suspect_start {
-			if c == '%' {
-				comment = true;
-				suspect_start = false;
-			} else {
-				suspect_start = false;
-				processed.push('/');
-				processed.push(c);
-			}
+            		if state.suspect_start {
+            			if c == '%' {
+                            state.comment = true;
+                            state.suspect_start = false;
+            			} else {
+                            state.suspect_start = false;
+            				queue.push_back('/');
+                            queue.push_back(c);
+            			}
+                        return true;
+            		}
 
-			continue;
-		}
+            		if c == '%' && state.comment {
+                        state.suspect_end = true;
+                        return true;
+            		}
 
-		if c == '%' && comment {
-			suspect_end = true;
-			continue;
-		}
+            		if state.suspect_end {
+            			if c == '/' {
+                            state.comment = false;
+                            state.suspect_end = false;
+            			} else {
+                            state.suspect_end = false;
+            			}
+                        return true;
+            		}
 
-		if suspect_end {
-			if c == '/' {
-				comment = false;
-				suspect_end = false;
-			} else {
-				suspect_end = false;
-			}
-			continue;
-		}
+            		if !state.comment {
+                        queue.push_back(c);
+            		}
 
-		if !comment {
-			processed.push(c);
-		}
-	}
-
-    Cursor::new(processed.into_bytes())
+                    true
+                },
+                None => false
+            }
+        }
+    ).map(|x: char| {x as u8}).collect())
 }
