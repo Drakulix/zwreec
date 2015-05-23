@@ -1,6 +1,6 @@
 use std::io::{Cursor, Read};
 use std::error::Error;
-use utils::extensions::{QueuedScanExtension, QueuedScan};
+use utils::extensions::QueuedScanExtension;
 
 // TODO: do not remove if in passage name, monospace etc.
 
@@ -17,11 +17,6 @@ pub fn screen<R: Read>(input: &mut R) -> Cursor<Vec<u8>> {
         Err(why) => panic!("could not read from input: {}", Error::description(&why)),
         Ok(_) => debug!("read input to buffer"),
     };
-
-    let mut comment = false;
-	let mut suspect_start = false;
-	let mut suspect_end = false;
-	let mut processed = String::new();
 
     Cursor::new(content.chars().queued_scan(
         ScanState {

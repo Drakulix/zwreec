@@ -1,4 +1,3 @@
-use std::any::Any;
 use std::collections::VecDeque;
 use std::io::{BufReader,Read};
 
@@ -23,16 +22,15 @@ use self::Token::{
 
 pub fn lex<R: Read>(input: &mut R) -> QueuedScan<TweeLexer<BufReader<&mut R>>, String, fn(&mut String, Option<Token>, &mut VecDeque<Token>) -> bool>  {
     print!("Nicht in Tokens verarbeitete Zeichen: ");
-	let mut lexer = TweeLexer::new(BufReader::new(input));
-
-	// Unify TokText's next to each other to a single TokText
 
 	//using a closure does not work, because closure have currently no fixed compile size
 	//fn does implement "Sized"
 	//we can also not use generics, because then the closure would need to be provided.
 	//we cannot implement a fixed static closure for a dynamic generic type
 	//at least that block nearly looks like a closure
-	lexer.queued_scan(String::new(), {
+	TweeLexer::new(BufReader::new(input)).queued_scan(String::new(), {
+
+		// Unify TokText's next to each other to a single TokText
 		fn scan(current_text: &mut String, maybe_token: Option<Token>, queue: &mut VecDeque<Token>) -> bool {
 			match maybe_token {
 		        Some(token) => {
@@ -61,6 +59,7 @@ pub fn lex<R: Read>(input: &mut R) -> QueuedScan<TweeLexer<BufReader<&mut R>>, S
 		    }
 		}
 		scan
+		
 	})
 }
 
