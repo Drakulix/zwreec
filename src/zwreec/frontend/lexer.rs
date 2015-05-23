@@ -21,7 +21,7 @@ use self::Token::{
 	TokArrayStart, TokArrayEnd, TokNewLine, TokFormatHorizontalLine
 };
 
-pub fn lex<R: Read>(input: &mut R) -> QueuedScan<TweeLexer<BufReader<&mut R>>, String, fn(&mut String, Option<Token>, VecDeque<Token>) -> bool>  {
+pub fn lex<R: Read>(input: &mut R) -> QueuedScan<TweeLexer<BufReader<&mut R>>, String, fn(&mut String, Option<Token>, &mut VecDeque<Token>) -> bool>  {
     print!("Nicht in Tokens verarbeitete Zeichen: ");
 	let mut lexer = TweeLexer::new(BufReader::new(input));
 
@@ -33,7 +33,7 @@ pub fn lex<R: Read>(input: &mut R) -> QueuedScan<TweeLexer<BufReader<&mut R>>, S
 	//we cannot implement a fixed static closure for a dynamic generic type
 	//at least that block nearly looks like a closure
 	lexer.queued_scan(String::new(), {
-		fn scan(current_text: &mut String, maybe_token: Option<Token>, queue: VecDeque<Token>) -> bool {
+		fn scan(current_text: &mut String, maybe_token: Option<Token>, queue: &mut VecDeque<Token>) -> bool {
 			match maybe_token {
 		        Some(token) => {
 		        	match token {

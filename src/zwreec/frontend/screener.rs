@@ -29,7 +29,7 @@ pub fn screen<R: Read>(input: &mut R) -> Cursor<Vec<u8>> {
             suspect_start: false,
             suspect_end: false
         },
-        |&mut state, maybe_char, queue| {
+        |ref mut state, maybe_char, ref mut queue| {
             match maybe_char {
                 Some(c) => {
                     if !state.comment && !state.suspect_start && c == '/' {

@@ -7,7 +7,7 @@ use std::any::Any;
 #[derive(Clone)]
 pub struct QueuedScan<I, St, F> where
    I: Iterator,
-   F: FnMut(&mut St, Option<I::Item>, VecDeque<I::Item>) -> bool
+   F: FnMut(&mut St, Option<I::Item>, &mut VecDeque<I::Item>) -> bool
  {
     iter: I,
     f: F,
@@ -17,17 +17,18 @@ pub struct QueuedScan<I, St, F> where
 
 impl<I, St, F> Iterator for QueuedScan<I, St, F> where
     I: Iterator,
-    F: FnMut(&mut St, Option<I::Item>, VecDeque<I::Item>) -> bool,
+    F: FnMut(&mut St, Option<I::Item>, &mut VecDeque<I::Item>) -> bool,
 {
     type Item = I::Item;
 
     #[inline]
     fn next(&mut self) -> Option<I::Item> {
         loop {
-            match self.queue.front() {
-                Some(item) => return Some(*item.clone()),
+            let elem: Option<I::Item> = self.queue.pop_front();
+            match elem {
+                Some(item) => return Some(item),
                 None => {
-                    if !((self.f)(&mut self.state, self.iter.next(), self.queue)) {
+                    if !((self.f)(&mut self.state, self.iter.next(), &mut self.queue)) {
                         return None;
                     }
                 },
@@ -41,14 +42,14 @@ impl<I, St, F> Iterator for QueuedScan<I, St, F> where
     }
 }
 
-trait QueuedScanExtension {
-    fn queued_scan<St, F>(self, initial_state: St, f: F) -> QueuedScan<Self, St, F>
-        where Self: Sized+Iterator, F: FnMut(&mut St, Option<Self::Item>, VecDeque<Self::Item>) -> bool;
+pub trait QueuedScanExtension {
+    fn queued_scan<St, F>(mut self, initial_state: St, f: F) -> QueuedScan<Self, St, F>
+        where Self: Sized+Iterator, F: FnMut(&mut St, Option<Self::Item>, &mut VecDeque<Self::Item>) -> bool;
 }
 
 impl<A: Sized+Iterator> QueuedScanExtension for A {
-    fn queued_scan<St, F>(self, initial_state: St, f: F) -> QueuedScan<A, St, F>
-        where Self: Sized+Iterator, F: FnMut(&mut St, Option<A::Item>, VecDeque<A::Item>) -> bool
+    fn queued_scan<St, F>(mut self, initial_state: St, f: F) -> QueuedScan<A, St, F>
+        where Self: Sized+Iterator, F: FnMut(&mut St, Option<A::Item>, &mut VecDeque<A::Item>) -> bool
     {
         QueuedScan {iter: self, f: f, state: initial_state, queue: VecDeque::<A::Item>::new()}
     }
