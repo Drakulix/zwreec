@@ -26,12 +26,12 @@ pub fn compile<R: Read, W: Write>(input: &mut R, output: &mut W) {
     let tokens = frontend::lexer::lex(&mut clean_input);
 
     debug!("");
-    for token in tokens.iter() {
+    for token in tokens {
     	debug!("{:?}", token);
     }
 
     // parse tokens and create ast
-    let ast = frontend::parser::parse_tokens(tokens);
+    let ast = frontend::parser::parse_tokens(tokens.collect()); //use collect until we work on iterators directly
     ast.print();
 
     // create code
