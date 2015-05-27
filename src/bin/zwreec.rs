@@ -122,7 +122,7 @@ fn main() {
         let path = Path::new(&parsed_opts.free[0]);
         match File::open(path) {
             Err(why) => {
-                panic!("couldn't open {}: {}",
+                panic!("Couldn't open {}: {}",
                                path.display(), Error::description(&why))
             },
             Ok(file) => {
@@ -142,9 +142,9 @@ fn main() {
         // parsed "-o FILE"
         // try to open FILE
         let path = Path::new(&file);
-        match File::open(path) {
+        match File::create(path) {
             Err(why) => {
-                panic!("couldn't open {}: {}",
+                panic!("Couldn't open {}: {}",
                        path.display(), Error::description(&why))
             },
             Ok(file) => {
@@ -155,9 +155,9 @@ fn main() {
     } else {
         // assume default
         let path = Path::new("a.z8");
-        match File::open(path) {
+        match File::create(path) {
             Err(why) => {
-                panic!("couldn't open {}: {}",
+                panic!("Couldn't open {}: {}",
                        path.display(), Error::description(&why))
             },
             Ok(file) => {
@@ -171,8 +171,8 @@ fn main() {
     // activate logger
     let _ = logger::CombinedLogger::init(loggers);
 
-    debug!("parsed command line options");
-    info!("main started");
+    debug!("Parsed command line options");
+    info!("Main started");
 
     // call library
     zwreec::compile(&mut infile, &mut outfile);
