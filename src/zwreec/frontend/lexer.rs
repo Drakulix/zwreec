@@ -19,7 +19,7 @@ use self::Token::{
 pub fn lex(input :String) -> Vec<Token> {
 	let processed = preprocess(input);
    	let inp = BufReader::new(processed.as_bytes());
-   	warn!("Nicht in Tokens verarbeitete Zeichen: ");
+   	info!("Nicht in Tokens verarbeitete Zeichen: ");
 	let mut lexer = TweeLexer::new(inp);
 	let mut current_text = "".to_string();
 	// Unify TokText's next to each other to a single TokText
