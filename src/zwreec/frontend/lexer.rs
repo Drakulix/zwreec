@@ -1,7 +1,6 @@
-use std::collections::VecDeque;
 use std::io::{BufReader,Read};
-
-use utils::extensions::{QueuedScanExtension, QueuedScan};
+use std::iter::Scan;
+use utils::extensions::{PeekingIterator, PeekingIteratorExtension};
 
 use self::Token::{
 	TokPassageName, TokTagStart, TokTagEnd, TokTag,
@@ -20,50 +19,34 @@ use self::Token::{
 	TokArrayStart, TokArrayEnd, TokNewLine, TokFormatHorizontalLine
 };
 
-pub fn lex<R: Read>(input: &mut R) -> QueuedScan<TweeLexer<BufReader<&mut R>>, String, fn(&mut String, Option<Token>, &mut VecDeque<Token>) -> bool>  {
+pub fn lex<R: Read>(input: &mut R) -> Scan<PeekingIterator<TweeLexer<BufReader<&mut R>>, Token>, String, fn(&mut String, (Token, Option<Token>)) -> Option<Token>>  {
+
     print!("Nicht in Tokens verarbeitete Zeichen: ");
 
-	//using a closure does not work, because closure have currently no fixed compile size
-	//fn does implement "Sized"
-	//we can also not use generics, because then the closure would need to be provided.
-	//we cannot implement a fixed static closure for a dynamic generic type
-	//at least that block nearly looks like a closure
-	TweeLexer::new(BufReader::new(input)).queued_scan(String::new(), {
-
-		// Unify TokText's next to each other to a single TokText
-		fn scan(current_text: &mut String, maybe_token: Option<Token>, queue: &mut VecDeque<Token>) -> bool {
-			match maybe_token {
-		        Some(token) => {
-		        	match token {
-		        		TokText(text) => {
-		        			current_text.push_str(&text);
-		        		},
-		        		_ => {
-		        			if current_text != "" {
-		        				queue.push_back(TokText(current_text.clone()));
-		        				current_text.clear();
-		        			}
-		        			queue.push_back(token);
-		        		}
-		        	}
-					true
-		        },
-		        None => {
-		        	if current_text != "" {
-						queue.push_back(TokText(current_text.clone()));
-						true
-		        	} else {
-						false
+	TweeLexer::new(BufReader::new(input)).peeking().scan(
+		String::new(),
+		{
+			fn scan_fn(current_text: &mut String, elem: (Token, Option<Token>)) -> Option<Token> {
+				match elem {
+					(TokText(text), Some(TokText(_))) => {
+						current_text.push_str(&text);
+						None
 					}
-		        }
-		    }
+					(TokText(text), _) => {
+						current_text.push_str(&text);
+						let val = TokText((*current_text).clone());
+						current_text.clear();
+						Some(val)
+					},
+					(x, _) => Some(x),
+				}
+			}
+			scan_fn
 		}
-		scan
-		
-	})
+	)
 }
 
-#[derive(PartialEq,Debug)]
+#[derive(PartialEq,Debug,Clone)]
 pub enum Token {
 	TokPassageName (String),
 	TokTagStart,

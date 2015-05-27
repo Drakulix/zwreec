@@ -1,54 +1,75 @@
-use std::collections::VecDeque;
+use std::iter::Peekable;
 
-/// An iterator that filters the elements of `iter` with `predicate`
+/// An iterator that performs a lookahead of 1, utilizing the existing Peakable Iterator
+/// Can be stacked to perform an even greater lookahead
 #[must_use = "iterator adaptors are lazy and do nothing unless consumed"]
 #[derive(Clone)]
-pub struct QueuedScan<I, St, F> where
-   I: Iterator,
-   F: FnMut(&mut St, Option<I::Item>, &mut VecDeque<I::Item>) -> bool
- {
-    iter: I,
-    f: F,
-    state: St,
-    queue: VecDeque<I::Item>,
+pub struct PeekingIterator<I, A> where
+    A: Clone,
+    I: Iterator<Item=A>,
+{
+    iter: Peekable<I>,
 }
 
-impl<I, St, F> Iterator for QueuedScan<I, St, F> where
-    I: Iterator,
-    F: FnMut(&mut St, Option<I::Item>, &mut VecDeque<I::Item>) -> bool,
+impl<I, A> Iterator for PeekingIterator<I, A> where
+    A: Clone,
+    I: Iterator<Item=A>
 {
-    type Item = I::Item;
+    type Item = (A, Option<A>);
 
     #[inline]
-    fn next(&mut self) -> Option<I::Item> {
-        loop {
-            let elem: Option<I::Item> = self.queue.pop_front();
-            match elem {
-                Some(item) => return Some(item),
-                None => {
-                    if !((self.f)(&mut self.state, self.iter.next(), &mut self.queue)) {
-                        return None;
-                    }
-                },
-            }
+    fn next(&mut self) -> Option<(A, Option<A>)> {
+        match self.iter.next() {
+            Some(item) => Some((item,
+                match self.iter.peek() {
+                    Some(ref item) => Some((*item).clone()),
+                    None => None,
+                }
+            )),
+            None => None,
         }
     }
 
     #[inline]
     fn size_hint(&self) -> (usize, Option<usize>) {
-        (0, None) //cannot know any bound
+        self.iter.size_hint()
     }
 }
 
-pub trait QueuedScanExtension {
-    fn queued_scan<St, F>(self, initial_state: St, f: F) -> QueuedScan<Self, St, F>
-        where Self: Sized+Iterator, F: FnMut(&mut St, Option<Self::Item>, &mut VecDeque<Self::Item>) -> bool;
+pub trait PeekingIteratorExtension {
+    fn peeking(self) -> PeekingIterator<Self, Self::Item>
+        where Self: Sized+Iterator,
+              Self::Item: Clone;
 }
 
-impl<A: Sized+Iterator> QueuedScanExtension for A {
-    fn queued_scan<St, F>(self, initial_state: St, f: F) -> QueuedScan<A, St, F>
-        where Self: Sized+Iterator, F: FnMut(&mut St, Option<A::Item>, &mut VecDeque<A::Item>) -> bool
+impl<A: Clone, I: Sized+Iterator<Item=A>> PeekingIteratorExtension for I {
+    fn peeking(self) -> PeekingIterator<Self, A>
+        where Self: Sized+Iterator
     {
-        QueuedScan {iter: self, f: f, state: initial_state, queue: VecDeque::<A::Item>::new()}
+         PeekingIterator { iter: self.peekable() }
     }
+}
+
+#[test]
+fn peeking_iterator_test() {
+    let test = vec!["first", "second", "third"];
+    let mut index = 0;
+    for (elem, peek) in test.into_iter().peeking() {
+        match elem {
+            "first" => {
+                assert_eq!(peek, Some("second"));
+                index += 1;
+            },
+            "second" => {
+                assert_eq!(peek, Some("third"));
+                index += 1;
+            },
+            "third" => {
+                assert_eq!(peek, None);
+                index += 1;
+            },
+            _ => assert!(false),
+        }
+    }
+    assert_eq!(index, 3);
 }
