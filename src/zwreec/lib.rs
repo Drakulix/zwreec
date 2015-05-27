@@ -27,7 +27,7 @@ pub fn compile(input_file_name: &str, output_file_name: &str) {
     // tokenize
     let tokens = frontend::lexer::lex(input);
 
-    println!("");
+    debug!("");
     for token in tokens.iter() {
     	debug!("{:?}", token);
     }

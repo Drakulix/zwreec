@@ -55,7 +55,7 @@ impl Bytes {
     }
 
     pub fn print(&self) {
-        println!("bytes: {:?}", self.bytes);
+        warn!("bytes: {:?}", self.bytes);
 
     }
 }
