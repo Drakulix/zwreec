@@ -1,14 +1,21 @@
 //! The `codegen` module is for the creating of zcode from an ast
 
+use std::error::Error;
+use std::io::Write;
 use frontend::ast;
 use super::super::backend::zcode::zfile;
-use utils::file;
 
-pub fn generate_zcode(ast: ast::AST, output_file_name: &str) {
-
+pub fn generate_zcode<W: Write>(ast: ast::AST, output: &mut W) {
     let mut codegenerator = Codegen::new(ast);
     codegenerator.start_codegen();
-    file::save_bytes_to_file(output_file_name, &(*codegenerator.zfile_bytes()) );
+    match output.write_all(&(*codegenerator.zfile_bytes())) {
+        Err(why) => {
+            panic!("Could not write to output: {}", Error::description(&why));
+        },
+        Ok(_) => {
+            info!("Wrote zcode to output");
+        }
+    };
 }
 
 struct Codegen {
@@ -40,9 +47,4 @@ impl Codegen {
     pub fn zfile_bytes(&self) -> &Vec<u8> {
         &self.zfile.data.bytes
     }
-}
-
-#[test]
-fn it_works() {
-
 }

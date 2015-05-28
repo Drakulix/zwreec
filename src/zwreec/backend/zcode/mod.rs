@@ -44,7 +44,3 @@ pub fn temp_create_zcode_example() {
 
     file::save_bytes_to_file("helloworld.z8", &(*zfile.data.bytes));
 }
-
-pub fn temp_hello() -> String {
-    "hello from zcode".to_string()
-}

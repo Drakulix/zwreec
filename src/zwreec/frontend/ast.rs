@@ -93,7 +93,7 @@ impl AST {
         if let Some(index) = path.first() {
             let mut new_path: Vec<usize> = path.to_vec();
             new_path.remove(0);
-            
+
             self.passages[*index].add_child(new_path, token)
         } else {
             self.passages.push(ASTNode::Default(NodeDefault { category: token, childs: Vec::new() }));
@@ -105,7 +105,7 @@ impl AST {
         if let Some(index) = path.first() {
             let mut new_path: Vec<usize> = path.to_vec();
             new_path.remove(0);
-            
+
             self.passages[*index].count_childs(new_path)
         } else {
             self.passages.len()
@@ -171,7 +171,7 @@ impl ASTNode {
     /// prints an node of an ast
     pub fn print(&self, indent: usize) {
         let mut spaces = "".to_string();
-        for _ in 0..indent { 
+        for _ in 0..indent {
             spaces.push_str(" ");
         }
 
@@ -191,13 +191,3 @@ impl ASTNode {
         }
     }
 }
-
-
-//==============================
-// 
-
-#[test]
-fn it_works() {
-
-}
-
