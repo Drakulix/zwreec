@@ -21,7 +21,7 @@ use self::Token::{
 
 pub fn lex<R: Read>(input: &mut R) -> FilteringScan<Peeking<TweeLexer<BufReader<&mut R>>, Token>, String, fn(&mut String, (Token, Option<Token>)) -> Option<Token>>  {
 
-    print!("Nicht in Tokens verarbeitete Zeichen: ");
+    info!("Nicht in Tokens verarbeitete Zeichen: ");
 
 	TweeLexer::new(BufReader::new(input)).peeking().scan_filter(
 		String::new(),
