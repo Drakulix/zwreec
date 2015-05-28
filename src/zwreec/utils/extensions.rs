@@ -4,14 +4,14 @@ use std::iter::Peekable;
 /// Can be stacked to perform an even greater lookahead
 #[must_use = "iterator adaptors are lazy and do nothing unless consumed"]
 #[derive(Clone)]
-pub struct PeekingIterator<I, A> where
+pub struct Peeking<I, A> where
     A: Clone,
     I: Iterator<Item=A>,
 {
     iter: Peekable<I>,
 }
 
-impl<I, A> Iterator for PeekingIterator<I, A> where
+impl<I, A> Iterator for Peeking<I, A> where
     A: Clone,
     I: Iterator<Item=A>
 {
@@ -36,22 +36,22 @@ impl<I, A> Iterator for PeekingIterator<I, A> where
     }
 }
 
-pub trait PeekingIteratorExtension {
-    fn peeking(self) -> PeekingIterator<Self, Self::Item>
+pub trait PeekingExt {
+    fn peeking(self) -> Peeking<Self, Self::Item>
         where Self: Sized+Iterator,
               Self::Item: Clone;
 }
 
-impl<A: Clone, I: Sized+Iterator<Item=A>> PeekingIteratorExtension for I {
-    fn peeking(self) -> PeekingIterator<Self, A>
+impl<A: Clone, I: Sized+Iterator<Item=A>> PeekingExt for I {
+    fn peeking(self) -> Peeking<Self, A>
         where Self: Sized+Iterator
     {
-         PeekingIterator { iter: self.peekable() }
+         Peeking { iter: self.peekable() }
     }
 }
 
 #[test]
-fn peeking_iterator_test() {
+fn peeking_test() {
     let test = vec!["first", "second", "third"];
     let mut index = 0;
     for (elem, peek) in test.into_iter().peeking() {
