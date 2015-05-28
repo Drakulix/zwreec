@@ -10,7 +10,7 @@ pub static ALPHABET: [char; 78] = [
     'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
     'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
 
-    '\0', '^', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '.',
+    '\0', '\n', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '.',
     ',', '!', '?', '_', '#', '\'','"', '/', '\\','-', ':', '(', ')'];
 
 
@@ -68,6 +68,7 @@ fn string_to_zchar(content: &str) -> Vec<u8> {
         let mut zchars: Vec<u8> = Vec::new();
         for byte in string_bytes{
             let t_index = pos_in_alpha(byte as u8);
+
             if t_index != -1 {
                 if byte == 0x0A {
                     // newline?
