@@ -13,7 +13,8 @@ use self::Token::{
 	TokFormatIndentBlock, TokFormatHeading, TokVarSetStart, 
 	TokVarSetEnd, TokSemiColon, TokPrint, TokDisplay, TokBoolean,
 	TokFunction , TokColon, TokArgsEnd, TokSilently, TokEndSilently,
-	TokArrayStart, TokArrayEnd, TokNewLine, TokFormatHorizontalLine
+	TokArrayStart, TokArrayEnd, TokNewLine, TokFormatHorizontalLine,
+	TokMakroVar
 };
 
 pub fn lex(input :String) -> Vec<Token> {
@@ -138,7 +139,7 @@ pub enum Token {
 	TokArrayStart,
 	TokArrayEnd,
 	TokSet,
-	TokAssign,
+	TokAssign (String),
 	TokNumOp (String),
 	TokCompOp (String),
 	TokLogOp (String),
@@ -150,6 +151,7 @@ pub enum Token {
 	TokDisplay,
 	TokSilently,
 	TokEndSilently,
+	TokMakroVar(String),
 	TokNewLine
 }
 
@@ -240,7 +242,7 @@ rustlex! TweeLexer {
 	let SILENTLY = "silently";
 	let END_SILENTLY = "endsilently";
 
-	let ASSIGN = "=" | "to";
+	let ASSIGN = "=" | "to" | "+=" | "-=" | "*=" | "/=";
 	let SEMI_COLON = ';';
 	let NUM_OP = ["+-*/%"];
 	let COMP_OP = "is" | "==" | "eq" | "neq" | ">" | "gt" | ">=" | "gte" | "<" | "lt" | "<=" | "lte";
@@ -279,10 +281,10 @@ rustlex! TweeLexer {
 			None
 		}
 
-		MAKRO_START => |lexer:&mut TweeLexer<R>| {
+		MAKRO_START => |lexer:&mut TweeLexer<R>| -> Option<Token>{
 			lexer.MAKRO();
 			lexer.new_line = true;
-			Some(TokMakroStart)
+			None
 		}
 
 		LINK_SIMPLE =>  |lexer:&mut TweeLexer<R>| {
@@ -368,10 +370,10 @@ rustlex! TweeLexer {
 
 	NON_NEWLINE {
 
-		MAKRO_START => |lexer:&mut TweeLexer<R>| {
+		MAKRO_START => |lexer:&mut TweeLexer<R>| -> Option<Token>{
 			lexer.MAKRO();
 			lexer.new_line = false;
-			Some(TokMakroStart)
+			None
 		}
 
 		LINK_SIMPLE =>  |lexer:&mut TweeLexer<R>| {
@@ -467,6 +469,11 @@ rustlex! TweeLexer {
 	}
 
 	MAKRO {
+		WHITESPACE =>  |lexer:&mut TweeLexer<R>| -> Option<Token> {
+			lexer.NON_NEWLINE();
+			None
+		}
+
 		SET =>  |lexer:&mut TweeLexer<R>| {
 			lexer.MAKRO_CONTENT();
 			Some(TokSet)
@@ -499,7 +506,14 @@ rustlex! TweeLexer {
 			lexer.MAKRO_CONTENT();
 			Some(TokEndSilently)
 		}
+
+		VAR_NAME =>  |lexer:&mut TweeLexer<R>| {
+			lexer.MAKRO_CONTENT();
+			Some(TokMakroVar(lexer.yystr()))
+		}
 	}
+
+
 
 	MAKRO_CONTENT {
 		MAKRO_END => |lexer:&mut TweeLexer<R>| {
@@ -529,7 +543,7 @@ rustlex! TweeLexer {
 		BR_OPEN =>  |_:&mut TweeLexer<R>| Some(TokBracketOpen)
 		BR_CLOSE =>  |_:&mut TweeLexer<R>| Some(TokBracketClose)
 		SEMI_COLON =>  |_:&mut TweeLexer<R>| Some(TokSemiColon)
-		ASSIGN =>  |_:&mut TweeLexer<R>| Some(TokAssign)
+		ASSIGN =>  |lexer:&mut TweeLexer<R>| Some(TokAssign(lexer.yystr()))
 		COLON =>  |_:&mut TweeLexer<R>| Some(TokColon)
 		// Expression Stuff End
 	}
@@ -594,7 +608,7 @@ rustlex! TweeLexer {
 		BR_OPEN =>  |_:&mut TweeLexer<R>| Some(TokBracketOpen)
 		BR_CLOSE =>  |_:&mut TweeLexer<R>| Some(TokBracketClose)
 		SEMI_COLON =>  |_:&mut TweeLexer<R>| Some(TokSemiColon)
-		ASSIGN =>  |_:&mut TweeLexer<R>| Some(TokAssign)
+		ASSIGN =>  |lexer:&mut TweeLexer<R>| Some(TokAssign(lexer.yystr()))
 		// Expression Stuff End
 
 		LINK_CLOSE => |lexer:&mut TweeLexer<R>| -> Option<Token> {
