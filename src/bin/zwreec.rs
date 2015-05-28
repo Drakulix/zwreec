@@ -6,8 +6,10 @@ extern crate term;
 
 use std::env;
 use std::vec::Vec;
+use std::error::Error;
 use std::fs::File;
 use std::io::Write;
+use std::path::Path;
 use std::process::exit;
 
 mod logger;
@@ -85,8 +87,8 @@ fn main() {
         // set log level to verbose
         loggers.push(logger::TermLogger::new(
                 match parsed_opts.opt_count("v") {
-                    1 => logger::LogLevelFilter::Info, 
-                    2 => logger::LogLevelFilter::Debug, 
+                    1 => logger::LogLevelFilter::Info,
+                    2 => logger::LogLevelFilter::Debug,
                     _ => logger::LogLevelFilter::Trace,
                 }));
     } else if parsed_opts.opt_present("q") {
@@ -108,43 +110,72 @@ fn main() {
             "zwreec.log".to_string()
         };
         loggers.push(logger::FileLogger::new(
-                        logger::LogLevelFilter::Trace, 
+                        logger::LogLevelFilter::Trace,
                         File::create(name).unwrap())
             );
     }
 
-    let outfile = if let Some(file) = parsed_opts.opt_str("o") { 
-        // parsed "-o FILE"
-        // set of to filename
-        file
+    // check parsed options and open the source file
+    let mut infile = if parsed_opts.free.len() == 1 {
+        // check number of 'free' parameter
+        // one free parameter is the input file name
+        let path = Path::new(&parsed_opts.free[0]);
+        match File::open(path) {
+            Err(why) => {
+                panic!("Couldn't open {}: {}",
+                               path.display(), Error::description(&why))
+            },
+            Ok(file) => {
+                info!("Opened input: {}", path.display());
+                file
+            }
+        }
     } else {
-        // assume default
-        "a.z8".to_string()
-    };
-
-    let infile = if parsed_opts.free.len() == 1 {
-         // check number of 'free' parameter
-         // one free parameter is the input file name
-         parsed_opts.free[0].clone()
-    } else {
+        // TODO: check if STDOUT is a tty
         print_stderr!("Input file name missing\n");
         print_usage!(program, opts);
-        // TODO: figure out a way to set exit code
         exit(1);
+    };
+
+    // check parsed options and open a file for the resulting output
+    let mut outfile = if let Some(file) = parsed_opts.opt_str("o") {
+        // parsed "-o FILE"
+        // try to open FILE
+        let path = Path::new(&file);
+        match File::create(path) {
+            Err(why) => {
+                panic!("Couldn't open {}: {}",
+                       path.display(), Error::description(&why))
+            },
+            Ok(file) => {
+                info!("Opened output: {}", path.display());
+                file
+            }
+        }
+    } else {
+        // assume default
+        let path = Path::new("a.z8");
+        match File::create(path) {
+            Err(why) => {
+                panic!("Couldn't open {}: {}",
+                       path.display(), Error::description(&why))
+            },
+            Ok(file) => {
+                debug!("No output file specified, assuming default");
+                info!("Opened output: {}", path.display());
+                file
+            }
+        }
     };
 
     // activate logger
     let _ = logger::CombinedLogger::init(loggers);
 
-    debug!("parsed command line options");
-    info!("main started");
+    debug!("Parsed command line options");
+    info!("Main started");
 
     // call library
-    zwreec::compile(&infile, &outfile);
+    zwreec::compile(&mut infile, &mut outfile);
 
-    // only for testing
-    debug!("(2) {}", zwreec::backend::temp_hello());
-    debug!("(3) {}", zwreec::utils::file::temp_hello());
-
-    info!("main finished");
+    info!("Main finished");
 }

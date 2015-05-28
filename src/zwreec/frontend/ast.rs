@@ -13,8 +13,10 @@ pub struct AST {
 }
 
 /// add zcode based on tokens
-fn gen_zcode(node: &ASTNode, state: &Vec<FormattingState>, mut out: &mut zfile::Zfile) {
-     match node {
+fn gen_zcode(node: &ASTNode, state: FormattingState, mut out: &mut zfile::Zfile) {
+    let mut state_copy = state.clone();
+
+    match node {
         &ASTNode::Passage(ref t) => {
             match &t.category{
                 _ => {
@@ -22,11 +24,11 @@ fn gen_zcode(node: &ASTNode, state: &Vec<FormattingState>, mut out: &mut zfile::
                 }
             };
             for child in &t.childs {
-                gen_zcode(child, state, out);
+                gen_zcode(child, state_copy, out);
             }
         },
         &ASTNode::Default(ref t) => {
-            match &t.category{
+            match &t.category {
                 &Token::TokText(ref s) => {
                     out.op_print(s);
                 },
@@ -34,10 +36,12 @@ fn gen_zcode(node: &ASTNode, state: &Vec<FormattingState>, mut out: &mut zfile::
                     out.op_newline();
                 },
                 &Token::TokFormatBoldStart => {
-                    out.op_set_text_style(true, false, false, false);
+                    state_copy.bold = true;
+                    out.op_set_text_style(state_copy.bold, state_copy.inverted, state_copy.mono, state_copy.italic);
                 },
                 &Token::TokFormatItalicStart => {
-                    out.op_set_text_style(false, false, false, true);
+                    state_copy.italic = true;
+                    out.op_set_text_style(state_copy.bold, state_copy.inverted, state_copy.mono, state_copy.italic);
                 },
                 _ => {
                     debug!("no match 2");
@@ -45,21 +49,21 @@ fn gen_zcode(node: &ASTNode, state: &Vec<FormattingState>, mut out: &mut zfile::
             };
 
             for child in &t.childs {
-                gen_zcode(child, state, out);
+                gen_zcode(child, state_copy, out);
             }
+
             out.op_set_text_style(false, false, false, false);
+            out.op_set_text_style(state.bold, state.inverted, state.mono, state.italic);
         }
     };
 }
 
 impl AST {
     /// convert ast to zcode
-    pub fn to_zcode(&self,  out: &mut zfile::Zfile){
-        let mut state:Vec<FormattingState> = Vec::new();
-        let base = FormattingState {bold: false, italic: false, mono: false, inverted: false};
-        state.push(base);
+    pub fn to_zcode(&self,  out: &mut zfile::Zfile) {
+        let state = FormattingState {bold: false, italic: false, mono: false, inverted: false};
         for child in &self.passages {
-            gen_zcode(child, &state, out);
+            gen_zcode(child, state, out);
         }
     }
 
@@ -89,7 +93,7 @@ impl AST {
         if let Some(index) = path.first() {
             let mut new_path: Vec<usize> = path.to_vec();
             new_path.remove(0);
-            
+
             self.passages[*index].add_child(new_path, token)
         } else {
             self.passages.push(ASTNode::Default(NodeDefault { category: token, childs: Vec::new() }));
@@ -101,7 +105,7 @@ impl AST {
         if let Some(index) = path.first() {
             let mut new_path: Vec<usize> = path.to_vec();
             new_path.remove(0);
-            
+
             self.passages[*index].count_childs(new_path)
         } else {
             self.passages.len()
@@ -167,7 +171,7 @@ impl ASTNode {
     /// prints an node of an ast
     pub fn print(&self, indent: usize) {
         let mut spaces = "".to_string();
-        for _ in 0..indent { 
+        for _ in 0..indent {
             spaces.push_str(" ");
         }
 
@@ -187,13 +191,3 @@ impl ASTNode {
         }
     }
 }
-
-
-//==============================
-// 
-
-#[test]
-fn it_works() {
-
-}
-

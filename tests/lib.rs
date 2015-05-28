@@ -4,10 +4,7 @@
 
 extern crate zwreec;
 
-#[test]
-fn file_test() {
-    assert_eq!("hello from file", zwreec::utils::file::temp_hello());
-}
+//TODO!
 
 #[test]
 fn frontend_test() {
@@ -15,5 +12,4 @@ fn frontend_test() {
 
 #[test]
 fn backend_test() {
-    assert_eq!("hello from backend", zwreec::backend::temp_hello());
 }

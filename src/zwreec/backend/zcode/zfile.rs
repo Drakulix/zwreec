@@ -28,6 +28,7 @@ struct Zlabel {
     pub name: String
 }
 
+#[derive(Debug, Copy, Clone)]
 pub struct FormattingState {
     pub bold: bool,
     pub mono: bool,
