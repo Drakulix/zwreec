@@ -1,4 +1,5 @@
-use std::io::BufReader;
+use std::error::Error;
+use std::io::{BufReader,Read};
 use self::Token::{
 	TokPassageName, TokTagStart, TokTagEnd, TokTag,
 	TokMakroStart, TokMakroEnd, TokVariable,
@@ -16,8 +17,15 @@ use self::Token::{
 	TokArrayStart, TokArrayEnd, TokNewLine, TokFormatHorizontalLine
 };
 
-pub fn lex(input :String) -> Vec<Token> {
-	let processed = preprocess(input);
+pub fn lex<R: Read>(input: &mut R) -> Vec<Token> {
+    // TODO: Instead of reading the entire input, work on BufRead or Read directly
+    let mut content = String::new();
+    match input.read_to_string(&mut content) {
+        Err(why) => panic!("could not read from input: {}", Error::description(&why)),
+        Ok(_) => debug!("read input to buffer"),
+    };
+
+	let processed = preprocess(content);
    	let inp = BufReader::new(processed.as_bytes());
    	print!("Nicht in Tokens verarbeitete Zeichen: ");
 	let mut lexer = TweeLexer::new(inp);
@@ -52,8 +60,9 @@ pub fn lex(input :String) -> Vec<Token> {
 	tokens
 }
 
-// TODO do not remove if in passage name, monospace etc. 
-fn preprocess(input :String) -> String {
+// TODO: do not remove if in passage name, monospace etc. 
+// TODO: Work on Read or BufRead instead of Strings
+fn preprocess(input: String) -> String {
 	let mut comment = false;
 	let mut suspect_start = false;
 	let mut suspect_end = false;
