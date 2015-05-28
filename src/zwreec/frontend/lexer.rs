@@ -1,6 +1,5 @@
 use std::io::{BufReader,Read};
-use std::iter::Scan;
-use utils::extensions::{PeekingIterator, PeekingIteratorExtension};
+use utils::extensions::{Peeking, PeekingExt, FilteringScan, FilteringScanExt};
 
 use self::Token::{
 	TokPassageName, TokTagStart, TokTagEnd, TokTag,
@@ -19,11 +18,11 @@ use self::Token::{
 	TokArrayStart, TokArrayEnd, TokNewLine, TokFormatHorizontalLine
 };
 
-pub fn lex<R: Read>(input: &mut R) -> Scan<PeekingIterator<TweeLexer<BufReader<&mut R>>, Token>, String, fn(&mut String, (Token, Option<Token>)) -> Option<Token>>  {
+pub fn lex<R: Read>(input: &mut R) -> FilteringScan<Peeking<TweeLexer<BufReader<&mut R>>, Token>, String, fn(&mut String, (Token, Option<Token>)) -> Option<Token>>  {
 
     print!("Nicht in Tokens verarbeitete Zeichen: ");
 
-	TweeLexer::new(BufReader::new(input)).peeking().scan(
+	TweeLexer::new(BufReader::new(input)).peeking().scan_filter(
 		String::new(),
 		{
 			fn scan_fn(current_text: &mut String, elem: (Token, Option<Token>)) -> Option<Token> {

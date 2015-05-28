@@ -1,6 +1,6 @@
 use std::io::{Cursor, Read};
 use std::error::Error;
-use utils::extensions::PeekingIteratorExtension;
+use utils::extensions::{PeekingExt, FilteringScanExt};
 
 // TODO: do not remove if in passage name, monospace etc.
 
@@ -17,7 +17,7 @@ pub fn screen<R: Read>(input: &mut R) -> Cursor<Vec<u8>> {
         Ok(_) => debug!("read input to buffer"),
     };
 
-    Cursor::new(content.chars().peeking().scan(
+    Cursor::new(content.chars().peeking().scan_filter(
         ScanState {
             comment: false,
             skip_next: false,
