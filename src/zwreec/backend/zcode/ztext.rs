@@ -66,27 +66,50 @@ fn string_to_zchar(content: &str) -> Vec<u8> {
     println!("string_to_zchar: {:?}", content);
     let string_bytes = content.to_string().into_bytes();
         let mut zchars: Vec<u8> = Vec::new();
-        for i in string_bytes{
-            let t_index = pos_in_alpha(i as u8);
-            if i == 0x0A {
-                zchars.push(0x05);
-                zchars.push(7);
-            } else if i == 0x20 {
-                //zchars.push(0x05);  
-                //zchars.push(0);
-                zchars.push(0x00);
-            } 
-            else {
-                if t_index >51 {
-                    zchars.push(0x05);  
-                    zchars.push(t_index as u8 % 26 + 6);
-                } else if t_index <26 {
-                    zchars.push(t_index as u8 % 26 + 6);
+        for byte in string_bytes{
+            let t_index = pos_in_alpha(byte as u8);
+            if t_index != -1 {
+                if byte == 0x0A {
+                    // newline?
+                    zchars.push(0x05);
+                    zchars.push(7);
+                } else if byte == 0x20 {
+                    // space
+                    //zchars.push(0x05);  
+                    //zchars.push(0);
+                    zchars.push(0x00);
+                } else {
+                    if t_index > 51 {
+                        // in A2
+                        zchars.push(0x05);  
+                        zchars.push(t_index as u8 % 26 + 6);
+                    } else if t_index < 26 {
+                        // in A0
+                        zchars.push(t_index as u8 % 26 + 6);
+                    } else {
+                        // in A1
+                        zchars.push(0x04);
+                        zchars.push(t_index as u8 % 26 + 6);
+                    } 
                 }
-                 else {
-                    zchars.push(0x04);
-                    zchars.push(t_index as u8 % 26 + 6);
-                } 
+            } else {
+                if t_index <= 126 {
+                    // ascii, but not in alphabet
+
+                    // to change alphabet
+                    zchars.push(0x05);
+
+                    // for special char (10 bit z-ascii)
+                    zchars.push(0x06);
+
+                    // char as 10bit
+                    //let zchar_10_bit: u16
+                    zchars.push(byte >> 5);
+                    zchars.push(byte & 0x1f);
+                } else {
+                    // unicode
+
+                }
             }
         }
     zchars
