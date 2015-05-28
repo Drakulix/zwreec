@@ -1,3 +1,4 @@
+#![feature(collections)]
 #![feature(plugin)]
 #![plugin(rustlex)]
 #[allow(plugin_as_library)]

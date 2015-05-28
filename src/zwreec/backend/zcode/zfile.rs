@@ -239,6 +239,14 @@ impl Zfile {
         self.data.write_bytes(&text_bytes.bytes, index + 1);
     }
 
+    /// print unicode string
+    /// emits one EXT OP per UTF16 unit
+    pub fn ops_print_unicode(&mut self, content: &str) {
+        for c in content.utf16_units() {
+            self.op_print_unicode_char(c);
+        }
+    }
+
     /// exits the program
     /// quit is 0OP
     pub fn op_quit(&mut self) {
@@ -328,12 +336,12 @@ impl Zfile {
         self.add_jump(jump_to_label.to_string(), JumpType::BRANCH);
     }
     /// prints an unicode char to the current stream
-    pub fn op_print_unicode_char(&mut self, value: u8){
+    pub fn op_print_unicode_char(&mut self, value: u16){
         self.op_1_op(0xbe);
         self.data.append_byte(0x0b);
-        let byte = 0x01 << 6 | 0x03 << 4 | 0x03 << 2 | 0x03 << 0;
+        let byte = 0x00 << 6 | 0x03 << 4 | 0x03 << 2 | 0x03 << 0;
         self.data.append_byte(byte);
-        self.data.append_byte(value);
+        self.data.append_u16(value);
     }
 
     // ================================
