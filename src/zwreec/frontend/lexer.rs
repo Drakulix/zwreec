@@ -15,7 +15,8 @@ use self::Token::{
 	TokFormatIndentBlock, TokFormatHeading, TokVarSetStart,
 	TokVarSetEnd, TokSemiColon, TokPrint, TokDisplay, TokBoolean,
 	TokFunction , TokColon, TokArgsEnd, TokSilently, TokEndSilently,
-	TokArrayStart, TokArrayEnd, TokNewLine, TokFormatHorizontalLine
+	TokArrayStart, TokArrayEnd, TokNewLine, TokFormatHorizontalLine,
+	TokMakroVar
 };
 
 pub fn lex<R: Read>(input: &mut R) -> FilteringScan<Peeking<TweeLexer<BufReader<&mut R>>, Token>, String, fn(&mut String, (Token, Option<Token>)) -> Option<Token>>  {
@@ -82,7 +83,7 @@ pub enum Token {
 	TokArrayStart,
 	TokArrayEnd,
 	TokSet,
-	TokAssign,
+	TokAssign (String),
 	TokNumOp (String),
 	TokCompOp (String),
 	TokLogOp (String),
@@ -94,6 +95,7 @@ pub enum Token {
 	TokDisplay,
 	TokSilently,
 	TokEndSilently,
+	TokMakroVar(String),
 	TokNewLine
 }
 
@@ -126,7 +128,7 @@ rustlex! TweeLexer {
 	let TEXT_MONO = TEXT_MONO_CHAR+ | "}" | "}}";
 
 	let PASSAGE_START = "::" ':'*;
-	let PASSAGE_CHAR_NORMAL = [^"[]$<>:|" '\n'];
+	let PASSAGE_CHAR_NORMAL = [^"]$<>:|" '\n'];
 	let PASSAGE_CHAR = PASSAGE_CHAR_NORMAL | ':' PASSAGE_CHAR_NORMAL;
 	let PASSAGE_NAME = PASSAGE_CHAR_NORMAL PASSAGE_CHAR* ':'?;
 
@@ -184,7 +186,7 @@ rustlex! TweeLexer {
 	let SILENTLY = "silently";
 	let END_SILENTLY = "endsilently";
 
-	let ASSIGN = "=" | "to";
+	let ASSIGN = "=" | "to" | "+=" | "-=" | "*=" | "/=";
 	let SEMI_COLON = ';';
 	let NUM_OP = ["+-*/%"];
 	let COMP_OP = "is" | "==" | "eq" | "neq" | ">" | "gt" | ">=" | "gte" | "<" | "lt" | "<=" | "lte";
@@ -193,7 +195,7 @@ rustlex! TweeLexer {
 
 	let LINK_OPEN = '[';
 	let LINK_CLOSE = ']';
-	let LINK_TEXT = [^'\n'"|[]"]+;
+	let LINK_TEXT = [^'\n'"|]"]+;
 
 	let LINK_SIMPLE = "[[" (PASSAGE_NAME | VAR_NAME) "]";
 	let LINK_LABELED = "[[" LINK_TEXT "|" (PASSAGE_NAME | VAR_NAME) "]";
@@ -223,10 +225,10 @@ rustlex! TweeLexer {
 			None
 		}
 
-		MAKRO_START => |lexer:&mut TweeLexer<R>| {
+		MAKRO_START => |lexer:&mut TweeLexer<R>| -> Option<Token>{
 			lexer.MAKRO();
 			lexer.new_line = true;
-			Some(TokMakroStart)
+			None
 		}
 
 		LINK_SIMPLE =>  |lexer:&mut TweeLexer<R>| {
@@ -312,10 +314,10 @@ rustlex! TweeLexer {
 
 	NON_NEWLINE {
 
-		MAKRO_START => |lexer:&mut TweeLexer<R>| {
+		MAKRO_START => |lexer:&mut TweeLexer<R>| -> Option<Token>{
 			lexer.MAKRO();
 			lexer.new_line = false;
-			Some(TokMakroStart)
+			None
 		}
 
 		LINK_SIMPLE =>  |lexer:&mut TweeLexer<R>| {
@@ -411,6 +413,11 @@ rustlex! TweeLexer {
 	}
 
 	MAKRO {
+		WHITESPACE =>  |lexer:&mut TweeLexer<R>| -> Option<Token> {
+			lexer.NON_NEWLINE();
+			None
+		}
+
 		SET =>  |lexer:&mut TweeLexer<R>| {
 			lexer.MAKRO_CONTENT();
 			Some(TokSet)
@@ -443,7 +450,14 @@ rustlex! TweeLexer {
 			lexer.MAKRO_CONTENT();
 			Some(TokEndSilently)
 		}
+
+		VAR_NAME =>  |lexer:&mut TweeLexer<R>| {
+			lexer.MAKRO_CONTENT();
+			Some(TokMakroVar(lexer.yystr()))
+		}
 	}
+
+
 
 	MAKRO_CONTENT {
 		MAKRO_END => |lexer:&mut TweeLexer<R>| {
@@ -473,7 +487,7 @@ rustlex! TweeLexer {
 		BR_OPEN =>  |_:&mut TweeLexer<R>| Some(TokBracketOpen)
 		BR_CLOSE =>  |_:&mut TweeLexer<R>| Some(TokBracketClose)
 		SEMI_COLON =>  |_:&mut TweeLexer<R>| Some(TokSemiColon)
-		ASSIGN =>  |_:&mut TweeLexer<R>| Some(TokAssign)
+		ASSIGN =>  |lexer:&mut TweeLexer<R>| Some(TokAssign(lexer.yystr()))
 		COLON =>  |_:&mut TweeLexer<R>| Some(TokColon)
 		// Expression Stuff End
 	}
@@ -538,7 +552,7 @@ rustlex! TweeLexer {
 		BR_OPEN =>  |_:&mut TweeLexer<R>| Some(TokBracketOpen)
 		BR_CLOSE =>  |_:&mut TweeLexer<R>| Some(TokBracketClose)
 		SEMI_COLON =>  |_:&mut TweeLexer<R>| Some(TokSemiColon)
-		ASSIGN =>  |_:&mut TweeLexer<R>| Some(TokAssign)
+		ASSIGN =>  |lexer:&mut TweeLexer<R>| Some(TokAssign(lexer.yystr()))
 		// Expression Stuff End
 
 		LINK_CLOSE => |lexer:&mut TweeLexer<R>| -> Option<Token> {
