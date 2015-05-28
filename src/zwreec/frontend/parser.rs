@@ -25,13 +25,13 @@ Passage -> PassageName PassageContent                       | "add passage (name
 PassageContent -> TextPassage PassageContent                | add text as child
 PassageContent -> Formatting PassageContent                 |
 PassageContent -> ɛ                                         |
-Formating -> BoldFormatting                                 | 
+Formating -> BoldFormatting                                 |
 Formating -> ItalicFormatting                               |
 BoldFormatting -> FormatBold BoldContent FormatBold         | add child bold
 BoldContent -> TextPassage BoldContent                      | add text as child
-BoldContent -> FormatItalic BoldItalicContent FormatItalic  | add child italic 
+BoldContent -> FormatItalic BoldItalicContent FormatItalic  | add child italic
 BoldContent -> ɛ                                            |
-ItalicFormatting -> FormatItalic ItalicContent FormatItalic | add child italic 
+ItalicFormatting -> FormatItalic ItalicContent FormatItalic | add child italic
 ItalicContent -> TextPassage ItalicContent                  | add text as child
 ItalicContent -> FormatBold BoldItalicContent FormatBold    | add child bold
 ItalicContent -> ɛ                                          | add text as child
@@ -45,7 +45,7 @@ Hello World, ''Yeah''.
 */
 
 pub fn parse_tokens(tokens: Vec<Token>) -> ast::AST {
-    let mut parser: Parser = Parser::new(tokens);    
+    let mut parser: Parser = Parser::new(tokens);
     parser.parsing();
     parser.ast
 }
@@ -94,7 +94,7 @@ impl Parser {
     /// the predictive stack ll(1) parsing routine
     pub fn parsing(&mut self) {
         self.stack.push_start();
-        
+
         while let Some(top) = self.stack.pop() {
             if self.tree.is_terminal(top.to_vec()) {
                 self.next_token();
@@ -102,13 +102,13 @@ impl Parser {
                 self.apply_grammar(top.to_vec());
             }
         }
-        
+
         self.tree.print();
     }
 
     /// apply the ll(1) grammar
     /// the match-statement simulates the parsing-table behavior
-    /// 
+    ///
     /// it creates the parse tree (from the ll(1) grammar)
     /// and the ast from the sdd
     fn apply_grammar(&mut self, top_path: Vec<usize>) {
@@ -287,11 +287,3 @@ impl Stack {
         self.data.pop()
     }
 }
-
-//==============================
-//
-#[test]
-fn it_works() {
-
-}
-

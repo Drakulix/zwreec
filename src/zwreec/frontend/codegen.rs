@@ -48,8 +48,3 @@ impl Codegen {
         &self.zfile.data.bytes
     }
 }
-
-#[test]
-fn it_works() {
-
-}
