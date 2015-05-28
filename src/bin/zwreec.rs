@@ -177,5 +177,5 @@ fn main() {
     // call library
     zwreec::compile(&mut infile, &mut outfile);
 
-    info!("main finished");
+    info!("Main finished");
 }
