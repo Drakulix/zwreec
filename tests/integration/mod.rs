@@ -32,10 +32,12 @@ fn helloworld_test() {
 	test_compile(TESTFOLDER.to_string() + "HelloWorld.twee");
 }
 
+#[test]
 fn zscii_test() {
 	test_compile(TESTFOLDER.to_string() + "ZSCII.twee");
 }
 
-fn unicode_test() {
-	//test_compile(TESTFOLDER.to_string() + "Unicode.twee");
+#[test]
+fn ascii_test() {
+	test_compile(TESTFOLDER.to_string() + "ASCII.twee");
 }
