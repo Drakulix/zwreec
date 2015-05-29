@@ -12,8 +12,7 @@ enum JumpType {
 
 /// types of possible arguments
 enum ArgType {
-    // large const are commented, becouse no implemented op-code use it _at the moment_
-    //LargConst,
+    LargeConst,
     SmallConst,
     Variable,
     Nothing
@@ -261,8 +260,37 @@ impl Zfile {
     /// calls a routine
     /// call_1n is 1OP
     pub fn op_call_1n(&mut self, jump_to_label: &str) {
-        self.op_1(0x0f);
+        self.op_1(0x0f, false);
         self.add_jump(jump_to_label.to_string(), JumpType::Routine);
+    }
+
+    /// increments the value of the variable
+    pub fn op_inc(&mut self, variable: u8) {
+        self.op_1(0x05, true);
+        self.data.append_byte(variable);
+    }
+
+    /// pushs an u16 value (for example an address) on the stack
+    pub fn op_push_u16(&mut self, value: u16) {
+        let args: [ArgType; 4] = [ArgType::LargeConst, ArgType::Nothing, ArgType::Nothing, ArgType::Nothing];
+        self.op_var(0x08, &args);
+        self.data.append_u16(value);
+    }
+
+    /// pulls an value off the stack to an variable
+    /// SmallConst becouse pull takes an reference to an variable
+    pub fn op_pull(&mut self, variable: u8) {
+        let args: [ArgType; 4] = [ArgType::SmallConst, ArgType::Nothing, ArgType::Nothing, ArgType::Nothing];
+        self.op_var(0x09, &args);
+
+        self.data.append_byte(variable);
+    }
+
+    pub fn op_print_num_var(&mut self, variable: u8) {
+        let args: [ArgType; 4] = [ArgType::Variable, ArgType::Nothing, ArgType::Nothing, ArgType::Nothing];
+        self.op_var(0x06, &args);
+
+        self.data.append_byte(variable);
     }
 
    /// sets the colors of the foreground (font) and background
@@ -310,7 +338,7 @@ impl Zfile {
 
     /// jumps to a label
     pub fn op_jump(&mut self, jump_to_label: &str) {
-        self.op_1(0x0c);
+        self.op_1(0x0c, false);
         self.add_jump(jump_to_label.to_string(), JumpType::Jump);
     }
 
@@ -333,7 +361,7 @@ impl Zfile {
 
     /// prints an unicode char to the current stream
     pub fn op_print_unicode_char(&mut self, value: u8){
-        self.op_1(0xbe);
+        self.op_1(0xbe, false);
         self.data.append_byte(0x0b);
         let byte = 0x01 << 6 | 0x03 << 4 | 0x03 << 2 | 0x03 << 0;
         self.data.append_byte(byte);
@@ -350,8 +378,13 @@ impl Zfile {
     }
     
     /// op-codes with 1 operator
-    fn op_1(&mut self, value: u8) {
-        let byte = value | 0x80;
+    fn op_1(&mut self, value: u8, is_variable_reference: bool) {
+        let byte;
+        if !is_variable_reference {
+            byte = value | 0x80;
+        } else {
+            byte = value | 0x80 | (0x01 << 4);
+        }
         self.data.append_byte(byte);
     }
 
@@ -381,7 +414,7 @@ impl Zfile {
         for (i, arg_type) in arg_types.iter().enumerate() {
             let shift: u8 = 6 - 2 * i as u8;
             match arg_type {
-                //&ArgType::LargConst  => byte2 |= 0x00 << shift,
+                &ArgType::LargeConst => byte2 |= 0x00 << shift,
                 &ArgType::SmallConst => byte2 |= 0x01 << shift,
                 &ArgType::Variable   => byte2 |= 0x02 << shift,
                 &ArgType::Nothing    => byte2 |= 0x03 << shift,
