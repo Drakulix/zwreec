@@ -3,6 +3,7 @@
 /// for the future: real twee and z-code test-data
 
 extern crate zwreec;
+mod integration;
 
 //TODO!
 
