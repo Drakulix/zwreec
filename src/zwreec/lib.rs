@@ -5,7 +5,9 @@ extern crate rustlex;
 #[macro_use] extern crate log;
 extern crate time;
 extern crate term;
+extern crate getopts;
 
+pub mod config;
 pub mod frontend;
 pub mod backend;
 pub use backend::zcode::zfile;
