@@ -425,6 +425,53 @@ impl Zfile {
 }
 
 /// returns the routine address, should be adress % 8 == 0 (becouse its an packed address)
-fn routine_address(adress: u16) -> u16 {
-    adress + adress % 8
+fn routine_address(address: u16) -> u16 {
+    if address % 8 == 0 {
+        address
+    } else {
+        address + 8 - (address % 8)
+    }
+}
+
+// ================================
+// test functions
+
+#[test]
+fn test_routine_address() {
+    assert_eq!(routine_address(8), 8);
+    assert_eq!(routine_address(9), 16);
+    assert_eq!(routine_address(10), 16);
+    assert_eq!(routine_address(15), 16);
+    assert_eq!(routine_address(17), 24);
+}
+
+#[test]
+fn test_zfile_write_jumps_length() {
+    let mut zfile: Zfile = Zfile::new();
+    zfile.write_jumps();
+    assert_eq!(zfile.data.len(), 0);
+    
+    zfile.op_jump("labename");
+    assert_eq!(zfile.data.len(), 3);
+
+    zfile.write_jumps();
+    assert_eq!(zfile.data.len(), 3);
+
+    zfile.label("labename");
+    zfile.write_jumps();
+    assert_eq!(zfile.data.len(), 3);
+}
+
+#[test]
+fn test_zfile_general_op_length() {
+    let mut zfile: Zfile = Zfile::new();
+    zfile.op_0(0x00);
+    assert_eq!(zfile.data.len(), 1);
+    zfile.op_1(0x00, false);
+    assert_eq!(zfile.data.len(), 2);
+    zfile.op_1(0x00, true);
+    assert_eq!(zfile.data.len(), 3);
+    let args: [ArgType; 4] = [ArgType::SmallConst, ArgType::Nothing, ArgType::Nothing, ArgType::Nothing];
+    zfile.op_var(0x00, &args);
+    assert_eq!(zfile.data.len(), 5);
 }
