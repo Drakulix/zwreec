@@ -45,8 +45,33 @@ Additional help:
         options.usage(&brief));
 }
 
+/// Parse command line arguments
+///
+/// Parses command line arguments to set up the logger and extract input and
+/// output parameters. Will display the usage and exit depending on arguments.
+///
+/// Returns `getopts::Matches` and a `std::fs::File` for the input and output 
+/// file. The `getopts::Matches` can be used to 
+///
+/// # Examples
+///
+/// ```
+/// let mut opts = getopts::Options::new();
+/// opts.optflag("h", "help", "display this help and exit");
+///
+/// let (matches, mut input, mut output) = parse_arguments(
+///     env::args().collect(),
+///     opts
+/// );
+/// ```
+///
+/// # Failures
+///
+/// Depending on encountered arguments or parsing errors this function will 
+/// print the usage and/or call `exit(1)`.
+///
 /// NOTE: This is similar to librustc_driver's handle_options function.
-fn parse_arguments(args: Vec<String>) -> getopts::Matches {
+fn parse_arguments(args: Vec<String>, opts: getopts::Options) -> (getopts::Matches, File, File) {
     let mut loggers: Vec<Box<logger::SharedLogger>> = vec![];
 
     if args.is_empty() {
@@ -54,8 +79,6 @@ fn parse_arguments(args: Vec<String>) -> getopts::Matches {
         usage(false);
         exit(1);
     }
-
-    let opts = config::zwreec_options();
 
     let matches = match opts.parse(&args[1..]) {
         Ok(m)  => m,
@@ -117,21 +140,12 @@ fn parse_arguments(args: Vec<String>) -> getopts::Matches {
     // activate logger
     let _ = logger::CombinedLogger::init(loggers);
 
-    matches
-}
-
-fn main() {
-    // handle command line parameters
-    let matches = parse_arguments(env::args().collect());
-
-    // TODO: Everything below this should be analysed inside the config module
-
-    let mut infile = if matches.free.len() == 1 {
+    let infile = if matches.free.len() == 1 {
         let path = Path::new(&matches.free[0]);
         match File::open(path) {
             Err(why) => {
                 panic!("Couldn't open {}: {}",
-                               path.display(), Error::description(&why))
+                       path.display(), Error::description(&why))
             },
             Ok(file) => {
                 info!("Opened input: {}", path.display());
@@ -145,7 +159,7 @@ fn main() {
         exit(1);
     };
 
-    let mut outfile = if let Some(file) = matches.opt_str("o") {
+    let outfile = if let Some(file) = matches.opt_str("o") {
         // try to open FILE
         let path = Path::new(&file);
         match File::create(path) {
@@ -173,11 +187,22 @@ fn main() {
         }
     };
 
+    (matches, infile, outfile)
+}
+
+
+fn main() {
+    // handle command line parameters
+    let (matches, mut input, mut output) = parse_arguments(
+        env::args().collect(),
+        config::zwreec_options()
+    );
+
     debug!("Parsed command line options");
     info!("Main started");
 
     // call library
-    zwreec::compile(&mut infile, &mut outfile);
+    zwreec::compile(&mut input, &mut output);
 
     info!("Main finished");
 }
