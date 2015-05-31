@@ -19,24 +19,41 @@ use self::Token::{
 	TokMakroVar
 };
 
-pub fn lex<R: Read>(input: &mut R) -> FilteringScan<Peeking<TweeLexer<BufReader<&mut R>>, Token>, String, fn(&mut String, (Token, Option<Token>)) -> Option<Token>>  {
+pub struct ScanState {
+    current_text: String,
+    skip_next: bool,
+}
+
+pub fn lex<R: Read>(input: &mut R) -> FilteringScan<Peeking<TweeLexer<BufReader<&mut R>>, Token>, ScanState, fn(&mut ScanState, (Token, Option<Token>)) -> Option<Token>>  {
 
     info!("Nicht in Tokens verarbeitete Zeichen: ");
 
 	TweeLexer::new(BufReader::new(input)).peeking().scan_filter(
-		String::new(),
+		ScanState {
+           	current_text: String::new(),
+            skip_next: false,
+        },
 		{
-			fn scan_fn(current_text: &mut String, elem: (Token, Option<Token>)) -> Option<Token> {
+			fn scan_fn(state: &mut ScanState, elem: (Token, Option<Token>)) -> Option<Token> {
+				if state.skip_next {
+					state.skip_next = false;
+					return None;
+				} 
+
 				match elem {
 					(TokText(text), Some(TokText(_))) => {
-						current_text.push_str(&text);
+						state.current_text.push_str(&text);
 						None
 					}
 					(TokText(text), _) => {
-						current_text.push_str(&text);
-						let val = TokText((*current_text).clone());
-						current_text.clear();
+						state.current_text.push_str(&text);
+						let val = TokText(state.current_text.clone());
+						state.current_text.clear();
 						Some(val)
+					},
+					(TokVariable(var), Some(TokAssign(_, op))) => {
+						state.skip_next = true;
+						Some(TokAssign(var, op))
 					},
 					(x, _) => Some(x),
 				}
@@ -83,7 +100,7 @@ pub enum Token {
 	TokArrayStart,
 	TokArrayEnd,
 	TokSet,
-	TokAssign (String),
+	TokAssign (String, String),
 	TokNumOp (String),
 	TokCompOp (String),
 	TokLogOp (String),
@@ -487,7 +504,7 @@ rustlex! TweeLexer {
 		BR_OPEN =>  |_:&mut TweeLexer<R>| Some(TokBracketOpen)
 		BR_CLOSE =>  |_:&mut TweeLexer<R>| Some(TokBracketClose)
 		SEMI_COLON =>  |_:&mut TweeLexer<R>| Some(TokSemiColon)
-		ASSIGN =>  |lexer:&mut TweeLexer<R>| Some(TokAssign(lexer.yystr()))
+		ASSIGN =>  |lexer:&mut TweeLexer<R>| Some(TokAssign("".to_string(), lexer.yystr()))
 		COLON =>  |_:&mut TweeLexer<R>| Some(TokColon)
 		// Expression Stuff End
 	}
@@ -552,7 +569,7 @@ rustlex! TweeLexer {
 		BR_OPEN =>  |_:&mut TweeLexer<R>| Some(TokBracketOpen)
 		BR_CLOSE =>  |_:&mut TweeLexer<R>| Some(TokBracketClose)
 		SEMI_COLON =>  |_:&mut TweeLexer<R>| Some(TokSemiColon)
-		ASSIGN =>  |lexer:&mut TweeLexer<R>| Some(TokAssign(lexer.yystr()))
+		ASSIGN =>  |lexer:&mut TweeLexer<R>| Some(TokAssign("".to_string(),lexer.yystr()))
 		// Expression Stuff End
 
 		LINK_CLOSE => |lexer:&mut TweeLexer<R>| -> Option<Token> {
