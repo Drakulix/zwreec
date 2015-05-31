@@ -247,14 +247,6 @@ impl Zfile {
         self.data.write_bytes(&text_bytes.bytes, index + 1);
     }
 
-    /// print unicode string
-    /// emits one EXT OP per UTF16 unit
-    pub fn ops_print_unicode(&mut self, content: &str) {
-        for c in content.utf16_units() {
-            self.op_print_unicode_char(c);
-        }
-    }
-
     /// exits the program
     /// quit is 0OP
     pub fn op_quit(&mut self) {
