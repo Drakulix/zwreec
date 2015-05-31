@@ -61,14 +61,31 @@ pub enum NonTerminalType {
     Sf,
     Passage,
     Passagef,
-    PassageContentNewline,
-    PassageContentNonNewline,
+    PassageContent,
     Formating,
     BoldFormatting,
     ItalicFormatting,
     MonoFormatting,
     MonoContent,
-    Link
+    Link,
+    Makro,
+    Makrof,
+    ExpressionList,
+    ExpressionListf,
+    Expression,
+    E,
+    E2,
+    T,
+    T2,
+    B,
+    B2,
+    F,
+    F2,
+    G,
+    G2,
+    H,
+    DataType,
+    AssignVariable,
 }
 
 //==============================
@@ -138,7 +155,7 @@ impl Parser {
                 (Passage, &TokPassageName(ref name)) => {
                     let new_token: Token = TokPassageName(name.clone());
                     new_nodes.push(PNode::new_terminal(new_token));
-                    new_nodes.push(PNode::new_non_terminal(PassageContentNewline));
+                    new_nodes.push(PNode::new_non_terminal(PassageContent));
 
                     // ast
                     self.ast_path.clear();
@@ -149,38 +166,42 @@ impl Parser {
                 },
 
                 // PassageContentNewline / PassageContentNonNewline
-                (PassageContentNewline, &TokText(ref text)) |
-                (PassageContentNonNewline, &TokText(ref text)) => {
+                (PassageContent, &TokText(ref text)) => {
                     let new_token: Token = TokText(text.clone());
                     new_nodes.push(PNode::new_terminal(new_token));
-                    new_nodes.push(PNode::new_non_terminal(PassageContentNonNewline));
+                    new_nodes.push(PNode::new_non_terminal(PassageContent));
 
                     // ast
                     let new_token2: Token = TokText(text.clone());
                     self.ast.add_child(&self.ast_path, new_token2);
                 },
-                (PassageContentNewline, &TokFormatBoldStart) | 
-                (PassageContentNewline, &TokFormatItalicStart) |
-                (PassageContentNewline, &TokFormatMonoStart) |
-                (PassageContentNonNewline, &TokFormatBoldStart) | 
-                (PassageContentNonNewline, &TokFormatItalicStart) |
-                (PassageContentNonNewline, &TokFormatMonoStart) => {
+                (PassageContent, &TokFormatBoldStart) | 
+                (PassageContent, &TokFormatItalicStart) |
+                (PassageContent, &TokFormatMonoStart) => {
                     new_nodes.push(PNode::new_non_terminal(Formating));
-                    new_nodes.push(PNode::new_non_terminal(PassageContentNonNewline));
+                    new_nodes.push(PNode::new_non_terminal(PassageContent));
                 },
-                (PassageContentNewline, &TokPassageLink(_, _)) |
-                (PassageContentNonNewline, &TokPassageLink(_, _)) => {
+                (PassageContent, &TokPassageLink(_, _)) => {
                     new_nodes.push(PNode::new_non_terminal(Link));
-                    new_nodes.push(PNode::new_non_terminal(PassageContentNewline));
+                    new_nodes.push(PNode::new_non_terminal(PassageContent));
                 },
-                (PassageContentNewline, &TokNewLine) |
-                (PassageContentNonNewline, &TokNewLine) => {
+                (PassageContent, &TokNewLine) => {
                     new_nodes.push(PNode::new_terminal(TokNewLine));
-                    new_nodes.push(PNode::new_non_terminal(PassageContentNewline));
+                    new_nodes.push(PNode::new_non_terminal(PassageContent));
 
                     // ast
                     self.ast.add_child(&self.ast_path, TokNewLine);
                 },
+                (PassageContent, &TokSet) |
+                (PassageContent, &TokIf) |
+                (PassageContent, &TokVariable(_)) => {
+                    new_nodes.push(PNode::new_non_terminal(Makro));
+                    new_nodes.push(PNode::new_non_terminal(PassageContent));
+
+                    // ast
+                },
+
+
                 (PassageContentNonNewline, &TokFormatBoldEnd) |
                 (PassageContentNewline, &TokFormatBoldEnd) => {
                     // jump one ast-level higher
@@ -255,6 +276,33 @@ impl Parser {
                     // ast
                     let new_token2: Token = TokPassageLink(text.clone(), name.clone());
                     self.ast.add_child(&self.ast_path, new_token2);
+                },
+
+                // Makro
+                (Makro, &TokSet) => {
+                    new_nodes.push(PNode::new_terminal(TokSet));
+                    new_nodes.push(PNode::new_non_terminal(ExpressionList));
+                    new_nodes.push(PNode::new_terminal(TokMakroEnd));
+                },
+                (Makro, &TokIf) => {
+                    new_nodes.push(PNode::new_terminal(TokSet));
+                    new_nodes.push(PNode::new_non_terminal(ExpressionList));
+                    new_nodes.push(PNode::new_terminal(TokMakroEnd));
+                    new_nodes.push(PNode::new_non_terminal(PassageContent));
+                    new_nodes.push(PNode::new_non_terminal(Makrof));
+                },
+                (Makro, &TokVariable(ref name)) => {
+                    let new_token: Token = TokVariable(name.clone());
+                    new_nodes.push(PNode::new_terminal(new_token));
+                    new_nodes.push(PNode::new_terminal(TokMakroEnd));
+                },
+
+                (Makro, &TokMakroElse) => {
+                    new_nodes.push(PNode::new_terminal(TokMakroElse));
+                    new_nodes.push(PNode::new_terminal(TokMakroEnd));
+                    new_nodes.push(PNode::new_non_terminal(PassageContent));
+                    new_nodes.push(PNode::new_terminal(TokMakroEndIf));
+                    new_nodes.push(PNode::new_terminal(TokMakroEnd));
                 },
 
                 
