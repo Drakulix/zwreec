@@ -27,14 +27,28 @@ macro_rules! print_stderr(
     )
 );
 
+/// Returns the primary options for zwreec. It is e.g. used to generate the 
+/// usage information.
+fn short_options() -> getopts::Options {
+    let mut opts = getopts::Options::new();
+    opts.optflagmulti("v", "verbose", "be more verbose. Can be used multiple times.");
+    opts.optflag("q", "quiet", "be quiet");
+    opts.optflagopt("l", "logfile", "specify log file (default zwreec.log)", "LOGFILE");
+    opts.optopt("o", "", "name of the output file", "FILE");
+    opts.optflag("h", "help", "display this help and exit");
+    opts.optflag("V", "version", "display version");
+
+    opts
+}
+
 /// Prints usage information
 /// The verbose flag signals if all options should be shown.
 /// NOTE: This is similar to librustc_driver's usage function.
 fn usage(verbose: bool) {
     let options = if verbose {
-        config::zwreec_options()
+        short_options()
     } else {
-        config::zwreec_short_options()
+        config::zwreec_options(short_options())
     };
 
     let brief = format!("Usage: zwreec [-hV] [-vq] [-l [LOGFILE]] [-o OUTPUT] INPUT");
@@ -195,7 +209,7 @@ fn main() {
     // handle command line parameters
     let (matches, mut input, mut output) = parse_arguments(
         env::args().collect(),
-        config::zwreec_options()
+        config::zwreec_options(short_options())
     );
 
     debug!("Parsed command line options");
