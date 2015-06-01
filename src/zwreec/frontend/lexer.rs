@@ -113,7 +113,8 @@ pub enum Token {
 	TokSilently,
 	TokEndSilently,
 	TokMakroVar(String),
-	TokNewLine
+	TokNewLine,
+	TokPseudo
 }
 
 rustlex! TweeLexer {
