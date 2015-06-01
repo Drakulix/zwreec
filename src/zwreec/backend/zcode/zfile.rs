@@ -360,12 +360,13 @@ impl Zfile {
     }
 
     /// prints an unicode char to the current stream
-    pub fn op_print_unicode_char(&mut self, value: u8){
+    pub fn op_print_unicode_char(&mut self, character: char){
+        let value = if character as u32 > 0xFFFF { '?' as u16 } else { character as u16 };
         self.op_1(0xbe, false);
         self.data.append_byte(0x0b);
-        let byte = 0x01 << 6 | 0x03 << 4 | 0x03 << 2 | 0x03 << 0;
+        let byte = 0x00 << 6 | 0x03 << 4 | 0x03 << 2 | 0x03 << 0;
         self.data.append_byte(byte);
-        self.data.append_byte(value);
+        self.data.append_u16(value);
     }
 
     // ================================
