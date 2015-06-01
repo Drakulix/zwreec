@@ -7,44 +7,9 @@
 
 use frontend::lexer::Token;
 use frontend::ast;
-use frontend::parsetree::{ParseTree, PNode};
+use frontend::parsetree::{PNode};
 use self::NonTerminalType::*;
-use frontend::lexer::Token::*/*{TokPassageName, TokText, TokNewLine,
-    TokFormatItalicStart, TokFormatItalicEnd, TokFormatBoldStart, TokFormatBoldEnd,
-    TokFormatMonoStart, TokFormatMonoEnd, TokPassageLink}*/;
-
-/*
-
-----------------------------------------
-Grammatik:
-
-LL(1)
-------------------------------------------------------------+-----------------------------------
-S -> Passage S2                                             |
-S2 -> S                                                     |
-S2 -> ɛ                                                     |
-Passage -> PassageName PassageContent                       | "add passage (name)", simple
-PassageContent -> TextPassage PassageContent                | add text as child
-PassageContent -> Formatting PassageContent                 |
-PassageContent -> ɛ                                         |
-Formating -> BoldFormatting                                 |
-Formating -> ItalicFormatting                               |
-BoldFormatting -> FormatBold BoldContent FormatBold         | add child bold
-BoldContent -> TextPassage BoldContent                      | add text as child
-BoldContent -> FormatItalic BoldItalicContent FormatItalic  | add child italic
-BoldContent -> ɛ                                            |
-ItalicFormatting -> FormatItalic ItalicContent FormatItalic | add child italic
-ItalicContent -> TextPassage ItalicContent                  | add text as child
-ItalicContent -> FormatBold BoldItalicContent FormatBold    | add child bold
-ItalicContent -> ɛ                                          | add text as child
-BoldItalicContent -> TextPassage                            |
-------------------------------------------------------------+-----------------------------------
-
-::Start
-Hello World, ''Yeah''.
-//Italic// is possible too.
-
-*/
+use frontend::lexer::Token::*;
 
 pub fn parse_tokens(tokens: Vec<Token>) -> ast::AST {
     let mut parser: Parser = Parser::new(tokens);
@@ -92,58 +57,56 @@ pub enum NonTerminalType {
 // parser
 
 struct Parser {
-    tree: ParseTree,
     ast: ast::AST,
-    stack: Stack,
+    stack: Vec<PNode>,
     ast_path: Vec<usize>,
     tokens: Vec<Token>,
-    lookahead: usize
+    lookahead: usize,
+    is_in_if: bool,
 }
 
 impl Parser {
     pub fn new(tokens: Vec<Token>) -> Parser {
         Parser {
-            tree: ParseTree::new(),
             ast: ast::AST::new(),
-            stack: Stack::new(),
+            stack: Vec::new(),
             ast_path: Vec::new(),
             tokens: tokens,
-            lookahead: 0
+            lookahead: 0,
+            is_in_if: false
         }
     }
 
     /// the predictive stack ll(1) parsing routine
     pub fn parsing(&mut self) {
-        self.stack.push_start();
+        // push Start-Non-Terminal to the stack
+        self.stack.push(PNode::new_non_terminal(S));
 
         while let Some(top) = self.stack.pop() {
-            if self.tree.is_terminal(top.to_vec()) {
-                self.next_token();
-            } else {
-                self.apply_grammar(top.to_vec());
+            match top {
+                PNode::NonTerminal(ref node) => {
+                    self.apply_grammar(node.clone());
+                }
+                PNode::Terminal(_) => {
+                    self.next_token();
+                }
             }
         }
-
-        self.tree.print();
     }
 
     /// apply the ll(1) grammar
     /// the match-statement simulates the parsing-table behavior
     ///
-    /// it creates the parse tree (from the ll(1) grammar)
-    /// and the ast from the sdd
-    fn apply_grammar(&mut self, top_path: Vec<usize>) {
+    fn apply_grammar(&mut self, top: NonTerminalType) {
         if let Some(token) = self.tokens.get_mut(self.lookahead) {
-
-            let to_add_path: Vec<usize> = top_path.to_vec();
 
             // the frst item in the tuple is the current state and
             // the snd is the current lookup-token
-            let state_first: (NonTerminalType, &Token) = (self.tree.get_non_terminal(top_path).clone(), token);
+            let state_first: (NonTerminalType, &Token) = (top, token);
 
             let mut new_nodes = Vec::new();
 
-            println!("match {:?}", state_first);
+            debug!("match {:?}", state_first);
             match state_first {
                 (S, &TokPassageName(_)) => {
                     new_nodes.push(PNode::new_non_terminal(Passage));
@@ -190,11 +153,15 @@ impl Parser {
                 },
                 (PassageContent, &TokSet) |
                 (PassageContent, &TokIf) |
-                (PassageContent, &TokVariable(_)) => {
+                (PassageContent, &TokVariable(_)) |
+                (PassageContent, &TokMakroVar(_)) => {
                     new_nodes.push(PNode::new_non_terminal(Makro));
                     new_nodes.push(PNode::new_non_terminal(PassageContent));
-
-                    // ast
+                },
+                (PassageContent, &TokEndIf) => {
+                    // jump one ast-level higher
+                    debug!("pop TokEndIf");
+                    self.ast_path.pop();
                 },
                 (PassageContent, &TokFormatBoldEnd) => {
                     // jump one ast-level higher
@@ -226,9 +193,9 @@ impl Parser {
                     new_nodes.push(PNode::new_terminal(TokFormatBoldEnd));
 
                     //ast
-                    let ast_count_passages = self.ast.count_childs(self.ast_path.to_vec());
+                    let ast_count_childs = self.ast.count_childs(self.ast_path.to_vec());
                     self.ast.add_child(&self.ast_path, TokFormatBoldStart);
-                    self.ast_path.push(ast_count_passages);
+                    self.ast_path.push(ast_count_childs);
                 },
 
                 // ItalicFormatting
@@ -238,9 +205,9 @@ impl Parser {
                     new_nodes.push(PNode::new_terminal(TokFormatItalicEnd));
 
                     //ast
-                    let ast_count_passages = self.ast.count_childs(self.ast_path.to_vec());
+                    let ast_count_childs = self.ast.count_childs(self.ast_path.to_vec());
                     self.ast.add_child(&self.ast_path, TokFormatItalicStart);
-                    self.ast_path.push(ast_count_passages);
+                    self.ast_path.push(ast_count_childs);
                 },
 
                 // MonoFormatting
@@ -248,6 +215,11 @@ impl Parser {
                     new_nodes.push(PNode::new_terminal(TokFormatMonoStart));
                     new_nodes.push(PNode::new_non_terminal(MonoContent));
                     new_nodes.push(PNode::new_terminal(TokFormatMonoEnd));
+
+                    //ast
+                    let ast_count_childs = self.ast.count_childs(self.ast_path.to_vec());
+                    self.ast.add_child(&self.ast_path, TokFormatMonoStart);
+                    self.ast_path.push(ast_count_childs);
                 },
 
                 // MonoContent
@@ -275,35 +247,75 @@ impl Parser {
                     new_nodes.push(PNode::new_terminal(TokMakroEnd));
                 },
                 (Makro, &TokIf) => {
-                    new_nodes.push(PNode::new_terminal(TokSet));
+                    new_nodes.push(PNode::new_terminal(TokIf));
                     new_nodes.push(PNode::new_non_terminal(ExpressionList));
                     new_nodes.push(PNode::new_terminal(TokMakroEnd));
                     new_nodes.push(PNode::new_non_terminal(PassageContent));
                     new_nodes.push(PNode::new_non_terminal(Makrof));
+
+                    // ast
+                    let ast_count_childs = self.ast.count_childs(self.ast_path.to_vec());
+                    self.ast.add_child(&self.ast_path, TokIf);
+                    self.ast_path.push(ast_count_childs);
+                    self.is_in_if = true;
                 },
-                (Makro, &TokVariable(ref name)) => {
-                    new_nodes.push(PNode::new_terminal(TokVariable(name.clone())));
+                // means <<$var>>
+                (Makro, &TokMakroVar(ref name)) => {
+                    new_nodes.push(PNode::new_terminal(TokMakroVar(name.clone())));
                     new_nodes.push(PNode::new_terminal(TokMakroEnd));
+
+                    // ast
+                    self.ast.add_child(&self.ast_path, TokMakroVar(name.clone()));
                 },
 
-                (Makro, &TokElse) => {
+                // Makrof
+                (Makrof, &TokElse) => {
                     new_nodes.push(PNode::new_terminal(TokElse));
                     new_nodes.push(PNode::new_terminal(TokMakroEnd));
                     new_nodes.push(PNode::new_non_terminal(PassageContent));
                     new_nodes.push(PNode::new_terminal(TokEndIf));
                     new_nodes.push(PNode::new_terminal(TokMakroEnd));
+
+                    // ast
+                    debug!("pop TokElse");
+                    self.ast_path.pop();
+                    self.ast_path.pop();
+
+                    let ast_count_childs = self.ast.count_childs(self.ast_path.to_vec());
+                    self.ast.add_child(&self.ast_path, TokElse);
+                    self.ast_path.push(ast_count_childs);
                 },
+                (Makrof, &TokEndIf) => {
+                    new_nodes.push(PNode::new_terminal(TokEndIf));
+                    new_nodes.push(PNode::new_terminal(TokMakroEnd));
+
+                    // ast
+                    debug!("pop TokEndIf");
+                    self.ast_path.pop();
+                }
 
                 // ExpressionList
                 (ExpressionList, &TokVariable(_)) |
                 (ExpressionList, &TokInt(_)) |
                 (ExpressionList, &TokString(_)) |
-                (ExpressionList, &TokBoolean(_)) => {
+                (ExpressionList, &TokBoolean(_)) |
+                (ExpressionList, &TokAssign(_, _)) => {
                     new_nodes.push(PNode::new_non_terminal(Expression));
                     new_nodes.push(PNode::new_non_terminal(ExpressionListf));
                 },
 
                 // ExpressionListf
+                (ExpressionListf, &TokMakroEnd) => {
+                    if self.is_in_if == true {
+                        let ast_count_childs = self.ast.count_childs(self.ast_path.to_vec());
+                        self.ast.add_child(&self.ast_path, TokPseudo);
+                        self.ast_path.push(ast_count_childs);
+                    } else {
+                        debug!("pop TokMakroEnd");
+                        self.ast_path.pop();
+                    }
+                    
+                },
                 (ExpressionListf, _) => {
                     // ExpressionListf -> ε
                 },
@@ -357,6 +369,14 @@ impl Parser {
                 },
 
                 // B2
+                (B2, &TokCompOp(ref op)) => {
+                    new_nodes.push(PNode::new_terminal(TokCompOp(op.clone())));
+                    new_nodes.push(PNode::new_non_terminal(F));
+                    new_nodes.push(PNode::new_non_terminal(B2));
+
+                    // ast
+                    self.ast.add_child(&self.ast_path, TokCompOp(op.clone()));
+                },
                 (B2, _) => {
                     // B2 -> ε
                 },
@@ -390,18 +410,48 @@ impl Parser {
                 },
 
                 // H
-                (H, &TokInt(_)) => {
+                (H, &TokInt(_)) |
+                (H, &TokString(_)) |
+                (H, &TokBoolean(_)) => {
                     new_nodes.push(PNode::new_non_terminal(DataType));
                 },
                 (H, &TokVariable(ref name)) => {
                     new_nodes.push(PNode::new_terminal(TokVariable(name.clone())));
+
+                    // ast
+                    self.ast.add_child(&self.ast_path, TokVariable(name.clone()));
                 },
 
                 // AssignVariable
                 (AssignVariable, &TokAssign(ref name, ref assign)) => {
                     new_nodes.push(PNode::new_terminal(TokAssign(name.clone(), assign.clone())));
                     new_nodes.push(PNode::new_non_terminal(E));
+
+                    //ast
+                    let ast_count_childs = self.ast.count_childs(self.ast_path.to_vec());
+                    self.ast.add_child(&self.ast_path, TokAssign(name.clone(), assign.clone()));
+                    self.ast_path.push(ast_count_childs);
                 },
+
+                // DataType
+                (DataType, &TokInt(ref value)) => {
+                    new_nodes.push(PNode::new_terminal(TokInt(value.clone())));
+
+                    // ast
+                    self.ast.add_child(&self.ast_path, TokInt(value.clone()));
+                },
+                (DataType, &TokString(ref value)) => {
+                    new_nodes.push(PNode::new_terminal(TokString(value.clone())));
+
+                    // ast
+                    self.ast.add_child(&self.ast_path, TokString(value.clone()));
+                },
+                (DataType, &TokBoolean(ref value)) => {
+                    new_nodes.push(PNode::new_terminal(TokBoolean(value.clone())));
+
+                    // ast
+                    self.ast.add_child(&self.ast_path, TokBoolean(value.clone()));
+                }
 
                 
                 _ => {
@@ -409,11 +459,10 @@ impl Parser {
                 }
             }
 
-            // adds the new nodes to the tree
-            // and adds the path in the tree to the stack
-            let length = new_nodes.len().clone();
-            self.tree.add_nodes(new_nodes, &to_add_path);
-            self.stack.push_path(length as u8, to_add_path);
+            // adds the new nodes to the stack (in reversed order)
+            while let Some(child) = new_nodes.pop() {
+                self.stack.push(child);
+            }
 
         } else {
             // no token left
@@ -425,37 +474,5 @@ impl Parser {
     /// sets the lookahead to the next token
     fn next_token(&mut self) {
         self.lookahead = self.lookahead + 1;
-    }
-}
-
-//==============================
-// stack of the parser
-struct Stack {
-    data: Vec<Vec<usize>>
-}
-
-impl Stack {
-    pub fn new() -> Stack {
-        Stack { data: Vec::new() }
-    }
-
-    /// pushs the address of the first startsymbol to the stack
-    fn push_start(&mut self) {
-        self.data.push(vec![]);
-    }
-
-    /// save the path of the nodes in the tree to the stack
-    /// the right part of the production
-    /// should be on the stack in reverse order
-    fn push_path(&mut self, count_elements: u8, to_add_path: Vec<usize>) {
-        for i in 0..count_elements {
-            let mut path: Vec<usize> = to_add_path.to_vec();
-            path.push((count_elements-i-1) as usize);
-            self.data.push(path);
-        }
-    }
-
-    fn pop(&mut self) -> Option<Vec<usize>> {
-        self.data.pop()
     }
 }
