@@ -424,17 +424,29 @@ impl Zfile {
     }
 }
 
+fn align_address(address: u16, align: u16) -> u16 {
+    address + (align - (address % align)) % align
+}
+
 /// returns the routine address, should be adress % 8 == 0 (becouse its an packed address)
 fn routine_address(address: u16) -> u16 {
-    if address % 8 == 0 {
-        address
-    } else {
-        address + 8 - (address % 8)
-    }
+    return align_address(address, 8);
 }
 
 // ================================
 // test functions
+
+#[test]
+fn test_align_address() {
+    assert_eq!(align_address(0xf, 8), 0x10);
+    assert_eq!(align_address(0x7, 8), 0x8);
+    assert_eq!(align_address(0x8, 8), 0x8);
+    assert_eq!(align_address(0x9, 8), 0x10);
+    assert_eq!(align_address(0x10, 16), 0x10);
+    assert_eq!(align_address(0x1f, 32), 0x20);
+    assert_eq!(align_address(0x20, 32), 0x20);
+    assert_eq!(align_address(0x21, 32), 0x40);
+}
 
 #[test]
 fn test_routine_address() {
