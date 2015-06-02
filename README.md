@@ -1,5 +1,4 @@
 # zwreec [![Build Status](https://travis-ci.org/Drakulix/zwreec.svg?branch=master)](https://travis-ci.org/Drakulix/zwreec)
-*This is currently in heavy development and does not work.*
 
 <img width=144px src="https://dl.dropboxusercontent.com/u/70410095/zwreec/logo.png">
 *Logo by [@madmalik](https://github.com/madmalik)*
@@ -13,9 +12,27 @@ To install the current rust version run:
 
 ```curl -s https://static.rust-lang.org/rustup.sh | sh -s -- --channel=nightly --date=2015-05-16```
 
+## Quick Start
+Install rust, clone the repository, then run:
+```
+cargo build
+```
+
+Compile the ASCII sample file:
+```
+./target/debug/zwreec ./tests/integration/sample/ASCII.twee -o ASCII.z8
+```
+
+_Edit the above line to compile different twee adventures._
+
+Then you can run `./ASCII.z8` with your favorite Z-Code interpreter, like [frotz](http://frotz.sourceforge.net).
+
+## Features
+Only rudimentary Twee features are supported right now. This is about to change in the upcoming weeks. Check the github issues for more information on the currently supported features.
+
 ## Usage
 ```
-Usage: target/debug/zwreec_bin [-hV] [-vq] [-l [LOGFILE]] [-o OUTPUT] INPUT
+Usage: target/debug/zwreec [-hV] [-vq] [-l [LOGFILE]] [-o OUTPUT] INPUT
 
 Options:
     -v --verbose        be more verbose. can be used multiple times.
@@ -31,6 +48,9 @@ Options:
 `cargo build`
 
 Install dependencies and build the application.
+
+_For a release build:_
+`cargo build --release`
 
 `cargo test`
 
