@@ -17,23 +17,25 @@ pub fn screen<R: Read>(input: &mut R) -> Cursor<Vec<u8>> {
         Ok(_) => debug!("read input to buffer"),
     };
 
-    Cursor::new(content.chars().peeking().scan_filter(
+    Cursor::new(content.bytes().peeking().scan_filter(
         ScanState {
             comment: false,
             skip_next: false,
         },
         |state, elem| {
+            const SLASH: u8 = '/' as u8;
+            const PERCENT: u8 = '%' as u8;
             match (state.comment, state.skip_next, elem) {
                 (_, true, _) => { //skipping
                     state.skip_next = false;
                     None
                 },
-                (false, _, ('/', Some('%'))) => { //comment_start
+                (false, _, (SLASH, Some(PERCENT))) => { //comment_start
                     state.comment = true;
                     state.skip_next = true;
                     None
                 },
-                (true, _, ('%', Some('/'))) => { //comment_end
+                (true, _, (PERCENT, Some(SLASH))) => { //comment_end
                     state.comment = false;
                     state.skip_next = true;
                     None
