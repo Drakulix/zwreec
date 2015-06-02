@@ -239,7 +239,7 @@ impl Zfile {
     // ================================
     // zcode routines
 
-    /// 
+    /// routine to add the address of a passage-link
     pub fn routine_add_link(&mut self) {
         self.routine("system_add_link", 1);
         
@@ -250,28 +250,43 @@ impl Zfile {
         // inc the count links
         self.op_inc(16);
 
-        self.op_ret();
+        self.op_ret(0);
     }
 
-    /// 
+    /// checks all stored links and make them choiceable
+    /// with the keyboard
     pub fn routine_check_links(&mut self) {
         self.routine("system_check_links", 1);
+
+        // jumps to the end, if there a no links
+        self.op_je(16, 0x00, "system_check_links_end");
+
+        self.op_print("press a key... ");
+        self.op_newline();
         self.label("system_check_links_loop");
         self.op_read_char(0x01);
 
         self.op_sub(0x01, 48, 0x01);
+
+        // check if the link in 0x01 exist, of not
+        // => "wrong key => jump bevore key-detection
         self.op_jl(16, 0x01, "system_check_links_loop");
 
         self.op_dec(0x01);
+
+        // loads the address of the link from the array
         self.op_loadw(0, 0x01, 0x02);
 
-        // !!! TODO  problem
-        //self.store(16, 0);
-        // temp fix
-        self.op_loadw(0, 100, 16);
+        // no mor links exist
+        self.op_store_u8(16, 0);
 
-        //self.op_quit();
+        self.op_newline();
+
+        // jump to the new passage
         self.op_call_1n_var(0x02);
+
+        self.label("system_check_links_end");
+        self.op_quit();
     }
 
 
@@ -307,6 +322,7 @@ impl Zfile {
         self.add_jump(jump_to_label.to_string(), JumpType::Routine);
     }
 
+    /// calls a routine (the address is stored in a variable)
     pub fn op_call_1n_var(&mut self, variable: u8) {
         self.op_1(0x0f, ArgType::Variable);
         //self.add_jump(jump_to_label.to_string(), JumpType::Routine);
@@ -320,9 +336,11 @@ impl Zfile {
     pub fn op_call_2n_with_address(&mut self, jump_to_label: &str, address: &str) {
         let args: Vec<ArgType> = vec![ArgType::LargeConst, ArgType::LargeConst];
         self.op_2(0x1a, args);
+
+        // the address of the jump_to_label
         self.add_jump(jump_to_label.to_string(), JumpType::Routine);
 
-        // 
+        // the address of the argument
         self.add_jump(address.to_string(), JumpType::Routine);
     }
 
@@ -337,6 +355,15 @@ impl Zfile {
         self.data.append_byte(variable2);
     }
 
+    // saves an u8 to the variable
+    pub fn op_store_u8(&mut self, variable: u8, value: u8) {
+        let args: Vec<ArgType> = vec![ArgType::Reference, ArgType::SmallConst];
+        self.op_2(0x0d, args);
+
+        self.data.append_byte(variable);
+        self.data.append_byte(value);
+    }
+
     /// increments the value of the variable
     pub fn op_inc(&mut self, variable: u8) {
         self.op_1(0x05, ArgType::Reference);
@@ -349,11 +376,10 @@ impl Zfile {
         self.data.append_byte(variable);
     }
 
-    /// return
-    /// at the moment it always returns 0
-    pub fn op_ret(&mut self) {
+    /// returns a SmallConst
+    pub fn op_ret(&mut self, value: u8) {
         self.op_1(0x0b, ArgType::SmallConst);
-        self.data.append_byte(0);
+        self.data.append_byte(value);
     }
 
     /// pushs an u16 value (for example an address) on the stack
@@ -372,6 +398,7 @@ impl Zfile {
         self.data.append_byte(variable);
     }
 
+    /// prints the value of a variable (only ints a possibe)
     pub fn op_print_num_var(&mut self, variable: u8) {
         let args: Vec<ArgType> = vec![ArgType::Variable, ArgType::Nothing, ArgType::Nothing, ArgType::Nothing];
         self.op_var(0x06, args);
@@ -438,6 +465,8 @@ impl Zfile {
         self.data.append_byte(variable);
     }
 
+    /// stores a value to an array
+    /// stores the value of variable to the address in: array_address + 2*index
     pub fn op_storew(&mut self, array_address: u16, index: u8, variable: u8) {
         let args: Vec<ArgType> = vec![ArgType::LargeConst, ArgType::Variable, ArgType::Variable, ArgType::Nothing];
         self.op_var(0x01, args);
@@ -522,12 +551,6 @@ impl Zfile {
             _                   => panic!("no possible 1OP")
         }
 
-        /*let byte;
-        if !is_variable_reference {
-            byte = value | 0x80;
-        } else {
-            byte = value | 0x80 | (0x01 << 4);
-        }*/
         self.data.append_byte(byte);
     }
 
@@ -540,6 +563,7 @@ impl Zfile {
             match arg_type {
                 &ArgType::SmallConst => byte |= 0x00 << shift,
                 &ArgType::Variable   => byte |= 0x01 << shift,
+                &ArgType::Reference  => byte |= 0x00 << shift,
                 &ArgType::LargeConst => is_variable = true,
                 _                    => panic!("no possible 2OP")
             }
@@ -569,6 +593,7 @@ impl Zfile {
         self.data.append_byte(byte2);
     }
 
+    /// encodes the argtypes for variable some 2OPs and varOPs
     fn encode_variable_arguments(&mut self, arg_types: Vec<ArgType>) -> u8 {
         let mut byte: u8 = 0x00;
         for (i, arg_type) in arg_types.iter().enumerate() {
