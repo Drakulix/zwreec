@@ -16,10 +16,43 @@ pub fn temp_create_zcode_example() {
     let mut zfile: Zfile = zfile::Zfile::new();
 
     zfile.start();
+    zfile.op_call_1n("Start");
+
+    zfile.routine("Start", 0);
+    zfile.op_print("start passage");
+    zfile.op_newline();
+
+    zfile.op_print("link1");
+    zfile.op_call_2n_with_address("system_add_link", "link1");
+
+    zfile.op_print("link2");
+    zfile.op_call_2n_with_address("system_add_link", "link2");
+
+    zfile.op_newline();
+    zfile.op_call_1n("system_check_links");
+
+    zfile.routine("link1", 1);
+    zfile.op_print("passage 1");
+    zfile.op_newline();
+    zfile.op_call_1n("Start");
+
+    zfile.routine("link2", 1);
+    zfile.op_print("passage 2");
+    zfile.op_newline();
+    zfile.op_call_1n("Start");
+
+    //zfile.op_loadw(0, 0x01, 0x02);
+
     //zfile.op_storew(1234, 16, 0x01);
     //zfile.op_loadw(1234, 16, 0x01);
+
     //zfile.op_ret();
-    zfile.op_sub(0x01, 1234, 0x01);
+    //zfile.op_sub(0x01, 1234, 0x01);
+    //zfile.op_call_2n_with_address("test", "link1");
+    //zfile.routine("test", 1);
+    //zfile.routine("link1", 0);
+    //zfile.op_call_1n_var(0x01);
+    //zfile.routine("test", 1);
     zfile.op_quit();
 
 

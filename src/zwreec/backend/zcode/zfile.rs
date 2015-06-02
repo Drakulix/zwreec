@@ -15,6 +15,7 @@ enum ArgType {
     LargeConst,
     SmallConst,
     Variable,
+    Reference,
     Nothing
 }
 
@@ -213,8 +214,8 @@ impl Zfile {
     /// writes all stuff that couldn't written directly
     /// should be called as the last commend
     pub fn end(&mut self) {
-        //self.routine_check_links();
-        //self.routine_add_link();
+        self.routine_check_links();
+        self.routine_add_link();
         self.write_jumps();
     }
 
@@ -242,16 +243,35 @@ impl Zfile {
     pub fn routine_add_link(&mut self) {
         self.routine("system_add_link", 1);
         
-        //self.op_storew();
+        // saves routine-argument to array
+        self.op_storew(0, 16, 0x01);
+        //self.op_loadw(0, 0x00, 0x02);
+        
+        // inc the count links
+        self.op_inc(16);
 
+        self.op_ret();
     }
 
     /// 
     pub fn routine_check_links(&mut self) {
         self.routine("system_check_links", 1);
+        self.label("system_check_links_loop");
+        self.op_read_char(0x01);
 
+        self.op_sub(0x01, 48, 0x01);
+        self.op_jl(16, 0x01, "system_check_links_loop");
 
+        self.op_dec(0x01);
+        self.op_loadw(0, 0x01, 0x02);
 
+        // !!! TODO  problem
+        //self.store(16, 0);
+        // temp fix
+        self.op_loadw(0, 100, 16);
+
+        //self.op_quit();
+        self.op_call_1n_var(0x02);
     }
 
 
@@ -283,8 +303,14 @@ impl Zfile {
     /// calls a routine
     /// call_1n is 1OP
     pub fn op_call_1n(&mut self, jump_to_label: &str) {
-        self.op_1(0x0f, false);
+        self.op_1(0x0f, ArgType::SmallConst);
         self.add_jump(jump_to_label.to_string(), JumpType::Routine);
+    }
+
+    pub fn op_call_1n_var(&mut self, variable: u8) {
+        self.op_1(0x0f, ArgType::Variable);
+        //self.add_jump(jump_to_label.to_string(), JumpType::Routine);
+        self.data.append_byte(variable);
     }
 
     /// calls a routine with an argument(variable) an throws result away
@@ -292,7 +318,7 @@ impl Zfile {
     /// inserts a pseudo routoune_address
     /// call_2n is 2OP
     pub fn op_call_2n_with_address(&mut self, jump_to_label: &str, address: &str) {
-        let args: Vec<ArgType> = vec![ArgType::LargeConst, ArgType::Nothing];
+        let args: Vec<ArgType> = vec![ArgType::LargeConst, ArgType::LargeConst];
         self.op_2(0x1a, args);
         self.add_jump(jump_to_label.to_string(), JumpType::Routine);
 
@@ -313,20 +339,20 @@ impl Zfile {
 
     /// increments the value of the variable
     pub fn op_inc(&mut self, variable: u8) {
-        self.op_1(0x05, true);
+        self.op_1(0x05, ArgType::Reference);
         self.data.append_byte(variable);
     }
 
     /// decrements the value of the variable
     pub fn op_dec(&mut self, variable: u8) {
-        self.op_1(0x06, true);
+        self.op_1(0x06, ArgType::Reference);
         self.data.append_byte(variable);
     }
 
     /// return
     /// at the moment it always returns 0
     pub fn op_ret(&mut self) {
-        self.op_1(0x0b, true);
+        self.op_1(0x0b, ArgType::SmallConst);
         self.data.append_byte(0);
     }
 
@@ -428,7 +454,7 @@ impl Zfile {
 
     /// jumps to a label
     pub fn op_jump(&mut self, jump_to_label: &str) {
-        self.op_1(0x0c, false);
+        self.op_1(0x0c, ArgType::SmallConst);
         self.add_jump(jump_to_label.to_string(), JumpType::Jump);
     }
 
@@ -469,7 +495,7 @@ impl Zfile {
     /// prints an unicode char to the current stream
     pub fn op_print_unicode_char(&mut self, character: char){
         let value = if character as u32 > 0xFFFF { '?' as u16 } else { character as u16 };
-        self.op_1(0xbe, false);
+        self.op_1(0xbe, ArgType::SmallConst);
         self.data.append_byte(0x0b);
         let byte = 0x00 << 6 | 0x03 << 4 | 0x03 << 2 | 0x03 << 0;
         self.data.append_byte(byte);
@@ -486,13 +512,22 @@ impl Zfile {
     }
     
     /// op-codes with 1 operator
-    fn op_1(&mut self, value: u8, is_variable_reference: bool) {
-        let byte;
+    fn op_1(&mut self, value: u8, arg_type: ArgType) {
+        let mut byte: u8 = 0x80 | value;
+
+         match arg_type {
+            ArgType::Reference  => byte |= 0x01 << 4,
+            ArgType::Variable   => byte |= 0x02 << 4,
+            ArgType::SmallConst => byte |= 0x00 << 4,
+            _                   => panic!("no possible 1OP")
+        }
+
+        /*let byte;
         if !is_variable_reference {
             byte = value | 0x80;
         } else {
             byte = value | 0x80 | (0x01 << 4);
-        }
+        }*/
         self.data.append_byte(byte);
     }
 
@@ -506,7 +541,7 @@ impl Zfile {
                 &ArgType::SmallConst => byte |= 0x00 << shift,
                 &ArgType::Variable   => byte |= 0x01 << shift,
                 &ArgType::LargeConst => is_variable = true,
-                _                    => panic!("not possible 2OP")
+                _                    => panic!("no possible 2OP")
             }
         }
 
@@ -543,6 +578,7 @@ impl Zfile {
                 &ArgType::SmallConst => byte |= 0x01 << shift,
                 &ArgType::Variable   => byte |= 0x02 << shift,
                 &ArgType::Nothing    => byte |= 0x03 << shift,
+                _                    => panic!("no possible varOP")
             }
         }
 
@@ -606,9 +642,9 @@ fn test_zfile_general_op_length() {
     let mut zfile: Zfile = Zfile::new();
     zfile.op_0(0x00);
     assert_eq!(zfile.data.len(), 1);
-    zfile.op_1(0x00, false);
+    zfile.op_1(0x00, ArgType::SmallConst);
     assert_eq!(zfile.data.len(), 2);
-    zfile.op_1(0x00, true);
+    zfile.op_1(0x00, ArgType::Reference);
     assert_eq!(zfile.data.len(), 3);
     let args: Vec<ArgType> = vec![ArgType::SmallConst, ArgType::Nothing, ArgType::Nothing, ArgType::Nothing];
     zfile.op_var(0x00, args);
