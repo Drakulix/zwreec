@@ -271,7 +271,7 @@ impl Zfile {
     }
 
     /// decrements the value of the variable
-    pub fn op_inc(&mut self, variable: u8) {
+    pub fn op_dec(&mut self, variable: u8) {
         self.op_1(0x06, true);
         self.data.append_byte(variable);
     }
@@ -360,6 +360,23 @@ impl Zfile {
 
         // const
         self.data.append_byte(equal_to_const);
+
+        // jump
+        self.add_jump(jump_to_label.to_string(), JumpType::Branch);
+    }
+
+    /// jumps to a label if the value of local_var_id is equal to local_var_id2
+    /// is an 2OP, but with variable and variable
+    pub fn op_jl(&mut self, local_var_id: u8, local_var_id2: u8, jump_to_label: &str) {
+
+        let args: [ArgType; 2] = [ArgType::Variable, ArgType::Variable];
+        self.op_2(0x02, &args);
+        
+        // variable id
+        self.data.append_byte(local_var_id);
+
+        // variable id 2
+        self.data.append_byte(local_var_id2);
 
         // jump
         self.add_jump(jump_to_label.to_string(), JumpType::Branch);
