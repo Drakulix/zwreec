@@ -270,6 +270,12 @@ impl Zfile {
         self.data.append_byte(variable);
     }
 
+    /// decrements the value of the variable
+    pub fn op_inc(&mut self, variable: u8) {
+        self.op_1(0x06, true);
+        self.data.append_byte(variable);
+    }
+
     /// pushs an u16 value (for example an address) on the stack
     pub fn op_push_u16(&mut self, value: u16) {
         let args: [ArgType; 4] = [ArgType::LargeConst, ArgType::Nothing, ArgType::Nothing, ArgType::Nothing];
