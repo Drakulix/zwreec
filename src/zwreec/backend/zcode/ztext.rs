@@ -10,7 +10,7 @@ pub static ALPHABET: [char; 78] = [
     'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
     'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
 
-    '\0', '\n', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '.',
+    ' ', '\n', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '.',
     ',', '!', '?', '_', '#', '\'','"', '/', '\\','-', ':', '(', ')'];
 
 
@@ -76,8 +76,6 @@ fn string_to_zchar(content: &str) -> Vec<u8> {
                     zchars.push(7);
                 } else if byte == 0x20 {
                     // space
-                    //zchars.push(0x05);  
-                    //zchars.push(0);
                     zchars.push(0x00);
                 } else {
                     if t_index > 51 {
