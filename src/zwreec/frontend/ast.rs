@@ -65,7 +65,7 @@ fn gen_zcode<'a>(node: &'a ASTNode, state: FormattingState, mut out: &mut zfile:
                     out.op_set_text_style(state_copy.bold, state_copy.inverted, state_copy.mono, state_copy.italic);
                 },
                 &Token::TokAssign(ref var, ref operator) => {
-                    if operator == "=" {
+                    if operator == "=" || operator == "to" {
                         if !var_table.contains_key::<str>(var) {
                             var_table.insert(&var, *var_id);
                             debug!("Assigned id {} to variable {}", var_id, var);
