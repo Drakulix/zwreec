@@ -604,7 +604,6 @@ impl Zfile {
 
     /// encodes the argtypes for variable some 2OPs and varOPs
     fn encode_variable_arguments(&mut self, arg_types: Vec<ArgType>) -> u8 {
-        println!("encode_variable_arguments");
         let mut byte: u8 = 0x00;
         for (i, arg_type) in arg_types.iter().enumerate() {
             let shift: u8 = 6 - 2 * i as u8;
