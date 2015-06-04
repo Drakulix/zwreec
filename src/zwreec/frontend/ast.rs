@@ -4,6 +4,7 @@
 use frontend::lexer::Token;
 use backend::zcode::zfile;
 use backend::zcode::zfile::{FormattingState};
+use std::collections::HashMap;
 
 //==============================
 // ast
@@ -15,6 +16,8 @@ pub struct AST {
 /// add zcode based on tokens
 fn gen_zcode(node: &ASTNode, state: FormattingState, mut out: &mut zfile::Zfile) {
     let mut state_copy = state.clone();
+    let mut var_table = HashMap::<&str, u8>::new();
+    let mut var_id : u8 = 100;
 
     match node {
         &ASTNode::Passage(ref node) => {
@@ -60,8 +63,15 @@ fn gen_zcode(node: &ASTNode, state: FormattingState, mut out: &mut zfile::Zfile)
                     out.op_print_num_var(16);
                     out.op_print("]");
                     out.op_set_text_style(state_copy.bold, state_copy.inverted, state_copy.mono, state_copy.italic);
-                    
-
+                },
+                &Token::TokAssign(ref var, ref operator) => {
+                    if operator == "=" {
+                        if !var_table.contains_key::<str>(var) {
+                            var_table.insert(&var, var_id);
+                            var_id += 1;
+                        }
+                        let id = var_table.get::<str>(var);
+                    }
                 },
                 _ => {
                     debug!("no match 2");
