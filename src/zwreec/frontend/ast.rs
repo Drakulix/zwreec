@@ -17,15 +17,23 @@ fn gen_zcode(node: &ASTNode, state: FormattingState, mut out: &mut zfile::Zfile)
     let mut state_copy = state.clone();
 
     match node {
-        &ASTNode::Passage(ref t) => {
-            match &t.category{
+        &ASTNode::Passage(ref node) => {
+            match &node.category {
+                &Token::TokPassageName(ref name) => {
+                    out.routine(name, 0);
+                },
                 _ => {
                     debug!("no match 1");
                 }
             };
-            for child in &t.childs {
+            
+            for child in &node.childs {
                 gen_zcode(child, state_copy, out);
             }
+
+            out.op_newline();
+            out.op_call_1n("system_check_links");
+
         },
         &ASTNode::Default(ref t) => {
             match &t.category {
@@ -42,6 +50,18 @@ fn gen_zcode(node: &ASTNode, state: FormattingState, mut out: &mut zfile::Zfile)
                 &Token::TokFormatItalicStart => {
                     state_copy.italic = true;
                     out.op_set_text_style(state_copy.bold, state_copy.inverted, state_copy.mono, state_copy.italic);
+                },
+                &Token::TokPassageLink (ref name, ref link) => {
+                    out.op_call_2n_with_address("system_add_link", link);
+
+                    out.op_set_text_style(state_copy.bold, true, state_copy.mono, state_copy.italic);
+                    let link_text = format!("{}[", name);
+                    out.op_print(&link_text);
+                    out.op_print_num_var(16);
+                    out.op_print("]");
+                    out.op_set_text_style(state_copy.bold, state_copy.inverted, state_copy.mono, state_copy.italic);
+                    
+
                 },
                 _ => {
                     debug!("no match 2");

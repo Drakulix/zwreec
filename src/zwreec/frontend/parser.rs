@@ -92,6 +92,8 @@ impl Parser {
                 }
             }
         }
+
+
     }
 
     /// apply the ll(1) grammar
@@ -466,8 +468,17 @@ impl Parser {
 
         } else {
             // no token left
-            // only ɛ-productions could be here
-            // these productions will be poped of the stack
+
+            // Sf, PassageContent, Linkf, 
+
+            match top {
+                Sf | PassageContent => {
+                    // ... -> ε
+                },
+                _ => {
+                    panic!("Nonterminal '{:?}' is not an allowed end.", top);
+                }
+            }
         }
     }
 
