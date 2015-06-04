@@ -195,14 +195,7 @@ rustlex! TweeLexer {
 
 	let FUNCTION = LETTER+ '(';
 
-	let SET = "set";
-	let IF = "if";
-	let ELSE = "else";
-	let END_IF = "endif";
-	let PRINT = "print";
-	let DISPLAY = "display";
-	let SILENTLY = "silently";
-	let END_SILENTLY = "endsilently";
+	let MACRO_NAME = LETTER+ WHITESPACE*;
 
 	let ASSIGN = "=" | "to" | "+=" | "-=" | "*=" | "/=";
 	let SEMI_COLON = ';';
@@ -436,37 +429,44 @@ rustlex! TweeLexer {
 			None
 		}
 
-		SET =>  |lexer:&mut TweeLexer<R>| {
-			lexer.MAKRO_CONTENT();
-			Some(TokSet)
-		}
-		IF =>  |lexer:&mut TweeLexer<R>| {
-			lexer.MAKRO_CONTENT();
-			Some(TokIf)
-		}
-		ELSE =>  |lexer:&mut TweeLexer<R>| {
-			lexer.MAKRO_CONTENT();
-			Some(TokElse)
-		}
-		END_IF =>  |lexer:&mut TweeLexer<R>| {
-			lexer.MAKRO_CONTENT();
-			Some(TokEndIf)
-		}
-		PRINT =>  |lexer:&mut TweeLexer<R>| {
-			lexer.MAKRO_CONTENT();
-			Some(TokPrint)
-		}
-		DISPLAY =>  |lexer:&mut TweeLexer<R>| {
-			lexer.DISPLAY_CONTENT();
-			Some(TokDisplay)
-		}
-		SILENTLY =>  |lexer:&mut TweeLexer<R>| {
-			lexer.MAKRO_CONTENT();
-			Some(TokSilently)
-		}
-		END_SILENTLY =>  |lexer:&mut TweeLexer<R>| {
-			lexer.MAKRO_CONTENT();
-			Some(TokEndSilently)
+		MACRO_NAME =>  |lexer:&mut TweeLexer<R>| {
+			match lexer.yystr().trim().as_ref() {
+				"set" => {
+					lexer.MAKRO_CONTENT();
+					Some(TokSet)
+				},
+				"if" => {
+					lexer.MAKRO_CONTENT();
+					Some(TokIf)
+				},
+				"else" => {
+					lexer.MAKRO_CONTENT();
+					Some(TokElse)
+				},
+				"endif" => {
+					lexer.MAKRO_CONTENT();
+					Some(TokEndIf)
+				},
+				"print" => {
+					lexer.MAKRO_CONTENT();
+					Some(TokPrint)
+				},
+				"display" => {
+					lexer.DISPLAY_CONTENT();
+					Some(TokDisplay)
+				},
+				"silently" => {
+					lexer.MAKRO_CONTENT();
+					Some(TokSilently)
+				},
+				"endsilently" => {
+					lexer.MAKRO_CONTENT();
+					Some(TokEndSilently)
+				},
+				_ => {
+					panic!("Unknown macro: \"{}\"", lexer.yystr());
+				}
+			}
 		}
 
 		VAR_NAME =>  |lexer:&mut TweeLexer<R>| {
