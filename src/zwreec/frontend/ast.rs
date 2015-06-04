@@ -19,7 +19,6 @@ pub struct AST {
 fn gen_zcode<'a>(node: &'a ASTNode, state: FormattingState, mut out: &mut zfile::Zfile, mut var_table: &mut HashMap<&'a str, u8>, mut var_id: &mut u8) {
     let mut state_copy = state.clone();
   
-
     match node {
         &ASTNode::Passage(ref node) => {
             match &node.category {
@@ -75,22 +74,30 @@ fn gen_zcode<'a>(node: &'a ASTNode, state: FormattingState, mut out: &mut zfile:
                         let id_option = var_table.get::<str>(var);
                         if t.childs.len() == 1 {
                             match t.childs[0] {
-                                 ASTNode::Default(ref def) => {
-                                      match def.category {
-                                        Token::TokInt(value) => {
-                                            match id_option {
-                                                Some(id) => {
-                                                    out.op_store_u8(*id, value as u8);                                                  
-                                                },
-                                                None => {
-                                                    panic!("Variable not in var table.")
-                                                }
-                                            }
+                                ASTNode::Default(ref def) => {
+                                    let actual_id :u8 = match id_option {
+                                        Some(id) => {
+                                            *id                                             
                                         },
+                                        None => {
+                                            panic!("Variable not in var table.")
+                                        }
+                                    };
+                                    match def.category {
+                                        Token::TokInt(value) => {
+                                            out.op_store_u8(actual_id, value as u8);
+                                        },
+                                        Token::TokBoolean(ref bool_val) => {
+                                            let value = match (*bool_val).as_ref() {
+                                                "true" => { 1 as u8 },
+                                                _ => { 0 as u8 }
+                                            };
+                                            out.op_store_u8(actual_id, value);
+                                        }
                                         _ => { }
-                                      }
-                                 },
-                                 _ => { }
+                                    }
+                                },
+                                _ => { }
                             }
                         } else {
                             debug!("Assign Expression currently not supported.");
