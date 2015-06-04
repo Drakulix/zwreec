@@ -82,7 +82,7 @@ fn gen_zcode<'a>(node: &'a ASTNode, state: FormattingState, mut out: &mut zfile:
                     out.op_set_text_style(state.bold, state.inverted, state.mono, state.italic);
                 },
                 &Token::TokAssign(ref var, ref operator) => {
-                    if operator == "=" {
+                    if operator == "=" || operator == "to" {
                         if !var_table.contains_key::<str>(var) {
                             var_table.insert(&var, *var_id);
                             debug!("Assigned id {} to variable {}", var_id, var);
@@ -102,7 +102,8 @@ fn gen_zcode<'a>(node: &'a ASTNode, state: FormattingState, mut out: &mut zfile:
                                     };
                                     match def.category {
                                         Token::TokInt(value) => {
-                                            out.op_store_u8(actual_id, value as u8);
+                                            out.op_store_u16(actual_id, value as u16);
+                                            out.op_print_num_var(actual_id);
                                         },
                                         Token::TokBoolean(ref bool_val) => {
                                             let value = match (*bool_val).as_ref() {
