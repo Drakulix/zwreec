@@ -85,7 +85,8 @@ fn gen_zcode<'a>(node: &'a ASTNode, state: FormattingState, mut out: &mut zfile:
                                     };
                                     match def.category {
                                         Token::TokInt(value) => {
-                                            out.op_store_u8(actual_id, value as u8);
+                                            out.op_store_u16(actual_id, value as u16);
+                                            out.op_print_num_var(actual_id);
                                         },
                                         Token::TokBoolean(ref bool_val) => {
                                             let value = match (*bool_val).as_ref() {
