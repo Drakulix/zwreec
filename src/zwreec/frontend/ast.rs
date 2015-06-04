@@ -127,10 +127,22 @@ fn gen_zcode<'a>(node: &'a ASTNode, state: FormattingState, mut out: &mut zfile:
                         panic!("Unsupported if-expression!");
                     }
 
-                    let mut pseudo_node_pos = 1;
                     let mut compare : u8 = 1;
+
+                    // check if the first node is a pseudonode
+                    let pseudo_node = match t.childs[0] {
+                        ASTNode::Default(ref def) => {
+                            match def.category {
+                                Token::TokPseudo => {
+                                    def
+                                },
+                                _ =>  panic!("Unsupported if-expression!")
+                            }
+                        }, _ => panic!("Unsupported if-expression!")
+                    };
+
                     // Check if first token is variable
-                    let var_name = match t.childs[0] {
+                    let var_name = match pseudo_node.childs[0] {
                         ASTNode::Default(ref def) => {
                             match def.category {
                                 Token::TokVariable(ref var) => {
@@ -140,10 +152,9 @@ fn gen_zcode<'a>(node: &'a ASTNode, state: FormattingState, mut out: &mut zfile:
                             }
                         }, _ => panic!("Unsupported if-expression!")
                     };
-                    if t.childs.len() > 2 {
-                        pseudo_node_pos = 3;
+                    if pseudo_node.childs.len() > 1 {
                         // Check if second token is compare operator
-                        match t.childs[1] {
+                        match pseudo_node.childs[1] {
                             ASTNode::Default(ref def) => {
                                 match def.category {
                                     Token::TokCompOp(ref op) => {
@@ -156,7 +167,7 @@ fn gen_zcode<'a>(node: &'a ASTNode, state: FormattingState, mut out: &mut zfile:
                             }, _ => panic!("Unsupported if-expression!")
                         }
                         // Check if third token is number
-                        compare = match t.childs[2] {
+                        compare = match pseudo_node.childs[2] {
                             ASTNode::Default(ref def) => {
                                 match def.category {
                                     Token::TokInt(ref value) => {
@@ -173,35 +184,23 @@ fn gen_zcode<'a>(node: &'a ASTNode, state: FormattingState, mut out: &mut zfile:
                         };
                     }
                     let actual_id :u8 = match var_table.get::<str>(&*(*var_name)) {
-                                    Some(id) => {
-                                        *id                                             
-                                    },
-                                    None => {
-                                        panic!("Variable not in var table.")
-                                    }
-                                };
+                        Some(id) => *id,
+                        None => panic!("Variable not in var table.")
+                    };
 
                     let if_label = &format!("if_{}", if_count);
                     let after_if_label = &format!("after_if_{}", if_count);
                     let after_else_label = &format!("after_else_{}", if_count);
-                    debug!("{}",if_label);
                     if_stack.push(*if_count);
                     *if_count += 1;
-                    out.label(after_else_label);
                     out.op_je(actual_id, compare, if_label);
                     out.op_jump(after_if_label);
                     out.label(if_label);
-                    match t.childs[pseudo_node_pos] { 
-                        ASTNode::Default(ref def) => {
-                                match def.category {
-                                    Token::TokPseudo => {
-                                        for child in &def.childs {
-                                            gen_zcode(child, state_copy, out, var_table, var_id, if_count, if_stack)
-                                        }
-                                    }, _ => panic!("Unexpected Token!")
-                                }
-                        }, _ => panic!("Unsupported if-expression!")
+
+                    for i in 1..t.childs.len() {
+                        gen_zcode(&t.childs[i], state_copy, out, var_table, var_id, if_count, if_stack)
                     }
+
                     out.op_jump(after_else_label);
                     out.label(after_if_label);
                 },
@@ -211,19 +210,13 @@ fn gen_zcode<'a>(node: &'a ASTNode, state: FormattingState, mut out: &mut zfile:
                     }
                 },
                 &Token::TokEndIf => {
-                    debug!("endif");
                     let after_else_label = &format!("after_else_{}", if_stack.pop().unwrap());
-                    debug!("{}",after_else_label);
                     out.label(after_else_label);
                 },
                 _ => {
                     debug!("no match 2");
                 }
             };
-
-           
-
-         
         }
     };
 }
