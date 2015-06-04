@@ -124,7 +124,7 @@ impl AST {
     /// convert ast to zcode
     pub fn to_zcode(&self,  out: &mut zfile::Zfile) {
         let mut var_table = HashMap::<&str, u8>::new();
-        let mut var_id : u8 = 100;
+        let mut var_id : u8 = 25;
         let state = FormattingState {bold: false, italic: false, mono: false, inverted: false};
         for child in &self.passages {
             gen_zcode(child, state, out, &mut var_table, &mut var_id);
