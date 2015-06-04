@@ -16,7 +16,9 @@ pub struct AST {
 
 
 /// add zcode based on tokens
-fn gen_zcode<'a>(node: &'a ASTNode, state: FormattingState, mut out: &mut zfile::Zfile, mut var_table: &mut HashMap<&'a str, u8>, mut var_id: &mut u8) {
+fn gen_zcode<'a>(node: &'a ASTNode, state: FormattingState, mut out: &mut zfile::Zfile, 
+    mut var_table: &mut HashMap<&'a str, u8>, mut var_id: &mut u8, mut if_count: &mut u32, mut if_stack: &mut Vec<u32>) {
+
     let mut state_copy = state.clone();
   
     match node {
@@ -31,7 +33,7 @@ fn gen_zcode<'a>(node: &'a ASTNode, state: FormattingState, mut out: &mut zfile:
             };
             
             for child in &node.childs {
-                gen_zcode(child, state_copy, out, var_table, var_id);
+                gen_zcode(child, state_copy, out, var_table, var_id, if_count, if_stack);
             }
 
             out.op_newline();
@@ -49,10 +51,20 @@ fn gen_zcode<'a>(node: &'a ASTNode, state: FormattingState, mut out: &mut zfile:
                 &Token::TokFormatBoldStart => {
                     state_copy.bold = true;
                     out.op_set_text_style(state_copy.bold, state_copy.inverted, state_copy.mono, state_copy.italic);
+                    for child in &t.childs {
+                        gen_zcode(child, state_copy, out, var_table, var_id, if_count, if_stack);
+                    }
+                    out.op_set_text_style(false, false, false, false);
+                    out.op_set_text_style(state.bold, state.inverted, state.mono, state.italic);
                 },
                 &Token::TokFormatItalicStart => {
                     state_copy.italic = true;
                     out.op_set_text_style(state_copy.bold, state_copy.inverted, state_copy.mono, state_copy.italic);
+                    for child in &t.childs {
+                        gen_zcode(child, state_copy, out, var_table, var_id, if_count, if_stack);
+                    }
+                    out.op_set_text_style(false, false, false, false);
+                    out.op_set_text_style(state.bold, state.inverted, state.mono, state.italic);
                 },
                 &Token::TokPassageLink (ref name, ref link) => {
                     out.op_call_2n_with_address("system_add_link", link);
@@ -63,6 +75,11 @@ fn gen_zcode<'a>(node: &'a ASTNode, state: FormattingState, mut out: &mut zfile:
                     out.op_print_num_var(16);
                     out.op_print("]");
                     out.op_set_text_style(state_copy.bold, state_copy.inverted, state_copy.mono, state_copy.italic);
+                    for child in &t.childs {
+                        gen_zcode(child, state_copy, out, var_table, var_id, if_count, if_stack);
+                    }
+                    out.op_set_text_style(false, false, false, false);
+                    out.op_set_text_style(state.bold, state.inverted, state.mono, state.italic);
                 },
                 &Token::TokAssign(ref var, ref operator) => {
                     if operator == "=" {
@@ -105,17 +122,108 @@ fn gen_zcode<'a>(node: &'a ASTNode, state: FormattingState, mut out: &mut zfile:
                         
                     }
                 },
+                &Token::TokIf => {
+                    if t.childs.len() < 2 {
+                        panic!("Unsupported if-expression!");
+                    }
+
+                    let mut pseudo_node_pos = 1;
+                    let mut compare : u8 = 1;
+                    // Check if first token is variable
+                    let var_name = match t.childs[0] {
+                        ASTNode::Default(ref def) => {
+                            match def.category {
+                                Token::TokVariable(ref var) => {
+                                    var
+                                },
+                                _ =>  panic!("Unsupported if-expression!")
+                            }
+                        }, _ => panic!("Unsupported if-expression!")
+                    };
+                    if t.childs.len() > 2 {
+                        pseudo_node_pos = 3;
+                        // Check if second token is compare operator
+                        match t.childs[1] {
+                            ASTNode::Default(ref def) => {
+                                match def.category {
+                                    Token::TokCompOp(ref op) => {
+                                        match &*(*op) {
+                                            "==" | "is" => {} ,
+                                            _ => panic!("Unsupported Compare Operator!")
+                                        }
+                                    }, _ =>  panic!("Unsupported if-expression!")
+                                }
+                            }, _ => panic!("Unsupported if-expression!")
+                        }
+                        // Check if third token is number
+                        compare = match t.childs[2] {
+                            ASTNode::Default(ref def) => {
+                                match def.category {
+                                    Token::TokInt(ref value) => {
+                                        *value as u8
+                                    },
+                                    Token::TokBoolean(ref bool_val) => {
+                                        match &*(*bool_val) {
+                                            "true" => 1 as u8,
+                                            _ => 0 as u8
+                                        }
+                                    }, _ => panic!("Unsupported assign value!") 
+                                }
+                            }, _ => panic!("Unsupported if-expression!")
+                        };
+                    }
+                    let actual_id :u8 = match var_table.get::<str>(&*(*var_name)) {
+                                    Some(id) => {
+                                        *id                                             
+                                    },
+                                    None => {
+                                        panic!("Variable not in var table.")
+                                    }
+                                };
+
+                    let if_label = &format!("if_{}", if_count);
+                    let after_if_label = &format!("after_if_{}", if_count);
+                    let after_else_label = &format!("after_else_{}", if_count);
+                    debug!("{}",if_label);
+                    if_stack.push(*if_count);
+                    *if_count += 1;
+                    out.label(after_else_label);
+                    out.op_je(actual_id, compare, if_label);
+                    out.op_jump(after_if_label);
+                    out.label(if_label);
+                    match t.childs[pseudo_node_pos] { 
+                        ASTNode::Default(ref def) => {
+                                match def.category {
+                                    Token::TokPseudo => {
+                                        for child in &def.childs {
+                                            gen_zcode(child, state_copy, out, var_table, var_id, if_count, if_stack)
+                                        }
+                                    }, _ => panic!("Unexpected Token!")
+                                }
+                        }, _ => panic!("Unsupported if-expression!")
+                    }
+                    out.op_jump(after_else_label);
+                    out.label(after_if_label);
+                },
+                &Token::TokElse => {
+                    for child in &t.childs {
+                        gen_zcode(child, state_copy, out, var_table, var_id, if_count, if_stack)
+                    }
+                },
+                &Token::TokEndIf => {
+                    debug!("endif");
+                    let after_else_label = &format!("after_else_{}", if_stack.pop().unwrap());
+                    debug!("{}",after_else_label);
+                    out.label(after_else_label);
+                },
                 _ => {
                     debug!("no match 2");
                 }
             };
 
-            for child in &t.childs {
-                gen_zcode(child, state_copy, out, var_table, var_id);
-            }
+           
 
-            out.op_set_text_style(false, false, false, false);
-            out.op_set_text_style(state.bold, state.inverted, state.mono, state.italic);
+         
         }
     };
 }
@@ -125,9 +233,11 @@ impl AST {
     pub fn to_zcode(&self,  out: &mut zfile::Zfile) {
         let mut var_table = HashMap::<&str, u8>::new();
         let mut var_id : u8 = 25;
+        let mut if_count : u32 = 0;
+        let mut if_stack : Vec<u32> = Vec::new();
         let state = FormattingState {bold: false, italic: false, mono: false, inverted: false};
         for child in &self.passages {
-            gen_zcode(child, state, out, &mut var_table, &mut var_id);
+            gen_zcode(child, state, out, &mut var_table, &mut var_id, &mut if_count, &mut if_stack);
         }
     }
 
