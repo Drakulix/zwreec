@@ -364,6 +364,15 @@ impl Zfile {
         self.data.append_byte(value);
     }
 
+    // saves an u16 to the variable
+    pub fn op_store_u16(&mut self, variable: u8, value: u16) {
+        let args: Vec<ArgType> = vec![ArgType::Reference, ArgType::LargeConst];
+        self.op_2(0x0d, args);
+
+        self.data.append_byte(variable);
+        self.data.append_u16(value);
+    }
+
     /// increments the value of the variable
     pub fn op_inc(&mut self, variable: u8) {
         self.op_1(0x05, ArgType::Reference);
@@ -603,7 +612,8 @@ impl Zfile {
                 &ArgType::SmallConst => byte |= 0x01 << shift,
                 &ArgType::Variable   => byte |= 0x02 << shift,
                 &ArgType::Nothing    => byte |= 0x03 << shift,
-                _                    => panic!("no possible varOP")
+                &ArgType::Reference  => byte |= 0x01 << shift,
+                //_                    => panic!("no possible varOP")
             }
         }
 

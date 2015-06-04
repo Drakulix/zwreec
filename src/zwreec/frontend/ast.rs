@@ -4,6 +4,7 @@
 use frontend::lexer::Token;
 use backend::zcode::zfile;
 use backend::zcode::zfile::{FormattingState};
+use std::collections::HashMap;
 
 //==============================
 // ast
@@ -12,10 +13,12 @@ pub struct AST {
     passages: Vec<ASTNode>
 }
 
-/// add zcode based on tokens
-fn gen_zcode(node: &ASTNode, state: FormattingState, mut out: &mut zfile::Zfile) {
-    let mut state_copy = state.clone();
 
+
+/// add zcode based on tokens
+fn gen_zcode<'a>(node: &'a ASTNode, state: FormattingState, mut out: &mut zfile::Zfile, mut var_table: &mut HashMap<&'a str, u8>, mut var_id: &mut u8) {
+    let mut state_copy = state.clone();
+  
     match node {
         &ASTNode::Passage(ref node) => {
             match &node.category {
@@ -28,7 +31,7 @@ fn gen_zcode(node: &ASTNode, state: FormattingState, mut out: &mut zfile::Zfile)
             };
             
             for child in &node.childs {
-                gen_zcode(child, state_copy, out);
+                gen_zcode(child, state_copy, out, var_table, var_id);
             }
 
             out.op_newline();
@@ -60,8 +63,48 @@ fn gen_zcode(node: &ASTNode, state: FormattingState, mut out: &mut zfile::Zfile)
                     out.op_print_num_var(16);
                     out.op_print("]");
                     out.op_set_text_style(state_copy.bold, state_copy.inverted, state_copy.mono, state_copy.italic);
-                    
-
+                },
+                &Token::TokAssign(ref var, ref operator) => {
+                    if operator == "=" || operator == "to" {
+                        if !var_table.contains_key::<str>(var) {
+                            var_table.insert(&var, *var_id);
+                            debug!("Assigned id {} to variable {}", var_id, var);
+                            *var_id += 1;
+                        }
+                        let id_option = var_table.get::<str>(var);
+                        if t.childs.len() == 1 {
+                            match t.childs[0] {
+                                ASTNode::Default(ref def) => {
+                                    let actual_id :u8 = match id_option {
+                                        Some(id) => {
+                                            *id                                             
+                                        },
+                                        None => {
+                                            panic!("Variable not in var table.")
+                                        }
+                                    };
+                                    match def.category {
+                                        Token::TokInt(value) => {
+                                            out.op_store_u16(actual_id, value as u16);
+                                            out.op_print_num_var(actual_id);
+                                        },
+                                        Token::TokBoolean(ref bool_val) => {
+                                            let value = match (*bool_val).as_ref() {
+                                                "true" => { 1 as u8 },
+                                                _ => { 0 as u8 }
+                                            };
+                                            out.op_store_u8(actual_id, value);
+                                        }
+                                        _ => { }
+                                    }
+                                },
+                                _ => { }
+                            }
+                        } else {
+                            debug!("Assign Expression currently not supported.");
+                        }
+                        
+                    }
                 },
                 _ => {
                     debug!("no match 2");
@@ -69,7 +112,7 @@ fn gen_zcode(node: &ASTNode, state: FormattingState, mut out: &mut zfile::Zfile)
             };
 
             for child in &t.childs {
-                gen_zcode(child, state_copy, out);
+                gen_zcode(child, state_copy, out, var_table, var_id);
             }
 
             out.op_set_text_style(false, false, false, false);
@@ -81,9 +124,11 @@ fn gen_zcode(node: &ASTNode, state: FormattingState, mut out: &mut zfile::Zfile)
 impl AST {
     /// convert ast to zcode
     pub fn to_zcode(&self,  out: &mut zfile::Zfile) {
+        let mut var_table = HashMap::<&str, u8>::new();
+        let mut var_id : u8 = 25;
         let state = FormattingState {bold: false, italic: false, mono: false, inverted: false};
         for child in &self.passages {
-            gen_zcode(child, state, out);
+            gen_zcode(child, state, out, &mut var_table, &mut var_id);
         }
     }
 

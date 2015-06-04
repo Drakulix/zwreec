@@ -33,4 +33,6 @@ pub fn compile<R: Read, W: Write>(input: &mut R, output: &mut W) {
 
     // create code
     codegen::generate_zcode(ast, output);
+
+    //backend::zcode::temp_create_zcode_example();
 }
