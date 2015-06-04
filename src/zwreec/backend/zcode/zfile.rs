@@ -199,6 +199,31 @@ impl Zfile {
         self.labels.push(label);
     }
 
+    /// generates normal print opcodes for ASCII characters and unicode print
+    /// opcodes for unicode characters
+    pub fn gen_print_ops(&mut self, text: &str) {
+        let mut current_text: String = String::new();
+        for character in text.chars() {
+            if character as u32 <= 126 {
+                // this is a non-unicode char
+                current_text.push(character);
+            } else {
+                debug!("Printing unicode char {}", character.to_string());
+                // unicode
+                if current_text.len() > 0 {
+                    self.op_print(&current_text[..]);
+                    current_text.clear();
+                }
+
+                self.op_print_unicode_char(character);
+            }
+        }
+
+        if current_text.len() > 0 {
+            self.op_print(&current_text[..]);
+        }
+    }
+
     // ================================
     // no op-commands
 

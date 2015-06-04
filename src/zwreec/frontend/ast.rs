@@ -30,7 +30,7 @@ fn gen_zcode(node: &ASTNode, state: FormattingState, mut out: &mut zfile::Zfile)
         &ASTNode::Default(ref t) => {
             match &t.category {
                 &Token::TokText(ref s) => {
-                    out.op_print(s);
+                    out.gen_print_ops(s);
                 },
                 &Token::TokNewLine => {
                     out.op_newline();
