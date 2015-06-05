@@ -1,4 +1,4 @@
-use std::io::{BufReader,Read};
+use std::io::{BufReader, Read};
 use utils::extensions::{Peeking, PeekingExt, FilteringScan, FilteringScanExt};
 
 use self::Token::{
@@ -587,3 +587,109 @@ rustlex! TweeLexer {
 	}
 
 }
+
+
+// ================================
+// test functions
+#[cfg(test)] use std::io::Cursor;
+
+#[cfg(test)]
+fn test_lex(input: &str) -> Vec<Token> {
+	let mut cursor: Cursor<Vec<u8>> = Cursor::new(input.to_string().into_bytes());
+	lex(&mut cursor).collect()
+}
+
+#[test]
+fn passage_test() {
+	// This should detect the ::Start passage
+	let start_tokens = test_lex("::Start");
+	assert_eq!(start_tokens.len(), 1);
+	if let TokPassageName(ref name) = start_tokens[0] {
+		assert_eq!(name, "Start")
+	} else {
+		panic!("Expected TokPassageName, got {:?}", start_tokens[0])
+	};
+
+	// This should not return any tokens
+	let fail_tokens = test_lex(":fail");
+	assert_eq!(fail_tokens.len(), 0);
+}
+
+#[test]
+fn text_test() {
+	// This should return a passage with a body text
+	let tokens = test_lex("::MyPassage\nTestText\nTestNextLine");
+	assert_eq!(tokens.len(), 4);
+
+	if let TokPassageName(ref name) = tokens[0] {
+		assert_eq!(name, "MyPassage");
+	} else {
+		panic!("Expected TokPassageName, got {:?}", tokens[0]);
+	}
+
+	if let TokText(ref text) = tokens[1] {
+		assert_eq!(text, "TestText");
+	} else {
+		panic!("Expected TokText, got {:?}", tokens[1]);
+	}
+
+	if let TokNewLine = tokens[2] {
+		// valid
+	} else {
+		panic!("Expected TokNewLine, got {:?}", tokens[2]);
+	}
+
+	if let TokText(ref text) = tokens[3] {
+		assert_eq!(text, "TestNextLine");
+	} else {
+		panic!("Expected TokText, got {:?}", tokens[3]);
+	}
+}
+
+/// TODO Tags are broken. Uncomment when #89 is fixed
+/*
+#[test]
+fn tag_test() {
+	// This should return a passage with tags
+	let tokens = test_lex("::TagPassage [tag1 tag2]\nContent");
+	assert_eq!(tokens.len(), 6);
+
+	if let TokPassageName(ref name) = tokens[0] {
+		assert_eq!(name, "TagPassage");
+	} else {
+		panic!("Expected TokPassageName, got {:?}", tokens[0]);
+	}
+
+	if let TokTagStart = tokens[1] {
+		// valid
+	} else {
+		panic!("Expected TokTagStart, got {:?}", tokens[1]);
+	}
+
+	if let TokTag(ref name) = tokens[2] {
+		assert_eq!(name, "tag1");
+	} else {
+		panic!("Expected TokTag, got {:?}", tokens[2]);
+	}
+
+	if let TokTag(ref name) = tokens[3] {
+		assert_eq!(name, "tag2");
+	} else {
+		panic!("Expected TokTag, got {:?}", tokens[3]);
+	}
+
+	if let TokTagEnd = tokens[4] {
+		// valid
+	} else {
+		panic!("Expected TokTagStart, got {:?}", tokens[4]);
+	}
+
+	if let TokText(ref text) = tokens[5] {
+		assert_eq!(text, "Content");
+	} else {
+		panic!("Expected TokText, got {:?}", tokens[5]);
+	}
+}
+*/
+
+
