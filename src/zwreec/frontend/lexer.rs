@@ -646,8 +646,8 @@ fn text_test() {
 	}
 }
 
-/// TODO Tags are broken. Uncomment when #89 is fixed
 /*
+/// TODO Tags are broken. Uncomment when #89 is fixed
 #[test]
 fn tag_test() {
 	// This should return a passage with tags
@@ -691,5 +691,4 @@ fn tag_test() {
 	}
 }
 */
-
 
