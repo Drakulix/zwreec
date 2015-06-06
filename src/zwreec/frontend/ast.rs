@@ -56,7 +56,6 @@ fn gen_zcode<'a>(node: &'a ASTNode, state: FormattingState, mut out: &mut zfile:
                 },
                 &Token::TokPassageLink (ref name, ref link) => {
                     out.op_call_2n_with_address("system_add_link", link);
-
                     out.op_set_text_style(state_copy.bold, true, state_copy.mono, state_copy.italic);
                     let link_text = format!("{}[", name);
                     out.op_print(&link_text);

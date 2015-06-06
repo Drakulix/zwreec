@@ -75,8 +75,13 @@ impl Zfile {
         // version
         self.data.write_byte(8, 0x00);
 
-        // flags
-        self.data.write_byte(0, 0x01);
+        // flag1 (from right to left)
+        // 0: colours availabe
+        // 1: picture
+        // 2: bold
+        // 3: italic
+        // 4: fixed
+        self.data.write_byte(0x1d, 0x01);
 
         // release version (0x02 und 0x03)
         self.data.write_u16(0, 0x02);
@@ -89,6 +94,11 @@ impl Zfile {
 
         // location of dictionary (byte address) (0x08 and 0x09)
         self.data.write_u16(dictionary_addr, 0x08);
+
+        // flag2 (from right to left)
+        // 6: game want to use colours
+        // 0000000001000000
+        self.data.write_u16(0x40, 0x10);
 
         // location of object table (byte address) (0x0a and 0x0b)
         self.data.write_u16(object_addr, 0x0a);
@@ -209,6 +219,10 @@ impl Zfile {
     pub fn start(&mut self) {
         self.create_header();
         self.data.write_zero_until(self.program_addr as usize);
+        
+        // default theme and erase_window to fore the color
+        self.op_set_color(9, 2);
+        self.op_erase_window(-1);
     }
 
     /// writes all stuff that couldn't written directly
@@ -216,6 +230,7 @@ impl Zfile {
     pub fn end(&mut self) {
         self.routine_check_links();
         self.routine_add_link();
+        self.routine_check_more();
         self.write_jumps();
     }
 
@@ -244,7 +259,7 @@ impl Zfile {
         self.routine("system_add_link", 1);
         
         // saves routine-argument to array
-        self.op_storew(0, 16, 0x01);
+        self.op_storew(1, 16, 0x01);
         //self.op_loadw(0, 0x00, 0x02);
         
         // inc the count links
@@ -261,10 +276,19 @@ impl Zfile {
         // jumps to the end, if there a no links
         self.op_je(16, 0x00, "system_check_links_end");
 
-        self.op_print("press a key... ");
+        self.op_print("--------------------");
+        self.op_newline();
+        self.op_print("Press a key... ");
         self.op_newline();
         self.label("system_check_links_loop");
         self.op_read_char(0x01);
+        //self.op_print_num_var(0x01);
+        self.op_je(0x01, 129, "system_check_links_jmp");
+        self.op_jump("system_check_links_after");
+        self.label("system_check_links_jmp");
+        self.op_call_1n("system_check_more");
+
+        self.label("system_check_links_after");
 
         self.op_sub(0x01, 48, 0x01);
 
@@ -275,18 +299,107 @@ impl Zfile {
         self.op_dec(0x01);
 
         // loads the address of the link from the array
-        self.op_loadw(0, 0x01, 0x02);
+        self.op_loadw(1, 0x01, 0x02);
 
         // no mor links exist
         self.op_store_u8(16, 0);
 
         self.op_newline();
 
+        // clears window bevor jumping
+        self.op_erase_window(-1);
+
         // jump to the new passage
         self.op_call_1n_var(0x02);
 
         self.label("system_check_links_end");
         self.op_quit();
+
+        
+        //self.op_ret(0);
+    }
+
+    pub fn routine_check_more(&mut self) {
+        self.routine("system_check_more", 1);
+
+        self.op_read_char(0x01);
+        self.op_je(0x01, 129, "system_check_more_ko_1");
+        self.op_ret(0);
+        self.label("system_check_more_ko_1");
+
+        self.op_read_char(0x01);
+        self.op_je(0x01, 130, "system_check_more_ko_2");
+        self.op_ret(0);
+        self.label("system_check_more_ko_2");
+
+        self.op_read_char(0x01);
+        self.op_je(0x01, 130, "system_check_more_ko_3");
+        self.op_ret(0);
+        self.label("system_check_more_ko_3");
+
+        self.op_read_char(0x01);
+        self.op_je(0x01, 131, "system_check_more_ko_4");
+        self.op_ret(0);
+        self.label("system_check_more_ko_4");
+
+        self.op_read_char(0x01);
+        self.op_je(0x01, 132, "system_check_more_ko_5");
+        self.op_ret(0);
+        self.label("system_check_more_ko_5");
+
+        self.op_read_char(0x01);
+        self.op_je(0x01, 131, "system_check_more_ko_6");
+        self.op_ret(0);
+        self.label("system_check_more_ko_6");
+
+        self.op_read_char(0x01);
+        self.op_je(0x01, 132, "system_check_more_ko_7");
+        self.op_ret(0);
+        self.label("system_check_more_ko_7");
+
+        self.op_read_char(0x01);
+        self.op_je(0x01, 98, "system_check_more_ko_8");
+        self.op_ret(0);
+        self.label("system_check_more_ko_8");
+
+        self.op_read_char(0x01);
+        self.op_je(0x01, 97, "system_check_more_ko_9");
+        self.op_ret(0);
+        self.label("system_check_more_ko_9");
+
+
+        self.label("system_check_more_timer_loop");
+        self.op_read_char_timer(0, 1, "system_check_more_anim");
+        self.op_jump("system_check_more_timer_loop");
+
+        self.op_quit();
+
+        self.routine("system_check_more_anim", 5);
+        self.op_erase_window(-1);
+        self.op_set_text_style(false, false, true, false);
+        self.op_set_color(2, 9);
+        self.op_print(" ZWREEC Easter egg <3");
+        self.op_newline();
+
+        self.op_store_u8(1, 20);
+        self.label("system_check_more_loop");
+        self.op_random(8, 4);
+        self.op_random(100, 5);
+        self.op_add(5, 10, 5);
+        self.op_inc(4);
+        self.op_set_color_var(4, 4);
+        self.op_print("aa");
+        self.op_inc(2);
+
+        self.op_jl(2, 1, "system_check_more_loop");
+        self.op_newline();
+        self.op_inc(3);
+        self.op_store_u8(2, 0);
+
+        self.op_jl(3, 1, "system_check_more_loop");
+
+        
+        self.op_ret(0);
     }
 
 
@@ -342,6 +455,17 @@ impl Zfile {
 
         // the address of the argument
         self.add_jump(address.to_string(), JumpType::Routine);
+    }
+
+    /// addition
+    /// variable2 = variable1 + sub_const
+    pub fn op_add(&mut self, variable1: u8, sub_const: u16, variable2: u8) {
+        let args: Vec<ArgType> = vec![ArgType::Variable, ArgType::LargeConst];
+        self.op_2(0x14, args);
+        
+        self.data.append_byte(variable1);
+        self.data.append_u16(sub_const);
+        self.data.append_byte(variable2);
     }
 
     /// subtraktion
@@ -415,10 +539,33 @@ impl Zfile {
         self.data.append_byte(variable);
     }
 
-   /// sets the colors of the foreground (font) and background
+    /// calculates a random numer from 1 to range
+    pub fn op_random(&mut self, range: u8, variable: u8) {
+        let args: Vec<ArgType> = vec![ArgType::SmallConst, ArgType::Nothing, ArgType::Nothing, ArgType::Nothing];
+        self.op_var(0x07, args);
+
+        self.data.append_byte(range);
+        self.data.append_byte(variable);
+    }
+
+    /// sets the colors of the foreground (font) and background
     pub fn op_set_color(&mut self, foreground: u8, background: u8){
-        let op_coding = 0x00 << 6 | 0x00 << 5 | 0x1B;
-        self.data.append_byte(op_coding);
+        let args: Vec<ArgType> = vec![ArgType::SmallConst, ArgType::SmallConst];
+        self.op_2(0x1b, args);
+
+        //let op_coding = 0x00 << 6 | 0x00 << 5 | 0x1B;
+        //self.data.append_byte(op_coding);
+        self.data.append_byte(foreground);
+        self.data.append_byte(background);
+    }
+
+    /// sets the colors of the foreground (font) and background (but with variables
+    pub fn op_set_color_var(&mut self, foreground: u8, background: u8){
+        let args: Vec<ArgType> = vec![ArgType::Variable, ArgType::Variable];
+        self.op_2(0x1b, args);
+
+        //let op_coding = 0x00 << 6 | 0x00 << 5 | 0x1B;
+        //self.data.append_byte(op_coding);
         self.data.append_byte(foreground);
         self.data.append_byte(background);
     }
@@ -458,6 +605,33 @@ impl Zfile {
         self.data.append_byte(local_var_id);
     }
 
+    /// reads keys from the keyboard and saves the asci-value in local_var_id
+    /// read_char is VAROP
+    pub fn op_read_char_timer(&mut self, local_var_id: u8, timer: u8, routine: &str) {
+        let args: Vec<ArgType> = vec![ArgType::SmallConst, ArgType::SmallConst, ArgType::LargeConst, ArgType::Nothing];
+        self.op_var(0x16, args);
+
+        // write argument value
+        self.data.append_byte(0x00);
+
+        // write timer
+        self.data.append_byte(timer);
+
+        // writes routine
+        self.add_jump(routine.to_string(), JumpType::Routine);
+
+        // write varible id
+        self.data.append_byte(local_var_id);
+    }
+
+    pub fn op_erase_window(&mut self, value: i8) {
+        let args: Vec<ArgType> = vec![ArgType::LargeConst, ArgType::Nothing, ArgType::Nothing, ArgType::Nothing];
+        self.op_var(0x0d, args);
+
+        // signed to unsigned value
+        self.data.append_u16(value as u16);
+    }
+
     /// loads a word from an array in a variable
     /// loadw is an 2op, BUT with 3 ops -.-
     pub fn op_loadw(&mut self, array_address: u16, index: u8, variable: u8) {
@@ -477,6 +651,8 @@ impl Zfile {
     /// stores a value to an array
     /// stores the value of variable to the address in: array_address + 2*index
     pub fn op_storew(&mut self, array_address: u16, index: u8, variable: u8) {
+        assert!(array_address > 0, "not allowed array-address, becouse in _some_ interpreters (for example zoom) it crahs. -.-");
+
         let args: Vec<ArgType> = vec![ArgType::LargeConst, ArgType::Variable, ArgType::Variable, ArgType::Nothing];
         self.op_var(0x01, args);
 
