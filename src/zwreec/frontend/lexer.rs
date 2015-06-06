@@ -603,12 +603,13 @@ fn test_lex(input: &str) -> Vec<Token> {
 fn passage_test() {
 	// This should detect the ::Start passage
 	let start_tokens = test_lex("::Start");
-	assert_eq!(start_tokens.len(), 1);
 	if let TokPassageName(ref name) = start_tokens[0] {
 		assert_eq!(name, "Start")
 	} else {
 		panic!("Expected TokPassageName, got {:?}", start_tokens[0])
 	};
+
+	assert_eq!(start_tokens.len(), 1);
 
 	// This should not return any tokens
 	let fail_tokens = test_lex(":fail");
@@ -619,7 +620,6 @@ fn passage_test() {
 fn text_test() {
 	// This should return a passage with a body text
 	let tokens = test_lex("::MyPassage\nTestText\nTestNextLine");
-	assert_eq!(tokens.len(), 4);
 
 	if let TokPassageName(ref name) = tokens[0] {
 		assert_eq!(name, "MyPassage");
@@ -644,6 +644,8 @@ fn text_test() {
 	} else {
 		panic!("Expected TokText, got {:?}", tokens[3]);
 	}
+
+	assert_eq!(tokens.len(), 4);
 }
 
 /*
@@ -652,7 +654,6 @@ fn text_test() {
 fn tag_test() {
 	// This should return a passage with tags
 	let tokens = test_lex("::TagPassage [tag1 tag2]\nContent");
-	assert_eq!(tokens.len(), 6);
 
 	if let TokPassageName(ref name) = tokens[0] {
 		assert_eq!(name, "TagPassage");
@@ -681,7 +682,7 @@ fn tag_test() {
 	if let TokTagEnd = tokens[4] {
 		// valid
 	} else {
-		panic!("Expected TokTagStart, got {:?}", tokens[4]);
+		panic!("Expected TokTagEnd, got {:?}", tokens[4]);
 	}
 
 	if let TokText(ref text) = tokens[5] {
@@ -689,6 +690,47 @@ fn tag_test() {
 	} else {
 		panic!("Expected TokText, got {:?}", tokens[5]);
 	}
+
+	assert_eq!(tokens.len(), 6);
 }
 */
+
+#[test]
+fn macro_set_test() {
+	// This should return a passage with a body text
+	let tokens = test_lex("::Passage\n<<set $var = 1>>");
+	//panic!("{:?}", tokens);
+
+	if let TokPassageName(ref name) = tokens[0] {
+		assert_eq!(name, "Passage");
+	} else {
+		panic!("Expected TokPassageName, got {:?}", tokens[0]);
+	}
+
+	if let TokSet = tokens[1] {
+		// valid
+	} else {
+		panic!("Expected TokSet, got {:?}", tokens[1]);
+	}
+
+	if let TokAssign(ref varname, _) = tokens[2] {
+		assert_eq!(varname, "$var");
+	} else {
+		panic!("Expected TokAssign, got {:?}", tokens[2]);
+	}
+
+	if let TokInt(value) = tokens[3] {
+		assert_eq!(value, 1);
+	} else {
+		panic!("Expected TokInt, got {:?}", tokens[3]);
+	}
+
+	if let TokMakroEnd = tokens[4] {
+		// valid
+	} else {
+		panic!("Expected TokMakroEnd, got {:?}", tokens[4]);
+	}
+
+	assert_eq!(tokens.len(), 5);
+}
 
