@@ -14,8 +14,8 @@ pub struct AST {
 }
 
  /// add zcode based on tokens
-fn gen_zcode<'a>(node: &'a ASTNode, state: FormattingState, mut out: &mut zfile::Zfile, mut manager: &mut CodeGenManager<'a>) {
-    let mut state_copy = state.clone();
+fn gen_zcode<'a>(node: &'a ASTNode, mut out: &mut zfile::Zfile, mut manager: &mut CodeGenManager<'a>) {
+    let mut state_copy = manager.format_state.clone();
     let mut set_formatting = false;
   
     match node {
@@ -30,7 +30,7 @@ fn gen_zcode<'a>(node: &'a ASTNode, state: FormattingState, mut out: &mut zfile:
             };
             
             for child in &node.childs {
-                gen_zcode(child, state_copy, out, manager);
+                gen_zcode(child, out, manager)
             }
 
             out.op_newline();
@@ -139,7 +139,7 @@ fn gen_zcode<'a>(node: &'a ASTNode, state: FormattingState, mut out: &mut zfile:
                     out.label(if_label);
 
                     for i in 1..t.childs.len() {
-                        gen_zcode(&t.childs[i], state_copy, out, manager)
+                        gen_zcode(&t.childs[i], out, manager)
                     }
 
                     out.op_jump(after_else_label);
@@ -147,7 +147,7 @@ fn gen_zcode<'a>(node: &'a ASTNode, state: FormattingState, mut out: &mut zfile:
                 },
                 &Token::TokElse => {
                     for child in &t.childs {
-                        gen_zcode(child, state_copy, out, manager)
+                        gen_zcode(child, out, manager)
                     }
                 },
                 &Token::TokEndIf => {
@@ -160,9 +160,10 @@ fn gen_zcode<'a>(node: &'a ASTNode, state: FormattingState, mut out: &mut zfile:
             };
             if set_formatting {
                 for child in &t.childs {
-                    gen_zcode(child, state_copy, out, manager);
+                    gen_zcode(child, out, manager)
                 }
                 out.op_set_text_style(false, false, false, false);
+                let state = manager.format_state;
                 out.op_set_text_style(state.bold, state.inverted, state.mono, state.italic);
             }
         }
@@ -182,9 +183,8 @@ impl AST {
     /// convert ast to zcode
     pub fn to_zcode(& self, out: &mut zfile::Zfile) {
         let mut manager = CodeGenManager::new();
-        let state = FormattingState {bold: false, italic: false, mono: false, inverted: false};
         for child in &self.passages {
-            gen_zcode(child, state, out, &mut manager);
+            gen_zcode(child, out, &mut manager);
         }
     }
 
@@ -254,7 +254,8 @@ struct NodeDefault {
 
 struct CodeGenManager<'a> {
     ids_if: IdentifierProvider,
-    symbol_table: SymbolTable<'a>
+    symbol_table: SymbolTable<'a>,
+    format_state: FormattingState
 }
 
 struct IdentifierProvider {
@@ -271,7 +272,8 @@ impl <'a> CodeGenManager<'a> {
     pub fn new() -> CodeGenManager<'a> {
         CodeGenManager {
             ids_if: IdentifierProvider::new(),
-            symbol_table: SymbolTable::new()
+            symbol_table: SymbolTable::new(),
+            format_state: FormattingState {bold: false, italic: false, mono: false, inverted: false}
         }
     }
 }
