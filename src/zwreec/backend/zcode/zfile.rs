@@ -4,6 +4,21 @@
 pub use super::zbytes::Bytes;
 pub use super::ztext;
 
+#[derive(Debug)]
+pub enum ZOP {
+  PrintUnicode{c: char},
+  Print{text: String},
+  PrintNumVar{variable: u8},
+  PrintOps{text: String},
+  Call{jump_to_label: String},
+  CallWithAddress{jump_to_label: String, address: String},
+  Routine{name: String, count_variables: u8},
+  Newline,
+  SetTextStyle{bold: bool, reverse: bool, monospace: bool, italic: bool},
+  StoreU16{variable: u8, value: u16},
+  StoreU8{variable: u8, value: u8},
+}
+
 enum JumpType {
     Jump,
     Branch,
@@ -198,6 +213,24 @@ impl Zfile {
             }
         }
         self.labels.push(label);
+    }
+
+    pub fn emit(&mut self, code: Vec<ZOP>) {
+        for instr in &code {
+            match instr {
+                &ZOP::PrintUnicode{c} => self.op_print_unicode_char(c),
+                &ZOP::Print{ref text} => self.op_print(text),
+                &ZOP::PrintNumVar{variable} => self.op_print_num_var(variable),
+                &ZOP::PrintOps{ref text} => self.gen_print_ops(text),
+                &ZOP::Call{ref jump_to_label} => self.op_call_1n(jump_to_label),
+                &ZOP::Routine{ref name, count_variables} => self.routine(name, count_variables),
+                &ZOP::Newline => self.op_newline(),
+                &ZOP::SetTextStyle{bold, reverse, monospace, italic} => self.op_set_text_style(bold, reverse, monospace, italic),
+                &ZOP::CallWithAddress{ref jump_to_label, ref address} => self.op_call_2n_with_address(jump_to_label, address),
+                &ZOP::StoreU16{variable, value} => self.op_store_u16(variable, value),
+                &ZOP::StoreU8{variable, value} => self.op_store_u8(variable, value),
+            }
+        }
     }
 
     /// generates normal print opcodes for ASCII characters and unicode print

@@ -3,7 +3,7 @@
 
 use frontend::lexer::Token;
 use backend::zcode::zfile;
-use backend::zcode::zfile::{FormattingState};
+use backend::zcode::zfile::{FormattingState, ZOP};
 use std::collections::HashMap;
 
 //==============================
@@ -16,14 +16,14 @@ pub struct AST {
 
 
 /// add zcode based on tokens
-fn gen_zcode<'a>(node: &'a ASTNode, state: FormattingState, mut out: &mut zfile::Zfile, mut var_table: &mut HashMap<&'a str, u8>, mut var_id: &mut u8) {
+fn gen_zcode<'a>(node: &'a ASTNode, state: FormattingState, mut out: &mut zfile::Zfile, mut var_table: &mut HashMap<&'a str, u8>, mut var_id: &mut u8) -> Vec<ZOP> {
     let mut state_copy = state.clone();
-  
     match node {
         &ASTNode::Passage(ref node) => {
+            let mut code: Vec<ZOP> = vec![];
             match &node.category {
                 &Token::TokPassageName(ref name) => {
-                    out.routine(name, 0);
+                    code.push(ZOP::Routine{name: name.to_string(), count_variables: 0});
                 },
                 _ => {
                     debug!("no match 1");
@@ -31,38 +31,41 @@ fn gen_zcode<'a>(node: &'a ASTNode, state: FormattingState, mut out: &mut zfile:
             };
             
             for child in &node.childs {
-                gen_zcode(child, state_copy, out, var_table, var_id);
+                for instr in gen_zcode(child, state_copy, out, var_table, var_id) {
+                    code.push(instr);
+                }
+
             }
 
-            out.op_newline();
-            out.op_call_1n("system_check_links");
-
+            code.push(ZOP::Newline);
+            code.push(ZOP::Call{jump_to_label: "system_check_links".to_string()});
+            code
         },
         &ASTNode::Default(ref t) => {
-            match &t.category {
+            let mut code: Vec<ZOP> = match &t.category {
                 &Token::TokText(ref s) => {
-                    out.gen_print_ops(s);
+                    vec![ZOP::PrintOps{text: s.to_string()}]
                 },
                 &Token::TokNewLine => {
-                    out.op_newline();
+                    vec![ZOP::Newline]
                 },
                 &Token::TokFormatBoldStart => {
                     state_copy.bold = true;
-                    out.op_set_text_style(state_copy.bold, state_copy.inverted, state_copy.mono, state_copy.italic);
+                    vec![ZOP::SetTextStyle{bold: state_copy.bold, reverse: state_copy.inverted, monospace: state_copy.mono, italic: state_copy.italic}]
                 },
                 &Token::TokFormatItalicStart => {
                     state_copy.italic = true;
-                    out.op_set_text_style(state_copy.bold, state_copy.inverted, state_copy.mono, state_copy.italic);
+                    vec![ZOP::SetTextStyle{bold: state_copy.bold, reverse: state_copy.inverted, monospace: state_copy.mono, italic: state_copy.italic}]
                 },
                 &Token::TokPassageLink (ref name, ref link) => {
-                    out.op_call_2n_with_address("system_add_link", link);
-
-                    out.op_set_text_style(state_copy.bold, true, state_copy.mono, state_copy.italic);
-                    let link_text = format!("{}[", name);
-                    out.op_print(&link_text);
-                    out.op_print_num_var(16);
-                    out.op_print("]");
-                    out.op_set_text_style(state_copy.bold, state_copy.inverted, state_copy.mono, state_copy.italic);
+                    vec![
+                    ZOP::CallWithAddress{jump_to_label: "system_add_link".to_string(), address: link.to_string()},
+                    ZOP::SetTextStyle{bold: state_copy.bold, reverse: state_copy.inverted, monospace: state_copy.mono, italic: state_copy.italic},
+                    ZOP::Print{text: format!("{}[", name)},
+                    ZOP::PrintNumVar{variable: 16},
+                    ZOP::Print{text: "]".to_string()},
+                    ZOP::SetTextStyle{bold: state_copy.bold, reverse: state_copy.inverted, monospace: state_copy.mono, italic: state_copy.italic}
+                    ]
                 },
                 &Token::TokAssign(ref var, ref operator) => {
                     if operator == "=" || operator == "to" {
@@ -85,40 +88,47 @@ fn gen_zcode<'a>(node: &'a ASTNode, state: FormattingState, mut out: &mut zfile:
                                     };
                                     match def.category {
                                         Token::TokInt(value) => {
-                                            out.op_store_u16(actual_id, value as u16);
-                                            out.op_print_num_var(actual_id);
+                                            vec![
+                                            ZOP::StoreU16{variable: actual_id, value: value as u16},
+                                            ZOP::PrintNumVar{variable: actual_id}
+                                            ]
                                         },
                                         Token::TokBoolean(ref bool_val) => {
                                             let value = match (*bool_val).as_ref() {
                                                 "true" => { 1 as u8 },
                                                 _ => { 0 as u8 }
                                             };
-                                            out.op_store_u8(actual_id, value);
+                                            vec![ZOP::StoreU8{variable: actual_id, value: value}]
                                         }
-                                        _ => { }
+                                        _ => { vec![] }
                                     }
                                 },
-                                _ => { }
+                                _ => { vec![] }
                             }
                         } else {
                             debug!("Assign Expression currently not supported.");
+                            vec![]
                         }
                         
-                    }
+                    } else { vec![] }
                 },
                 _ => {
                     debug!("no match 2");
+                    vec![]
                 }
             };
 
             for child in &t.childs {
-                gen_zcode(child, state_copy, out, var_table, var_id);
+                for instr in gen_zcode(child, state_copy, out, var_table, var_id) {
+                    code.push(instr);
+                }
             }
 
-            out.op_set_text_style(false, false, false, false);
-            out.op_set_text_style(state.bold, state.inverted, state.mono, state.italic);
+            code.push(ZOP::SetTextStyle{bold: false, reverse: false, monospace: false, italic: false});
+            code.push(ZOP::SetTextStyle{bold: state.bold, reverse: state.inverted, monospace: state.mono, italic: state.italic});
+            code
         }
-    };
+    }
 }
 
 impl AST {
@@ -127,9 +137,17 @@ impl AST {
         let mut var_table = HashMap::<&str, u8>::new();
         let mut var_id : u8 = 25;
         let state = FormattingState {bold: false, italic: false, mono: false, inverted: false};
+        let mut code : Vec<ZOP> = vec![];
         for child in &self.passages {
-            gen_zcode(child, state, out, &mut var_table, &mut var_id);
+            for instr in gen_zcode(child, state, out, &mut var_table, &mut var_id) {
+                code.push(instr);
+            }
         }
+        debug!("emit zcode:");
+        for instr in &code {
+            debug!("{:?}", instr);
+        }
+        out.emit(code);
     }
 
     pub fn new() -> AST {
