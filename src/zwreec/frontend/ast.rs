@@ -60,7 +60,7 @@ fn gen_zcode<'a>(node: &'a ASTNode, state: FormattingState, mut out: &mut zfile:
                 &Token::TokPassageLink (ref name, ref link) => {
                     vec![
                     ZOP::CallWithAddress{jump_to_label: "system_add_link".to_string(), address: link.to_string()},
-                    ZOP::SetTextStyle{bold: state_copy.bold, reverse: state_copy.inverted, monospace: state_copy.mono, italic: state_copy.italic},
+                    ZOP::SetTextStyle{bold: state_copy.bold, reverse: true, monospace: state_copy.mono, italic: state_copy.italic},
                     ZOP::Print{text: format!("{}[", name)},
                     ZOP::PrintNumVar{variable: 16},
                     ZOP::Print{text: "]".to_string()},
