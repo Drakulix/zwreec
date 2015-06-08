@@ -181,8 +181,8 @@ fn gen_zcode<'a>(node: &'a ASTNode, mut out: &mut zfile::Zfile, mut manager: &mu
                 code.push(ZOP::SetTextStyle{bold: false, reverse: false, monospace: false, italic: false});
                 let state = manager.format_state;
                 code.push(ZOP::SetTextStyle{bold: state.bold, reverse: state.inverted, monospace: state.mono, italic: state.italic});
-                code
             }
+            code
         }
     }
 
