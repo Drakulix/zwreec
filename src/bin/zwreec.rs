@@ -48,6 +48,7 @@ fn main() {
     opts.optopt("o", "", "name of the output file", "FILE");
     opts.optflag("h", "help", "display this help and exit");
     opts.optflag("V", "version", "display version");
+    opts.optflag("e", "generate-sample-zcode", "writes out a sample zcode file, input file is not used and can be omitted");
 
     let parsed_opts = match opts.parse(&args[1..]) {
         Ok(m)  => { m }
@@ -115,28 +116,6 @@ fn main() {
             );
     }
 
-    // check parsed options and open the source file
-    let mut infile = if parsed_opts.free.len() == 1 {
-        // check number of 'free' parameter
-        // one free parameter is the input file name
-        let path = Path::new(&parsed_opts.free[0]);
-        match File::open(path) {
-            Err(why) => {
-                panic!("Couldn't open {}: {}",
-                               path.display(), Error::description(&why))
-            },
-            Ok(file) => {
-                info!("Opened input: {}", path.display());
-                file
-            }
-        }
-    } else {
-        // TODO: check if STDOUT is a tty
-        print_stderr!("Input file name missing\n");
-        print_usage!(program, opts);
-        exit(1);
-    };
-
     // check parsed options and open a file for the resulting output
     let mut outfile = if let Some(file) = parsed_opts.opt_str("o") {
         // parsed "-o FILE"
@@ -170,6 +149,34 @@ fn main() {
 
     // activate logger
     let _ = logger::CombinedLogger::init(loggers);
+
+    if parsed_opts.opt_present("e") {
+        info!("calling temp_create_zcode_example()");
+        zwreec::backend::zcode::temp_create_zcode_example(&mut outfile);
+        exit(0);
+    }
+
+    // check parsed options and open the source file
+    let mut infile = if parsed_opts.free.len() == 1 {
+        // check number of 'free' parameter
+        // one free parameter is the input file name
+        let path = Path::new(&parsed_opts.free[0]);
+        match File::open(path) {
+            Err(why) => {
+                panic!("Couldn't open {}: {}",
+                               path.display(), Error::description(&why))
+            },
+            Ok(file) => {
+                info!("Opened input: {}", path.display());
+                file
+            }
+        }
+    } else {
+        // TODO: check if STDOUT is a tty
+        print_stderr!("Input file name missing\n");
+        print_usage!(program, opts);
+        exit(1);
+    };
 
     debug!("Parsed command line options");
     info!("Main started");

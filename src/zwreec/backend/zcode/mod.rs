@@ -5,13 +5,14 @@ pub mod zbytes;
 pub mod zfile;
 pub mod ztext;
 
-use utils::file;
+use std::error::Error;
+use std::io::Write;
 use self::zfile::Zfile;
 
 
 /// an example to show the current status of the z-code implementation
 /// zcode playground function
-pub fn temp_create_zcode_example() {
+pub fn temp_create_zcode_example<W: Write>(output: &mut W) {
 
     let mut zfile: Zfile = zfile::Zfile::new();
 
@@ -26,5 +27,12 @@ pub fn temp_create_zcode_example() {
     zfile.op_quit();
     zfile.end();
 
-    file::save_bytes_to_file("helloworld.z8", &(*zfile.data.bytes));
+    match output.write_all(&(*zfile.data.bytes)) {
+        Err(why) => {
+            panic!("Could not write to output: {}", Error::description(&why));
+        },
+        Ok(_) => {
+            info!("Wrote zcode to output");
+        }
+    };
 }
