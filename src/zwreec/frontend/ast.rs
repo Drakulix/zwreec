@@ -91,7 +91,7 @@ fn gen_zcode<'a>(node: &'a ASTNode, mut out: &mut zfile::Zfile, mut manager: &mu
                             vec![]
                         }
                         
-                    }
+                    } else { vec![] }
                 },
                 &Token::TokIf => {
                     if t.childs.len() < 2 {
@@ -137,13 +137,13 @@ fn gen_zcode<'a>(node: &'a ASTNode, mut out: &mut zfile::Zfile, mut manager: &mu
                     let symbol_id = manager.symbol_table.get_symbol_id(&*var_name);
                     let if_id = manager.ids_if.start_next();
 
-                    let if_label = &format!("if_{}", if_id);
-                    let after_if_label = &format!("after_if_{}", if_id);
-                    let after_else_label = &format!("after_else_{}", if_id);
+                    let if_label = format!("if_{}", if_id);
+                    let after_if_label = format!("after_if_{}", if_id);
+                    let after_else_label = format!("after_else_{}", if_id);
                     let mut code: Vec<ZOP> = vec![
-                        ZOP::JE{local_var_id: symbol_id, equal_to_const: compare, jump_to_label: if_label},
-                        ZOP::Jump{jump_to_label: after_if_label},
-                        ZOP::Label{name: if_label}
+                        ZOP::JE{local_var_id: symbol_id, equal_to_const: compare, jump_to_label: if_label.to_string()},
+                        ZOP::Jump{jump_to_label: after_if_label.to_string()},
+                        ZOP::Label{name: if_label.to_string()}
                     ];
 
                     for i in 1..t.childs.len() {
@@ -152,19 +152,21 @@ fn gen_zcode<'a>(node: &'a ASTNode, mut out: &mut zfile::Zfile, mut manager: &mu
                         }
                     }
 
-                    code.push(ZOP::Jump{jump_to_label: after_else_label});
-                    code.push(ZOP::Label{name: after_if_label});
+                    code.push(ZOP::Jump{jump_to_label: after_else_label.to_string()});
+                    code.push(ZOP::Label{name: after_if_label.to_string()});
                     code
                 },
                 &Token::TokElse => {
+                    let mut code: Vec<ZOP> = vec![];
                     for child in &t.childs {
                         for instr in gen_zcode(child, out, manager) {
                             code.push(instr);
                         }
                     }
+                    code
                 },
                 &Token::TokEndIf => {
-                    let after_else_label = &format!("after_else_{}", manager.ids_if.pop_id());
+                    let after_else_label = format!("after_else_{}", manager.ids_if.pop_id());
                     vec![ZOP::Label{name: after_else_label}]
                 },
                 _ => {
@@ -200,11 +202,17 @@ impl AST {
     /// convert ast to zcode
     pub fn to_zcode(& self, out: &mut zfile::Zfile) {
         let mut manager = CodeGenManager::new();
+        let mut code: Vec<ZOP> = vec![];
         for child in &self.passages {
             for instr in gen_zcode(child, out, &mut manager) {
                 code.push(instr);
             }
         }
+        debug!("emit zcode:");
+        for instr in &code {
+            debug!("{:?}", instr);
+        }
+        out.emit(code);
     }
 
     pub fn new() -> AST {
