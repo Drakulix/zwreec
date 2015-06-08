@@ -33,6 +33,11 @@ fn helloworld_test() {
 }
 
 #[test]
+fn long_text_test() {
+    test_compile(TESTFOLDER.to_string() + "HelloWorld.twee");
+}
+
+#[test]
 fn zscii_test() {
 	test_compile(TESTFOLDER.to_string() + "ZSCII.twee");
 }
@@ -40,4 +45,9 @@ fn zscii_test() {
 #[test]
 fn ascii_test() {
 	test_compile(TESTFOLDER.to_string() + "ASCII.twee");
+}
+
+#[test]
+fn unicode_test() {
+    test_compile(TESTFOLDER.to_string() + "Unicode.twee");
 }

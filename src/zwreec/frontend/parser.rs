@@ -62,7 +62,7 @@ struct Parser {
     ast_path: Vec<usize>,
     tokens: Vec<Token>,
     lookahead: usize,
-    is_in_if: bool,
+    is_in_else: bool,
 }
 
 impl Parser {
@@ -73,7 +73,7 @@ impl Parser {
             ast_path: Vec::new(),
             tokens: tokens,
             lookahead: 0,
-            is_in_if: false
+            is_in_else: false
         }
     }
 
@@ -162,8 +162,15 @@ impl Parser {
                 },
                 (PassageContent, &TokEndIf) => {
                     // jump one ast-level higher
-                    debug!("pop TokEndIf");
-                    self.ast_path.pop();
+                    debug!("pop TokEndIf Passage; in else: {:?}", self.is_in_else);
+
+                    // ast
+                    // special handling for the else
+                    if self.is_in_else == true {
+                        self.is_in_else = false;
+                        self.ast_path.pop();
+                        self.ast.add_child(&self.ast_path, TokEndIf);
+                    }
                 },
                 (PassageContent, &TokFormatBoldEnd) => {
                     // jump one ast-level higher
@@ -259,7 +266,11 @@ impl Parser {
                     let ast_count_childs = self.ast.count_childs(self.ast_path.to_vec());
                     self.ast.add_child(&self.ast_path, TokIf);
                     self.ast_path.push(ast_count_childs);
-                    self.is_in_if = true;
+
+                    // pseudo_node for expression
+                    let ast_count_childs = self.ast.count_childs(self.ast_path.to_vec());
+                    self.ast.add_child(&self.ast_path, TokPseudo);
+                    self.ast_path.push(ast_count_childs);
                 },
                 // means <<$var>>
                 (Makro, &TokMakroVar(ref name)) => {
@@ -281,7 +292,8 @@ impl Parser {
                     // ast
                     debug!("pop TokElse");
                     self.ast_path.pop();
-                    self.ast_path.pop();
+                    self.is_in_else = true;
+                    //self.ast_path.pop();
 
                     let ast_count_childs = self.ast.count_childs(self.ast_path.to_vec());
                     self.ast.add_child(&self.ast_path, TokElse);
@@ -292,8 +304,9 @@ impl Parser {
                     new_nodes.push(PNode::new_terminal(TokMakroEnd));
 
                     // ast
-                    debug!("pop TokEndIf");
+                    debug!("pop TokEndIf Macro");
                     self.ast_path.pop();
+                    self.ast.add_child(&self.ast_path, TokEndIf);
                 }
 
                 // ExpressionList
@@ -308,14 +321,8 @@ impl Parser {
 
                 // ExpressionListf
                 (ExpressionListf, &TokMakroEnd) => {
-                    if self.is_in_if == true {
-                        let ast_count_childs = self.ast.count_childs(self.ast_path.to_vec());
-                        self.ast.add_child(&self.ast_path, TokPseudo);
-                        self.ast_path.push(ast_count_childs);
-                    } else {
-                        debug!("pop TokMakroEnd");
-                        self.ast_path.pop();
-                    }
+                    debug!("pop TokMakroEnd");
+                    self.ast_path.pop();
                     
                 },
                 (ExpressionListf, _) => {
