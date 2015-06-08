@@ -13,11 +13,11 @@ pub struct AST {
     passages: Vec<ASTNode>
 }
 
-
-
-/// add zcode based on tokens
-fn gen_zcode<'a>(node: &'a ASTNode, state: FormattingState, mut out: &mut zfile::Zfile, mut var_table: &mut HashMap<&'a str, u8>, mut var_id: &mut u8) -> Vec<ZOP> {
-    let mut state_copy = state.clone();
+ /// add zcode based on tokens
+fn gen_zcode<'a>(node: &'a ASTNode, mut out: &mut zfile::Zfile, mut manager: &mut CodeGenManager<'a>) -> Vec<ZOP> {
+    let mut state_copy = manager.format_state.clone();
+    let mut set_formatting = false;
+  
     match node {
         &ASTNode::Passage(ref node) => {
             let mut code: Vec<ZOP> = vec![];
@@ -31,7 +31,7 @@ fn gen_zcode<'a>(node: &'a ASTNode, state: FormattingState, mut out: &mut zfile:
             };
             
             for child in &node.childs {
-                for instr in gen_zcode(child, state_copy, out, var_table, var_id) {
+                for instr in gen_zcode(child, out, manager) {
                     code.push(instr);
                 }
 
@@ -51,13 +51,16 @@ fn gen_zcode<'a>(node: &'a ASTNode, state: FormattingState, mut out: &mut zfile:
                 },
                 &Token::TokFormatBoldStart => {
                     state_copy.bold = true;
+                    set_formatting = true;
                     vec![ZOP::SetTextStyle{bold: state_copy.bold, reverse: state_copy.inverted, monospace: state_copy.mono, italic: state_copy.italic}]
                 },
                 &Token::TokFormatItalicStart => {
                     state_copy.italic = true;
+                    set_formatting = true;
                     vec![ZOP::SetTextStyle{bold: state_copy.bold, reverse: state_copy.inverted, monospace: state_copy.mono, italic: state_copy.italic}]
                 },
                 &Token::TokPassageLink (ref name, ref link) => {
+                    set_formatting = true;
                     vec![
                     ZOP::CallWithAddress{jump_to_label: "system_add_link".to_string(), address: link.to_string()},
                     ZOP::SetTextStyle{bold: state_copy.bold, reverse: true, monospace: state_copy.mono, italic: state_copy.italic},
@@ -69,40 +72,18 @@ fn gen_zcode<'a>(node: &'a ASTNode, state: FormattingState, mut out: &mut zfile:
                 },
                 &Token::TokAssign(ref var, ref operator) => {
                     if operator == "=" || operator == "to" {
-                        if !var_table.contains_key::<str>(var) {
-                            var_table.insert(&var, *var_id);
-                            debug!("Assigned id {} to variable {}", var_id, var);
-                            *var_id += 1;
+                        if !manager.symbol_table.is_known_symbol(var) {
+                            manager.symbol_table.insert_new_symbol(&var);
                         }
-                        let id_option = var_table.get::<str>(var);
+                        let symbol_id = manager.symbol_table.get_symbol_id(var);
                         if t.childs.len() == 1 {
-                            match t.childs[0] {
-                                ASTNode::Default(ref def) => {
-                                    let actual_id :u8 = match id_option {
-                                        Some(id) => {
-                                            *id                                             
-                                        },
-                                        None => {
-                                            panic!("Variable not in var table.")
-                                        }
-                                    };
-                                    match def.category {
-                                        Token::TokInt(value) => {
-                                            vec![
-                                            ZOP::StoreU16{variable: actual_id, value: value as u16},
-                                            ZOP::PrintNumVar{variable: actual_id}
-                                            ]
-                                        },
-                                        Token::TokBoolean(ref bool_val) => {
-                                            let value = match (*bool_val).as_ref() {
-                                                "true" => { 1 as u8 },
-                                                _ => { 0 as u8 }
-                                            };
-                                            vec![ZOP::StoreU8{variable: actual_id, value: value}]
-                                        }
-                                        _ => { vec![] }
-                                    }
+                            match t.childs[0].as_default().category {
+                                Token::TokInt(value) => {
+                                    vec![ZOP::StoreU16{variable: symbol_id, value: value as u16}]
                                 },
+                                Token::TokBoolean(ref bool_val) => {
+                                    vec![ZOP::StoreU8{variable: symbol_id, value: boolstr_to_u8(&*bool_val)}]
+                                }
                                 _ => { vec![] }
                             }
                         } else {
@@ -110,44 +91,120 @@ fn gen_zcode<'a>(node: &'a ASTNode, state: FormattingState, mut out: &mut zfile:
                             vec![]
                         }
                         
-                    } else { vec![] }
+                    }
+                },
+                &Token::TokIf => {
+                    if t.childs.len() < 2 {
+                        panic!("Unsupported if-expression!");
+                    }
+
+                    let mut compare: u8 = 1;
+
+                    // check if the first node is a pseudonode
+                    let pseudo_node = match t.childs[0].as_default().category {
+                        Token::TokPseudo => t.childs[0].as_default(),
+                        _ =>  panic!("Unsupported if-expression!")
+                    };
+
+                    // Check if first token is variable
+                    let var_name = match pseudo_node.childs[0].as_default().category {
+                        Token::TokVariable(ref var) => var,
+                        _ =>  panic!("Unsupported if-expression!")
+                    };
+
+                    if pseudo_node.childs.len() > 1 {
+                        // Check if second token is compare operator
+                        match pseudo_node.childs[1].as_default().category {
+                            Token::TokCompOp(ref op) => {
+                                match &*(*op) {
+                                    "==" | "is" => {} ,
+                                    _ => panic!("Unsupported Compare Operator!")
+                                }
+                            }, _ =>  panic!("Unsupported if-expression!")
+                        }
+
+                        // Check if third token is number
+                        compare = match pseudo_node.childs[2].as_default().category {
+                            Token::TokInt(ref value) => {
+                                *value as u8
+                            },
+                            Token::TokBoolean(ref bool_val) => {
+                                boolstr_to_u8(&*bool_val)
+                            }, _ => panic!("Unsupported assign value!") 
+                        };
+                    }
+
+                    let symbol_id = manager.symbol_table.get_symbol_id(&*var_name);
+                    let if_id = manager.ids_if.start_next();
+
+                    let if_label = &format!("if_{}", if_id);
+                    let after_if_label = &format!("after_if_{}", if_id);
+                    let after_else_label = &format!("after_else_{}", if_id);
+                    let mut code: Vec<ZOP> = vec![
+                        ZOP::JE{local_var_id: symbol_id, equal_to_const: compare, jump_to_label: if_label},
+                        ZOP::Jump{jump_to_label: after_if_label},
+                        ZOP::Label{name: if_label}
+                    ];
+
+                    for i in 1..t.childs.len() {
+                        for instr in gen_zcode(&t.childs[i], out, manager) {
+                            code.push(instr);
+                        }
+                    }
+
+                    code.push(ZOP::Jump{jump_to_label: after_else_label});
+                    code.push(ZOP::Label{name: after_if_label});
+                    code
+                },
+                &Token::TokElse => {
+                    for child in &t.childs {
+                        for instr in gen_zcode(child, out, manager) {
+                            code.push(instr);
+                        }
+                    }
+                },
+                &Token::TokEndIf => {
+                    let after_else_label = &format!("after_else_{}", manager.ids_if.pop_id());
+                    vec![ZOP::Label{name: after_else_label}]
                 },
                 _ => {
                     debug!("no match 2");
                     vec![]
                 }
             };
-
-            for child in &t.childs {
-                for instr in gen_zcode(child, state_copy, out, var_table, var_id) {
-                    code.push(instr);
+            if set_formatting {
+                for child in &t.childs {
+                    for instr in gen_zcode(child, out, manager) {
+                        code.push(instr);
+                    }
                 }
+                code.push(ZOP::SetTextStyle{bold: false, reverse: false, monospace: false, italic: false});
+                let state = manager.format_state;
+                code.push(ZOP::SetTextStyle{bold: state.bold, reverse: state.inverted, monospace: state.mono, italic: state.italic});
+                code
             }
-
-            code.push(ZOP::SetTextStyle{bold: false, reverse: false, monospace: false, italic: false});
-            code.push(ZOP::SetTextStyle{bold: state.bold, reverse: state.inverted, monospace: state.mono, italic: state.italic});
-            code
         }
+    }
+
+   
+}
+
+fn boolstr_to_u8(string: &str) -> u8 {
+    match string {
+        "true" => 1 as u8,
+        _ => 0 as u8
     }
 }
 
 impl AST {
     /// convert ast to zcode
-    pub fn to_zcode(&self,  out: &mut zfile::Zfile) {
-        let mut var_table = HashMap::<&str, u8>::new();
-        let mut var_id : u8 = 25;
-        let state = FormattingState {bold: false, italic: false, mono: false, inverted: false};
-        let mut code : Vec<ZOP> = vec![];
+    pub fn to_zcode(& self, out: &mut zfile::Zfile) {
+        let mut manager = CodeGenManager::new();
         for child in &self.passages {
-            for instr in gen_zcode(child, state, out, &mut var_table, &mut var_id) {
+            for instr in gen_zcode(child, out, &mut manager) {
                 code.push(instr);
             }
         }
-        debug!("emit zcode:");
-        for instr in &code {
-            debug!("{:?}", instr);
-        }
-        out.emit(code);
     }
 
     pub fn new() -> AST {
@@ -214,6 +271,81 @@ struct NodeDefault {
     childs: Vec<ASTNode>
 }
 
+struct CodeGenManager<'a> {
+    ids_if: IdentifierProvider,
+    symbol_table: SymbolTable<'a>,
+    format_state: FormattingState
+}
+
+struct IdentifierProvider {
+    current_id: u32,
+    id_stack: Vec<u32>
+}
+
+struct SymbolTable<'a> {
+    current_id: u8,
+    symbol_map: HashMap<&'a str, u8>
+}
+
+impl <'a> CodeGenManager<'a> {
+    pub fn new() -> CodeGenManager<'a> {
+        CodeGenManager {
+            ids_if: IdentifierProvider::new(),
+            symbol_table: SymbolTable::new(),
+            format_state: FormattingState {bold: false, italic: false, mono: false, inverted: false}
+        }
+    }
+}
+
+impl IdentifierProvider {
+    pub fn new() -> IdentifierProvider {
+        IdentifierProvider {
+            current_id: 0, 
+            id_stack: Vec::new()
+        }
+    }
+
+    // Returns a new id and pushes it onto the stack
+    pub fn start_next(&mut self) -> u32 {
+        let id = self.current_id;
+        self.current_id += 1;
+        self.id_stack.push(id);
+        id
+    }
+
+    // Pops the last id from the stack
+    pub fn pop_id(&mut self) -> u32 {
+        self.id_stack.pop().unwrap()
+    }
+}
+
+impl <'a> SymbolTable<'a> {
+    pub fn new() -> SymbolTable<'a> {
+        SymbolTable {
+            current_id: 25,
+            symbol_map: HashMap::<&str, u8>::new()
+        }
+    }
+
+    // Inserts a symbol into the table, assigning a new id
+    pub fn insert_new_symbol(&mut self, symbol: &'a str) {
+        debug!("Assigned id {} to variable {}", self.current_id, symbol);
+        self.symbol_map.insert(symbol, self.current_id);
+        self.current_id += 1;
+    }
+
+    // Checks if the symbol is already existent in the table
+    pub fn is_known_symbol(&self, symbol: &str) -> bool {
+        self.symbol_map.contains_key(symbol)
+    }
+
+    // Returns the id for a given symbol 
+    // (check if is_known_symbol, otherwise panics)
+    pub fn get_symbol_id(&self, symbol: &str) -> u8 {
+        *self.symbol_map.get(symbol).unwrap()
+    }
+}
+
 impl ASTNode {
     /// adds an child to the path in the ast
     pub fn add_child(&mut self, path: Vec<usize>, token: Token) {
@@ -271,6 +403,13 @@ impl ASTNode {
                     child.print(indent+2);
                 }
             }
+        }
+    }
+
+    pub fn as_default(&self) -> &NodeDefault {
+        match self { 
+            &ASTNode::Default(ref def) => def, 
+            _ => panic!("Node cannot be unwrapped as NodeDefault!")
         }
     }
 }
