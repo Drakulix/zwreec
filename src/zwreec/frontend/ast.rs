@@ -90,7 +90,6 @@ fn gen_zcode<'a>(node: &'a ASTNode, mut out: &mut zfile::Zfile, mut manager: &mu
                             debug!("Assign Expression currently not supported.");
                             vec![]
                         }
-                        
                     } else { vec![] }
                 },
                 &Token::TokIf => {
@@ -152,8 +151,8 @@ fn gen_zcode<'a>(node: &'a ASTNode, mut out: &mut zfile::Zfile, mut manager: &mu
                         }
                     }
 
-                    code.push(ZOP::Jump{jump_to_label: after_else_label.to_string()});
-                    code.push(ZOP::Label{name: after_if_label.to_string()});
+                    code.push(ZOP::Jump{jump_to_label: after_else_label});
+                    code.push(ZOP::Label{name: after_if_label});
                     code
                 },
                 &Token::TokElse => {
