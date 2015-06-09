@@ -171,7 +171,7 @@ rustlex! TweeLexer {
 	let INT = "-"? DIGIT+;
 	let FLOAT = "-"? (DIGIT+ "." DIGIT*) | "-"? (DIGIT* "." DIGIT+) | "-"? "Infinity";
 
-	let STRING = ('"' [^'"']* '"') | ("'" [^"'"]* "'");
+	let STRING = '"' ([^'\\''"']|'\\'.)* '"' | "'" ([^'\\'"'"]|'\\'.)* "'";
 
 	let BOOL = "true" | "false";
 
@@ -478,10 +478,31 @@ rustlex! TweeLexer {
 		}
 
 		// Expression Stuff
+		STRING => |lexer:&mut TweeLexer<R>| {
+			let s = lexer.yystr();
+			// strip the quotes from strings
+			let trimmed = &s[1 .. s.len() - 1];
+
+			// unescape quotes
+			let quote_type = s.chars().next().unwrap();
+			let mut unescaped = String::new();
+
+			for (c, peek) in trimmed.chars().peeking() {
+				if let Some(nextc) = peek {
+					if c == '\\' && nextc == quote_type {
+						continue;
+					}
+				}
+
+				unescaped.push(c);
+			}
+
+			Some(TokString(unescaped))
+		}
+
 		VAR_NAME =>  |lexer:&mut TweeLexer<R>| Some(TokVariable(lexer.yystr()))
 		FLOAT =>  |lexer:&mut TweeLexer<R>| Some(TokFloat(lexer.yystr()[..].parse().unwrap()))
 		INT =>  |lexer:&mut TweeLexer<R>| Some(TokInt(lexer.yystr()[..].parse().unwrap()))
-		STRING =>  |lexer:&mut TweeLexer<R>| Some(TokString(lexer.yystr()))
 		BOOL =>  |lexer:&mut TweeLexer<R>| Some(TokBoolean(lexer.yystr()))
 		NUM_OP =>  |lexer:&mut TweeLexer<R>| Some(TokNumOp(lexer.yystr()))
 		COMP_OP =>  |lexer:&mut TweeLexer<R>| Some(TokCompOp(lexer.yystr()))
@@ -833,7 +854,7 @@ mod tests {
 
 	#[test]
 	fn macro_print_test() {
-		let tokens = test_lex("::Passage\n<<print \"Test\">>\n<<print $var>>");
+		let tokens = test_lex("::Passage\n<<print \"Test with escaped \\\"Quotes\">>\n<<print $var>>");
 
 		if let TokPassageName(ref name) = tokens[0] {
 			assert_eq!(name, "Passage");
@@ -848,7 +869,7 @@ mod tests {
 		}
 
 		if let TokString(ref content) = tokens[2] {
-			assert_eq!(content, "Test");
+			assert_eq!(content, "Test with escaped \"Quotes");
 		} else {
 			panic!("Expected TokString, got {:?}", tokens[2]);
 		}
