@@ -1,23 +1,7 @@
 use std::io::{BufReader, Read};
 use utils::extensions::{Peeking, PeekingExt, FilteringScan, FilteringScanExt};
 
-use self::Token::{
-	TokPassageName, TokTagStart, TokTagEnd, TokTag,
-	TokMakroStart, TokMakroEnd, TokVariable,
-	TokSet, TokAssign, TokInt, TokFloat, TokNumOp, TokCompOp,
-	TokLogOp, TokText, 	TokFormatBoldStart, TokFormatBoldEnd,
-	TokFormatItalicStart, TokFormatItalicEnd, TokFormatUnderStart,
-	TokFormatUnderEnd,	TokFormatStrikeStart, TokFormatStrikeEnd,
-	TokFormatSubStart, TokFormatSubEnd, TokFormatSupStart,
-	TokFormatSupEnd, TokFormatMonoStart, TokFormatMonoEnd,
-	TokString, TokBracketOpen, TokBracketClose, TokIf, TokElse,
-	TokEndIf, TokPassageLink, TokFormatBulList, TokFormatNumbList,
-	TokFormatIndentBlock, TokFormatHeading, TokVarSetStart,
-	TokVarSetEnd, TokSemiColon, TokPrint, TokDisplay, TokBoolean,
-	TokFunction , TokColon, TokArgsEnd, TokSilently, TokEndSilently,
-	TokArrayStart, TokArrayEnd, TokNewLine, TokFormatHorizontalLine,
-	TokMakroVar
-};
+use self::Token::*;
 
 pub struct ScanState {
     current_text: String,
@@ -591,146 +575,314 @@ rustlex! TweeLexer {
 
 // ================================
 // test functions
-#[cfg(test)] use std::io::Cursor;
-
 #[cfg(test)]
-fn test_lex(input: &str) -> Vec<Token> {
-	let mut cursor: Cursor<Vec<u8>> = Cursor::new(input.to_string().into_bytes());
-	lex(&mut cursor).collect()
+mod tests {
+	use std::io::Cursor;
+
+	use super::*;
+	use super::Token::*;
+
+	fn test_lex(input: &str) -> Vec<Token> {
+		let mut cursor: Cursor<Vec<u8>> = Cursor::new(input.to_string().into_bytes());
+		lex(&mut cursor).collect()
+	}
+
+	#[test]
+	fn passage_test() {
+		// This should detect the ::Start passage
+		let start_tokens = test_lex("::Start");
+		if let TokPassageName(ref name) = start_tokens[0] {
+			assert_eq!(name, "Start")
+		} else {
+			panic!("Expected TokPassageName, got {:?}", start_tokens[0])
+		};
+
+		assert_eq!(start_tokens.len(), 1);
+
+		// This should not return any tokens
+		let fail_tokens = test_lex(":fail");
+		assert_eq!(fail_tokens.len(), 0);
+	}
+
+	#[test]
+	fn text_test() {
+		// This should return a passage with a body text
+		let tokens = test_lex("::MyPassage\nTestText\nTestNextLine");
+
+		if let TokPassageName(ref name) = tokens[0] {
+			assert_eq!(name, "MyPassage");
+		} else {
+			panic!("Expected TokPassageName, got {:?}", tokens[0]);
+		}
+
+		if let TokText(ref text) = tokens[1] {
+			assert_eq!(text, "TestText");
+		} else {
+			panic!("Expected TokText, got {:?}", tokens[1]);
+		}
+
+		if let TokNewLine = tokens[2] {
+			// valid
+		} else {
+			panic!("Expected TokNewLine, got {:?}", tokens[2]);
+		}
+
+		if let TokText(ref text) = tokens[3] {
+			assert_eq!(text, "TestNextLine");
+		} else {
+			panic!("Expected TokText, got {:?}", tokens[3]);
+		}
+
+		assert_eq!(tokens.len(), 4);
+	}
+
+	/*
+	/// TODO Tags are broken. Uncomment when #89 is fixed
+	#[test]
+	fn tag_test() {
+		// This should return a passage with tags
+		let tokens = test_lex("::TagPassage [tag1 tag2]\nContent");
+
+		if let TokPassageName(ref name) = tokens[0] {
+			assert_eq!(name, "TagPassage");
+		} else {
+			panic!("Expected TokPassageName, got {:?}", tokens[0]);
+		}
+
+		if let TokTagStart = tokens[1] {
+			// valid
+		} else {
+			panic!("Expected TokTagStart, got {:?}", tokens[1]);
+		}
+
+		if let TokTag(ref name) = tokens[2] {
+			assert_eq!(name, "tag1");
+		} else {
+			panic!("Expected TokTag, got {:?}", tokens[2]);
+		}
+
+		if let TokTag(ref name) = tokens[3] {
+			assert_eq!(name, "tag2");
+		} else {
+			panic!("Expected TokTag, got {:?}", tokens[3]);
+		}
+
+		if let TokTagEnd = tokens[4] {
+			// valid
+		} else {
+			panic!("Expected TokTagEnd, got {:?}", tokens[4]);
+		}
+
+		if let TokText(ref text) = tokens[5] {
+			assert_eq!(text, "Content");
+		} else {
+			panic!("Expected TokText, got {:?}", tokens[5]);
+		}
+
+		assert_eq!(tokens.len(), 6);
+	}
+	*/
+
+	#[test]
+	fn macro_set_test() {
+		// This should return a passage with a set macro
+		let tokens = test_lex("::Passage\n<<set $var = 1>>");
+
+		if let TokPassageName(ref name) = tokens[0] {
+			assert_eq!(name, "Passage");
+		} else {
+			panic!("Expected TokPassageName, got {:?}", tokens[0]);
+		}
+
+		if let TokSet = tokens[1] {
+			// valid
+		} else {
+			panic!("Expected TokSet, got {:?}", tokens[1]);
+		}
+
+		if let TokAssign(ref varname, _) = tokens[2] {
+			assert_eq!(varname, "$var");
+		} else {
+			panic!("Expected TokAssign, got {:?}", tokens[2]);
+		}
+
+		if let TokInt(value) = tokens[3] {
+			assert_eq!(value, 1);
+		} else {
+			panic!("Expected TokInt, got {:?}", tokens[3]);
+		}
+
+		if let TokMakroEnd = tokens[4] {
+			// valid
+		} else {
+			panic!("Expected TokMakroEnd, got {:?}", tokens[4]);
+		}
+
+		assert_eq!(tokens.len(), 5);
+	}
+
+	#[test]
+	fn macro_if_test() {
+		// This should return a passage with an if macro
+		let tokens = test_lex("::Passage\n<<if $var == 1>>1<<else if var == 2>>2<<else>>3<<endif>>");
+
+		if let TokPassageName(ref name) = tokens[0] {
+			assert_eq!(name, "Passage");
+		} else {
+			panic!("Expected TokPassageName, got {:?}", tokens[0]);
+		}
+
+		if let TokIf = tokens[1] {
+			// valid
+		} else {
+			panic!("Expected TokIf, got {:?}", tokens[1]);
+		}
+
+		if let TokVariable(ref varname) = tokens[2] {
+			assert_eq!(varname, "$var");
+		} else {
+			panic!("Expected TokAssign, got {:?}", tokens[2]);
+		}
+
+		if let TokCompOp(_) = tokens[3] {
+			// valid
+		} else {
+			panic!("Expected TokCompOp, got {:?}", tokens[3]);
+		}
+
+		if let TokInt(value) = tokens[4] {
+			assert_eq!(value, 1);
+		} else {
+			panic!("Expected TokInt, got {:?}", tokens[4]);
+		}
+
+		if let TokMakroEnd = tokens[5] {
+			// valid
+		} else {
+			panic!("Expected TokMakroEnd, got {:?}", tokens[5]);
+		}
+
+		if let TokText(ref value) = tokens[6] {
+			assert_eq!(value, "1");
+		} else {
+			panic!("Expected TokText, got {:?}", tokens[6]);
+		}
+
+		if let TokElse = tokens[7] {
+			// valid
+		} else {
+			panic!("Expected TokElse, got {:?}", tokens[7]);
+		}
+
+		if let TokCompOp(_) = tokens[8] {
+			// valid
+		} else {
+			panic!("Expected TokCompOp, got {:?}", tokens[8]);
+		}
+
+		if let TokInt(value) = tokens[9] {
+			assert_eq!(value, 2);
+		} else {
+			panic!("Expected TokInt, got {:?}", tokens[9]);
+		}
+
+		if let TokMakroEnd = tokens[10] {
+			// valid
+		} else {
+			panic!("Expected TokMakroEnd, got {:?}", tokens[10]);
+		}
+
+		if let TokText(ref value) = tokens[11] {
+			assert_eq!(value, "2");
+		} else {
+			panic!("Expected TokText, got {:?}", tokens[11]);
+		}
+
+		if let TokElse = tokens[12] {
+			// valid
+		} else {
+			panic!("Expected TokElse, got {:?}", tokens[12]);
+		}
+
+		if let TokMakroEnd = tokens[13] {
+			// valid
+		} else {
+			panic!("Expected TokMakroEnd, got {:?}", tokens[13]);
+		}
+
+		if let TokText(ref value) = tokens[14] {
+			assert_eq!(value, "3");
+		} else {
+			panic!("Expected TokText, got {:?}", tokens[14]);
+		}
+
+		if let TokEndIf = tokens[15] {
+			// valid
+		} else {
+			panic!("Expected TokEndIf, got {:?}", tokens[15])
+		}
+
+		if let TokMakroEnd = tokens[16] {
+			// valid
+		} else {
+			panic!("Expected TokMakroEnd, got {:?}", tokens[16]);
+		}
+
+		assert_eq!(tokens.len(), 17);
+	}
+
+	#[test]
+	fn macro_print_test() {
+		let tokens = test_lex("::Passage\n<<print \"Test\">>\n<<print $var>>");
+
+		if let TokPassageName(ref name) = tokens[0] {
+			assert_eq!(name, "Passage");
+		} else {
+			panic!("Expected TokPassageName, got {:?}", tokens[0]);
+		}
+
+		if let TokPrint = tokens[1] {
+			// valid
+		} else {
+			panic!("Expected TokPrint, got {:?}", tokens[1]);
+		}
+
+		if let TokString(ref content) = tokens[2] {
+			assert_eq!(content, "Test");
+		} else {
+			panic!("Expected TokString, got {:?}", tokens[2]);
+		}
+
+		if let TokMakroEnd = tokens[3] {
+			// valid
+		} else {
+			panic!("Expected TokMakroEnd, got {:?}", tokens[3]);
+		}
+
+		if let TokNewLine = tokens[4] {
+			// valid
+		} else {
+			panic!("Expected TokNewLine, got {:?}", tokens[4]);
+		}
+
+		if let TokPrint = tokens[5] {
+			// valid
+		} else {
+			panic!("Expected TokPrint, got {:?}", tokens[5]);
+		}
+
+		if let TokVariable(ref name) = tokens[6] {
+			assert_eq!(name, "$var");
+		} else {
+			panic!("Expected TokString, got {:?}", tokens[6]);
+		}
+
+		if let TokMakroEnd = tokens[7] {
+			// valid
+		} else {
+			panic!("Expected TokMakroEnd, got {:?}", tokens[7]);
+		}
+
+		assert_eq!(tokens.len(), 8);
+	}
 }
-
-#[test]
-fn passage_test() {
-	// This should detect the ::Start passage
-	let start_tokens = test_lex("::Start");
-	if let TokPassageName(ref name) = start_tokens[0] {
-		assert_eq!(name, "Start")
-	} else {
-		panic!("Expected TokPassageName, got {:?}", start_tokens[0])
-	};
-
-	assert_eq!(start_tokens.len(), 1);
-
-	// This should not return any tokens
-	let fail_tokens = test_lex(":fail");
-	assert_eq!(fail_tokens.len(), 0);
-}
-
-#[test]
-fn text_test() {
-	// This should return a passage with a body text
-	let tokens = test_lex("::MyPassage\nTestText\nTestNextLine");
-
-	if let TokPassageName(ref name) = tokens[0] {
-		assert_eq!(name, "MyPassage");
-	} else {
-		panic!("Expected TokPassageName, got {:?}", tokens[0]);
-	}
-
-	if let TokText(ref text) = tokens[1] {
-		assert_eq!(text, "TestText");
-	} else {
-		panic!("Expected TokText, got {:?}", tokens[1]);
-	}
-
-	if let TokNewLine = tokens[2] {
-		// valid
-	} else {
-		panic!("Expected TokNewLine, got {:?}", tokens[2]);
-	}
-
-	if let TokText(ref text) = tokens[3] {
-		assert_eq!(text, "TestNextLine");
-	} else {
-		panic!("Expected TokText, got {:?}", tokens[3]);
-	}
-
-	assert_eq!(tokens.len(), 4);
-}
-
-/*
-/// TODO Tags are broken. Uncomment when #89 is fixed
-#[test]
-fn tag_test() {
-	// This should return a passage with tags
-	let tokens = test_lex("::TagPassage [tag1 tag2]\nContent");
-
-	if let TokPassageName(ref name) = tokens[0] {
-		assert_eq!(name, "TagPassage");
-	} else {
-		panic!("Expected TokPassageName, got {:?}", tokens[0]);
-	}
-
-	if let TokTagStart = tokens[1] {
-		// valid
-	} else {
-		panic!("Expected TokTagStart, got {:?}", tokens[1]);
-	}
-
-	if let TokTag(ref name) = tokens[2] {
-		assert_eq!(name, "tag1");
-	} else {
-		panic!("Expected TokTag, got {:?}", tokens[2]);
-	}
-
-	if let TokTag(ref name) = tokens[3] {
-		assert_eq!(name, "tag2");
-	} else {
-		panic!("Expected TokTag, got {:?}", tokens[3]);
-	}
-
-	if let TokTagEnd = tokens[4] {
-		// valid
-	} else {
-		panic!("Expected TokTagEnd, got {:?}", tokens[4]);
-	}
-
-	if let TokText(ref text) = tokens[5] {
-		assert_eq!(text, "Content");
-	} else {
-		panic!("Expected TokText, got {:?}", tokens[5]);
-	}
-
-	assert_eq!(tokens.len(), 6);
-}
-*/
-
-#[test]
-fn macro_set_test() {
-	// This should return a passage with a body text
-	let tokens = test_lex("::Passage\n<<set $var = 1>>");
-	//panic!("{:?}", tokens);
-
-	if let TokPassageName(ref name) = tokens[0] {
-		assert_eq!(name, "Passage");
-	} else {
-		panic!("Expected TokPassageName, got {:?}", tokens[0]);
-	}
-
-	if let TokSet = tokens[1] {
-		// valid
-	} else {
-		panic!("Expected TokSet, got {:?}", tokens[1]);
-	}
-
-	if let TokAssign(ref varname, _) = tokens[2] {
-		assert_eq!(varname, "$var");
-	} else {
-		panic!("Expected TokAssign, got {:?}", tokens[2]);
-	}
-
-	if let TokInt(value) = tokens[3] {
-		assert_eq!(value, 1);
-	} else {
-		panic!("Expected TokInt, got {:?}", tokens[3]);
-	}
-
-	if let TokMakroEnd = tokens[4] {
-		// valid
-	} else {
-		panic!("Expected TokMakroEnd, got {:?}", tokens[4]);
-	}
-
-	assert_eq!(tokens.len(), 5);
-}
-
