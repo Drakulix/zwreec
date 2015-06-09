@@ -168,8 +168,13 @@ fn gen_zcode<'a>(node: &'a ASTNode, mut out: &mut zfile::Zfile, mut manager: &mu
                     let after_else_label = format!("after_else_{}", manager.ids_if.pop_id());
                     vec![ZOP::Label{name: after_else_label}]
                 },
+                &Token::TokMakroVar(ref name) => {
+                    let var_id = manager.symbol_table.get_symbol_id(&*name);
+                    println!("{:?}", var_id);
+                    vec![ZOP::PrintNumVar{variable: var_id}]
+                },
                 _ => {
-                    debug!("no match 2");
+                    debug!("no match if");
                     vec![]
                 }
             };
