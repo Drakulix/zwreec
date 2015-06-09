@@ -16,6 +16,8 @@ pub enum ZOP {
   Routine{name: String, count_variables: u8},
   Label{name: String},
   Newline,
+  SetColor{foreground: u8, background: u8},
+  SetColorVar{foreground: u8, background: u8},
   SetTextStyle{bold: bool, reverse: bool, monospace: bool, italic: bool},
   StoreU16{variable: u8, value: u16},
   StoreU8{variable: u8, value: u8},
@@ -23,7 +25,10 @@ pub enum ZOP {
   Inc{variable: u8},
   Ret{value: u8},
   JE{local_var_id: u8, equal_to_const: u8, jump_to_label: String},
+  Random{range: u8, variable: u8},
   ReadChar{local_var_id: u8},
+  ReadCharTimer{local_var_id: u8, timer: u8, routine: String},
+  Add{variable1: u8, add_const: u16, variable2: u8},
   Sub{variable1: u8, sub_const: u16, variable2: u8},
   JL{local_var_id: u8, local_var_id2: u8, jump_to_label: String},
   Jump{jump_to_label: String},
@@ -247,24 +252,29 @@ impl Zfile {
                 &ZOP::PrintNumVar{variable} => self.op_print_num_var(variable),
                 &ZOP::PrintOps{ref text} => self.gen_print_ops(text),
                 &ZOP::Call1N{ref jump_to_label} => self.op_call_1n(jump_to_label),
+                &ZOP::Call2NWithAddress{ref jump_to_label, ref address} => self.op_call_2n_with_address(jump_to_label, address),
+                &ZOP::Call1NVar{variable} => self.op_call_1n_var(variable),
                 &ZOP::Routine{ref name, count_variables} => self.routine(name, count_variables),
                 &ZOP::Label{ref name} => self.label(name),
                 &ZOP::Newline => self.op_newline(),
+                &ZOP::SetColor{foreground, background} => self.op_set_color(foreground, background),
+                &ZOP::SetColorVar{foreground, background} => self.op_set_color_var(foreground, background),
                 &ZOP::SetTextStyle{bold, reverse, monospace, italic} => self.op_set_text_style(bold, reverse, monospace, italic),
-                &ZOP::Call2NWithAddress{ref jump_to_label, ref address} => self.op_call_2n_with_address(jump_to_label, address),
                 &ZOP::StoreU16{variable, value} => self.op_store_u16(variable, value),
                 &ZOP::StoreU8{variable, value} => self.op_store_u8(variable, value),
                 &ZOP::StoreW{array_address, index, variable} => self.op_storew(array_address, index, variable),
                 &ZOP::Inc{variable} => self.op_inc(variable),
                 &ZOP::Ret{value} => self.op_ret(value),
                 &ZOP::JE{local_var_id, equal_to_const, ref jump_to_label} => self.op_je(local_var_id, equal_to_const, jump_to_label),
+                &ZOP::Random{range, variable} => self.op_random(range, variable),
                 &ZOP::ReadChar{local_var_id} => self.op_read_char(local_var_id),
+                &ZOP::ReadCharTimer{local_var_id, timer, ref routine} => self.op_read_char_timer(local_var_id, timer, routine),
+                &ZOP::Add{variable1, add_const, variable2} => self.op_add(variable1, add_const, variable2),
                 &ZOP::Sub{variable1, sub_const, variable2} => self.op_sub(variable1, sub_const, variable2),
                 &ZOP::JL{local_var_id, local_var_id2, ref jump_to_label} => self.op_jl(local_var_id, local_var_id2, jump_to_label),
                 &ZOP::Jump{ref jump_to_label} => self.op_jump(jump_to_label),
                 &ZOP::Dec{variable} => self.op_dec(variable),
                 &ZOP::LoadW{array_address, index, variable} => self.op_loadw(array_address, index, variable),
-                &ZOP::Call1NVar{variable} => self.op_call_1n_var(variable),
                 &ZOP::EraseWindow{value} => self.op_erase_window(value),
                 &ZOP::Quit => self.op_quit(),
             }
@@ -401,6 +411,8 @@ impl Zfile {
     }
 
     pub fn routine_check_more(&mut self) {
+        //self.emit(vec![
+        //    ZOP::Routine{name: "system_check_links".to_string(), count_variables: 1},
         self.routine("system_check_more", 1);
 
         self.op_read_char(0x01);
@@ -540,12 +552,12 @@ impl Zfile {
 
     /// addition
     /// variable2 = variable1 + sub_const
-    pub fn op_add(&mut self, variable1: u8, sub_const: u16, variable2: u8) {
+    pub fn op_add(&mut self, variable1: u8, add_const: u16, variable2: u8) {
         let args: Vec<ArgType> = vec![ArgType::Variable, ArgType::LargeConst];
         self.op_2(0x14, args);
         
         self.data.append_byte(variable1);
-        self.data.append_u16(sub_const);
+        self.data.append_u16(add_const);
         self.data.append_byte(variable2);
     }
 
