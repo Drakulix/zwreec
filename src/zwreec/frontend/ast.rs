@@ -8,6 +8,12 @@ use std::collections::HashMap;
 
 //==============================
 // ast
+#[derive(Clone)]
+enum Type{
+    Bool,
+    Integer,
+    String,
+}
 
 pub struct AST {
     passages: Vec<ASTNode>
@@ -73,7 +79,7 @@ fn gen_zcode<'a>(node: &'a ASTNode, mut out: &mut zfile::Zfile, mut manager: &mu
                 &Token::TokAssign(ref var, ref operator) => {
                     if operator == "=" || operator == "to" {
                         if !manager.symbol_table.is_known_symbol(var) {
-                            manager.symbol_table.insert_new_symbol(&var);
+                            manager.symbol_table.insert_new_symbol(&var, Type::Integer);
                         }
                         let symbol_id = manager.symbol_table.get_symbol_id(var);
                         if t.childs.len() == 1 {
@@ -170,8 +176,17 @@ fn gen_zcode<'a>(node: &'a ASTNode, mut out: &mut zfile::Zfile, mut manager: &mu
                 },
                 &Token::TokMakroVar(ref name) => {
                     let var_id = manager.symbol_table.get_symbol_id(&*name);
-                    println!("{:?}", var_id);
-                    vec![ZOP::PrintNumVar{variable: var_id}]
+                    match manager.symbol_table.get_symbol_type(&*name) {
+                        Type::Integer => {
+                            vec![ZOP::PrintNumVar{variable: var_id}]
+                        },
+                        Type::String => {
+                            vec![]
+                        },
+                        Type::Bool => {
+                            vec![]
+                        }
+                    }
                 },
                 _ => {
                     debug!("no match if");
@@ -296,7 +311,7 @@ struct IdentifierProvider {
 
 struct SymbolTable<'a> {
     current_id: u8,
-    symbol_map: HashMap<&'a str, u8>
+    symbol_map: HashMap<&'a str, (u8, Type)>
 }
 
 impl <'a> CodeGenManager<'a> {
@@ -335,14 +350,14 @@ impl <'a> SymbolTable<'a> {
     pub fn new() -> SymbolTable<'a> {
         SymbolTable {
             current_id: 25,
-            symbol_map: HashMap::<&str, u8>::new()
+            symbol_map: HashMap::<&str, (u8,Type)>::new()
         }
     }
 
     // Inserts a symbol into the table, assigning a new id
-    pub fn insert_new_symbol(&mut self, symbol: &'a str) {
+    pub fn insert_new_symbol(&mut self, symbol: &'a str, t: Type) {
         debug!("Assigned id {} to variable {}", self.current_id, symbol);
-        self.symbol_map.insert(symbol, self.current_id);
+        self.symbol_map.insert(symbol, (self.current_id,t));
         self.current_id += 1;
     }
 
@@ -354,7 +369,15 @@ impl <'a> SymbolTable<'a> {
     // Returns the id for a given symbol 
     // (check if is_known_symbol, otherwise panics)
     pub fn get_symbol_id(&self, symbol: &str) -> u8 {
-        *self.symbol_map.get(symbol).unwrap()
+        let (b,_) = self.symbol_map.get(symbol).unwrap().clone();  
+        b 
+    }
+
+    pub fn get_symbol_type(&self, symbol: &str) -> Type {
+        let (_,b) = self.symbol_map.get(symbol).unwrap().clone();
+        let mut t:Type; 
+        t = b.clone();
+        t 
     }
 }
 
