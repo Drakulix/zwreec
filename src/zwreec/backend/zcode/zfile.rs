@@ -6,6 +6,7 @@ pub use super::ztext;
 
 #[derive(Debug)]
 pub enum ZOP {
+  StoreString{variable: u8, string: String},
   PrintUnicode{c: char},
   Print{text: String},
   PrintNumVar{variable: u8},
@@ -255,6 +256,7 @@ impl Zfile {
                 &ZOP::LoadW{array_address, index, variable} => self.op_loadw(array_address, index, variable),
                 &ZOP::CallVar{variable} => self.op_call_1n_var(variable),
                 &ZOP::Quit => self.op_quit(),
+                &ZOP::StoreString{variable, ref string} => self.op_store_string(variable, string),
             }
         }
     }
@@ -564,6 +566,10 @@ impl Zfile {
 
         // value
         self.data.append_byte(variable);
+    }
+
+    pub fn op_store_string(&mut self, variable: u8, string: &str){
+    	//TODO: fill me
     }
 
     /// jumps to a label
