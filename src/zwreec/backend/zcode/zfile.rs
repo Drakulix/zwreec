@@ -317,8 +317,10 @@ impl Zfile {
         self.data.write_zero_until(self.program_addr as usize);
 
         // default theme and erase_window to fore the color
-        self.op_set_color(9, 2);
-        self.op_erase_window(-1);
+        self.emit(vec![
+            ZOP::SetColor{foreground: 9, background: 2},
+            ZOP::EraseWindow{value: -1},
+        ]);
     }
 
     /// writes all stuff that couldn't written directly
@@ -411,88 +413,83 @@ impl Zfile {
     }
 
     pub fn routine_check_more(&mut self) {
-        //self.emit(vec![
-        //    ZOP::Routine{name: "system_check_links".to_string(), count_variables: 1},
-        self.routine("system_check_more", 1);
-
-        self.op_read_char(0x01);
-        self.op_je(0x01, 129, "system_check_more_ko_1");
-        self.op_ret(0);
-        self.label("system_check_more_ko_1");
-
-        self.op_read_char(0x01);
-        self.op_je(0x01, 130, "system_check_more_ko_2");
-        self.op_ret(0);
-        self.label("system_check_more_ko_2");
-
-        self.op_read_char(0x01);
-        self.op_je(0x01, 130, "system_check_more_ko_3");
-        self.op_ret(0);
-        self.label("system_check_more_ko_3");
-
-        self.op_read_char(0x01);
-        self.op_je(0x01, 131, "system_check_more_ko_4");
-        self.op_ret(0);
-        self.label("system_check_more_ko_4");
-
-        self.op_read_char(0x01);
-        self.op_je(0x01, 132, "system_check_more_ko_5");
-        self.op_ret(0);
-        self.label("system_check_more_ko_5");
-
-        self.op_read_char(0x01);
-        self.op_je(0x01, 131, "system_check_more_ko_6");
-        self.op_ret(0);
-        self.label("system_check_more_ko_6");
-
-        self.op_read_char(0x01);
-        self.op_je(0x01, 132, "system_check_more_ko_7");
-        self.op_ret(0);
-        self.label("system_check_more_ko_7");
-
-        self.op_read_char(0x01);
-        self.op_je(0x01, 98, "system_check_more_ko_8");
-        self.op_ret(0);
-        self.label("system_check_more_ko_8");
-
-        self.op_read_char(0x01);
-        self.op_je(0x01, 97, "system_check_more_ko_9");
-        self.op_ret(0);
-        self.label("system_check_more_ko_9");
-
-
-        self.label("system_check_more_timer_loop");
-        self.op_read_char_timer(0, 1, "system_check_more_anim");
-        self.op_jump("system_check_more_timer_loop");
-
-        self.op_quit();
-
-        self.routine("system_check_more_anim", 5);
-        self.op_erase_window(-1);
-        self.op_set_text_style(false, false, true, false);
-        self.op_set_color(2, 9);
-        self.op_print(" ZWREEC Easter egg <3");
-        self.op_newline();
-
-        self.op_store_u8(1, 20);
-        self.label("system_check_more_loop");
-        self.op_random(8, 4);
-        self.op_random(100, 5);
-        self.op_add(5, 10, 5);
-        self.op_inc(4);
-        self.op_set_color_var(4, 4);
-        self.op_print("aa");
-        self.op_inc(2);
-
-        self.op_jl(2, 1, "system_check_more_loop");
-        self.op_newline();
-        self.op_inc(3);
-        self.op_store_u8(2, 0);
-
-        self.op_jl(3, 1, "system_check_more_loop");
-
+        self.emit(vec![
+            ZOP::Routine{name: "system_check_more".to_string(), count_variables: 1},
+            ZOP::ReadChar{local_var_id: 0x01},
+            ZOP::JE{local_var_id: 0x01, equal_to_const: 129, jump_to_label: "system_check_more_ko_1".to_string()},
+            ZOP::Ret{value: 0},
+            ZOP::Label{name: "system_check_more_ko_1".to_string()},
         
-        self.op_ret(0);
+            ZOP::ReadChar{local_var_id: 0x01},
+            ZOP::JE{local_var_id: 0x01, equal_to_const: 130, jump_to_label: "system_check_more_ko_2".to_string()},
+            ZOP::Ret{value: 0},
+            ZOP::Label{name: "system_check_more_ko_2".to_string()},
+
+            ZOP::ReadChar{local_var_id: 0x01},
+            ZOP::JE{local_var_id: 0x01, equal_to_const: 130, jump_to_label: "system_check_more_ko_3".to_string()},
+            ZOP::Ret{value: 0},
+            ZOP::Label{name: "system_check_more_ko_3".to_string()},
+
+            ZOP::ReadChar{local_var_id: 0x01},
+            ZOP::JE{local_var_id: 0x01, equal_to_const: 131, jump_to_label: "system_check_more_ko_4".to_string()},
+            ZOP::Ret{value: 0},
+            ZOP::Label{name: "system_check_more_ko_4".to_string()},
+
+            ZOP::ReadChar{local_var_id: 0x01},
+            ZOP::JE{local_var_id: 0x01, equal_to_const: 132, jump_to_label: "system_check_more_ko_5".to_string()},
+            ZOP::Ret{value: 0},
+            ZOP::Label{name: "system_check_more_ko_5".to_string()},
+
+            ZOP::ReadChar{local_var_id: 0x01},
+            ZOP::JE{local_var_id: 0x01, equal_to_const: 131, jump_to_label: "system_check_more_ko_6".to_string()},
+            ZOP::Ret{value: 0},
+            ZOP::Label{name: "system_check_more_ko_6".to_string()},
+
+            ZOP::ReadChar{local_var_id: 0x01},
+            ZOP::JE{local_var_id: 0x01, equal_to_const: 132, jump_to_label: "system_check_more_ko_7".to_string()},
+            ZOP::Ret{value: 0},
+            ZOP::Label{name: "system_check_more_ko_7".to_string()},
+
+            ZOP::ReadChar{local_var_id: 0x01},
+            ZOP::JE{local_var_id: 0x01, equal_to_const: 98, jump_to_label: "system_check_more_ko_8".to_string()},
+            ZOP::Ret{value: 0},
+            ZOP::Label{name: "system_check_more_ko_8".to_string()},
+
+            ZOP::ReadChar{local_var_id: 0x01},
+            ZOP::JE{local_var_id: 0x01, equal_to_const: 97, jump_to_label: "system_check_more_ko_9".to_string()},
+            ZOP::Ret{value: 0},
+            ZOP::Label{name: "system_check_more_ko_9".to_string()},
+
+            ZOP::Label{name: "system_check_more_timer_loop".to_string()},
+            ZOP::ReadCharTimer{local_var_id: 0x01, timer: 1, routine: "system_check_more_anim".to_string()},
+            ZOP::Jump{jump_to_label: "system_check_more_timer_loop".to_string()},
+            ZOP::Quit,
+
+            ZOP::Routine{name: "system_check_more_anim".to_string(), count_variables: 5},
+            ZOP::EraseWindow{value: -1},
+
+            ZOP::SetTextStyle{bold: false, reverse: false, monospace: true, italic: false},
+            ZOP::SetColor{foreground: 2, background: 9},
+            ZOP::Print{text: " ZWREEC Easter egg <3".to_string()},
+            ZOP::Newline,
+
+            ZOP::StoreU8{variable: 1, value: 20},
+            ZOP::Label{name: "system_check_more_loop".to_string()},
+            ZOP::Random{range: 8, variable: 4},
+            ZOP::Random{range: 100, variable: 5},
+            ZOP::Add{variable1: 5, add_const: 10, variable2: 5},
+            ZOP::Inc{variable: 4},
+            ZOP::SetColorVar{foreground: 4, background: 4},
+            ZOP::Print{text: "aa".to_string()},
+            ZOP::Inc{variable: 2},
+
+            ZOP::JL{local_var_id: 2, local_var_id2: 1, jump_to_label: "system_check_more_loop".to_string()},
+            ZOP::Newline,
+            ZOP::Inc{variable: 3},
+            ZOP::StoreU8{variable: 2, value: 0},
+            ZOP::JL{local_var_id: 3, local_var_id2: 1, jump_to_label: "system_check_more_loop".to_string()},
+            ZOP::Ret{value: 0}
+        ]);
     }
 
 
