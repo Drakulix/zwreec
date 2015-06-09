@@ -38,7 +38,7 @@ pub fn lex<R: Read>(input: &mut R) -> FilteringScan<Peeking<TweeLexer<BufReader<
 				if state.skip_next {
 					state.skip_next = false;
 					return None;
-				} 
+				}
 
 				match elem {
 					(TokText(text), Some(TokText(_))) => {
@@ -146,7 +146,7 @@ rustlex! TweeLexer {
 	let TEXT_MONO = TEXT_MONO_CHAR+ | "}" | "}}";
 
 	let PASSAGE_START = "::" ':'*;
-	let PASSAGE_CHAR_NORMAL = [^"]$<>:|" '\n'];
+	let PASSAGE_CHAR_NORMAL = [^"[]$<>:|" '\n'];
 	let PASSAGE_CHAR = PASSAGE_CHAR_NORMAL | ':' PASSAGE_CHAR_NORMAL;
 	let PASSAGE_NAME = PASSAGE_CHAR_NORMAL PASSAGE_CHAR* ':'?;
 
@@ -206,7 +206,7 @@ rustlex! TweeLexer {
 
 	let LINK_OPEN = '[';
 	let LINK_CLOSE = ']';
-	let LINK_TEXT = [^'\n'"|]"]+;
+	let LINK_TEXT = [^'\n'"|[]"]+;
 
 	let LINK_SIMPLE = "[[" (PASSAGE_NAME | VAR_NAME) "]";
 	let LINK_LABELED = "[[" LINK_TEXT "|" (PASSAGE_NAME | VAR_NAME) "]";
