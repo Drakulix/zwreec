@@ -386,9 +386,7 @@ impl <'a> SymbolTable<'a> {
 
     pub fn get_symbol_type(&self, symbol: &str) -> Type {
         let (_,b) = self.symbol_map.get(symbol).unwrap().clone();
-        let mut t:Type; 
-        t = b.clone();
-        t 
+        b
     }
 }
 
