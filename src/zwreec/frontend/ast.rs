@@ -78,16 +78,20 @@ fn gen_zcode<'a>(node: &'a ASTNode, mut out: &mut zfile::Zfile, mut manager: &mu
                 },
                 &Token::TokAssign(ref var, ref operator) => {
                     if operator == "=" || operator == "to" {
-                        if !manager.symbol_table.is_known_symbol(var) {
-                            manager.symbol_table.insert_new_symbol(&var, Type::Integer);
-                        }
-                        let symbol_id = manager.symbol_table.get_symbol_id(var);
                         if t.childs.len() == 1 {
                             match t.childs[0].as_default().category {
                                 Token::TokInt(value) => {
+                                    if !manager.symbol_table.is_known_symbol(var) {
+                                        manager.symbol_table.insert_new_symbol(&var, Type::Integer);
+                                    }
+                                    let symbol_id = manager.symbol_table.get_symbol_id(var);
                                     vec![ZOP::StoreU16{variable: symbol_id, value: value as u16}]
                                 },
                                 Token::TokBoolean(ref bool_val) => {
+                                    if !manager.symbol_table.is_known_symbol(var) {
+                                        manager.symbol_table.insert_new_symbol(&var, Type::Bool);
+                                    }
+                                    let symbol_id = manager.symbol_table.get_symbol_id(var);
                                     vec![ZOP::StoreU8{variable: symbol_id, value: boolstr_to_u8(&*bool_val)}]
                                 }
                                 _ => { vec![] }
