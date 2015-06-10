@@ -10,12 +10,14 @@ pub enum ZOP {
   Print{text: String},
   PrintNumVar{variable: u8},
   PrintOps{text: String},
-  Call{jump_to_label: String},
-  CallWithAddress{jump_to_label: String, address: String},
-  CallVar{variable: u8},
+  Call1N{jump_to_label: String},
+  Call2NWithAddress{jump_to_label: String, address: String},
+  Call1NVar{variable: u8},
   Routine{name: String, count_variables: u8},
   Label{name: String},
   Newline,
+  SetColor{foreground: u8, background: u8},
+  SetColorVar{foreground: u8, background: u8},
   SetTextStyle{bold: bool, reverse: bool, monospace: bool, italic: bool},
   StoreU16{variable: u8, value: u16},
   StoreU8{variable: u8, value: u8},
@@ -23,12 +25,16 @@ pub enum ZOP {
   Inc{variable: u8},
   Ret{value: u8},
   JE{local_var_id: u8, equal_to_const: u8, jump_to_label: String},
+  Random{range: u8, variable: u8},
   ReadChar{local_var_id: u8},
+  ReadCharTimer{local_var_id: u8, timer: u8, routine: String},
+  Add{variable1: u8, add_const: u16, variable2: u8},
   Sub{variable1: u8, sub_const: u16, variable2: u8},
   JL{local_var_id: u8, local_var_id2: u8, jump_to_label: String},
   Jump{jump_to_label: String},
   Dec{variable: u8},
   LoadW{array_address: u16, index: u8, variable: u8},
+  EraseWindow{value: i8},
   Quit,
 }
 
@@ -103,8 +109,13 @@ impl Zfile {
         // version
         self.data.write_byte(8, 0x00);
 
-        // flags
-        self.data.write_byte(0, 0x01);
+        // flag1 (from right to left)
+        // 0: colours availabe
+        // 1: picture
+        // 2: bold
+        // 3: italic
+        // 4: fixed
+        self.data.write_byte(0x1d, 0x01);
 
         // release version (0x02 und 0x03)
         self.data.write_u16(0, 0x02);
@@ -117,6 +128,11 @@ impl Zfile {
 
         // location of dictionary (byte address) (0x08 and 0x09)
         self.data.write_u16(dictionary_addr, 0x08);
+
+        // flag2 (from right to left)
+        // 6: game want to use colours
+        // 0000000001000000
+        self.data.write_u16(0x40, 0x10);
 
         // location of object table (byte address) (0x0a and 0x0b)
         self.data.write_u16(object_addr, 0x0a);
@@ -235,25 +251,31 @@ impl Zfile {
                 &ZOP::Print{ref text} => self.op_print(text),
                 &ZOP::PrintNumVar{variable} => self.op_print_num_var(variable),
                 &ZOP::PrintOps{ref text} => self.gen_print_ops(text),
-                &ZOP::Call{ref jump_to_label} => self.op_call_1n(jump_to_label),
+                &ZOP::Call1N{ref jump_to_label} => self.op_call_1n(jump_to_label),
+                &ZOP::Call2NWithAddress{ref jump_to_label, ref address} => self.op_call_2n_with_address(jump_to_label, address),
+                &ZOP::Call1NVar{variable} => self.op_call_1n_var(variable),
                 &ZOP::Routine{ref name, count_variables} => self.routine(name, count_variables),
                 &ZOP::Label{ref name} => self.label(name),
                 &ZOP::Newline => self.op_newline(),
+                &ZOP::SetColor{foreground, background} => self.op_set_color(foreground, background),
+                &ZOP::SetColorVar{foreground, background} => self.op_set_color_var(foreground, background),
                 &ZOP::SetTextStyle{bold, reverse, monospace, italic} => self.op_set_text_style(bold, reverse, monospace, italic),
-                &ZOP::CallWithAddress{ref jump_to_label, ref address} => self.op_call_2n_with_address(jump_to_label, address),
                 &ZOP::StoreU16{variable, value} => self.op_store_u16(variable, value),
                 &ZOP::StoreU8{variable, value} => self.op_store_u8(variable, value),
                 &ZOP::StoreW{array_address, index, variable} => self.op_storew(array_address, index, variable),
                 &ZOP::Inc{variable} => self.op_inc(variable),
                 &ZOP::Ret{value} => self.op_ret(value),
                 &ZOP::JE{local_var_id, equal_to_const, ref jump_to_label} => self.op_je(local_var_id, equal_to_const, jump_to_label),
+                &ZOP::Random{range, variable} => self.op_random(range, variable),
                 &ZOP::ReadChar{local_var_id} => self.op_read_char(local_var_id),
+                &ZOP::ReadCharTimer{local_var_id, timer, ref routine} => self.op_read_char_timer(local_var_id, timer, routine),
+                &ZOP::Add{variable1, add_const, variable2} => self.op_add(variable1, add_const, variable2),
                 &ZOP::Sub{variable1, sub_const, variable2} => self.op_sub(variable1, sub_const, variable2),
                 &ZOP::JL{local_var_id, local_var_id2, ref jump_to_label} => self.op_jl(local_var_id, local_var_id2, jump_to_label),
                 &ZOP::Jump{ref jump_to_label} => self.op_jump(jump_to_label),
                 &ZOP::Dec{variable} => self.op_dec(variable),
                 &ZOP::LoadW{array_address, index, variable} => self.op_loadw(array_address, index, variable),
-                &ZOP::CallVar{variable} => self.op_call_1n_var(variable),
+                &ZOP::EraseWindow{value} => self.op_erase_window(value),
                 &ZOP::Quit => self.op_quit(),
             }
         }
@@ -293,6 +315,12 @@ impl Zfile {
     pub fn start(&mut self) {
         self.create_header();
         self.data.write_zero_until(self.program_addr as usize);
+
+        // default theme and erase_window to fore the color
+        self.emit(vec![
+            ZOP::SetColor{foreground: 9, background: 2},
+            ZOP::EraseWindow{value: -1},
+        ]);
     }
 
     /// writes all stuff that couldn't written directly
@@ -300,6 +328,7 @@ impl Zfile {
     pub fn end(&mut self) {
         self.routine_check_links();
         self.routine_add_link();
+        self.routine_check_more();
         self.write_jumps();
     }
 
@@ -328,11 +357,11 @@ impl Zfile {
         self.emit(vec![
             ZOP::Routine{name: "system_add_link".to_string(), count_variables: 1},
             // saves routine-argument to array
-            ZOP::StoreW{array_address: 0, index: 16, variable: 0x01},
-            //self.op_loadw(0, 0x00, 0x02);
+            ZOP::StoreW{array_address: 1, index: 16, variable: 0x01},
 
             // inc the count links
             ZOP::Inc{variable: 16},
+
             ZOP::Ret{value: 0}
         ]);
     }
@@ -342,26 +371,124 @@ impl Zfile {
     pub fn routine_check_links(&mut self) {
         self.emit(vec![
             ZOP::Routine{name: "system_check_links".to_string(), count_variables: 1},
+
             // jumps to the end, if there a no links
             ZOP::JE{local_var_id: 16, equal_to_const: 0x00, jump_to_label: "system_check_links_end".to_string()},
+            ZOP::Print{text: "--------------------".to_string()},
+            ZOP::Newline,
             ZOP::Print{text: "press a key... ".to_string()},
             ZOP::Newline,
+
             ZOP::Label{name: "system_check_links_loop".to_string()},
             ZOP::ReadChar{local_var_id: 0x01},
+            ZOP::JE{local_var_id: 0x01, equal_to_const: 129, jump_to_label: "system_check_links_jmp".to_string()},
+            ZOP::Jump{jump_to_label: "system_check_links_after".to_string()},
+            ZOP::Label{name: "system_check_links_jmp".to_string()},
+            ZOP::Call1N{jump_to_label: "system_check_more".to_string()},
+
+            ZOP::Label{name: "system_check_links_after".to_string()},
+
             ZOP::Sub{variable1: 0x01, sub_const: 48, variable2: 0x01},
+
             // check if the link in 0x01 exist, if not
             // => "wrong key => jump before key-detection
             ZOP::JL{local_var_id: 16, local_var_id2: 0x01, jump_to_label: "system_check_links_loop".to_string()},
             ZOP::Dec{variable: 0x01},
+
             // loads the address of the link from the array
-            ZOP::LoadW{array_address: 0, index: 0x01, variable: 0x02},
+            ZOP::LoadW{array_address: 1, index: 0x01, variable: 0x02},
+
             // no more links exist
             ZOP::StoreU8{variable: 16, value: 0},
             ZOP::Newline,
+
+            // clears window bevor jumping
+            ZOP::EraseWindow{value: -1},
+
             // jump to the new passage
-            ZOP::CallVar{variable: 0x02},
+            ZOP::Call1NVar{variable: 0x02},
             ZOP::Label{name: "system_check_links_end".to_string()},
             ZOP::Quit
+        ]);
+    }
+
+    pub fn routine_check_more(&mut self) {
+        self.emit(vec![
+            ZOP::Routine{name: "system_check_more".to_string(), count_variables: 1},
+            ZOP::ReadChar{local_var_id: 0x01},
+            ZOP::JE{local_var_id: 0x01, equal_to_const: 129, jump_to_label: "system_check_more_ko_1".to_string()},
+            ZOP::Ret{value: 0},
+            ZOP::Label{name: "system_check_more_ko_1".to_string()},
+        
+            ZOP::ReadChar{local_var_id: 0x01},
+            ZOP::JE{local_var_id: 0x01, equal_to_const: 130, jump_to_label: "system_check_more_ko_2".to_string()},
+            ZOP::Ret{value: 0},
+            ZOP::Label{name: "system_check_more_ko_2".to_string()},
+
+            ZOP::ReadChar{local_var_id: 0x01},
+            ZOP::JE{local_var_id: 0x01, equal_to_const: 130, jump_to_label: "system_check_more_ko_3".to_string()},
+            ZOP::Ret{value: 0},
+            ZOP::Label{name: "system_check_more_ko_3".to_string()},
+
+            ZOP::ReadChar{local_var_id: 0x01},
+            ZOP::JE{local_var_id: 0x01, equal_to_const: 131, jump_to_label: "system_check_more_ko_4".to_string()},
+            ZOP::Ret{value: 0},
+            ZOP::Label{name: "system_check_more_ko_4".to_string()},
+
+            ZOP::ReadChar{local_var_id: 0x01},
+            ZOP::JE{local_var_id: 0x01, equal_to_const: 132, jump_to_label: "system_check_more_ko_5".to_string()},
+            ZOP::Ret{value: 0},
+            ZOP::Label{name: "system_check_more_ko_5".to_string()},
+
+            ZOP::ReadChar{local_var_id: 0x01},
+            ZOP::JE{local_var_id: 0x01, equal_to_const: 131, jump_to_label: "system_check_more_ko_6".to_string()},
+            ZOP::Ret{value: 0},
+            ZOP::Label{name: "system_check_more_ko_6".to_string()},
+
+            ZOP::ReadChar{local_var_id: 0x01},
+            ZOP::JE{local_var_id: 0x01, equal_to_const: 132, jump_to_label: "system_check_more_ko_7".to_string()},
+            ZOP::Ret{value: 0},
+            ZOP::Label{name: "system_check_more_ko_7".to_string()},
+
+            ZOP::ReadChar{local_var_id: 0x01},
+            ZOP::JE{local_var_id: 0x01, equal_to_const: 98, jump_to_label: "system_check_more_ko_8".to_string()},
+            ZOP::Ret{value: 0},
+            ZOP::Label{name: "system_check_more_ko_8".to_string()},
+
+            ZOP::ReadChar{local_var_id: 0x01},
+            ZOP::JE{local_var_id: 0x01, equal_to_const: 97, jump_to_label: "system_check_more_ko_9".to_string()},
+            ZOP::Ret{value: 0},
+            ZOP::Label{name: "system_check_more_ko_9".to_string()},
+
+            ZOP::Label{name: "system_check_more_timer_loop".to_string()},
+            ZOP::ReadCharTimer{local_var_id: 0x01, timer: 1, routine: "system_check_more_anim".to_string()},
+            ZOP::Jump{jump_to_label: "system_check_more_timer_loop".to_string()},
+            ZOP::Quit,
+
+            ZOP::Routine{name: "system_check_more_anim".to_string(), count_variables: 5},
+            ZOP::EraseWindow{value: -1},
+
+            ZOP::SetTextStyle{bold: false, reverse: false, monospace: true, italic: false},
+            ZOP::SetColor{foreground: 2, background: 9},
+            ZOP::Print{text: " ZWREEC Easter egg <3".to_string()},
+            ZOP::Newline,
+
+            ZOP::StoreU8{variable: 1, value: 20},
+            ZOP::Label{name: "system_check_more_loop".to_string()},
+            ZOP::Random{range: 8, variable: 4},
+            ZOP::Random{range: 100, variable: 5},
+            ZOP::Add{variable1: 5, add_const: 10, variable2: 5},
+            ZOP::Inc{variable: 4},
+            ZOP::SetColorVar{foreground: 4, background: 4},
+            ZOP::Print{text: "aa".to_string()},
+            ZOP::Inc{variable: 2},
+
+            ZOP::JL{local_var_id: 2, local_var_id2: 1, jump_to_label: "system_check_more_loop".to_string()},
+            ZOP::Newline,
+            ZOP::Inc{variable: 3},
+            ZOP::StoreU8{variable: 2, value: 0},
+            ZOP::JL{local_var_id: 3, local_var_id2: 1, jump_to_label: "system_check_more_loop".to_string()},
+            ZOP::Ret{value: 0}
         ]);
     }
 
@@ -418,6 +545,17 @@ impl Zfile {
 
         // the address of the argument
         self.add_jump(address.to_string(), JumpType::Routine);
+    }
+
+    /// addition
+    /// variable2 = variable1 + sub_const
+    pub fn op_add(&mut self, variable1: u8, add_const: u16, variable2: u8) {
+        let args: Vec<ArgType> = vec![ArgType::Variable, ArgType::LargeConst];
+        self.op_2(0x14, args);
+        
+        self.data.append_byte(variable1);
+        self.data.append_u16(add_const);
+        self.data.append_byte(variable2);
     }
 
     /// subtraktion
@@ -491,10 +629,29 @@ impl Zfile {
         self.data.append_byte(variable);
     }
 
-   /// sets the colors of the foreground (font) and background
+    /// calculates a random numer from 1 to range
+    pub fn op_random(&mut self, range: u8, variable: u8) {
+        let args: Vec<ArgType> = vec![ArgType::SmallConst, ArgType::Nothing, ArgType::Nothing, ArgType::Nothing];
+        self.op_var(0x07, args);
+
+        self.data.append_byte(range);
+        self.data.append_byte(variable);
+    }
+
+    /// sets the colors of the foreground (font) and background
     pub fn op_set_color(&mut self, foreground: u8, background: u8){
-        let op_coding = 0x00 << 6 | 0x00 << 5 | 0x1B;
-        self.data.append_byte(op_coding);
+        let args: Vec<ArgType> = vec![ArgType::SmallConst, ArgType::SmallConst];
+        self.op_2(0x1b, args);
+
+        self.data.append_byte(foreground);
+        self.data.append_byte(background);
+    }
+
+    /// sets the colors of the foreground (font) and background (but with variables
+    pub fn op_set_color_var(&mut self, foreground: u8, background: u8){
+        let args: Vec<ArgType> = vec![ArgType::Variable, ArgType::Variable];
+        self.op_2(0x1b, args);
+
         self.data.append_byte(foreground);
         self.data.append_byte(background);
     }
@@ -534,6 +691,33 @@ impl Zfile {
         self.data.append_byte(local_var_id);
     }
 
+    /// reads keys from the keyboard and saves the asci-value in local_var_id
+    /// read_char is VAROP
+    pub fn op_read_char_timer(&mut self, local_var_id: u8, timer: u8, routine: &str) {
+        let args: Vec<ArgType> = vec![ArgType::SmallConst, ArgType::SmallConst, ArgType::LargeConst, ArgType::Nothing];
+        self.op_var(0x16, args);
+
+        // write argument value
+        self.data.append_byte(0x00);
+
+        // write timer
+        self.data.append_byte(timer);
+
+        // writes routine
+        self.add_jump(routine.to_string(), JumpType::Routine);
+
+        // write varible id
+        self.data.append_byte(local_var_id);
+    }
+
+    pub fn op_erase_window(&mut self, value: i8) {
+        let args: Vec<ArgType> = vec![ArgType::LargeConst, ArgType::Nothing, ArgType::Nothing, ArgType::Nothing];
+        self.op_var(0x0d, args);
+
+        // signed to unsigned value
+        self.data.append_u16(value as u16);
+    }
+
     /// loads a word from an array in a variable
     /// loadw is an 2op, BUT with 3 ops -.-
     pub fn op_loadw(&mut self, array_address: u16, index: u8, variable: u8) {
@@ -553,6 +737,8 @@ impl Zfile {
     /// stores a value to an array
     /// stores the value of variable to the address in: array_address + 2*index
     pub fn op_storew(&mut self, array_address: u16, index: u8, variable: u8) {
+        assert!(array_address > 0, "not allowed array-address, becouse in _some_ interpreters (for example zoom) it crahs. -.-");
+
         let args: Vec<ArgType> = vec![ArgType::LargeConst, ArgType::Variable, ArgType::Variable, ArgType::Nothing];
         self.op_var(0x01, args);
 

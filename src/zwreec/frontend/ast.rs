@@ -38,7 +38,7 @@ fn gen_zcode<'a>(node: &'a ASTNode, mut out: &mut zfile::Zfile, mut manager: &mu
             }
 
             code.push(ZOP::Newline);
-            code.push(ZOP::Call{jump_to_label: "system_check_links".to_string()});
+            code.push(ZOP::Call1N{jump_to_label: "system_check_links".to_string()});
             code
         },
         &ASTNode::Default(ref t) => {
@@ -62,7 +62,7 @@ fn gen_zcode<'a>(node: &'a ASTNode, mut out: &mut zfile::Zfile, mut manager: &mu
                 &Token::TokPassageLink (ref name, ref link) => {
                     set_formatting = true;
                     vec![
-                    ZOP::CallWithAddress{jump_to_label: "system_add_link".to_string(), address: link.to_string()},
+                    ZOP::Call2NWithAddress{jump_to_label: "system_add_link".to_string(), address: link.to_string()},
                     ZOP::SetTextStyle{bold: state_copy.bold, reverse: true, monospace: state_copy.mono, italic: state_copy.italic},
                     ZOP::Print{text: format!("{}[", name)},
                     ZOP::PrintNumVar{variable: 16},

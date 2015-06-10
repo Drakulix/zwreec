@@ -63,7 +63,6 @@ pub fn encode(data: &mut Bytes, content: &str) -> u16 {
 
 /// reads the content and converts it to a zasci vector
 fn string_to_zchar(content: &str) -> Vec<u8> {
-    debug!("string_to_zchar: {:?}", content);
     let string_bytes = content.to_string().into_bytes();
         let mut zchars: Vec<u8> = Vec::new();
         for byte in string_bytes{
