@@ -1,0 +1,2 @@
+::Start
+This is a sample text with a very long line. This line is used to demonstrate that the compiler doesn't produce garbage if there is more than a few characters per line. As you can see everything is fine. This text also contains umlauts: ö and other special characters: ♫♬

@@ -4,6 +4,34 @@
 pub use super::zbytes::Bytes;
 pub use super::ztext;
 
+#[derive(Debug)]
+pub enum ZOP {
+  PrintUnicode{c: char},
+  Print{text: String},
+  PrintNumVar{variable: u8},
+  PrintOps{text: String},
+  Call{jump_to_label: String},
+  CallWithAddress{jump_to_label: String, address: String},
+  CallVar{variable: u8},
+  Routine{name: String, count_variables: u8},
+  Label{name: String},
+  Newline,
+  SetTextStyle{bold: bool, reverse: bool, monospace: bool, italic: bool},
+  StoreU16{variable: u8, value: u16},
+  StoreU8{variable: u8, value: u8},
+  StoreW{array_address: u16, index: u8, variable: u8},
+  Inc{variable: u8},
+  Ret{value: u8},
+  JE{local_var_id: u8, equal_to_const: u8, jump_to_label: String},
+  ReadChar{local_var_id: u8},
+  Sub{variable1: u8, sub_const: u16, variable2: u8},
+  JL{local_var_id: u8, local_var_id2: u8, jump_to_label: String},
+  Jump{jump_to_label: String},
+  Dec{variable: u8},
+  LoadW{array_address: u16, index: u8, variable: u8},
+  Quit,
+}
+
 enum JumpType {
     Jump,
     Branch,
@@ -200,6 +228,62 @@ impl Zfile {
         self.labels.push(label);
     }
 
+    pub fn emit(&mut self, code: Vec<ZOP>) {
+        for instr in &code {
+            match instr {
+                &ZOP::PrintUnicode{c} => self.op_print_unicode_char(c),
+                &ZOP::Print{ref text} => self.op_print(text),
+                &ZOP::PrintNumVar{variable} => self.op_print_num_var(variable),
+                &ZOP::PrintOps{ref text} => self.gen_print_ops(text),
+                &ZOP::Call{ref jump_to_label} => self.op_call_1n(jump_to_label),
+                &ZOP::Routine{ref name, count_variables} => self.routine(name, count_variables),
+                &ZOP::Label{ref name} => self.label(name),
+                &ZOP::Newline => self.op_newline(),
+                &ZOP::SetTextStyle{bold, reverse, monospace, italic} => self.op_set_text_style(bold, reverse, monospace, italic),
+                &ZOP::CallWithAddress{ref jump_to_label, ref address} => self.op_call_2n_with_address(jump_to_label, address),
+                &ZOP::StoreU16{variable, value} => self.op_store_u16(variable, value),
+                &ZOP::StoreU8{variable, value} => self.op_store_u8(variable, value),
+                &ZOP::StoreW{array_address, index, variable} => self.op_storew(array_address, index, variable),
+                &ZOP::Inc{variable} => self.op_inc(variable),
+                &ZOP::Ret{value} => self.op_ret(value),
+                &ZOP::JE{local_var_id, equal_to_const, ref jump_to_label} => self.op_je(local_var_id, equal_to_const, jump_to_label),
+                &ZOP::ReadChar{local_var_id} => self.op_read_char(local_var_id),
+                &ZOP::Sub{variable1, sub_const, variable2} => self.op_sub(variable1, sub_const, variable2),
+                &ZOP::JL{local_var_id, local_var_id2, ref jump_to_label} => self.op_jl(local_var_id, local_var_id2, jump_to_label),
+                &ZOP::Jump{ref jump_to_label} => self.op_jump(jump_to_label),
+                &ZOP::Dec{variable} => self.op_dec(variable),
+                &ZOP::LoadW{array_address, index, variable} => self.op_loadw(array_address, index, variable),
+                &ZOP::CallVar{variable} => self.op_call_1n_var(variable),
+                &ZOP::Quit => self.op_quit(),
+            }
+        }
+    }
+
+    /// generates normal print opcodes for ASCII characters and unicode print
+    /// opcodes for unicode characters
+    pub fn gen_print_ops(&mut self, text: &str) {
+        let mut current_text: String = String::new();
+        for character in text.chars() {
+            if character as u32 <= 126 {
+                // this is a non-unicode char
+                current_text.push(character);
+            } else {
+                debug!("Printing unicode char {}", character.to_string());
+                // unicode
+                if current_text.len() > 0 {
+                    self.op_print(&current_text[..]);
+                    current_text.clear();
+                }
+
+                self.op_print_unicode_char(character);
+            }
+        }
+
+        if current_text.len() > 0 {
+            self.op_print(&current_text[..]);
+        }
+    }
+
     // ================================
     // no op-commands
 
@@ -241,52 +325,44 @@ impl Zfile {
 
     /// routine to add the address of a passage-link
     pub fn routine_add_link(&mut self) {
-        self.routine("system_add_link", 1);
-        
-        // saves routine-argument to array
-        self.op_storew(0, 16, 0x01);
-        //self.op_loadw(0, 0x00, 0x02);
-        
-        // inc the count links
-        self.op_inc(16);
+        self.emit(vec![
+            ZOP::Routine{name: "system_add_link".to_string(), count_variables: 1},
+            // saves routine-argument to array
+            ZOP::StoreW{array_address: 0, index: 16, variable: 0x01},
+            //self.op_loadw(0, 0x00, 0x02);
 
-        self.op_ret(0);
+            // inc the count links
+            ZOP::Inc{variable: 16},
+            ZOP::Ret{value: 0}
+        ]);
     }
 
     /// checks all stored links and make them choiceable
     /// with the keyboard
     pub fn routine_check_links(&mut self) {
-        self.routine("system_check_links", 1);
-
-        // jumps to the end, if there a no links
-        self.op_je(16, 0x00, "system_check_links_end");
-
-        self.op_print("press a key... ");
-        self.op_newline();
-        self.label("system_check_links_loop");
-        self.op_read_char(0x01);
-
-        self.op_sub(0x01, 48, 0x01);
-
-        // check if the link in 0x01 exist, of not
-        // => "wrong key => jump bevore key-detection
-        self.op_jl(16, 0x01, "system_check_links_loop");
-
-        self.op_dec(0x01);
-
-        // loads the address of the link from the array
-        self.op_loadw(0, 0x01, 0x02);
-
-        // no mor links exist
-        self.op_store_u8(16, 0);
-
-        self.op_newline();
-
-        // jump to the new passage
-        self.op_call_1n_var(0x02);
-
-        self.label("system_check_links_end");
-        self.op_quit();
+        self.emit(vec![
+            ZOP::Routine{name: "system_check_links".to_string(), count_variables: 1},
+            // jumps to the end, if there a no links
+            ZOP::JE{local_var_id: 16, equal_to_const: 0x00, jump_to_label: "system_check_links_end".to_string()},
+            ZOP::Print{text: "press a key... ".to_string()},
+            ZOP::Newline,
+            ZOP::Label{name: "system_check_links_loop".to_string()},
+            ZOP::ReadChar{local_var_id: 0x01},
+            ZOP::Sub{variable1: 0x01, sub_const: 48, variable2: 0x01},
+            // check if the link in 0x01 exist, if not
+            // => "wrong key => jump before key-detection
+            ZOP::JL{local_var_id: 16, local_var_id2: 0x01, jump_to_label: "system_check_links_loop".to_string()},
+            ZOP::Dec{variable: 0x01},
+            // loads the address of the link from the array
+            ZOP::LoadW{array_address: 0, index: 0x01, variable: 0x02},
+            // no more links exist
+            ZOP::StoreU8{variable: 16, value: 0},
+            ZOP::Newline,
+            // jump to the new passage
+            ZOP::CallVar{variable: 0x02},
+            ZOP::Label{name: "system_check_links_end".to_string()},
+            ZOP::Quit
+        ]);
     }
 
 
