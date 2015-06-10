@@ -626,12 +626,14 @@ mod tests {
 	#[test]
 	fn text_test() {
 		// This should return a passage with a body text
-		let tokens = test_lex("::Passage\nTestText\nTestNextLine");
+		let tokens = test_lex("::Passage\nTestText\nTestNextLine\n::NextPassage");
 		let expected = vec!(
 			TokPassageName("Passage".to_string()),
 			TokText("TestText".to_string()),
 			TokNewLine,
-			TokText("TestNextLine".to_string())
+			TokText("TestNextLine".to_string()),
+			TokNewLine,
+			TokPassageName("NextPassage".to_string())
 		);
 
 		assert_eq!(expected, tokens);
@@ -707,6 +709,21 @@ mod tests {
 			TokPrint,
 			TokVariable("$var".to_string()),
 			TokMakroEnd
+		);
+
+		assert_eq!(expected, tokens);
+	}
+
+	#[test]
+	fn macro_display_test() {
+		let tokens = test_lex("::Passage\n<<display DisplayedPassage>>\n::DisplayedPassage");
+		let expected = vec!(
+			TokPassageName("Passage".to_string()),
+			TokDisplay,
+			TokPassageName("DisplayedPassage".to_string()),
+			TokMakroEnd,
+			TokNewLine,
+			TokPassageName("DisplayedPassage".to_string())
 		);
 
 		assert_eq!(expected, tokens);
