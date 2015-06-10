@@ -637,52 +637,21 @@ mod tests {
 		assert_eq!(expected, tokens);
 	}
 	
-	/*
-	/// TODO Tags are broken. Uncomment when #89 is fixed
 	#[test]
 	fn tag_test() {
 		// This should return a passage with tags
 		let tokens = test_lex("::TagPassage [tag1 tag2]\nContent");
+		let expected = vec!(
+			TokPassageName("TagPassage".to_string()),
+			TokTagStart,
+			TokTag("tag1".to_string()),
+			TokTag("tag2".to_string()),
+			TokTagEnd,
+			TokText("Content".to_string())
+		);
 
-		if let TokPassageName(ref name) = tokens[0] {
-			assert_eq!(name, "TagPassage");
-		} else {
-			panic!("Expected TokPassageName, got {:?}", tokens[0]);
-		}
-
-		if let TokTagStart = tokens[1] {
-			// valid
-		} else {
-			panic!("Expected TokTagStart, got {:?}", tokens[1]);
-		}
-
-		if let TokTag(ref name) = tokens[2] {
-			assert_eq!(name, "tag1");
-		} else {
-			panic!("Expected TokTag, got {:?}", tokens[2]);
-		}
-
-		if let TokTag(ref name) = tokens[3] {
-			assert_eq!(name, "tag2");
-		} else {
-			panic!("Expected TokTag, got {:?}", tokens[3]);
-		}
-
-		if let TokTagEnd = tokens[4] {
-			// valid
-		} else {
-			panic!("Expected TokTagEnd, got {:?}", tokens[4]);
-		}
-
-		if let TokText(ref text) = tokens[5] {
-			assert_eq!(text, "Content");
-		} else {
-			panic!("Expected TokText, got {:?}", tokens[5]);
-		}
-
-		assert_eq!(tokens.len(), 6);
+		assert_eq!(expected, tokens);
 	}
-	*/
 
 	#[test]
 	fn macro_set_test() {
