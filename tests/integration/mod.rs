@@ -7,7 +7,7 @@ use std::error::Error;
 use std::io::Cursor;
 use std::vec::Vec;
 
-static TESTFOLDER: &'static str = "./tests/integration/sample/";
+static TESTFOLDER: &'static str = "./tests/integration/should-compile/";
 
 fn test_compile(input_filename: String) {
 	let path = Path::new(&input_filename);
@@ -51,3 +51,8 @@ fn ascii_test() {
 fn unicode_test() {
     test_compile(TESTFOLDER.to_string() + "Unicode.twee");
 }
+
+#[test]
+fn current_status_test() {
+    test_compile(TESTFOLDER.to_string() + "CurrentStatus.twee");
+} 
