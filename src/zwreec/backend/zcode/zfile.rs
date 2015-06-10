@@ -376,7 +376,7 @@ impl Zfile {
     /// with the keyboard
     pub fn routine_check_links(&mut self) {
         self.emit(vec![
-            ZOP::Routine{name: "system_check_links".to_string(), count_variables: 1},
+            ZOP::Routine{name: "system_check_links".to_string(), count_variables: 2},
 
             // jumps to the end, if there a no links
             ZOP::JE{local_var_id: 16, equal_to_const: 0x00, jump_to_label: "system_check_links_end".to_string()},
@@ -399,6 +399,10 @@ impl Zfile {
             // check if the link in 0x01 exist, if not
             // => "wrong key => jump before key-detection
             ZOP::JL{local_var_id: 16, local_var_id2: 0x01, jump_to_label: "system_check_links_loop".to_string()},
+
+            // check if the key-48 is < 0, if it is => jump before key-detection
+            ZOP::StoreU8{variable: 0x02, value: 1},
+            ZOP::JL{local_var_id: 0x01, local_var_id2: 0x02, jump_to_label: "system_check_links_loop".to_string()},
             ZOP::Dec{variable: 0x01},
 
             // loads the address of the link from the array
