@@ -57,7 +57,7 @@ pub struct Zfile {
     pub data: Bytes,
     program_addr: u16,
     jumps: Vec<Zjump>,
-    labels: Vec<Zlabel>
+    labels: Vec<Zlabel>,
 }
 
 struct Zjump {
@@ -88,7 +88,7 @@ impl Zfile {
             data: Bytes{bytes: Vec::new()}, 
             program_addr: 0x800,
             jumps: Vec::new(),
-            labels: Vec::new()
+            labels: Vec::new(),
         }
     }
 
@@ -240,7 +240,7 @@ impl Zfile {
             if other_label.name == label.name {
                 panic!("label has to be unique, but \"{}\" isn't.", other_label.name);
             }
-        }
+     }
         self.labels.push(label);
     }
 
