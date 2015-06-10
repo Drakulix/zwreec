@@ -136,7 +136,7 @@ impl Parser {
                     // ast
                     self.ast.add_child(&self.ast_path, TokText(text.clone()));
                 },
-                (PassageContent, &TokFormatBoldStart) | 
+                (PassageContent, &TokFormatBoldStart) |
                 (PassageContent, &TokFormatItalicStart) |
                 (PassageContent, &TokFormatMonoStart) => {
                     new_nodes.push(PNode::new_non_terminal(Formating));
@@ -156,7 +156,8 @@ impl Parser {
                 (PassageContent, &TokSet) |
                 (PassageContent, &TokIf) |
                 (PassageContent, &TokVariable(_)) |
-                (PassageContent, &TokMakroVar(_)) => {
+                (PassageContent, &TokMakroVar(_)) |
+                (PassageContent, &TokMakroPassageName(_)) => {
                     new_nodes.push(PNode::new_non_terminal(Makro));
                     new_nodes.push(PNode::new_non_terminal(PassageContent));
                 },
@@ -280,7 +281,14 @@ impl Parser {
                     // ast
                     self.ast.add_child(&self.ast_path, TokMakroVar(name.clone()));
                 },
+                // means <<passagename>>
+                (Makro, &TokMakroPassageName(ref name)) => {
+                    new_nodes.push(PNode::new_terminal(TokMakroPassageName(name.clone())));
+                    new_nodes.push(PNode::new_terminal(TokMakroEnd));
 
+                    // ast
+                    self.ast.add_child(&self.ast_path, TokMakroPassageName(name.clone()));
+                },
                 // Makrof
                 (Makrof, &TokElse) => {
                     new_nodes.push(PNode::new_terminal(TokElse));
@@ -323,7 +331,7 @@ impl Parser {
                 (ExpressionListf, &TokMakroEnd) => {
                     debug!("pop TokMakroEnd");
                     self.ast_path.pop();
-                    
+
                 },
                 (ExpressionListf, _) => {
                     // ExpressionListf -> ε
@@ -462,7 +470,7 @@ impl Parser {
                     self.ast.add_child(&self.ast_path, TokBoolean(value.clone()));
                 }
 
-                
+
                 _ => {
                     panic!("not supported grammar: {:?}", state_first);
                 }
@@ -476,7 +484,7 @@ impl Parser {
         } else {
             // no token left
 
-            // Sf, PassageContent, Linkf, 
+            // Sf, PassageContent, Linkf,
 
             match top {
                 Sf | PassageContent => {
