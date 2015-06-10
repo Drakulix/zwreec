@@ -10,6 +10,7 @@ pub enum ZOP {
   PrintUnicode{c: char},
   Print{text: String},
   PrintNumVar{variable: u8},
+  PrintStrPaddr{variable: u8},
   PrintOps{text: String},
   Call{jump_to_label: String},
   CallWithAddress{jump_to_label: String, address: String},
@@ -282,6 +283,7 @@ impl Zfile {
                 &ZOP::CallVar{variable} => self.op_call_1n_var(variable),
                 &ZOP::Quit => self.op_quit(),
                 &ZOP::StoreString{variable, ref string} => self.op_store_string(variable, string),
+                &ZOP::PrintStrPaddr{variable} => self.op_print_paddr_var(variable),
             }
         }
     }
@@ -611,7 +613,7 @@ impl Zfile {
 
         // -2 becouse op_store_u16 wrote the address
         let address: u16 = routine_address(self.data.bytes.len() as u16 - 2);
-        let zstring_use: ZStringUse = ZStringMemory {from_addr: address, content: string.to_string()};
+        let zstring_use: ZStringMemory = ZStringMemory {to_addr: address, content: string.to_string()};
         self.zstring_memory.push(zstring_use);
 
 
