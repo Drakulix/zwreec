@@ -17,12 +17,15 @@ pub fn temp_create_zcode_example<W: Write>(output: &mut W) {
     let mut zfile: Zfile = zfile::Zfile::new();
 
     zfile.start();
-    zfile.op_call_1n("Start");
+    /*zfile.op_call_1n("Start");
 
     zfile.routine("Start", 0);
     zfile.op_print("start passage");
+    zfile.op_newline();*/
+    zfile.op_store_string(0x02, "hallo");
+    zfile.op_print("start");
     zfile.op_newline();
-
+    zfile.op_print_paddr_var(0x02);
 
     zfile.op_quit();
     zfile.end();

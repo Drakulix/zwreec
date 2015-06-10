@@ -52,7 +52,9 @@ pub struct Zfile {
     pub data: Bytes,
     program_addr: u16,
     jumps: Vec<Zjump>,
-    labels: Vec<Zlabel>
+    labels: Vec<Zlabel>,
+    zstring_memory: Vec<ZStringMemory>,
+    zstring_use: Vec<ZStringUse>
 }
 
 struct Zjump {
@@ -64,6 +66,16 @@ struct Zjump {
 struct Zlabel {
     pub to_addr: u16,
     pub name: String
+}
+
+struct ZStringUse {
+    pub from_addr: u16,
+    pub content: String
+}
+
+struct ZStringMemory {
+    pub to_addr: u16,
+    pub content: String
 }
 
 #[derive(Debug, Copy, Clone)]
@@ -83,7 +95,9 @@ impl Zfile {
             data: Bytes{bytes: Vec::new()}, 
             program_addr: 0x800,
             jumps: Vec::new(),
-            labels: Vec::new()
+            labels: Vec::new(),
+            zstring_memory: Vec::new(),
+            zstring_use: Vec::new(),
         }
     }
 
@@ -208,6 +222,17 @@ impl Zfile {
         }
     }
 
+    /// TODO
+    fn write_zstring_addresses(&mut self) {
+        for z_memory in self.zstring_memory.iter_mut() {
+            for z_use in self.zstring_use.iter_mut() {
+                if z_memory.content == z_use.content {
+                    self.data.write_u16(z_memory.to_addr as u16, z_use.from_addr as usize);
+                }
+            }
+        }
+    }
+
     /// adds jump to write the jump-addresses after reading all commands
     fn add_jump(&mut self, name: String, jump_type: JumpType) {
         let from_addr: u16 = self.data.bytes.len() as u16;
@@ -303,6 +328,7 @@ impl Zfile {
         self.routine_check_links();
         self.routine_add_link();
         self.write_jumps();
+        self.write_zstring_addresses();
     }
 
     /// command to create a routine
@@ -404,6 +430,13 @@ impl Zfile {
     pub fn op_call_1n_var(&mut self, variable: u8) {
         self.op_1(0x0f, ArgType::Variable);
         //self.add_jump(jump_to_label.to_string(), JumpType::Routine);
+        self.data.append_byte(variable);
+    }
+
+    /// TODO
+    pub fn op_print_paddr_var(&mut self, variable: u8) {
+        self.op_1(0x0d, ArgType::Variable);
+
         self.data.append_byte(variable);
     }
 
@@ -568,8 +601,32 @@ impl Zfile {
         self.data.append_byte(variable);
     }
 
+    /// TODO
     pub fn op_store_string(&mut self, variable: u8, string: &str){
     	//TODO: fill me
+
+        // write placeholder addresse
+        self.op_store_u16(variable, 0x00);
+
+
+        // -2 becouse op_store_u16 wrote the address
+        let address: u16 = routine_address(self.data.bytes.len() as u16 - 2);
+        let zstring_use: ZStringUse = ZStringMemory {from_addr: address, content: string.to_string()};
+        self.zstring_memory.push(zstring_use);
+
+
+
+        // TODO die eigentlichen strings sollten wohl erst ganz am ende geschrieben werden..
+        /*let index: usize = self.data.bytes.len();
+
+        let mut text_bytes: Bytes = Bytes{bytes: Vec::new()};
+        ztext::encode(&mut text_bytes, string);
+        self.data.write_bytes(&text_bytes.bytes, index);
+
+        // adds a ZStringMemory
+        //let from_addr: u16 = self.data.bytes.len() as u16;
+        let zstring_memory: ZStringMemory = ZStringMemory {to_addr: address, content: string.to_string()};
+        self.zstring_memory.push(zstring_memory);*/
     }
 
     /// jumps to a label
