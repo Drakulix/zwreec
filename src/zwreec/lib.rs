@@ -19,6 +19,7 @@ use config::{Config,TestCase};
 use std::io::{Read,Write};
 
 
+#[allow(unused_variables)]
 pub fn compile<R: Read, W: Write>(cfg: Config, input: &mut R, output: &mut W) {
     //screen
     let mut clean_input = frontend::screener::screen(input);
@@ -36,6 +37,7 @@ pub fn compile<R: Read, W: Write>(cfg: Config, input: &mut R, output: &mut W) {
     codegen::generate_zcode(ast, output);
 }
 
+#[allow(unused_variables)]
 pub fn test_library<R: Read, W: Write>(cfg: Config, input: &mut Option<R>, output: &mut Option<W>) {
     for case in cfg.test_cases {
         match case {
