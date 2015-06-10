@@ -683,6 +683,7 @@ mod tests {
 			TokMakroEnd,
 			TokText("1".to_string()),
 			TokElse,
+			/* TODO: Fix else if */
 			TokCompOp("is".to_string()),
 			TokInt(2),
 			TokMakroEnd,
@@ -727,5 +728,12 @@ mod tests {
 		);
 
 		assert_eq!(expected, tokens);
+	}
+
+	#[test]
+	#[should_panic]
+	fn macro_invalid_test() {
+		// Should fail because it contains an invalid macro
+		test_lex("::Passage\n<<invalid>>");
 	}
 }
