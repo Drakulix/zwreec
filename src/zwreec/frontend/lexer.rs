@@ -160,7 +160,7 @@ rustlex! TweeLexer {
 
 	let MAKRO_START = "<<";
 	let MAKRO_END = ">>";
-	let MAKRO_PANIC = ["[]<:|"] [^" >"]*;
+	let MAKRO_PANIC = ["[]<:|"] [^" >"'\n']*;
 
 	let BR_OPEN = '(';
 	let BR_CLOSE = ')';
@@ -181,7 +181,7 @@ rustlex! TweeLexer {
 
 	let FUNCTION = LETTER+ '(';
 
-	let MACRO_NAME = LETTER+ WHITESPACE*;
+	let MACRO_NAME = [^" >"'\n']*;
 
 	let ASSIGN = "=" | "to" | "+=" | "-=" | "*=" | "/=";
 	let SEMI_COLON = ';';
