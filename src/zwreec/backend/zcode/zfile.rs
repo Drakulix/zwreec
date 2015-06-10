@@ -197,11 +197,13 @@ impl Zfile {
     /// saves the addresses of the labels to the positions of the jump-ops
     /// goes through all jumps and labels, if they have the same name:
     ///  write the "where to jump"-adress of the label to the position of the jump
-    /// TODO: Error handling for nonexistant labels
     fn write_jumps(&mut self) {
         for jump in self.jumps.iter_mut() {
+            let mut label_found = false;
+
             for label in self.labels.iter_mut() {
                 if label.name == jump.name {
+                    label_found = true;
                     match jump.jump_type {
                         JumpType::Routine => {
                             let new_addr: u16 = label.to_addr / 8;
@@ -219,6 +221,10 @@ impl Zfile {
                         }
                     }
                 }
+            }
+
+            if label_found == false {
+                panic!("Should generate jump to label \"{}\" but no such label exists", jump.name);
             }
         }
     }
@@ -924,9 +930,6 @@ fn test_zfile_write_jumps_length() {
     assert_eq!(zfile.data.len(), 0);
     
     zfile.op_jump("labename");
-    assert_eq!(zfile.data.len(), 3);
-
-    zfile.write_jumps();
     assert_eq!(zfile.data.len(), 3);
 
     zfile.label("labename");

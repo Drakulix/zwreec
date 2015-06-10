@@ -1,0 +1,162 @@
+::Start
+Ascii: [[Ascii]]
+Unicode: [[Unicode]]
+Variablen: [[Variablen]]
+If: [[If]]
+Format: [[Format]]
+Links: (siehe links oben)
+
+
+::Variablen
+Variablen<<set $last to 1>>
+/%<<set $var1 to "string example">>%/
+set $var2 to 1234; <<set $var2=1234>>
+set $var3 to true; <<set $var3=true>>
+variable set:
+/%<<$var1>>%/
+print value of $var2: <<$var2>>
+print value of $var3: <<$var3>>
+
+[[Start]]
+
+
+::If
+Verzweigungen:
+variable last: <<$last>>
+<<if $last == 1>>
+last passage was: Variable
+<<else>>
+last passage was: Start
+<<endif>>
+
+<<if $last == 3>>
+last passage was: Ascii
+<<endif>>
+
+<<if $last == 4>>
+last passage was: Unicode
+<<endif>>
+
+[[Start]]
+
+::Ascii
+Ascii-Zeichen
+<<set $last to 3>>
+
+ !"#$%&'()*+,-./0123456789:;<=>?
+@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]_
+'abcdefghijklmnopqrstuvwxyz{|}~ 
+
+[[Start]]
+
+
+
+::Unicode
+Unicode
+<<set $last to 4>>
+
+We currently support a wide range of Unicode characters. The Z-Machine has support for all unicode characters from 0x0 to 0xffffffff. These are excerpts from multiple Unicode Code pages.
+
+U+00000000 Basic Latin:
+ !"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]_'abcdefghijklmnopqrstuvwxyz{|}~
+
+U+00000080 Latin Supplements and Extended:
+ äöüÖÄÜßẞéèêîíìçáàânñnńiïÀÁÂÃĀĂȦÄẢÅǍȀȂĄẠḀẦẤẪẨẰẮẴẲǠǞǺẬẶȺⱭÆǼǢ
+
+U+00000370 Greek and Coptic:
+ ΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩαβγδεζηθικλμνξοπρστυφχψωⲀⲂⲄⲆⲈⲊⲌ
+
+U+00000400 Cyrillic and Supplements:
+ АБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдежзийклмнопрстуфхцчшщъыьэюяӐӁӜЉҨӝҩ҈꙲
+
+U+00000530 Armenian:
+ ԱԲԳԴԵԶԷ
+
+U+00000590 Hebrew:
+ אבדהזש
+
+Georgian:
+ ႠႡႢႣႤႥႦ
+
+Arrows:
+ →←↑↓➤
+
+Parentheses:
+ 〖〗⎝⎠
+
+Punctuation:
+ ¿?%‰‱❝❞
+
+Currency Symbols:
+ $€¥¢£₽₩฿₺₮₱₭₴₦৲৳૱௹﷼₹₲₪₡₫៛₵₢₸₤₳₥₠₣₰₧₯₶₷
+
+Pictographs:
+ ☼☆♠︎♣︎♥︎♦︎
+
+Bullets/Stars:
+ ∙・◎◉☑︎☒
+
+Math Symbols:
+ +−×÷±∓⊂⊃⊆⊇∈∉∫
+
+Letterlike Symbols:
+ ®©℗™℠№℅
+
+Sign/Standard Symbols:
+ ✆♳♴♺
+
+Technical Symbols:
+ ⌘⎋⏎⏏⌤⌥⌃⌄⌅⌆⌀⌁⌂⌐⌦⌧⌫⎛⎞⎝⎠⎡⎤⎩⎭
+
+Enclosed Characters:
+ ⒜⒝⒞⒟⒠⒡⒢ⒶⒷⒸⒹⒺⒻⒼ
+
+Divination Symbols:
+ ☰☱☲☳䷉
+
+Musical Symbols:
+ ♩♪♫♬♭𝄫♮♯
+
+Braille Patterns:
+ ⠁⠇⠖⠥⠵⠽⡅
+
+[[Start]]
+
+
+:: Format
+Formatierung
+<<set $last to 5>>
+
+Normal:
+Z-char 6789abcdef0123456789abcdef
+current   --------------------------
+  A0      abcdefghijklmnopqrstuvwxyz
+  A1      ABCDEFGHIJKLMNOPQRSTUVWXYZ
+  A2        0123456789.,!?_#'"/\-:()
+          --------------------------
+
+Bold:
+''Z-char 6789abcdef0123456789abcdef ''
+''current   --------------------------''
+''  A0      abcdefghijklmnopqrstuvwxyz''
+''  A1      ABCDEFGHIJKLMNOPQRSTUVWXYZ''
+''  A2        0123456789.,!?_#'"/\-:()''
+''          --------------------------''
+
+Italic:
+//Z-char 6789abcdef0123456789abcdef//
+//current   --------------------------//
+//  A0      abcdefghijklmnopqrstuvwxyz//
+//  A1      ABCDEFGHIJKLMNOPQRSTUVWXYZ//
+//  A2        0123456789.,!?_#'"/\-:()//
+//          --------------------------//
+
+Italic-Bold
+''//Z-char 6789abcdef0123456789abcdef//''
+''//current   --------------------------//''
+''//  A0      abcdefghijklmnopqrstuvwxyz//''
+''//  A1      ABCDEFGHIJKLMNOPQRSTUVWXYZ//''
+''//  A2        0123456789.,!?_#'"/\-:()//''
+''//          --------------------------//''
+
+[[Start]]

@@ -1,23 +1,7 @@
-use std::io::{BufReader,Read};
+use std::io::{BufReader, Read};
 use utils::extensions::{Peeking, PeekingExt, FilteringScan, FilteringScanExt};
 
-use self::Token::{
-	TokPassageName, TokTagStart, TokTagEnd, TokTag,
-	TokMakroStart, TokMakroEnd, TokVariable,
-	TokSet, TokAssign, TokInt, TokFloat, TokNumOp, TokCompOp,
-	TokLogOp, TokText, 	TokFormatBoldStart, TokFormatBoldEnd,
-	TokFormatItalicStart, TokFormatItalicEnd, TokFormatUnderStart,
-	TokFormatUnderEnd,	TokFormatStrikeStart, TokFormatStrikeEnd,
-	TokFormatSubStart, TokFormatSubEnd, TokFormatSupStart,
-	TokFormatSupEnd, TokFormatMonoStart, TokFormatMonoEnd,
-	TokString, TokBracketOpen, TokBracketClose, TokIf, TokElse,
-	TokEndIf, TokPassageLink, TokFormatBulList, TokFormatNumbList,
-	TokFormatIndentBlock, TokFormatHeading, TokVarSetStart,
-	TokVarSetEnd, TokSemiColon, TokPrint, TokDisplay, TokBoolean,
-	TokFunction , TokColon, TokArgsEnd, TokSilently, TokEndSilently,
-	TokArrayStart, TokArrayEnd, TokNewLine, TokFormatHorizontalLine,
-	TokMakroVar
-};
+use self::Token::*;
 
 pub struct ScanState {
     current_text: String,
@@ -187,7 +171,7 @@ rustlex! TweeLexer {
 	let INT = "-"? DIGIT+;
 	let FLOAT = "-"? (DIGIT+ "." DIGIT*) | "-"? (DIGIT* "." DIGIT+) | "-"? "Infinity";
 
-	let STRING = ('"' [^'"']* '"') | ("'" [^"'"]* "'");
+	let STRING = '"' ([^'\\''"']|'\\'.)* '"' | "'" ([^'\\'"'"]|'\\'.)* "'";
 
 	let BOOL = "true" | "false";
 
@@ -494,10 +478,31 @@ rustlex! TweeLexer {
 		}
 
 		// Expression Stuff
+		STRING => |lexer:&mut TweeLexer<R>| {
+			let s = lexer.yystr();
+			// strip the quotes from strings
+			let trimmed = &s[1 .. s.len() - 1];
+
+			// unescape quotes
+			let quote_type = s.chars().next().unwrap();
+			let mut unescaped = String::new();
+
+			for (c, peek) in trimmed.chars().peeking() {
+				if let Some(nextc) = peek {
+					if c == '\\' && nextc == quote_type {
+						continue;
+					}
+				}
+
+				unescaped.push(c);
+			}
+
+			Some(TokString(unescaped))
+		}
+
 		VAR_NAME =>  |lexer:&mut TweeLexer<R>| Some(TokVariable(lexer.yystr()))
 		FLOAT =>  |lexer:&mut TweeLexer<R>| Some(TokFloat(lexer.yystr()[..].parse().unwrap()))
 		INT =>  |lexer:&mut TweeLexer<R>| Some(TokInt(lexer.yystr()[..].parse().unwrap()))
-		STRING =>  |lexer:&mut TweeLexer<R>| Some(TokString(lexer.yystr()))
 		BOOL =>  |lexer:&mut TweeLexer<R>| Some(TokBoolean(lexer.yystr()))
 		NUM_OP =>  |lexer:&mut TweeLexer<R>| Some(TokNumOp(lexer.yystr()))
 		COMP_OP =>  |lexer:&mut TweeLexer<R>| Some(TokCompOp(lexer.yystr()))
@@ -586,4 +591,149 @@ rustlex! TweeLexer {
 		}
 	}
 
+}
+
+
+// ================================
+// test functions
+#[cfg(test)]
+mod tests {
+	use std::io::Cursor;
+
+	use super::*;
+	use super::Token::*;
+
+	fn test_lex(input: &str) -> Vec<Token> {
+		let mut cursor: Cursor<Vec<u8>> = Cursor::new(input.to_string().into_bytes());
+		lex(&mut cursor).collect()
+	}
+
+	#[test]
+	fn passage_test() {
+		// This should detect the ::Start passage
+		let start_tokens = test_lex("::Start");
+		let expected = vec!(
+			TokPassageName("Start".to_string())
+		);
+
+		assert_eq!(expected, start_tokens);
+
+		// This should not return any tokens
+		let fail_tokens = test_lex(":fail");
+		assert_eq!(0, fail_tokens.len());
+	}
+
+	#[test]
+	fn text_test() {
+		// This should return a passage with a body text
+		let tokens = test_lex("::Passage\nTestText\nTestNextLine\n::NextPassage");
+		let expected = vec!(
+			TokPassageName("Passage".to_string()),
+			TokText("TestText".to_string()),
+			TokNewLine,
+			TokText("TestNextLine".to_string()),
+			TokNewLine,
+			TokPassageName("NextPassage".to_string())
+		);
+
+		assert_eq!(expected, tokens);
+	}
+	
+	#[test]
+	fn tag_test() {
+		// This should return a passage with tags
+		let tokens = test_lex("::TagPassage [tag1 tag2]\nContent");
+		let expected = vec!(
+			TokPassageName("TagPassage".to_string()),
+			TokTagStart,
+			TokTag("tag1".to_string()),
+			TokTag("tag2".to_string()),
+			TokTagEnd,
+			TokText("Content".to_string())
+		);
+
+		assert_eq!(expected, tokens);
+	}
+
+	#[test]
+	fn macro_set_test() {
+		// This should return a passage with a set macro
+		let tokens = test_lex("::Passage\n<<set $var = 1>>");
+		let expected = vec!(
+			TokPassageName("Passage".to_string()),
+			TokSet,
+			TokAssign("$var".to_string(), "=".to_string()),
+			TokInt(1),
+			TokMakroEnd
+		);
+
+		assert_eq!(expected, tokens);
+	}
+
+	#[test]
+	fn macro_if_test() {
+		// This should return a passage with an if macro
+		let tokens = test_lex("::Passage\n<<if $var == 1>>1<<else if var is 2>>2<<else>>3<<endif>>");
+		let expected = vec!(
+			TokPassageName("Passage".to_string()),
+			TokIf,
+			TokVariable("$var".to_string()),
+			TokCompOp("==".to_string()),
+			TokInt(1),
+			TokMakroEnd,
+			TokText("1".to_string()),
+			TokElse,
+			/* TODO: Fix else if */
+			TokCompOp("is".to_string()),
+			TokInt(2),
+			TokMakroEnd,
+			TokText("2".to_string()),
+			TokElse,
+			TokMakroEnd,
+			TokText("3".to_string()),
+			TokEndIf,
+			TokMakroEnd
+		);
+
+		assert_eq!(expected, tokens);
+	}
+
+	#[test]
+	fn macro_print_test() {
+		let tokens = test_lex("::Passage\n<<print \"Test with escaped \\\"Quotes\">>\n<<print $var>>");
+		let expected = vec!(
+			TokPassageName("Passage".to_string()),
+			TokPrint,
+			TokString("Test with escaped \"Quotes".to_string()),
+			TokMakroEnd,
+			TokNewLine,
+			TokPrint,
+			TokVariable("$var".to_string()),
+			TokMakroEnd
+		);
+
+		assert_eq!(expected, tokens);
+	}
+
+	#[test]
+	fn macro_display_test() {
+		let tokens = test_lex("::Passage\n<<display DisplayedPassage>>\n::DisplayedPassage");
+		let expected = vec!(
+			TokPassageName("Passage".to_string()),
+			TokDisplay,
+			TokPassageName("DisplayedPassage".to_string()),
+			TokMakroEnd,
+			TokNewLine,
+			TokPassageName("DisplayedPassage".to_string())
+		);
+
+		assert_eq!(expected, tokens);
+	}
+
+	#[test]
+	#[should_panic]
+	fn macro_invalid_test() {
+		// Should fail because it contains an invalid macro
+		test_lex("::Passage\n<<invalid>>");
+	}
 }
