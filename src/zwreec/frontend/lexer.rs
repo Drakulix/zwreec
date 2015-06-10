@@ -98,7 +98,8 @@ pub enum Token {
 	TokEndSilently,
 	TokMakroVar(String),
 	TokNewLine,
-	TokPseudo
+	TokPseudo,
+	TokMakroPassageName(String)
 }
 
 rustlex! TweeLexer {
@@ -159,6 +160,7 @@ rustlex! TweeLexer {
 
 	let MAKRO_START = "<<";
 	let MAKRO_END = ">>";
+	let MAKRO_PANIC = ["[]<:|"] [^" >"]*;
 
 	let BR_OPEN = '(';
 	let BR_CLOSE = ')';
@@ -413,7 +415,7 @@ rustlex! TweeLexer {
 			None
 		}
 
-		MACRO_NAME =>  |lexer:&mut TweeLexer<R>| {
+		MACRO_NAME =>  |lexer:&mut TweeLexer<R>| -> Option<Token> {
 			match lexer.yystr().trim().as_ref() {
 				"set" => {
 					lexer.MAKRO_CONTENT();
@@ -448,7 +450,8 @@ rustlex! TweeLexer {
 					Some(TokEndSilently)
 				},
 				_ => {
-					panic!("Unknown macro: \"{}\"", lexer.yystr());
+					lexer.MAKRO_CONTENT();
+					Some(TokMakroPassageName(lexer.yystr().trim().to_string()))
 				}
 			}
 		}
@@ -456,6 +459,10 @@ rustlex! TweeLexer {
 		VAR_NAME =>  |lexer:&mut TweeLexer<R>| {
 			lexer.MAKRO_CONTENT();
 			Some(TokMakroVar(lexer.yystr()))
+		}
+
+		MAKRO_PANIC =>  |lexer:&mut TweeLexer<R>| -> Option<Token> {
+			panic!("No macro called \"{}\"", lexer.yystr());
 		}
 	}
 
@@ -513,6 +520,10 @@ rustlex! TweeLexer {
 		ASSIGN =>  |lexer:&mut TweeLexer<R>| Some(TokAssign("".to_string(), lexer.yystr()))
 		COLON =>  |_:&mut TweeLexer<R>| Some(TokColon)
 		// Expression Stuff End
+
+		WHITESPACE =>  |_:&mut TweeLexer<R>| -> Option<Token> {
+			None
+		}
 	}
 
 	FUNCTION_ARGS {
@@ -638,7 +649,7 @@ mod tests {
 
 		assert_eq!(expected, tokens);
 	}
-	
+
 	#[test]
 	fn tag_test() {
 		// This should return a passage with tags
