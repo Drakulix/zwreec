@@ -225,7 +225,7 @@ impl Zfile {
             if other_label.name == label.name {
                 panic!("label has to be unique, but \"{}\" isn't.", other_label.name);
             }
-        }
+     }
         self.labels.push(label);
     }
 

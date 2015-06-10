@@ -96,7 +96,7 @@ fn gen_zcode<'a>(node: &'a ASTNode, mut out: &mut zfile::Zfile, mut manager: &mu
                                 },
                                 Token::TokString(ref string_content) => {
                                     if !manager.symbol_table.is_known_symbol(var) {
-                                        manager.symbol_table.insert_new_symbol(&var, Type::Bool);
+                                        manager.symbol_table.insert_new_symbol(&var, Type::String);
                                     }
                                     let symbol_id = manager.symbol_table.get_symbol_id(var);
                                     vec![ZOP::StoreString{variable: symbol_id, string: format!("{}", string_content)}]
@@ -195,7 +195,7 @@ fn gen_zcode<'a>(node: &'a ASTNode, mut out: &mut zfile::Zfile, mut manager: &mu
                             vec![]
                         },
                         Type::Bool => {
-                            vec![]
+                            vec![ZOP::PrintNumVar{variable: var_id}]
                         }
                     }
                 },
