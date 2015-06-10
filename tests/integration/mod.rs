@@ -69,3 +69,9 @@ fn invalid_macro_test() {
 fn no_start_passage_test() {
     test_compile(TESTFOLDER_FAIL.to_string() + "NoStartPassage.twee");
 }
+
+#[test]
+#[should_panic]
+fn duplicate_passage_test() {
+    test_compile(TESTFOLDER_FAIL.to_string() + "DuplicatePassage.twee");
+}
