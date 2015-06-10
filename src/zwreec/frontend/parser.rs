@@ -62,7 +62,7 @@ struct Parser {
     ast_path: Vec<usize>,
     tokens: Vec<Token>,
     lookahead: usize,
-    is_in_else: bool,
+    is_in_else: u8,
 }
 
 impl Parser {
@@ -73,7 +73,7 @@ impl Parser {
             ast_path: Vec::new(),
             tokens: tokens,
             lookahead: 0,
-            is_in_else: false
+            is_in_else: 0
         }
     }
 
@@ -166,8 +166,8 @@ impl Parser {
 
                     // ast
                     // special handling for the else
-                    if self.is_in_else == true {
-                        self.is_in_else = false;
+                    if self.is_in_else > 0 {
+                        self.is_in_else -= 1;
                         self.ast_path.pop();
                         self.ast.add_child(&self.ast_path, TokEndIf);
                     }
@@ -292,7 +292,7 @@ impl Parser {
                     // ast
                     debug!("pop TokElse");
                     self.ast_path.pop();
-                    self.is_in_else = true;
+                    self.is_in_else += 1;
                     //self.ast_path.pop();
 
                     let ast_count_childs = self.ast.count_childs(self.ast_path.to_vec());
