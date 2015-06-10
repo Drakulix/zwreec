@@ -5,9 +5,10 @@ pub mod zbytes;
 pub mod zfile;
 pub mod ztext;
 
+use self::zfile::Zfile;
+
 use std::error::Error;
 use std::io::Write;
-use self::zfile::Zfile;
 
 
 /// an example to show the current status of the z-code implementation

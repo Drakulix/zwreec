@@ -25,7 +25,9 @@ fn test_compile(input_filename: String) {
     let vec: Vec<u8> = vec![];
     let mut output = Cursor::new(vec);
 
-    zwreec::compile(&mut input, &mut output);
+    let cfg = zwreec::config::default_config();
+
+    zwreec::compile(cfg, &mut input, &mut output);
 }
 
 #[test]

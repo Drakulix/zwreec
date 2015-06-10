@@ -8,7 +8,7 @@ use std::env;
 use std::vec::Vec;
 use std::error::Error;
 use std::fs::File;
-use std::io::Write;
+use std::io::{Read,Write};
 use std::path::Path;
 use std::process::exit;
 
@@ -85,7 +85,7 @@ Additional help:
 /// print the usage and/or call `exit(1)`.
 ///
 /// NOTE: This is similar to librustc_driver's handle_options function.
-fn parse_arguments(args: Vec<String>, opts: getopts::Options) -> (getopts::Matches, File, File) {
+fn parse_arguments(args: Vec<String>, opts: getopts::Options) -> (getopts::Matches, config::Config) {
     let mut loggers: Vec<Box<logger::SharedLogger>> = vec![];
 
     if args.is_empty() {
@@ -154,69 +154,91 @@ fn parse_arguments(args: Vec<String>, opts: getopts::Options) -> (getopts::Match
     // activate logger
     let _ = logger::CombinedLogger::init(loggers);
 
-    let infile = if matches.free.len() == 1 {
+    let cfg = config::parse_matches(&matches);
+    (matches, cfg)
+}
+
+fn parse_input(matches: &getopts::Matches) -> Option<File> {
+    if matches.free.len() == 1 {
         let path = Path::new(&matches.free[0]);
         match File::open(path) {
             Err(why) => {
-                panic!("Couldn't open {}: {}",
-                       path.display(), Error::description(&why))
+                error!("Couldn't open {}: {}",
+                    path.display(), Error::description(&why));
+                None
             },
             Ok(file) => {
                 info!("Opened input: {}", path.display());
-                file
+                Some(file)
             }
         }
     } else {
         // TODO: check if STDOUT is a tty
-        print_stderr!("Input file name missing\n");
-        usage(matches.opt_present("verbose"));
-        exit(1);
-    };
+        None
+    }
+}
 
-    let outfile = if let Some(file) = matches.opt_str("o") {
+fn parse_output(matches: &getopts::Matches) -> Option<File> {
+    if let Some(file) = matches.opt_str("o") {
         // try to open FILE
         let path = Path::new(&file);
         match File::create(path) {
             Err(why) => {
-                panic!("Couldn't open {}: {}",
-                       path.display(), Error::description(&why))
+                error!("Couldn't open {}: {}",
+                       path.display(), Error::description(&why));
+                None
             },
             Ok(file) => {
                 info!("Opened output: {}", path.display());
-                file
+                Some(file)
             }
         }
     } else {
         let path = Path::new("a.z8");
         match File::create(path) {
             Err(why) => {
-                panic!("Couldn't open {}: {}",
-                       path.display(), Error::description(&why))
+                error!("Couldn't open {}: {}",
+                       path.display(), Error::description(&why));
+                None
             },
             Ok(file) => {
                 debug!("No output file specified, assuming default");
                 info!("Opened output: {}", path.display());
-                file
+                Some(file)
             }
         }
-    };
-
-    (matches, infile, outfile)
+    }
 }
 
 
 fn main() {
     // handle command line parameters
-    let (matches, mut input, mut output) = parse_arguments(
+    let (matches, cfg) = parse_arguments(
         env::args().collect(),
         config::zwreec_options(short_options())
     );
+
+    let mut input = parse_input(&matches);
+    let mut output = parse_output(&matches);
 
     debug!("Parsed command line options");
     info!("Main started");
 
     // call library
-    zwreec::compile(&mut input, &mut output);
+    if cfg.testmode {
+        zwreec::test_library(cfg, &mut input, &mut output);
+    } else {
+        // unwrap input and output
+        let mut _input = match input {
+            Some(i) => i,
+            None => panic!("Missing input file! Compile aborted")
+        };
+        let mut _output = match output {
+            Some(o) => o,
+            None => panic!("Missing output file! Compile aborted")
+        };
+        zwreec::compile(cfg, &mut _input, &mut _output);
+    }
 
     info!("Main finished");
 }

@@ -15,12 +15,11 @@ pub mod utils;
 
 use frontend::codegen;
 
+use config::{Config,TestCase};
 use std::io::{Read,Write};
 
 
-pub fn compile<R: Read, W: Write>(input: &mut R, output: &mut W) {
-    // compile
-
+pub fn compile<R: Read, W: Write>(cfg: Config, input: &mut R, output: &mut W) {
     //screen
     let mut clean_input = frontend::screener::screen(input);
 
@@ -35,4 +34,17 @@ pub fn compile<R: Read, W: Write>(input: &mut R, output: &mut W) {
 
     // create code
     codegen::generate_zcode(ast, output);
+}
+
+pub fn test_library<R: Read, W: Write>(cfg: Config, input: &mut Option<R>, output: &mut Option<W>) {
+    for case in cfg.test_cases {
+        match case {
+            TestCase::ZcodeBackend => {
+                match output.as_mut() {
+                     Some(o) => backend::zcode::temp_create_zcode_example(o),
+                     None => error!("TestCase::ZcodeBackend requires output!"),
+                }
+            }
+        }
+    }
 }
