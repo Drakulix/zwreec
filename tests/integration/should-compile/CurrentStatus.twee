@@ -169,6 +169,14 @@ Italic-Bold
 ''//  A2        0123456789.,!?_#'"/\-:()//''
 ''//          --------------------------//''
 
+Mono:
+{{{Z-char 6789abcdef0123456789abcdef
+current   --------------------------
+  A0      abcdefghijklmnopqrstuvwxyz
+  A1      ABCDEFGHIJKLMNOPQRSTUVWXYZ
+  A2        0123456789.,!?_#'"/\-:()
+          --------------------------}}}
+
 ASCII-Zeichensatz: [[ASCII|Ascii]]
 Unicode-Zeichen: [[Unicode]]
 Variablen set und print: [[Variablen]]
