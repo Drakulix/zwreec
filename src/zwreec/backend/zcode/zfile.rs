@@ -58,6 +58,8 @@ pub struct Zfile {
     program_addr: u16,
     jumps: Vec<Zjump>,
     labels: Vec<Zlabel>,
+    global_addr: u16,
+    object_addr: u16,
 }
 
 struct Zjump {
@@ -89,6 +91,8 @@ impl Zfile {
             program_addr: 0x800,
             jumps: Vec::new(),
             labels: Vec::new(),
+            global_addr: 0,
+            object_addr: 0,
         }
     }
 
@@ -99,8 +103,8 @@ impl Zfile {
 
         let alpha_addr: u16 = 0x40;
         let extension_addr: u16 = alpha_addr + 78;
-        let global_addr: u16 = extension_addr as u16 + 4;
-        let object_addr: u16 = global_addr + 480;
+        self.global_addr = extension_addr as u16 + 4;
+        self.object_addr = self.global_addr + 480;
         let high_memory_addr: u16 = 0x308;
         let static_addr: u16 = 0x308;
         let dictionary_addr: u16 = 0x308;
@@ -135,10 +139,10 @@ impl Zfile {
         self.data.write_u16(0x40, 0x10);
 
         // location of object table (byte address) (0x0a and 0x0b)
-        self.data.write_u16(object_addr, 0x0a);
+        self.data.write_u16(self.object_addr, 0x0a);
 
         // location of global variables table (byte address) (0x0c and 0x0d)
-        self.data.write_u16(global_addr, 0x0c);
+        self.data.write_u16(self.global_addr, 0x0c);
 
         // base of static memory (byte address) (0x0e and 0x0f)
         self.data.write_u16(static_addr, 0x0e);
@@ -735,7 +739,7 @@ impl Zfile {
         self.op_2(0x0f, vec![ArgType::LargeConst, ArgType::Variable]);
 
         // array address
-        self.data.append_u16(array_address);
+        self.data.append_u16(self.object_addr + array_address);
 
         // array index
         self.data.append_byte(index);
@@ -753,7 +757,7 @@ impl Zfile {
         self.op_var(0x01, args);
 
         // array address
-        self.data.append_u16(array_address);
+        self.data.append_u16(self.object_addr + array_address);
 
         // array index
         self.data.append_byte(index);
