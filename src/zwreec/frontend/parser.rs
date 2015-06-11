@@ -136,7 +136,7 @@ impl Parser {
                     // ast
                     self.ast.add_child(&self.ast_path, TokText(text.clone()));
                 },
-                (PassageContent, &TokFormatBoldStart) | 
+                (PassageContent, &TokFormatBoldStart) |
                 (PassageContent, &TokFormatItalicStart) |
                 (PassageContent, &TokFormatMonoStart) => {
                     new_nodes.push(PNode::new_non_terminal(Formating));
@@ -235,10 +235,23 @@ impl Parser {
                 (MonoContent, &TokText(ref text)) => {
                     new_nodes.push(PNode::new_terminal(TokText(text.clone())));
                     new_nodes.push(PNode::new_non_terminal(MonoContent));
+
+                    // ast
+                    self.ast.add_child(&self.ast_path, TokText(text.clone()));
                 },
                 (MonoContent, &TokNewLine) => {
                     new_nodes.push(PNode::new_terminal(TokNewLine));
                     new_nodes.push(PNode::new_non_terminal(MonoContent));
+
+                    // ast
+                    self.ast.add_child(&self.ast_path, TokNewLine);
+                },
+                (MonoContent, &TokFormatMonoEnd) => {
+                    // MonoContent -> ε
+
+                    //ast
+                    self.ast_path.pop();
+                    self.ast.add_child(&self.ast_path, TokFormatMonoEnd);
                 },
 
                 // Link
@@ -323,7 +336,7 @@ impl Parser {
                 (ExpressionListf, &TokMakroEnd) => {
                     debug!("pop TokMakroEnd");
                     self.ast_path.pop();
-                    
+
                 },
                 (ExpressionListf, _) => {
                     // ExpressionListf -> ε
@@ -462,7 +475,7 @@ impl Parser {
                     self.ast.add_child(&self.ast_path, TokBoolean(value.clone()));
                 }
 
-                
+
                 _ => {
                     panic!("not supported grammar: {:?}", state_first);
                 }
@@ -476,7 +489,7 @@ impl Parser {
         } else {
             // no token left
 
-            // Sf, PassageContent, Linkf, 
+            // Sf, PassageContent, Linkf,
 
             match top {
                 Sf | PassageContent => {
