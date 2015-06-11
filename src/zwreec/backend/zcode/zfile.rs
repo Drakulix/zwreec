@@ -38,7 +38,8 @@ pub enum ZOP {
   Quit,
 }
 
-enum JumpType {
+#[derive(Debug, PartialEq, Clone)]
+pub enum JumpType {
     Jump,
     Branch,
     Routine
@@ -62,13 +63,15 @@ pub struct Zfile {
     object_addr: u16,
 }
 
-struct Zjump {
+#[derive(Debug, PartialEq, Clone)]
+pub struct Zjump {
     pub from_addr: u16,
     pub name: String,
     pub jump_type: JumpType
 }
 
-struct Zlabel {
+#[derive(Debug, PartialEq, Clone)]
+pub struct Zlabel {
     pub to_addr: u16,
     pub name: String
 }
@@ -254,41 +257,68 @@ impl Zfile {
         self.labels.push(label);
     }
 
+    /// write out respective byte stream of opcodes to file
     pub fn emit(&mut self, code: Vec<ZOP>) {
         for instr in &code {
-            match instr {
-                &ZOP::PrintUnicode{c} => self.op_print_unicode_char(c),
-                &ZOP::Print{ref text} => self.op_print(text),
-                &ZOP::PrintNumVar{variable} => self.op_print_num_var(variable),
-                &ZOP::PrintOps{ref text} => self.gen_print_ops(text),
-                &ZOP::Call1N{ref jump_to_label} => self.op_call_1n(jump_to_label),
-                &ZOP::Call2NWithAddress{ref jump_to_label, ref address} => self.op_call_2n_with_address(jump_to_label, address),
-                &ZOP::Call1NVar{variable} => self.op_call_1n_var(variable),
-                &ZOP::Routine{ref name, count_variables} => self.routine(name, count_variables),
-                &ZOP::Label{ref name} => self.label(name),
-                &ZOP::Newline => self.op_newline(),
-                &ZOP::SetColor{foreground, background} => self.op_set_color(foreground, background),
-                &ZOP::SetColorVar{foreground, background} => self.op_set_color_var(foreground, background),
-                &ZOP::SetTextStyle{bold, reverse, monospace, italic} => self.op_set_text_style(bold, reverse, monospace, italic),
-                &ZOP::StoreU16{variable, value} => self.op_store_u16(variable, value),
-                &ZOP::StoreU8{variable, value} => self.op_store_u8(variable, value),
-                &ZOP::StoreW{array_address, index, variable} => self.op_storew(array_address, index, variable),
-                &ZOP::Inc{variable} => self.op_inc(variable),
-                &ZOP::Ret{value} => self.op_ret(value),
-                &ZOP::JE{local_var_id, equal_to_const, ref jump_to_label} => self.op_je(local_var_id, equal_to_const, jump_to_label),
-                &ZOP::Random{range, variable} => self.op_random(range, variable),
-                &ZOP::ReadChar{local_var_id} => self.op_read_char(local_var_id),
-                &ZOP::ReadCharTimer{local_var_id, timer, ref routine} => self.op_read_char_timer(local_var_id, timer, routine),
-                &ZOP::Add{variable1, add_const, variable2} => self.op_add(variable1, add_const, variable2),
-                &ZOP::Sub{variable1, sub_const, variable2} => self.op_sub(variable1, sub_const, variable2),
-                &ZOP::JL{local_var_id, local_var_id2, ref jump_to_label} => self.op_jl(local_var_id, local_var_id2, jump_to_label),
-                &ZOP::Jump{ref jump_to_label} => self.op_jump(jump_to_label),
-                &ZOP::Dec{variable} => self.op_dec(variable),
-                &ZOP::LoadW{array_address, index, variable} => self.op_loadw(array_address, index, variable),
-                &ZOP::EraseWindow{value} => self.op_erase_window(value),
-                &ZOP::Quit => self.op_quit(),
+            let addr = self.data.bytes.len();
+            debug!("{:#x}: {:?}", addr, instr);
+            let (_, _, bytes) = self.write_zop(instr);
+            let hexstrs: Vec<String> = bytes.iter().map(|b| format!("{:02X}", b)).collect();
+            trace!("{:#x}: {}", addr, hexstrs.connect(" "));
+        }
+    }
+
+    /// write opcodes to file but also return written bytes for testing purposes
+    /// as well as the resulting new labels and jumps
+    pub fn write_zop(&mut self, instr: &ZOP) -> (Vec<Zlabel>, Vec<Zjump>, &[u8]){
+        let beginning = self.data.bytes.len();
+        let old_jumps: Vec<Zjump> = self.jumps.clone();
+        let old_labels: Vec<Zlabel> = self.labels.clone();
+        match instr {
+            &ZOP::PrintUnicode{c} => self.op_print_unicode_char(c),
+            &ZOP::Print{ref text} => self.op_print(text),
+            &ZOP::PrintNumVar{variable} => self.op_print_num_var(variable),
+            &ZOP::PrintOps{ref text} => self.gen_print_ops(text),
+            &ZOP::Call1N{ref jump_to_label} => self.op_call_1n(jump_to_label),
+            &ZOP::Call2NWithAddress{ref jump_to_label, ref address} => self.op_call_2n_with_address(jump_to_label, address),
+            &ZOP::Call1NVar{variable} => self.op_call_1n_var(variable),
+            &ZOP::Routine{ref name, count_variables} => self.routine(name, count_variables),
+            &ZOP::Label{ref name} => self.label(name),
+            &ZOP::Newline => self.op_newline(),
+            &ZOP::SetColor{foreground, background} => self.op_set_color(foreground, background),
+            &ZOP::SetColorVar{foreground, background} => self.op_set_color_var(foreground, background),
+            &ZOP::SetTextStyle{bold, reverse, monospace, italic} => self.op_set_text_style(bold, reverse, monospace, italic),
+            &ZOP::StoreU16{variable, value} => self.op_store_u16(variable, value),
+            &ZOP::StoreU8{variable, value} => self.op_store_u8(variable, value),
+            &ZOP::StoreW{array_address, index, variable} => self.op_storew(array_address, index, variable),
+            &ZOP::Inc{variable} => self.op_inc(variable),
+            &ZOP::Ret{value} => self.op_ret(value),
+            &ZOP::JE{local_var_id, equal_to_const, ref jump_to_label} => self.op_je(local_var_id, equal_to_const, jump_to_label),
+            &ZOP::Random{range, variable} => self.op_random(range, variable),
+            &ZOP::ReadChar{local_var_id} => self.op_read_char(local_var_id),
+            &ZOP::ReadCharTimer{local_var_id, timer, ref routine} => self.op_read_char_timer(local_var_id, timer, routine),
+            &ZOP::Add{variable1, add_const, variable2} => self.op_add(variable1, add_const, variable2),
+            &ZOP::Sub{variable1, sub_const, variable2} => self.op_sub(variable1, sub_const, variable2),
+            &ZOP::JL{local_var_id, local_var_id2, ref jump_to_label} => self.op_jl(local_var_id, local_var_id2, jump_to_label),
+            &ZOP::Jump{ref jump_to_label} => self.op_jump(jump_to_label),
+            &ZOP::Dec{variable} => self.op_dec(variable),
+            &ZOP::LoadW{array_address, index, variable} => self.op_loadw(array_address, index, variable),
+            &ZOP::EraseWindow{value} => self.op_erase_window(value),
+            &ZOP::Quit => self.op_quit(),
+        }
+        let mut new_jumps: Vec<Zjump> = vec![];
+        let mut new_labels: Vec<Zlabel> = vec![];
+        for label in self.labels.iter() {
+            if !old_labels.contains(&label) {
+                new_labels.push(label.clone());
             }
         }
+        for jump in self.jumps.iter() {
+            if !old_jumps.contains(&jump) {
+                new_jumps.push(jump.clone());
+            }
+        }
+        (new_labels, new_jumps, &self.data.bytes[beginning..self.data.bytes.len()])
     }
 
     /// generates normal print opcodes for ASCII characters and unicode print
