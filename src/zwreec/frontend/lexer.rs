@@ -742,9 +742,15 @@ mod tests {
 	}
 
 	#[test]
-	#[should_panic]
-	fn macro_invalid_test() {
+	fn macro_display_short_test() {
 		// Should fail because it contains an invalid macro
-		test_lex("::Passage\n<<invalid>>");
+		let tokens = test_lex("::Passage\n<<Passage>>");
+		let expected = vec![
+			TokPassageName("Passage".to_string()),
+			TokMakroPassageName("Passage".to_string()),
+			TokMakroEnd
+		];
+
+		assert_eq!(expected, tokens);
 	}
 }
