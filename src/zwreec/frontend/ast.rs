@@ -69,11 +69,11 @@ fn gen_zcode<'a>(node: &'a ASTNode, mut out: &mut zfile::Zfile, mut manager: &mu
                     set_formatting = true;
                     vec![
                     ZOP::Call2NWithAddress{jump_to_label: "system_add_link".to_string(), address: link.to_string()},
-                    ZOP::SetTextStyle{bold: state_copy.bold, reverse: true, monospace: state_copy.mono, italic: state_copy.italic},
+                    ZOP::SetColor{foreground: 8, background: 2},
                     ZOP::Print{text: format!("{}[", name)},
                     ZOP::PrintNumVar{variable: 16},
                     ZOP::Print{text: "]".to_string()},
-                    ZOP::SetTextStyle{bold: state_copy.bold, reverse: state_copy.inverted, monospace: state_copy.mono, italic: state_copy.italic}
+                    ZOP::SetColor{foreground: 9, background: 2},
                     ]
                 },
                 &Token::TokAssign(ref var, ref operator) => {
