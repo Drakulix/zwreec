@@ -18,6 +18,7 @@ enum Type{
 pub struct AST {
     passages: Vec<ASTNode>,
     path: Vec<usize>,
+    is_in_else: u8
 }
 
  /// add zcode based on tokens
@@ -227,6 +228,7 @@ impl AST {
         AST {
             passages: Vec::new(),
             path: Vec::new(),
+            is_in_else: 0
         }
     }
 
@@ -255,16 +257,62 @@ impl AST {
     }
 
     /// adds a child an goees one child down
-    pub fn add_child_and_go_down(&mut self, token: Token) {
+    pub fn child_down(&mut self, token: Token) {
         let ast_count_childs = self.count_childs(self.path.to_vec());
         self.add_child(token);
         self.path.push(ast_count_childs);
     }
 
-    /// goes one child up
-    pub fn one_child_up(&mut self) {
+    /// adds one child and goes down. adds snd child and goes down.
+    pub fn two_childs_down(&mut self, child1: Token, child2: Token) {
+        self.child_down(child1);
+        self.child_down(child2);
+    }
+
+    /// goes one lvl up
+    pub fn up(&mut self) {
         self.path.pop();
     }
+
+     /// goes one lvl up and adds and child
+    pub fn up_child(&mut self, token: Token, is_in_passage: bool) {
+        match token {
+            Token::TokEndIf => {
+                if is_in_passage == false {
+                    self.up();
+                    self.add_child(token);
+                } else if self.is_in_else > 0 {
+                    self.is_in_else -= 1;
+                    self.up();
+                    self.add_child(token);
+                }
+                
+            },
+            _ => {
+                panic!{"no supported"}
+            }
+        }
+    }
+
+    /// goeas one lvl up, adds an child and goes one lvl down
+    pub fn up_child_down(&mut self, token: Token) {
+        
+        match token {
+            Token::TokElse => {
+                self.is_in_else += 1;
+            },
+            _ => {
+                panic!{"no supported"}
+            }
+        }
+
+        self.up();
+        self.child_down(token);
+    }
+
+
+
+    
 
     /// convert ast to zcode
     pub fn to_zcode(& self, out: &mut zfile::Zfile) {

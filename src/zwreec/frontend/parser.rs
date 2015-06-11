@@ -60,8 +60,7 @@ struct Parser {
     ast: ast::AST,
     stack: Vec<PNode>,
     tokens: Vec<Token>,
-    lookahead: usize,
-    is_in_else: u8,
+    lookahead: usize
 }
 
 impl Parser {
@@ -70,8 +69,7 @@ impl Parser {
             ast: ast::AST::new(),
             stack: Vec::new(),
             tokens: tokens,
-            lookahead: 0,
-            is_in_else: 0
+            lookahead: 0
         }
     }
 
@@ -155,23 +153,17 @@ impl Parser {
                 },
                 (PassageContent, &TokEndIf) => {
                     // jump one ast-level higher
-                    debug!("pop TokEndIf Passage; in else: {:?}", self.is_in_else);
+                    debug!("pop TokEndIf Passage;");
 
-                    // ast
-                    // special handling for the else
-                    if self.is_in_else > 0 {
-                        self.is_in_else -= 1;
-                        self.ast.one_child_up();
-                        self.ast.add_child(TokEndIf);
-                    }
+                    self.ast.up_child(TokEndIf, true);
                 },
                 (PassageContent, &TokFormatBoldEnd) => {
                     // jump one ast-level higher
-                    self.ast.one_child_up();
+                    self.ast.up();
                 },
                 (PassageContent, &TokFormatItalicEnd) => {
                     // jump one ast-level higher
-                    self.ast.one_child_up();
+                    self.ast.up();
                 },
                 (PassageContent, _) => {
                     // PassageContent -> ε
@@ -195,7 +187,7 @@ impl Parser {
                     new_nodes.push(PNode::new_terminal(TokFormatBoldEnd));
 
                     //ast
-                    self.ast.add_child_and_go_down(TokFormatBoldStart);
+                    self.ast.child_down(TokFormatBoldStart);
                 },
 
                 // ItalicFormatting
@@ -205,7 +197,7 @@ impl Parser {
                     new_nodes.push(PNode::new_terminal(TokFormatItalicEnd));
 
                     //ast
-                    self.ast.add_child_and_go_down(TokFormatItalicStart);
+                    self.ast.child_down(TokFormatItalicStart);
                 },
 
                 // MonoFormatting
@@ -215,7 +207,7 @@ impl Parser {
                     new_nodes.push(PNode::new_terminal(TokFormatMonoEnd));
 
                     //ast
-                    self.ast.add_child_and_go_down(TokFormatMonoStart);
+                    self.ast.child_down(TokFormatMonoStart);
                 },
 
                 // MonoContent
@@ -250,10 +242,7 @@ impl Parser {
                     new_nodes.push(PNode::new_non_terminal(Makrof));
 
                     // ast
-                    self.ast.add_child_and_go_down(TokIf);
-
-                    // pseudo_node for expression
-                    self.ast.add_child_and_go_down(TokPseudo);
+                    self.ast.two_childs_down(TokIf, TokPseudo);
                 },
                 // means <<$var>>
                 (Makro, &TokMakroVar(ref name)) => {
@@ -273,20 +262,14 @@ impl Parser {
                     new_nodes.push(PNode::new_terminal(TokMakroEnd));
 
                     // ast
-                    debug!("pop TokElse");
-                    self.ast.one_child_up();
-                    self.is_in_else += 1;
-
-                    self.ast.add_child_and_go_down(TokElse);
+                    self.ast.up_child_down(TokElse);
                 },
                 (Makrof, &TokEndIf) => {
                     new_nodes.push(PNode::new_terminal(TokEndIf));
                     new_nodes.push(PNode::new_terminal(TokMakroEnd));
 
                     // ast
-                    debug!("pop TokEndIf Macro");
-                    self.ast.one_child_up();
-                    self.ast.add_child(TokEndIf);
+                    self.ast.up_child(TokEndIf, false);
                 }
 
                 // ExpressionList
@@ -302,7 +285,7 @@ impl Parser {
                 // ExpressionListf
                 (ExpressionListf, &TokMakroEnd) => {
                     debug!("pop TokMakroEnd");
-                    self.ast.one_child_up();
+                    self.ast.up();
                     
                 },
                 (ExpressionListf, _) => {
@@ -417,7 +400,7 @@ impl Parser {
                     new_nodes.push(PNode::new_non_terminal(E));
 
                     //ast
-                    self.ast.add_child_and_go_down(TokAssign(name.clone(), assign.clone()));
+                    self.ast.child_down(TokAssign(name.clone(), assign.clone()));
                 },
 
                 // DataType
