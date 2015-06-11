@@ -239,13 +239,6 @@ impl Parser {
                     // ast
                     self.ast.add_child(&self.ast_path, TokText(text.clone()));
                 },
-                (MonoContent, &TokNewLine) => {
-                    new_nodes.push(PNode::new_terminal(TokNewLine));
-                    new_nodes.push(PNode::new_non_terminal(MonoContent));
-
-                    // ast
-                    self.ast.add_child(&self.ast_path, TokNewLine);
-                },
                 (MonoContent, &TokFormatMonoEnd) => {
                     // MonoContent -> ε
 
