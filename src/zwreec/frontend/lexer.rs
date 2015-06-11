@@ -160,7 +160,6 @@ rustlex! TweeLexer {
 
 	let MAKRO_START = "<<";
 	let MAKRO_END = ">>";
-	let MAKRO_PANIC = ["[]<:|"] [^" >"'\n']*;
 
 	let BR_OPEN = '(';
 	let BR_CLOSE = ')';
@@ -459,10 +458,6 @@ rustlex! TweeLexer {
 		VAR_NAME =>  |lexer:&mut TweeLexer<R>| {
 			lexer.MAKRO_CONTENT();
 			Some(TokMakroVar(lexer.yystr()))
-		}
-
-		MAKRO_PANIC =>  |lexer:&mut TweeLexer<R>| -> Option<Token> {
-			panic!("No macro called \"{}\"", lexer.yystr());
 		}
 	}
 
