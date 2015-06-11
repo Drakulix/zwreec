@@ -60,6 +60,11 @@ fn gen_zcode<'a>(node: &'a ASTNode, mut out: &mut zfile::Zfile, mut manager: &mu
                     set_formatting = true;
                     vec![ZOP::SetTextStyle{bold: state_copy.bold, reverse: state_copy.inverted, monospace: state_copy.mono, italic: state_copy.italic}]
                 },
+                &Token::TokFormatMonoStart => {
+                    state_copy.mono = true;
+                    set_formatting = true;
+                    vec![ZOP::SetTextStyle{bold: state_copy.bold, reverse: state_copy.inverted, monospace: state_copy.mono, italic: state_copy.italic}]
+                },
                 &Token::TokFormatItalicStart => {
                     state_copy.italic = true;
                     set_formatting = true;
