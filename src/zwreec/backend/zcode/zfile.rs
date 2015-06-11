@@ -260,10 +260,11 @@ impl Zfile {
     /// write out respective byte stream of opcodes to file
     pub fn emit(&mut self, code: Vec<ZOP>) {
         for instr in &code {
-            debug!("{:#x}: {:?}", self.data.bytes.len(), instr);
-            let (labels, jumps, bytes) = self.write_zop(instr);
+            let addr = self.data.bytes.len();
+            debug!("{:#x}: {:?}", addr, instr);
+            let (_, _, bytes) = self.write_zop(instr);
             let hexstrs: Vec<String> = bytes.iter().map(|b| format!("{:02X}", b)).collect();
-            trace!("{}. {:?}. {:?}", hexstrs.connect(" "), labels, jumps);
+            trace!("{:#x}: {}", addr, hexstrs.connect(" "));
         }
     }
 
