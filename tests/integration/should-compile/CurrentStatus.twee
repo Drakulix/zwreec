@@ -1,59 +1,29 @@
 ::Start
-Ascii: [[Ascii]]
-Unicode: [[Unicode]]
-Variablen: [[Variablen]]
-If: [[If and Else |If]]
+ASCII-Zeichensatz: [[ASCII|Ascii]]
+Unicode-Zeichen: [[Unicode]]
+Variablen set und print: [[Variablen]]
+If: [[If and Else|If]]
 Format: [[Format]]
 Links: (siehe links oben)
 
-
-::Variablen
-Variablen<<set $last to 1>>
-/%<<set $var1 to "string example">>%/
-set $var2 to 1234; <<set $var2=1234>>
-set $var3 to true; <<set $var3=true>>
-variable set:
-/%<<$var1>>%/
-print value of $var2: <<$var2>>
-print value of $var3: <<$var3>>
-
-[[Start]]
-
-
-::If
-Verzweigungen:
-variable last: <<$last>>
-<<if $last == 1>>
-last passage was: Variable
-<<else>>
-last passage was: Start
-<<endif>>
-
-<<if $last == 3>>
-last passage was: Ascii
-<<endif>>
-
-<<if $last == 4>>
-last passage was: Unicode
-<<endif>>
-
-[[Start]]
-
 ::Ascii
-Ascii-Zeichen
-<<set $last to 3>>
+ASCII-Zeichen
+<<set $last to 1>>
 
  !"#$%&'()*+,-./0123456789:;<=>?
 @ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]_
 'abcdefghijklmnopqrstuvwxyz{|}~ 
 
-[[Start]]
-
-
+ASCII-Zeichensatz: [[ASCII|Ascii]]
+Unicode-Zeichen: [[Unicode]]
+Variablen set und print: [[Variablen]]
+If: [[If and Else|If]]
+Format: [[Format]]
+Links: (siehe links oben)
 
 ::Unicode
 Unicode
-<<set $last to 4>>
+<<set $last to 2>>
 
 We currently support a wide range of Unicode characters. The Z-Machine has support for all unicode characters from 0x0 to 0xffffffff. These are excerpts from multiple Unicode Code pages.
 
@@ -120,8 +90,48 @@ Musical Symbols:
 Braille Patterns:
  ⠁⠇⠖⠥⠵⠽⡅
 
-[[Start]]
+ASCII-Zeichensatz: [[ASCII|Ascii]]
+Unicode-Zeichen: [[Unicode]]
+Variablen set und print: [[Variablen]]
+If: [[If and Else|If]]
+Format: [[Format]]
+Links: (siehe links oben)
 
+::Variablen
+Variablen<<set $last to 3>>
+/%<<set $var1 to "string example">>%/
+set $var2 to 1234; <<set $var2=1234>>
+set $var3 to true; <<set $var3=true>>
+variable set:
+print value of $var2: <<$var2>>
+print value of $var3: <<$var3>>
+
+ASCII-Zeichensatz: [[ASCII|Ascii]]
+Unicode-Zeichen: [[Unicode]]
+Variablen set und print: [[Variablen]]
+If: [[If and Else|If]]
+Format: [[Format]]
+Links: (siehe links oben)
+
+::If
+Verzweigungen:
+variable last: <<$last>>
+Last passage: <<if $last == 1>>ASCII<<else>><<if $last == 2>>Unicode<<else>><<if $last == 3>>Variablen<<else>><<if $last == 5>>Format<<endif>><<endif>><<endif>><<endif>>
+
+<<if $last == 3>>
+last passage was: Ascii
+<<endif>>
+
+<<if $last == 4>>
+last passage was: Unicode
+<<endif>>
+
+ASCII-Zeichensatz: [[ASCII|Ascii]]
+Unicode-Zeichen: [[Unicode]]
+Variablen set und print: [[Variablen]]
+If: [[If and Else|If]]
+Format: [[Format]]
+Links: (siehe links oben)
 
 :: Format
 Formatierung
@@ -159,4 +169,9 @@ Italic-Bold
 ''//  A2        0123456789.,!?_#'"/\-:()//''
 ''//          --------------------------//''
 
-[[Start]]
+ASCII-Zeichensatz: [[ASCII|Ascii]]
+Unicode-Zeichen: [[Unicode]]
+Variablen set und print: [[Variablen]]
+If: [[If and Else|If]]
+Format: [[Format]]
+Links: (siehe links oben)
