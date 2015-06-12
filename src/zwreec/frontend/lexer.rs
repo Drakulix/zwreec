@@ -404,7 +404,9 @@ rustlex! TweeLexer {
 			lexer.NON_NEWLINE();
 			Some(TokFormatMonoEnd)
 		}
-		NEWLINE =>  |_:&mut TweeLexer<R>| -> Option<Token> { None }
+		NEWLINE =>  |_:&mut TweeLexer<R>| -> Option<Token> {
+            Some(TokText(" ".to_string()))
+        }
 	}
 
 	MAKRO {
@@ -638,7 +640,7 @@ mod tests {
 
 		assert_eq!(expected, tokens);
 	}
-	
+
 	#[test]
 	fn tag_test() {
 		// This should return a passage with tags
