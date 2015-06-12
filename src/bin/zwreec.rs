@@ -1,5 +1,6 @@
 extern crate zwreec;
 extern crate getopts;
+extern crate libc;
 #[macro_use] extern crate log;
 extern crate time;
 extern crate term;
@@ -8,7 +9,7 @@ use std::env;
 use std::vec::Vec;
 use std::error::Error;
 use std::fs::File;
-use std::io::Write;
+use std::io::{Read,Write};
 use std::path::Path;
 use std::process::exit;
 
@@ -158,7 +159,7 @@ fn parse_arguments(args: Vec<String>, opts: getopts::Options) -> (getopts::Match
     (matches, cfg)
 }
 
-fn parse_input(matches: &getopts::Matches) -> Option<File> {
+fn parse_input(matches: &getopts::Matches) -> Option<Box<Read>> {
     if matches.free.len() == 1 {
         let path = Path::new(&matches.free[0]);
         match File::open(path) {
@@ -169,32 +170,49 @@ fn parse_input(matches: &getopts::Matches) -> Option<File> {
             },
             Ok(file) => {
                 info!("Opened input: {}", path.display());
-                Some(file)
+                Some(Box::new(file))
             }
         }
+    } else if unsafe { libc::isatty(libc::STDIN_FILENO as i32) } == 0 {
+        // Not connected to a terminal, assuming safe to read from stdin
+        info!("Reading input from stdin");
+        Some(Box::new(std::io::stdin()))
     } else {
-        // TODO: check if STDOUT is a tty
         None
     }
 }
 
-fn parse_output(matches: &getopts::Matches) -> Option<File> {
-    if let Some(file) = matches.opt_str("o") {
-        // try to open FILE
-        let path = Path::new(&file);
-        match File::create(path) {
-            Err(why) => {
-                error!("Couldn't open {}: {}",
-                       path.display(), Error::description(&why));
-                None
-            },
-            Ok(file) => {
-                info!("Opened output: {}", path.display());
-                Some(file)
+fn parse_output(matches: &getopts::Matches) -> Option<Box<Write>> {
+    let name = matches.opt_str("o").unwrap_or("-".to_string());
+
+    if name == "-" {
+        // no name specified
+        if unsafe { libc::isatty(libc::STDOUT_FILENO as i32)  } == 0 {
+            // Not connected to a terminal, assuming safe to write to stdin
+            // NOTE: this should be considered unsafe, as the library is *not*
+            // guaranteed to only print to stderr
+            warn!("Writing to stdout can lead to unusable output! You should specify an output name using -o 'FILE'");
+            info!("Writing output to stdout");
+            Some(Box::new(std::io::stdout()))
+        } else {
+            // assume default name
+            let path = Path::new("a.z8");
+            match File::create(path) {
+                Err(why) => {
+                    error!("Couldn't open {}: {}",
+                           path.display(), Error::description(&why));
+                    None
+                },
+                Ok(file) => {
+                    debug!("No output file specified, assuming default");
+                    info!("Opened output: {}", path.display());
+                    Some(Box::new(file))
+                }
             }
         }
     } else {
-        let path = Path::new("a.z8");
+        // try to open FILE
+        let path = Path::new(&name);
         match File::create(path) {
             Err(why) => {
                 error!("Couldn't open {}: {}",
@@ -202,9 +220,8 @@ fn parse_output(matches: &getopts::Matches) -> Option<File> {
                 None
             },
             Ok(file) => {
-                debug!("No output file specified, assuming default");
                 info!("Opened output: {}", path.display());
-                Some(file)
+                Some(Box::new(file))
             }
         }
     }

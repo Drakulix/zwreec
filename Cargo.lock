@@ -3,6 +3,7 @@ name = "zwreec"
 version = "0.0.2"
 dependencies = [
  "getopts 0.2.10 (registry+https://github.com/rust-lang/crates.io-index)",
+ "libc 0.1.7 (registry+https://github.com/rust-lang/crates.io-index)",
  "log 0.3.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "rustlex 0.2.4 (git+https://github.com/kali/rustlex.git)",
  "term 0.2.7 (registry+https://github.com/rust-lang/crates.io-index)",
