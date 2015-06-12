@@ -46,9 +46,9 @@ fn short_options() -> getopts::Options {
 /// NOTE: This is similar to librustc_driver's usage function.
 fn usage(verbose: bool) {
     let options = if verbose {
-        short_options()
-    } else {
         config::zwreec_options(short_options())
+    } else {
+        short_options()
     };
 
     let brief = format!("Usage: zwreec [-hV] [-vq] [-l [LOGFILE]] [-o OUTPUT] INPUT");
