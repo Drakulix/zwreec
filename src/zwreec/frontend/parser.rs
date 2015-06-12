@@ -214,10 +214,18 @@ impl Parser {
                 (MonoContent, &TokText(ref text)) => {
                     new_nodes.push(PNode::new_terminal(TokText(text.clone())));
                     new_nodes.push(PNode::new_non_terminal(MonoContent));
+
+                    // ast
+                    self.ast.add_child(TokText(text.clone()));
                 },
                 (MonoContent, &TokNewLine) => {
                     new_nodes.push(PNode::new_terminal(TokNewLine));
                     new_nodes.push(PNode::new_non_terminal(MonoContent));
+                },
+
+                (MonoContent, &TokFormatMonoEnd) => {
+                    // jump one ast-level higher
+                    self.ast.up();
                 },
 
                 // Link
