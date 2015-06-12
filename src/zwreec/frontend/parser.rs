@@ -147,7 +147,8 @@ impl Parser {
                 (PassageContent, &TokSet) |
                 (PassageContent, &TokIf) |
                 (PassageContent, &TokVariable(_)) |
-                (PassageContent, &TokMakroVar(_)) => {
+                (PassageContent, &TokMakroVar(_)) |
+                (PassageContent, &TokMakroPassageName(_)) => {
                     new_nodes.push(PNode::new_non_terminal(Makro));
                     new_nodes.push(PNode::new_non_terminal(PassageContent));
                 },
@@ -260,7 +261,14 @@ impl Parser {
                     // ast
                     self.ast.add_child(TokMakroVar(name.clone()));
                 },
+                // means <<passagename>>
+                (Makro, &TokMakroPassageName(ref name)) => {
+                    new_nodes.push(PNode::new_terminal(TokMakroPassageName(name.clone())));
+                    new_nodes.push(PNode::new_terminal(TokMakroEnd));
 
+                    // ast
+                    self.ast.add_child(&self.ast_path, TokMakroPassageName(name.clone()));
+                },
                 // Makrof
                 (Makrof, &TokElse) => {
                     new_nodes.push(PNode::new_terminal(TokElse));
