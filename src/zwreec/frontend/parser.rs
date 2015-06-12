@@ -267,7 +267,7 @@ impl Parser {
                     new_nodes.push(PNode::new_terminal(TokMakroEnd));
 
                     // ast
-                    self.ast.add_child(&self.ast_path, TokMakroPassageName(name.clone()));
+                    self.ast.add_child(TokMakroPassageName(name.clone()));
                 },
                 // Makrof
                 (Makrof, &TokElse) => {
