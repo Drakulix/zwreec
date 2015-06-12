@@ -23,10 +23,10 @@ pub enum TestCase {
 
 /// Appends a `getopts::Options` with zwreeclib specific flags
 pub fn zwreec_options(mut opts: getopts::Options) -> getopts::Options {
-    opts.optmulti("F", "feature", "enable feature (can occur multiple times)", "ENABLE");
-    opts.optmulti("N", "no-feature", "diable feature (can occur multiple times)\n
+    opts.optmulti("F", "feature", "", "FEAT");
+    opts.optmulti("N", "no-feature", "enable or disable a feature (can occur multiple times).
                         List of supported features (default):
-                            easter-egg (enabled)", "DISABLE");
+                            easter-egg (enabled)", "FEAT");
     opts.optflag("e", "generate-sample-zcode", "writes out a sample zcode file, input file is not used and can be omitted");
 
     opts
