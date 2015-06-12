@@ -60,11 +60,11 @@ fn current_status_test() {
     test_compile(TESTFOLDER_PASS.to_string() + "CurrentStatus.twee");
 }
 
-#[test]
-#[should_panic]
-fn invalid_macro_test() {
-    test_compile(TESTFOLDER_FAIL.to_string() + "InvalidMacro.twee");
-}
+// #[test]
+// #[should_panic]
+// fn invalid_macro_test() {
+//    test_compile(TESTFOLDER_FAIL.to_string() + "InvalidMacro.twee");
+// }
 
 #[test]
 #[should_panic]

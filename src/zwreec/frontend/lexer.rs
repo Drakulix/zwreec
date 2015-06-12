@@ -98,7 +98,8 @@ pub enum Token {
 	TokEndSilently,
 	TokMakroVar(String),
 	TokNewLine,
-	TokPseudo
+	TokPseudo,
+	TokMakroPassageName(String)
 }
 
 rustlex! TweeLexer {
@@ -179,7 +180,7 @@ rustlex! TweeLexer {
 
 	let FUNCTION = LETTER+ '(';
 
-	let MACRO_NAME = LETTER+ WHITESPACE*;
+	let MACRO_NAME = [^" >"'\n']*;
 
 	let ASSIGN = "=" | "to" | "+=" | "-=" | "*=" | "/=";
 	let SEMI_COLON = ';';
@@ -415,7 +416,7 @@ rustlex! TweeLexer {
 			None
 		}
 
-		MACRO_NAME =>  |lexer:&mut TweeLexer<R>| {
+		MACRO_NAME =>  |lexer:&mut TweeLexer<R>| -> Option<Token> {
 			match lexer.yystr().trim().as_ref() {
 				"set" => {
 					lexer.MAKRO_CONTENT();
@@ -450,7 +451,8 @@ rustlex! TweeLexer {
 					Some(TokEndSilently)
 				},
 				_ => {
-					panic!("Unknown macro: \"{}\"", lexer.yystr());
+					lexer.MAKRO_CONTENT();
+					Some(TokMakroPassageName(lexer.yystr().trim().to_string()))
 				}
 			}
 		}
@@ -515,6 +517,10 @@ rustlex! TweeLexer {
 		ASSIGN =>  |lexer:&mut TweeLexer<R>| Some(TokAssign("".to_string(), lexer.yystr()))
 		COLON =>  |_:&mut TweeLexer<R>| Some(TokColon)
 		// Expression Stuff End
+
+		WHITESPACE =>  |_:&mut TweeLexer<R>| -> Option<Token> {
+			None
+		}
 	}
 
 	FUNCTION_ARGS {
@@ -733,9 +739,15 @@ mod tests {
 	}
 
 	#[test]
-	#[should_panic]
-	fn macro_invalid_test() {
+	fn macro_display_short_test() {
 		// Should fail because it contains an invalid macro
-		test_lex("::Passage\n<<invalid>>");
+		let tokens = test_lex("::Passage\n<<Passage>>");
+		let expected = vec![
+			TokPassageName("Passage".to_string()),
+			TokMakroPassageName("Passage".to_string()),
+			TokMakroEnd
+		];
+
+		assert_eq!(expected, tokens);
 	}
 }
