@@ -1,6 +1,6 @@
 //! Module providing the SimpleLogger Implementation
 
-use std::io::{stderr, stdout, Write};
+use std::io::{stderr, Write};
 use log::{LogLevel, LogLevelFilter, LogMetadata, LogRecord, SetLoggerError, set_logger, Log};
 use time;
 use super::SharedLogger;
@@ -57,26 +57,14 @@ impl Log for SimpleLogger {
         if self.enabled(record.metadata()) {
 
             let stderr = stderr();
-            let stdout = stdout();
 
             let mut stderr_lock = stderr.lock();
-            let mut stdout_lock = stdout.lock();
 
             let cur_time = time::now();
 
             let _ = match record.level() {
-                LogLevel::Error =>
-                    writeln!(stderr_lock,
-                        "[{}] {}: ({}:{}:{}) - {}",
-                            record.level(),
-                            record.target(),
-                            cur_time.tm_hour,
-                            cur_time.tm_min,
-                            cur_time.tm_sec,
-                            record.args()
-                    ),
                 LogLevel::Trace =>
-                    writeln!(stdout_lock,
+                    writeln!(stderr_lock,
                         "[{}] {}: ({}:{}:{}) [{}:{}] - {}",
                             record.level(),
                             record.target(),
@@ -88,7 +76,7 @@ impl Log for SimpleLogger {
                             record.args()
                     ),
                 _ =>
-                    writeln!(stdout_lock,
+                    writeln!(stderr_lock,
                         "[{}] {}: ({}:{}:{}) - {}",
                             record.level(),
                             record.target(),
@@ -100,7 +88,6 @@ impl Log for SimpleLogger {
             };
 
             stderr_lock.flush().unwrap();
-            stdout_lock.flush().unwrap();
         }
     }
 }

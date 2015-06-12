@@ -3,15 +3,14 @@
 use log::{LogLevel, LogLevelFilter, LogMetadata, LogRecord, SetLoggerError, set_logger, Log};
 use time;
 use term;
-use term::{StderrTerminal, StdoutTerminal, color};
+use term::{StderrTerminal, color};
 use std::sync::Mutex;
 use super::SharedLogger;
 
-/// The TermLogger struct. Provides a stderr/stdout based Logger implementation
+/// The TermLogger struct. Provides a stderr based Logger implementation
 pub struct TermLogger {
     level: LogLevelFilter,
     stderr: Mutex<Box<StderrTerminal>>,
-    stdout: Mutex<Box<StdoutTerminal>>,
 }
 
 impl TermLogger {
@@ -46,7 +45,7 @@ impl TermLogger {
     /// '''
     #[allow(dead_code)]
     pub fn new(log_level: LogLevelFilter) -> Box<TermLogger> {
-        Box::new(TermLogger { level: log_level, stderr: Mutex::new(term::stderr().unwrap()), stdout: Mutex::new(term::stdout().unwrap()) })
+        Box::new(TermLogger { level: log_level, stderr: Mutex::new(term::stderr().unwrap()) })
     }
 
 }
@@ -61,7 +60,6 @@ impl Log for TermLogger {
         if self.enabled(record.metadata()) {
 
             let mut stderr_lock = self.stderr.lock().unwrap();
-            let mut stdout_lock = self.stdout.lock().unwrap();
 
             let cur_time = time::now();
 
@@ -81,11 +79,11 @@ impl Log for TermLogger {
                     ).unwrap();
                 },
                 LogLevel::Warn => {
-                    write!(stdout_lock, "[").unwrap();
-                    stdout_lock.fg(color::YELLOW).unwrap();
-                    write!(stdout_lock, "{}", record.level()).unwrap();
-                    let _ = stdout_lock.reset();
-                    writeln!(stdout_lock,
+                    write!(stderr_lock, "[").unwrap();
+                    stderr_lock.fg(color::YELLOW).unwrap();
+                    write!(stderr_lock, "{}", record.level()).unwrap();
+                    let _ = stderr_lock.reset();
+                    writeln!(stderr_lock,
                         "] {}: ({}:{}:{}) - {}",
                             record.target(),
                             cur_time.tm_hour,
@@ -95,11 +93,11 @@ impl Log for TermLogger {
                     ).unwrap();
                 },
                 LogLevel::Info => {
-                    write!(stdout_lock, "[").unwrap();
-                    stdout_lock.fg(color::BLUE).unwrap();
-                    write!(stdout_lock, "{}", record.level()).unwrap();
-                    let _ = stdout_lock.reset();
-                    writeln!(stdout_lock,
+                    write!(stderr_lock, "[").unwrap();
+                    stderr_lock.fg(color::BLUE).unwrap();
+                    write!(stderr_lock, "{}", record.level()).unwrap();
+                    let _ = stderr_lock.reset();
+                    writeln!(stderr_lock,
                         "] {}: ({}:{}:{}) - {}",
                             record.target(),
                             cur_time.tm_hour,
@@ -109,11 +107,11 @@ impl Log for TermLogger {
                     ).unwrap();
                 },
                 LogLevel::Debug => {
-                    write!(stdout_lock, "[").unwrap();
-                    stdout_lock.fg(color::CYAN).unwrap();
-                    write!(stdout_lock, "{}", record.level()).unwrap();
-                    let _ = stdout_lock.reset();
-                    writeln!(stdout_lock,
+                    write!(stderr_lock, "[").unwrap();
+                    stderr_lock.fg(color::CYAN).unwrap();
+                    write!(stderr_lock, "{}", record.level()).unwrap();
+                    let _ = stderr_lock.reset();
+                    writeln!(stderr_lock,
                         "] {}: ({}:{}:{}) - {}",
                             record.target(),
                             cur_time.tm_hour,
@@ -123,7 +121,7 @@ impl Log for TermLogger {
                     ).unwrap();
                 },
                 LogLevel::Trace => {
-                    writeln!(stdout_lock,
+                    writeln!(stderr_lock,
                         "[{}] {}: ({}:{}:{}) [{}:{}] - {}",
                             record.level(),
                             record.target(),
@@ -138,7 +136,6 @@ impl Log for TermLogger {
             };
 
             stderr_lock.flush().unwrap();
-            stdout_lock.flush().unwrap();
         }
     }
 }

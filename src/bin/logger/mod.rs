@@ -3,7 +3,7 @@
 //!
 //! It provides the following Logger implementations:
 //! - SimpleLogger (uses printfn!{})
-//! - TermLogger (logs directly to stderr and stdout, color support)
+//! - TermLogger (logs directly to stderr, color support)
 //! - FileLogger (logs to a log file)
 //! - CombinedLogger (allows to form combinations of the above loggers)
 //!
