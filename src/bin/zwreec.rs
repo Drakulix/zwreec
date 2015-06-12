@@ -242,7 +242,7 @@ fn main() {
     info!("Main started");
 
     // call library
-    if cfg.testmode {
+    if !cfg.test_cases.is_empty() {
         zwreec::test_library(cfg, &mut input, &mut output);
     } else {
         // unwrap input and output
