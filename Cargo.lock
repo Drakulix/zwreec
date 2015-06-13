@@ -4,7 +4,7 @@ version = "0.0.2"
 dependencies = [
  "getopts 0.2.10 (registry+https://github.com/rust-lang/crates.io-index)",
  "log 0.3.1 (registry+https://github.com/rust-lang/crates.io-index)",
- "rustlex 0.2.4 (git+https://github.com/kali/rustlex.git)",
+ "rustlex 0.2.6 (git+https://github.com/farthen/rustlex.git)",
  "term 0.2.7 (registry+https://github.com/rust-lang/crates.io-index)",
  "time 0.1.25 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
@@ -45,8 +45,8 @@ dependencies = [
 
 [[package]]
 name = "rustlex"
-version = "0.2.4"
-source = "git+https://github.com/kali/rustlex.git#fa5425a782a768b7fe0e8b5457b5143410e15898"
+version = "0.2.6"
+source = "git+https://github.com/farthen/rustlex.git#90e76958fe97df270b2b85efd90dbb5593a5ad20"
 
 [[package]]
 name = "term"
