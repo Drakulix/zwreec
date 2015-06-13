@@ -25,6 +25,7 @@ doc = false
 
 [dependencies]
 time = "*"
+libc = "*"
 log = "*"
 term = "0.2"
 
