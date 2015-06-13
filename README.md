@@ -10,7 +10,7 @@ Twee to Z-Code Compiler written in the Rust programming language. This is intend
 
 To install the current rust version run:
 
-```curl -s https://static.rust-lang.org/rustup.sh | sh -s -- --channel=nightly --date=2015-05-16```
+```curl -s https://static.rust-lang.org/rustup.sh | sh -s -- --channel=nightly --date=2015-06-02```
 
 ## Quick Start
 Install rust, clone the repository, then run:
