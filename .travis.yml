@@ -1,5 +1,5 @@
 language: rust
-rust: nightly-2015-05-16
+rust: nightly-2015-06-02
 branches:
   only:
     - master
