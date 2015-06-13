@@ -36,6 +36,7 @@ fn short_options() -> getopts::Options {
     opts.optflag("q", "quiet", "be quiet");
     opts.optflagopt("l", "logfile", "specify log file (default zwreec.log)", "LOGFILE");
     opts.optopt("o", "", "name of the output file", "FILE");
+    opts.optflag("f", "force", "force opening of output file");
     opts.optflag("h", "help", "display this help and exit");
     opts.optflag("V", "version", "display version");
 
@@ -183,36 +184,42 @@ fn parse_input(matches: &getopts::Matches) -> Option<Box<Read>> {
 }
 
 fn parse_output(matches: &getopts::Matches) -> Option<Box<Write>> {
-    let name = matches.opt_str("o").unwrap_or("-".to_string());
+    let name = matches.opt_str("o").unwrap_or("a.z8".to_string());
 
     if name == "-" {
-        // no name specified
+        // tty requested
         if unsafe { libc::isatty(libc::STDOUT_FILENO as i32)  } == 0 {
             // Not connected to a terminal, assuming safe to write to stdin
             // NOTE: this should be considered unsafe, as the library is *not*
             // guaranteed to only print to stderr
-            warn!("Writing to stdout can lead to unusable output! You should specify an output name using -o 'FILE'");
+            warn!("Writing to stdout can lead to unusable output!");
+            warn!("You should specify an output name using -o 'FILE'");
             info!("Writing output to stdout");
             Some(Box::new(std::io::stdout()))
         } else {
-            // assume default name
-            let path = Path::new("a.z8");
-            match File::create(path) {
-                Err(why) => {
-                    error!("Couldn't open {}: {}",
-                           path.display(), Error::description(&why));
-                    None
-                },
-                Ok(file) => {
-                    debug!("No output file specified, assuming default");
-                    info!("Opened output: {}", path.display());
-                    Some(Box::new(file))
-                }
-            }
+            error!("stdout is connected to a terminal.");
+            error!("Zcode is a binary format and should not be printed to a tty.");
+            None
         }
     } else {
-        // try to open FILE
+        // opening file
         let path = Path::new(&name);
+
+        if name == "a.z8" {
+            debug!("No output file specified, using {}", path.display());
+        }
+
+        // Check if FILE exists and issue warning.
+        if File::open(path).is_ok() {
+            if !matches.opt_present("f") {
+                error!("Output file {} already exists. Use '-f' to overwrite!", 
+                       path.display());
+                return None;
+            } else {
+                warn!("Output file {} already exists", path.display());
+            }
+        }
+
         match File::create(path) {
             Err(why) => {
                 error!("Couldn't open {}: {}",
