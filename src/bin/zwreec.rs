@@ -1,5 +1,6 @@
 extern crate zwreec;
 extern crate getopts;
+extern crate libc;
 #[macro_use] extern crate log;
 extern crate time;
 extern crate term;
@@ -8,18 +9,13 @@ use std::env;
 use std::vec::Vec;
 use std::error::Error;
 use std::fs::File;
-use std::io::Write;
+use std::io::{Read,Write};
 use std::path::Path;
 use std::process::exit;
 
-mod logger;
+use zwreec::config;
 
-// shorthand to display program usage
-macro_rules! print_usage(
-    ($prog:ident, $opts:ident) => (
-    print_stderr!("{}", $opts.usage(&format!("Usage: {} [-hV] [-vq] [-l [LOGFILE]] [-o OUTPUT] INPUT", $prog)));
-    )
-);
+mod logger;
 
 // found in:
 // http://stackoverflow.com/a/27590832
@@ -32,47 +28,91 @@ macro_rules! print_stderr(
     )
 );
 
-fn main() {
-    //early init
-
-    // handling command line parameters
-    let args: Vec<String> = env::args().collect();
-    let ref program = args[0];
-    let mut loggers: Vec<Box<logger::SharedLogger>> = vec![];
-
-    // define options
+/// Returns the primary options for zwreec. It is e.g. used to generate the 
+/// usage information.
+fn short_options() -> getopts::Options {
     let mut opts = getopts::Options::new();
     opts.optflagmulti("v", "verbose", "be more verbose. Can be used multiple times.");
     opts.optflag("q", "quiet", "be quiet");
     opts.optflagopt("l", "logfile", "specify log file (default zwreec.log)", "LOGFILE");
     opts.optopt("o", "", "name of the output file", "FILE");
+    opts.optflag("f", "force", "force opening of output file");
     opts.optflag("h", "help", "display this help and exit");
     opts.optflag("V", "version", "display version");
-    opts.optflag("e", "generate-sample-zcode", "writes out a sample zcode file, input file is not used and can be omitted");
 
-    let parsed_opts = match opts.parse(&args[1..]) {
-        Ok(m)  => { m }
+    opts
+}
+
+/// Prints usage information
+/// The verbose flag signals if all options should be shown.
+/// NOTE: This is similar to librustc_driver's usage function.
+fn usage(verbose: bool) {
+    let options = if verbose {
+        config::zwreec_options(short_options())
+    } else {
+        short_options()
+    };
+
+    let brief = format!("Usage: zwreec [-hV] [-vq] [-l [LOGFILE]] [-o OUTPUT] INPUT");
+
+    println!("{}\n
+Additional help:
+    --help -v           Print the full set of options zwreec accepts", 
+        options.usage(&brief));
+}
+
+/// Parse command line arguments
+///
+/// Parses command line arguments to set up the logger and extract input and
+/// output parameters. Will display the usage and exit depending on arguments.
+///
+/// Returns `getopts::Matches` and a `std::fs::File` for the input and output 
+/// file. The `getopts::Matches` can be used to 
+///
+/// # Examples
+///
+/// ```
+/// let mut opts = getopts::Options::new();
+/// opts.optflag("h", "help", "display this help and exit");
+///
+/// let (matches, mut input, mut output) = parse_arguments(
+///     env::args().collect(),
+///     opts
+/// );
+/// ```
+///
+/// # Failures
+///
+/// Depending on encountered arguments or parsing errors this function will 
+/// print the usage and/or call `exit(1)`.
+///
+/// NOTE: This is similar to librustc_driver's handle_options function.
+fn parse_arguments(args: Vec<String>, opts: getopts::Options) -> (getopts::Matches, config::Config) {
+    let mut loggers: Vec<Box<logger::SharedLogger>> = vec![];
+
+    if args.is_empty() {
+        // No options provided, print usage and exit
+        usage(false);
+        exit(1);
+    }
+
+    let matches = match opts.parse(&args[1..]) {
+        Ok(m)  => m,
         Err(f) => {
             // parsing error
             // display usage and return
             print_stderr!("{}\n", f.to_string());
-            print_usage!(program, opts);
             exit(1);
         }
     };
 
-    // examine options
-    if parsed_opts.opt_present("h") {
-        // parsed "-h|--help"
-        // display usage and return
-        print_usage!(program, opts);
+    if matches.opt_present("help") {
+        usage(matches.opt_present("verbose"));
         exit(1);
     }
 
-    if parsed_opts.opt_present("V") {
-        // parsed "-V|--version"
-        // display current version
-        println!("{} {}", program, match option_env!("CFG_VERSION") {
+    if matches.opt_present("version") {
+        println!("zwreec {}", match option_env!("CFG_VERSION") {
             Some(s) => s.to_string(),
             None => format!("{}.{}.{}{}",
                             env!("CARGO_PKG_VERSION_MAJOR"),
@@ -80,32 +120,28 @@ fn main() {
                             env!("CARGO_PKG_VERSION_PATCH"),
                             option_env!("CARGO_PKG_VERSION_PRE").unwrap_or(""))
         });
-        exit(1);
+        exit(0);
     }
 
-    if parsed_opts.opt_present("v") {
-        // parsed "-v|--verbose"
+    if matches.opt_present("verbose") {
         // set log level to verbose
         loggers.push(logger::TermLogger::new(
-                match parsed_opts.opt_count("v") {
+                match matches.opt_count("v") {
                     1 => logger::LogLevelFilter::Info,
                     2 => logger::LogLevelFilter::Debug,
                     _ => logger::LogLevelFilter::Trace,
                 }));
-    } else if parsed_opts.opt_present("q") {
-        // parsed "-q|--quiet"
+    } else if matches.opt_present("quiet") {
         // set log level to error
         loggers.push(logger::TermLogger::new(logger::LogLevelFilter::Error));
     } else {
-        // default
         // set log level to warn
         loggers.push(logger::TermLogger::new(logger::LogLevelFilter::Warn));
     }
 
-    if parsed_opts.opt_present("l") {
-        // parsed "-l|--logfile"
+    if matches.opt_present("logfile") {
         // sets a logger to output to logfile
-        let name = if let Some(n) = parsed_opts.opt_str("l") {
+        let name = if let Some(n) = matches.opt_str("logfile") {
             n
         } else {
             "zwreec.log".to_string()
@@ -116,73 +152,117 @@ fn main() {
             );
     }
 
-    // check parsed options and open a file for the resulting output
-    let mut outfile = if let Some(file) = parsed_opts.opt_str("o") {
-        // parsed "-o FILE"
-        // try to open FILE
-        let path = Path::new(&file);
-        match File::create(path) {
-            Err(why) => {
-                panic!("Couldn't open {}: {}",
-                       path.display(), Error::description(&why))
-            },
-            Ok(file) => {
-                info!("Opened output: {}", path.display());
-                file
-            }
-        }
-    } else {
-        // assume default
-        let path = Path::new("a.z8");
-        match File::create(path) {
-            Err(why) => {
-                panic!("Couldn't open {}: {}",
-                       path.display(), Error::description(&why))
-            },
-            Ok(file) => {
-                debug!("No output file specified, assuming default");
-                info!("Opened output: {}", path.display());
-                file
-            }
-        }
-    };
-
+    // TODO: This might not belong in a function called parse_arguments
     // activate logger
     let _ = logger::CombinedLogger::init(loggers);
 
-    if parsed_opts.opt_present("e") {
-        info!("calling temp_create_zcode_example()");
-        zwreec::backend::zcode::temp_create_zcode_example(&mut outfile);
-        exit(0);
-    }
+    let cfg = config::parse_matches(&matches);
+    (matches, cfg)
+}
 
-    // check parsed options and open the source file
-    let mut infile = if parsed_opts.free.len() == 1 {
-        // check number of 'free' parameter
-        // one free parameter is the input file name
-        let path = Path::new(&parsed_opts.free[0]);
+fn parse_input(matches: &getopts::Matches) -> Option<Box<Read>> {
+    if matches.free.len() == 1 {
+        let path = Path::new(&matches.free[0]);
         match File::open(path) {
             Err(why) => {
-                panic!("Couldn't open {}: {}",
-                               path.display(), Error::description(&why))
+                error!("Couldn't open {}: {}",
+                    path.display(), Error::description(&why));
+                None
             },
             Ok(file) => {
                 info!("Opened input: {}", path.display());
-                file
+                Some(Box::new(file))
             }
         }
+    } else if unsafe { libc::isatty(libc::STDIN_FILENO as i32) } == 0 {
+        // Not connected to a terminal, assuming safe to read from stdin
+        info!("Reading input from stdin");
+        Some(Box::new(std::io::stdin()))
     } else {
-        // TODO: check if STDOUT is a tty
-        print_stderr!("Input file name missing\n");
-        print_usage!(program, opts);
-        exit(1);
-    };
+        None
+    }
+}
+
+fn parse_output(matches: &getopts::Matches) -> Option<Box<Write>> {
+    let name = matches.opt_str("o").unwrap_or("a.z8".to_string());
+
+    if name == "-" {
+        // tty requested
+        if unsafe { libc::isatty(libc::STDOUT_FILENO as i32)  } == 0 {
+            // Not connected to a terminal, assuming safe to write to stdin
+            // NOTE: this should be considered unsafe, as the library is *not*
+            // guaranteed to only print to stderr
+            warn!("Writing to stdout can lead to unusable output!");
+            warn!("You should specify an output name using -o 'FILE'");
+            info!("Writing output to stdout");
+            Some(Box::new(std::io::stdout()))
+        } else {
+            error!("stdout is connected to a terminal.");
+            error!("Zcode is a binary format and should not be printed to a tty.");
+            None
+        }
+    } else {
+        // opening file
+        let path = Path::new(&name);
+
+        if name == "a.z8" {
+            debug!("No output file specified, using {}", path.display());
+        }
+
+        // Check if FILE exists and issue warning.
+        if File::open(path).is_ok() {
+            if !matches.opt_present("f") {
+                error!("Output file {} already exists. Use '-f' to overwrite!", 
+                       path.display());
+                return None;
+            } else {
+                warn!("Output file {} already exists", path.display());
+            }
+        }
+
+        match File::create(path) {
+            Err(why) => {
+                error!("Couldn't open {}: {}",
+                       path.display(), Error::description(&why));
+                None
+            },
+            Ok(file) => {
+                info!("Opened output: {}", path.display());
+                Some(Box::new(file))
+            }
+        }
+    }
+}
+
+
+fn main() {
+    // handle command line parameters
+    let (matches, cfg) = parse_arguments(
+        env::args().collect(),
+        config::zwreec_options(short_options())
+    );
+
+    let mut input = parse_input(&matches);
+    let mut output = parse_output(&matches);
 
     debug!("Parsed command line options");
     info!("Main started");
 
     // call library
-    zwreec::compile(&mut infile, &mut outfile);
+    if !cfg.test_cases.is_empty() {
+        zwreec::test_library(cfg, &mut input, &mut output);
+    } else {
+        // unwrap input and output
+        let mut _input = match input {
+            Some(i) => i,
+            None => panic!("Missing input file! Compile aborted")
+        };
+        let mut _output = match output {
+            Some(o) => o,
+            None => panic!("Missing output file! Compile aborted")
+        };
+        zwreec::compile(cfg, &mut _input, &mut _output);
+    }
 
     info!("Main finished");
 }
