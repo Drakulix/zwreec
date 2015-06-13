@@ -6,7 +6,7 @@ pub use super::ztext;
 
 #[derive(Debug)]
 pub enum ZOP {
-  PrintUnicode{c: char},
+  PrintUnicode{c: u16},
   Print{text: String},
   PrintNumVar{variable: u8},
   PrintOps{text: String},
@@ -56,9 +56,11 @@ enum ArgType {
 
 pub struct Zfile {
     pub data: Bytes,
-    program_addr: u16,
+    unicode_table: Vec<u16>,
     jumps: Vec<Zjump>,
     labels: Vec<Zlabel>,
+    program_addr: u16,
+    unicode_table_addr: u16,
     global_addr: u16,
     object_addr: u16,
 }
@@ -90,10 +92,12 @@ impl Zfile {
     /// creates a new zfile
     pub fn new() -> Zfile {
         Zfile {
-            data: Bytes{bytes: Vec::new()}, 
-            program_addr: 0x800,
+            data: Bytes{bytes: Vec::new()},
+            unicode_table: Vec::new(),
             jumps: Vec::new(),
             labels: Vec::new(),
+            program_addr: 0x800,
+            unicode_table_addr: 0,
             global_addr: 0,
             object_addr: 0,
         }
@@ -106,12 +110,16 @@ impl Zfile {
 
         let alpha_addr: u16 = 0x40;
         let extension_addr: u16 = alpha_addr + 78;
-        self.global_addr = extension_addr as u16 + 4;
+        self.unicode_table_addr = extension_addr as u16 + 4;
+
+        // 1 byte for the unicode count, 97 possible chars with 2 bytes
+        self.global_addr = self.unicode_table_addr + 195;
+
+        // 480 becouse there are 240 global 2-bytes variables
         self.object_addr = self.global_addr + 480;
-        let high_memory_addr: u16 = 0x308;
-        let static_addr: u16 = 0x308;
-        let dictionary_addr: u16 = 0x308;
-        //let program_addr: u16 = 0x800;
+        let high_memory_addr: u16 = 0x800;
+        let static_addr: u16 = 0x800;
+        let dictionary_addr: u16 = 0x800;
 
         // version
         self.data.write_byte(8, 0x00);
@@ -160,20 +168,13 @@ impl Zfile {
         self.write_alphabet(alpha_addr as usize);
 
         // header extension table
-        self.data.write_u16(3, extension_addr as usize); // Number of further words in table
+        self.data.write_u16(3, extension_addr as usize);     // Number of further words in table
         self.data.write_u16(0, extension_addr as usize + 1); // x-coordinate of mouse after a click
         self.data.write_u16(0, extension_addr as usize + 2); // y-coordinate of mouse after a click
         self.data.write_u16(0, extension_addr as usize + 3); // if != 0: unicode translation table address (optional)
 
         // global variables
         // ...
-
-        // object table name
-        self.write_object_name("object", 770);
-
-        // dictionary
-        let tmp: [u8; 4] = [0x00, 0x06, 0x00, 0x00];
-        self.data.write_bytes(&tmp, dictionary_addr as usize);
     }
 
     /// writes the alphabet to index
@@ -186,19 +187,14 @@ impl Zfile {
         self.data.write_bytes(&alpha_tmp, index);
     }
 
-    /// writes the object-name to an index
-    /// # Examples
-    /// '''ignore
-    /// write_object_name(name: 3, index: 10)
-    /// '''
-    fn write_object_name(&mut self, name: &str, index: usize) {
-        let mut text_bytes: Bytes = Bytes{bytes: Vec::new()};
-        let length: u16 = ztext::encode(&mut text_bytes, name);
+    /// writes the unicode table to the address unicode_table_addr
+    fn write_unicode_table(&mut self) {
+        self.data.write_byte(self.unicode_table.len() as u8, self.unicode_table_addr as usize);
 
-        // length ob object name
-        self.data.write_byte(length as u8, index);
+        for (i, character) in self.unicode_table.iter().enumerate() {
+            self.data.write_u16(*character, self.unicode_table_addr as usize + 1 + 2*i);
+        }
 
-        self.data.write_bytes(&text_bytes.bytes, index + 1);
     }
 
     /// saves the addresses of the labels to the positions of the jump-ops
@@ -329,15 +325,29 @@ impl Zfile {
             if character as u32 <= 126 {
                 // this is a non-unicode char
                 current_text.push(character);
-            } else {
-                debug!("Printing unicode char {}", character.to_string());
-                // unicode
-                if current_text.len() > 0 {
-                    self.op_print(&current_text[..]);
-                    current_text.clear();
-                }
 
-                self.op_print_unicode_char(character);
+            } else if character as u32 > 0xFFFF {
+                // zcode has no support for such high unicode values
+                current_text.push('?');
+            } else {
+                if ztext::pos_in_unicode(character as u16, &self.unicode_table) != -1 {
+                    // unicode exist in table
+                    current_text.push(character);
+                } else if self.unicode_table.len() < 97 {
+                    // there is space in the unicode table
+                    trace!("added char '{:?}' to unicode_table", character);
+                    self.unicode_table.push(character as u16);
+                    current_text.push(character);
+                } else {
+                    // no space, so op_print_unicode_char is the answer
+                    trace!("Unicode char '{:?}' is not in unicode_table", character.to_string());
+                    if current_text.len() > 0 {
+                        self.op_print(&current_text[..]);
+                        current_text.clear();
+                    }
+
+                    self.op_print_unicode_char(character as u16);
+                }
             }
         }
 
@@ -366,6 +376,7 @@ impl Zfile {
     /// writes all stuff that couldn't written directly
     /// should be called as the last commend
     pub fn end(&mut self) {
+        self.write_unicode_table();
         self.routine_check_links();
         self.routine_add_link();
         self.routine_check_more();
@@ -456,6 +467,7 @@ impl Zfile {
         ]);
     }
 
+    /// easter-egg, with konami-code to start
     pub fn routine_check_more(&mut self) {
         self.emit(vec![
             ZOP::Routine{name: "system_check_more".to_string(), count_variables: 1},
@@ -543,12 +555,12 @@ impl Zfile {
 
     /// print strings
     /// print is 0OP
-    pub fn op_print(&mut self, content: &str) {
+    fn op_print(&mut self, content: &str) {
         let index: usize = self.data.bytes.len();
         self.op_0(0x02);
 
         let mut text_bytes: Bytes = Bytes{bytes: Vec::new()};
-        ztext::encode(&mut text_bytes, content);
+        ztext::encode(&mut text_bytes, content, &self.unicode_table);
         self.data.write_bytes(&text_bytes.bytes, index + 1);
     }
 
@@ -837,13 +849,12 @@ impl Zfile {
     }
 
     /// prints an unicode char to the current stream
-    pub fn op_print_unicode_char(&mut self, character: char){
-        let value = if character as u32 > 0xFFFF { '?' as u16 } else { character as u16 };
+    pub fn op_print_unicode_char(&mut self, character: u16){
         self.op_1(0xbe, ArgType::SmallConst);
         self.data.append_byte(0x0b);
         let byte = 0x00 << 6 | 0x03 << 4 | 0x03 << 2 | 0x03 << 0;
         self.data.append_byte(byte);
-        self.data.append_u16(value);
+        self.data.append_u16(character);
     }
 
     // ================================
