@@ -21,7 +21,7 @@ pub fn temp_create_zcode_example<W: Write>(output: &mut W) {
     zfile.op_call_1n("Start");
 
     zfile.routine("Start", 0);
-    zfile.op_print("start passage");
+    zfile.gen_print_ops("start passage");
     zfile.op_newline();
 
 

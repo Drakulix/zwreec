@@ -24,8 +24,8 @@ pub static ALPHABET: [char; 78] = [
 /// let data = Bytes{bytes: Vec::new()};
 /// let byteLength = data.encode("hello");
 /// ```
-pub fn encode(data: &mut Bytes, content: &str) -> u16 {
-    let zchars: Vec<u8> = string_to_zchar(content);
+pub fn encode(data: &mut Bytes, content: &str, unicode_table: &Vec<u16>) -> u16 {
+    let zchars: Vec<u8> = string_to_zchar(content, unicode_table);
 
     let mut two_bytes: u16 = 0;
     let len = zchars.len();
@@ -62,54 +62,60 @@ pub fn encode(data: &mut Bytes, content: &str) -> u16 {
 }
 
 /// reads the content and converts it to a zasci vector
-fn string_to_zchar(content: &str) -> Vec<u8> {
-    let string_bytes = content.to_string().into_bytes();
-        let mut zchars: Vec<u8> = Vec::new();
-        for byte in string_bytes{
-            let t_index = pos_in_alpha(byte as u8);
+fn string_to_zchar(content: &str, unicode_table: &Vec<u16>) -> Vec<u8> {
+    //let string_bytes = content.to_string().into_bytes();
+    let mut zchars: Vec<u8> = Vec::new();
 
-            if t_index != -1 {
-                if byte == 0x0A {
-                    // newline?
-                    zchars.push(0x05);
-                    zchars.push(7);
-                } else if byte == 0x20 {
-                    // space
-                    zchars.push(0x00);
-                } else {
-                    if t_index > 51 {
-                        // in A2
-                        zchars.push(0x05);  
-                        zchars.push(t_index as u8 % 26 + 6);
-                    } else if t_index < 26 {
-                        // in A0
-                        zchars.push(t_index as u8 % 26 + 6);
-                    } else {
-                        // in A1
-                        zchars.push(0x04);
-                        zchars.push(t_index as u8 % 26 + 6);
-                    } 
-                }
+    for character in content.chars() {
+
+        let mut byte: u8 = character as u8;
+        let alpha_index = pos_in_alpha(byte as u8);
+        if character as u16 <= 126 && alpha_index != -1 {
+
+            if byte == 0x0A {
+                // newline
+                zchars.push(0x05);
+                zchars.push(7);
+            } else if byte == 0x20 {
+                // space
+                zchars.push(0x00);
             } else {
-                if t_index <= 126 {
-                    // ascii, but not in alphabet
-
-                    // to change alphabet
-                    zchars.push(0x05);
-
-                    // for special char (10 bit z-ascii)
-                    zchars.push(0x06);
-
-                    // char as 10bit
-                    //let zchar_10_bit: u16
-                    zchars.push(byte >> 5);
-                    zchars.push(byte & 0x1f);
+                if alpha_index > 51 {
+                    // in A2
+                    zchars.push(0x05);  
+                    zchars.push(alpha_index as u8 % 26 + 6);
+                } else if alpha_index < 26 {
+                    // in A0
+                    zchars.push(alpha_index as u8 % 26 + 6);
                 } else {
-                    // unicode
-
-                }
+                    // in A1
+                    zchars.push(0x04);
+                    zchars.push(alpha_index as u8 % 26 + 6);
+                } 
             }
+        } else {
+            // not in alphabet or unicode
+
+            // to change alphabet
+            zchars.push(0x05);
+
+            // for special char (10 bit z-ascii)
+            zchars.push(0x06);
+
+            //let mut byte: u8;
+            if character as u16 <= 126 {
+                // not in alphabet, but still ascii
+                byte = character as u8;
+            } else {
+                // unicode
+                let unicode_index = pos_in_unicode(character as u16, unicode_table);
+                byte = unicode_index as u8 + 155;
+            }
+
+            zchars.push(byte >> 5);
+            zchars.push(byte & 0x1f);
         }
+    }
     zchars
 }
 
@@ -138,6 +144,17 @@ fn shift(zchar: u16, position: u8) -> u16 {
 fn pos_in_alpha(letter: u8) -> i8 {
     for i in 0..ALPHABET.len() {
         if ALPHABET[i] as u8 == letter {
+            return i as i8
+        }
+    }
+
+    return -1
+}
+
+/// returns the position in the unicode-table
+pub fn pos_in_unicode(letter: u16, unicode_table: &Vec<u16>) -> i8 {
+    for (i, character) in unicode_table.iter().enumerate() {
+        if *character == letter {
             return i as i8
         }
     }
