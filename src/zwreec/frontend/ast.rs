@@ -16,7 +16,9 @@ enum Type{
 }
 
 pub struct AST {
-    passages: Vec<ASTNode>
+    passages: Vec<ASTNode>,
+    path: Vec<usize>,
+    is_in_else: u8
 }
 
  /// add zcode based on tokens
@@ -227,6 +229,96 @@ fn boolstr_to_u8(string: &str) -> u8 {
 }
 
 impl AST {
+    pub fn new() -> AST {
+        AST {
+            passages: Vec::new(),
+            path: Vec::new(),
+            is_in_else: 0
+        }
+    }
+
+    /// adds a passage to the path in the ast
+    pub fn add_passage(&mut self, token: Token) {
+        self.path.clear();
+        let ast_count_passages = self.count_childs(self.path.to_vec());
+
+        let node = ASTNode::Passage(NodePassage { category: token, childs: Vec::new() });
+        self.passages.push(node);
+
+        self.path.push(ast_count_passages);
+    }
+
+    /// adds a child to the path in the ast
+    pub fn add_child(&mut self, token: Token) {
+
+        if let Some(index) = self.path.first() {
+            let mut new_path: Vec<usize> = self.path.to_vec();
+            new_path.remove(0);
+
+            self.passages[*index].add_child(new_path, token)
+        } else {
+            self.passages.push(ASTNode::Default(NodeDefault { category: token, childs: Vec::new() }));
+        }
+    }
+
+    /// adds a child an goees one child down
+    pub fn child_down(&mut self, token: Token) {
+        let ast_count_childs = self.count_childs(self.path.to_vec());
+        self.add_child(token);
+        self.path.push(ast_count_childs);
+    }
+
+    /// adds one child and goes down. adds snd child and goes down.
+    pub fn two_childs_down(&mut self, child1: Token, child2: Token) {
+        self.child_down(child1);
+        self.child_down(child2);
+    }
+
+    /// goes one lvl up
+    pub fn up(&mut self) {
+        self.path.pop();
+    }
+
+     /// goes one lvl up and adds and child
+    pub fn up_child(&mut self, token: Token, is_in_passage: bool) {
+        match token {
+            Token::TokEndIf => {
+                if is_in_passage == false {
+                    self.up();
+                    self.add_child(token);
+                } else if self.is_in_else > 0 {
+                    self.is_in_else -= 1;
+                    self.up();
+                    self.add_child(token);
+                }
+                
+            },
+            _ => {
+                panic!{"no supported"}
+            }
+        }
+    }
+
+    /// goeas one lvl up, adds an child and goes one lvl down
+    pub fn up_child_down(&mut self, token: Token) {
+        
+        match token {
+            Token::TokElse => {
+                self.is_in_else += 1;
+            },
+            _ => {
+                panic!{"no supported"}
+            }
+        }
+
+        self.up();
+        self.child_down(token);
+    }
+
+
+
+    
+
     /// convert ast to zcode
     pub fn to_zcode(& self, out: &mut zfile::Zfile) {
         let mut manager = CodeGenManager::new();
@@ -243,12 +335,6 @@ impl AST {
         out.emit(code);
     }
 
-    pub fn new() -> AST {
-        AST {
-            passages: Vec::new()
-        }
-    }
-
     /// prints the tree
     pub fn print(&self) {
         debug!("Abstract Syntax Tree: ");
@@ -256,24 +342,6 @@ impl AST {
             child.print(0);
         }
         debug!("");
-    }
-
-    /// adds a passage to the path in the ast
-    pub fn add_passage(&mut self, token: Token) {
-        let node = ASTNode::Passage(NodePassage { category: token, childs: Vec::new() });
-        self.passages.push(node);
-    }
-
-    /// adds a child to the path in the ast
-    pub fn add_child(&mut self, path: &Vec<usize>, token: Token) {
-        if let Some(index) = path.first() {
-            let mut new_path: Vec<usize> = path.to_vec();
-            new_path.remove(0);
-
-            self.passages[*index].add_child(new_path, token)
-        } else {
-            self.passages.push(ASTNode::Default(NodeDefault { category: token, childs: Vec::new() }));
-        }
     }
 
     /// counts the childs of the path in the asts

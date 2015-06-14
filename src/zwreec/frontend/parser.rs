@@ -59,10 +59,8 @@ pub enum NonTerminalType {
 struct Parser {
     ast: ast::AST,
     stack: Vec<PNode>,
-    ast_path: Vec<usize>,
     tokens: Vec<Token>,
-    lookahead: usize,
-    is_in_else: u8,
+    lookahead: usize
 }
 
 impl Parser {
@@ -70,10 +68,8 @@ impl Parser {
         Parser {
             ast: ast::AST::new(),
             stack: Vec::new(),
-            ast_path: Vec::new(),
             tokens: tokens,
-            lookahead: 0,
-            is_in_else: 0
+            lookahead: 0
         }
     }
 
@@ -92,8 +88,6 @@ impl Parser {
                 }
             }
         }
-
-
     }
 
     /// apply the ll(1) grammar
@@ -122,10 +116,7 @@ impl Parser {
                     new_nodes.push(PNode::new_non_terminal(PassageContent));
 
                     // ast
-                    self.ast_path.clear();
-                    let ast_count_passages = self.ast.count_childs(self.ast_path.to_vec());
                     self.ast.add_passage(TokPassageName(name.clone()));
-                    self.ast_path.push(ast_count_passages);
                 },
 
                 // PassageContent
@@ -134,9 +125,9 @@ impl Parser {
                     new_nodes.push(PNode::new_non_terminal(PassageContent));
 
                     // ast
-                    self.ast.add_child(&self.ast_path, TokText(text.clone()));
+                    self.ast.add_child(TokText(text.clone()));
                 },
-                (PassageContent, &TokFormatBoldStart) |
+                (PassageContent, &TokFormatBoldStart) | 
                 (PassageContent, &TokFormatItalicStart) |
                 (PassageContent, &TokFormatMonoStart) => {
                     new_nodes.push(PNode::new_non_terminal(Formating));
@@ -151,7 +142,7 @@ impl Parser {
                     new_nodes.push(PNode::new_non_terminal(PassageContent));
 
                     // ast
-                    self.ast.add_child(&self.ast_path, TokNewLine);
+                    self.ast.add_child(TokNewLine);
                 },
                 (PassageContent, &TokSet) |
                 (PassageContent, &TokIf) |
@@ -163,23 +154,17 @@ impl Parser {
                 },
                 (PassageContent, &TokEndIf) => {
                     // jump one ast-level higher
-                    debug!("pop TokEndIf Passage; in else: {:?}", self.is_in_else);
+                    debug!("pop TokEndIf Passage;");
 
-                    // ast
-                    // special handling for the else
-                    if self.is_in_else > 0 {
-                        self.is_in_else -= 1;
-                        self.ast_path.pop();
-                        self.ast.add_child(&self.ast_path, TokEndIf);
-                    }
+                    self.ast.up_child(TokEndIf, true);
                 },
                 (PassageContent, &TokFormatBoldEnd) => {
                     // jump one ast-level higher
-                    self.ast_path.pop();
+                    self.ast.up();
                 },
                 (PassageContent, &TokFormatItalicEnd) => {
                     // jump one ast-level higher
-                    self.ast_path.pop();
+                    self.ast.up();
                 },
                 (PassageContent, _) => {
                     // PassageContent -> ε
@@ -203,9 +188,7 @@ impl Parser {
                     new_nodes.push(PNode::new_terminal(TokFormatBoldEnd));
 
                     //ast
-                    let ast_count_childs = self.ast.count_childs(self.ast_path.to_vec());
-                    self.ast.add_child(&self.ast_path, TokFormatBoldStart);
-                    self.ast_path.push(ast_count_childs);
+                    self.ast.child_down(TokFormatBoldStart);
                 },
 
                 // ItalicFormatting
@@ -215,9 +198,7 @@ impl Parser {
                     new_nodes.push(PNode::new_terminal(TokFormatItalicEnd));
 
                     //ast
-                    let ast_count_childs = self.ast.count_childs(self.ast_path.to_vec());
-                    self.ast.add_child(&self.ast_path, TokFormatItalicStart);
-                    self.ast_path.push(ast_count_childs);
+                    self.ast.child_down(TokFormatItalicStart);
                 },
 
                 // MonoFormatting
@@ -227,9 +208,7 @@ impl Parser {
                     new_nodes.push(PNode::new_terminal(TokFormatMonoEnd));
 
                     //ast
-                    let ast_count_childs = self.ast.count_childs(self.ast_path.to_vec());
-                    self.ast.add_child(&self.ast_path, TokFormatMonoStart);
-                    self.ast_path.push(ast_count_childs);
+                    self.ast.child_down(TokFormatMonoStart);
                 },
 
                 // MonoContent
@@ -238,14 +217,16 @@ impl Parser {
                     new_nodes.push(PNode::new_non_terminal(MonoContent));
 
                     // ast
-                    self.ast.add_child(&self.ast_path, TokText(text.clone()));
+                    self.ast.add_child(TokText(text.clone()));
                 },
-                (MonoContent, &TokFormatMonoEnd) => {
-                    // MonoContent -> ε
+                (MonoContent, &TokNewLine) => {
+                    new_nodes.push(PNode::new_terminal(TokNewLine));
+                    new_nodes.push(PNode::new_non_terminal(MonoContent));
+                },
 
-                    //ast
-                    self.ast_path.pop();
-                    self.ast.add_child(&self.ast_path, TokFormatMonoEnd);
+                (MonoContent, &TokFormatMonoEnd) => {
+                    // jump one ast-level higher
+                    self.ast.up();
                 },
 
                 // Link
@@ -253,7 +234,7 @@ impl Parser {
                     new_nodes.push(PNode::new_terminal(TokPassageLink(text.clone(), name.clone())));
 
                     // ast
-                    self.ast.add_child(&self.ast_path, TokPassageLink(text.clone(), name.clone()));
+                    self.ast.add_child(TokPassageLink(text.clone(), name.clone()));
                 },
 
                 // Makro
@@ -270,14 +251,7 @@ impl Parser {
                     new_nodes.push(PNode::new_non_terminal(Makrof));
 
                     // ast
-                    let ast_count_childs = self.ast.count_childs(self.ast_path.to_vec());
-                    self.ast.add_child(&self.ast_path, TokIf);
-                    self.ast_path.push(ast_count_childs);
-
-                    // pseudo_node for expression
-                    let ast_count_childs = self.ast.count_childs(self.ast_path.to_vec());
-                    self.ast.add_child(&self.ast_path, TokPseudo);
-                    self.ast_path.push(ast_count_childs);
+                    self.ast.two_childs_down(TokIf, TokPseudo);
                 },
                 // means <<$var>>
                 (Makro, &TokMakroVar(ref name)) => {
@@ -285,7 +259,7 @@ impl Parser {
                     new_nodes.push(PNode::new_terminal(TokMakroEnd));
 
                     // ast
-                    self.ast.add_child(&self.ast_path, TokMakroVar(name.clone()));
+                    self.ast.add_child(TokMakroVar(name.clone()));
                 },
                 // means <<passagename>>
                 (Makro, &TokMakroPassageName(ref name)) => {
@@ -293,7 +267,7 @@ impl Parser {
                     new_nodes.push(PNode::new_terminal(TokMakroEnd));
 
                     // ast
-                    self.ast.add_child(&self.ast_path, TokMakroPassageName(name.clone()));
+                    self.ast.add_child(TokMakroPassageName(name.clone()));
                 },
                 // Makrof
                 (Makrof, &TokElse) => {
@@ -304,23 +278,14 @@ impl Parser {
                     new_nodes.push(PNode::new_terminal(TokMakroEnd));
 
                     // ast
-                    debug!("pop TokElse");
-                    self.ast_path.pop();
-                    self.is_in_else += 1;
-                    //self.ast_path.pop();
-
-                    let ast_count_childs = self.ast.count_childs(self.ast_path.to_vec());
-                    self.ast.add_child(&self.ast_path, TokElse);
-                    self.ast_path.push(ast_count_childs);
+                    self.ast.up_child_down(TokElse);
                 },
                 (Makrof, &TokEndIf) => {
                     new_nodes.push(PNode::new_terminal(TokEndIf));
                     new_nodes.push(PNode::new_terminal(TokMakroEnd));
 
                     // ast
-                    debug!("pop TokEndIf Macro");
-                    self.ast_path.pop();
-                    self.ast.add_child(&self.ast_path, TokEndIf);
+                    self.ast.up_child(TokEndIf, false);
                 }
 
                 // ExpressionList
@@ -336,8 +301,8 @@ impl Parser {
                 // ExpressionListf
                 (ExpressionListf, &TokMakroEnd) => {
                     debug!("pop TokMakroEnd");
-                    self.ast_path.pop();
-
+                    self.ast.up();
+                    
                 },
                 (ExpressionListf, _) => {
                     // ExpressionListf -> ε
@@ -398,7 +363,7 @@ impl Parser {
                     new_nodes.push(PNode::new_non_terminal(B2));
 
                     // ast
-                    self.ast.add_child(&self.ast_path, TokCompOp(op.clone()));
+                    self.ast.add_child(TokCompOp(op.clone()));
                 },
                 (B2, _) => {
                     // B2 -> ε
@@ -442,7 +407,7 @@ impl Parser {
                     new_nodes.push(PNode::new_terminal(TokVariable(name.clone())));
 
                     // ast
-                    self.ast.add_child(&self.ast_path, TokVariable(name.clone()));
+                    self.ast.add_child(TokVariable(name.clone()));
                 },
 
                 // AssignVariable
@@ -451,9 +416,7 @@ impl Parser {
                     new_nodes.push(PNode::new_non_terminal(E));
 
                     //ast
-                    let ast_count_childs = self.ast.count_childs(self.ast_path.to_vec());
-                    self.ast.add_child(&self.ast_path, TokAssign(name.clone(), assign.clone()));
-                    self.ast_path.push(ast_count_childs);
+                    self.ast.child_down(TokAssign(name.clone(), assign.clone()));
                 },
 
                 // DataType
@@ -461,22 +424,22 @@ impl Parser {
                     new_nodes.push(PNode::new_terminal(TokInt(value.clone())));
 
                     // ast
-                    self.ast.add_child(&self.ast_path, TokInt(value.clone()));
+                    self.ast.add_child(TokInt(value.clone()));
                 },
                 (DataType, &TokString(ref value)) => {
                     new_nodes.push(PNode::new_terminal(TokString(value.clone())));
 
                     // ast
-                    self.ast.add_child(&self.ast_path, TokString(value.clone()));
+                    self.ast.add_child(TokString(value.clone()));
                 },
                 (DataType, &TokBoolean(ref value)) => {
                     new_nodes.push(PNode::new_terminal(TokBoolean(value.clone())));
 
                     // ast
-                    self.ast.add_child(&self.ast_path, TokBoolean(value.clone()));
+                    self.ast.add_child(TokBoolean(value.clone()));
                 }
 
-
+                
                 _ => {
                     panic!("not supported grammar: {:?}", state_first);
                 }
@@ -490,7 +453,7 @@ impl Parser {
         } else {
             // no token left
 
-            // Sf, PassageContent, Linkf,
+            // Sf, PassageContent, Linkf, 
 
             match top {
                 Sf | PassageContent => {
