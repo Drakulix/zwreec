@@ -684,6 +684,21 @@ impl Zfile {
 
         self.data.append_byte(variable);
     }
+    /// prints string at given packet adress TODO: needs testing
+    pub fn op_print_paddr(&mut self, address: u8) {
+        let args: Vec<ArgType> = vec![ArgType::Variable, ArgType::Nothing, ArgType::Nothing, ArgType::Nothing];
+        self.op_var(0x8D, args);
+
+        self.data.append_byte(address);
+    }
+
+    /// prints string at given adress TODO: needs testing
+    pub fn op_print_addr(&mut self, address: u8) {
+        let args: Vec<ArgType> = vec![ArgType::Variable, ArgType::Nothing, ArgType::Nothing, ArgType::Nothing];
+        self.op_var(0x87, args);
+
+        self.data.append_byte(address);
+    }
 
     /// calculates a random numer from 1 to range
     pub fn op_random(&mut self, range: u8, variable: u8) {
