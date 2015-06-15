@@ -69,8 +69,8 @@ pub enum Token {
 	TokFormatIndentBlock,
 	TokFormatHorizontalLine,
 	TokFormatHeading {rank: usize},
-	TokMakroStart,
-	TokMakroEnd,
+	TokMacroStart,
+	TokMacroEnd,
 	TokBracketOpen,
 	TokBracketClose,
 	TokVariable {name: String},
@@ -96,10 +96,10 @@ pub enum Token {
 	TokDisplay,
 	TokSilently,
 	TokEndSilently,
-	TokMakroVar {var_name: String},
+	TokMacroVar {var_name: String},
 	TokNewLine,
 	TokPseudo,
-	TokMakroPassageName {passage_name: String}
+	TokMacroPassageName {passage_name: String}
 }
 
 rustlex! TweeLexer {
@@ -158,8 +158,8 @@ rustlex! TweeLexer {
 
 	let FORMAT_HEADING = ("!" | "!!" | "!!!" | "!!!!" | "!!!!!") WHITESPACE*;
 
-	let MAKRO_START = "<<";
-	let MAKRO_END = ">>";
+	let MACRO_START = "<<";
+	let MACRO_END = ">>";
 
 	let BR_OPEN = '(';
 	let BR_CLOSE = ')';
@@ -221,8 +221,8 @@ rustlex! TweeLexer {
 			None
 		}
 
-		MAKRO_START => |lexer:&mut TweeLexer<R>| -> Option<Token>{
-			lexer.MAKRO();
+		MACRO_START => |lexer:&mut TweeLexer<R>| -> Option<Token>{
+			lexer.MACRO();
 			lexer.new_line = true;
 			None
 		}
@@ -310,8 +310,8 @@ rustlex! TweeLexer {
 
 	NON_NEWLINE {
 
-		MAKRO_START => |lexer:&mut TweeLexer<R>| -> Option<Token>{
-			lexer.MAKRO();
+		MACRO_START => |lexer:&mut TweeLexer<R>| -> Option<Token>{
+			lexer.MACRO();
 			lexer.new_line = false;
 			None
 		}
@@ -410,7 +410,7 @@ rustlex! TweeLexer {
         }
 	}
 
-	MAKRO {
+	MACRO {
 		WHITESPACE =>  |lexer:&mut TweeLexer<R>| -> Option<Token> {
 			lexer.NON_NEWLINE();
 			None
@@ -419,23 +419,23 @@ rustlex! TweeLexer {
 		MACRO_NAME =>  |lexer:&mut TweeLexer<R>| -> Option<Token> {
 			match lexer.yystr().trim().as_ref() {
 				"set" => {
-					lexer.MAKRO_CONTENT();
+					lexer.MACRO_CONTENT();
 					Some(TokSet)
 				},
 				"if" => {
-					lexer.MAKRO_CONTENT();
+					lexer.MACRO_CONTENT();
 					Some(TokIf)
 				},
 				"else" => {
-					lexer.MAKRO_CONTENT();
+					lexer.MACRO_CONTENT();
 					Some(TokElse)
 				},
 				"endif" => {
-					lexer.MAKRO_CONTENT();
+					lexer.MACRO_CONTENT();
 					Some(TokEndIf)
 				},
 				"print" => {
-					lexer.MAKRO_CONTENT();
+					lexer.MACRO_CONTENT();
 					Some(TokPrint)
 				},
 				"display" => {
@@ -443,32 +443,32 @@ rustlex! TweeLexer {
 					Some(TokDisplay)
 				},
 				"silently" => {
-					lexer.MAKRO_CONTENT();
+					lexer.MACRO_CONTENT();
 					Some(TokSilently)
 				},
 				"endsilently" => {
-					lexer.MAKRO_CONTENT();
+					lexer.MACRO_CONTENT();
 					Some(TokEndSilently)
 				},
 				_ => {
-					lexer.MAKRO_CONTENT();
-					Some(TokMakroPassageName {passage_name: lexer.yystr().trim().to_string()} )
+					lexer.MACRO_CONTENT();
+					Some(TokMacroPassageName {passage_name: lexer.yystr().trim().to_string()} )
 				}
 			}
 		}
 
 		VAR_NAME =>  |lexer:&mut TweeLexer<R>| {
-			lexer.MAKRO_CONTENT();
-			Some(TokMakroVar {var_name: lexer.yystr()} )
+			lexer.MACRO_CONTENT();
+			Some(TokMacroVar {var_name: lexer.yystr()} )
 		}
 	}
 
 
 
-	MAKRO_CONTENT {
-		MAKRO_END => |lexer:&mut TweeLexer<R>| {
+	MACRO_CONTENT {
+		MACRO_END => |lexer:&mut TweeLexer<R>| {
 			if lexer.new_line { lexer.NEWLINE() } else { lexer.NON_NEWLINE() };
-			Some(TokMakroEnd)
+			Some(TokMacroEnd)
 		}
 
 
@@ -540,7 +540,7 @@ rustlex! TweeLexer {
 		BR_CLOSE =>  |lexer:&mut TweeLexer<R>| {
 			lexer.function_brackets -= 1;
 			if lexer.function_brackets == 0 {
-				lexer.MAKRO_CONTENT();
+				lexer.MACRO_CONTENT();
 				Some(TokArgsEnd)
 			} else {
 				Some(TokBracketClose)
@@ -549,9 +549,9 @@ rustlex! TweeLexer {
 	}
 
 	DISPLAY_CONTENT {
-		MAKRO_END => |lexer:&mut TweeLexer<R>| {
+		MACRO_END => |lexer:&mut TweeLexer<R>| {
 			if lexer.new_line { lexer.NEWLINE() } else { lexer.NON_NEWLINE() };
-			Some(TokMakroEnd)
+			Some(TokMacroEnd)
 		}
 
 		VAR_NAME =>  |lexer:&mut TweeLexer<R>| Some(TokVariable {name: lexer.yystr()} )
@@ -672,7 +672,7 @@ mod tests {
 			TokSet,
 			TokAssign {var_name: "$var".to_string(), op_name: "=".to_string()},
 			TokInt {value: 1},
-			TokMakroEnd
+			TokMacroEnd
 		);
 
 		assert_eq!(expected, tokens);
@@ -688,19 +688,19 @@ mod tests {
 			TokVariable {name: "$var".to_string()},
 			TokCompOp {op_name: "==".to_string()},
 			TokInt {value: 1},
-			TokMakroEnd,
+			TokMacroEnd,
 			TokText {text: "1".to_string()},
 			TokElse,
 			/* TODO: Fix else if */
 			TokCompOp {op_name: "is".to_string()},
 			TokInt {value: 2},
-			TokMakroEnd,
+			TokMacroEnd,
 			TokText {text: "2".to_string()},
 			TokElse,
-			TokMakroEnd,
+			TokMacroEnd,
 			TokText {text: "3".to_string()},
 			TokEndIf,
-			TokMakroEnd
+			TokMacroEnd
 		);
 
 		assert_eq!(expected, tokens);
@@ -713,11 +713,11 @@ mod tests {
 			TokPassage {name: "Passage".to_string()},
 			TokPrint,
 			TokString {value: "Test with escaped \"Quotes".to_string()},
-			TokMakroEnd,
+			TokMacroEnd,
 			TokNewLine,
 			TokPrint,
 			TokVariable {name: "$var".to_string()},
-			TokMakroEnd
+			TokMacroEnd
 		);
 
 		assert_eq!(expected, tokens);
@@ -730,7 +730,7 @@ mod tests {
 			TokPassage {name: "Passage".to_string()},
 			TokDisplay,
 			TokPassage {name: "DisplayedPassage".to_string()},
-			TokMakroEnd,
+			TokMacroEnd,
 			TokNewLine,
 			TokPassage {name: "DisplayedPassage".to_string()}
 		);
@@ -744,8 +744,8 @@ mod tests {
 		let tokens = test_lex("::Passage\n<<Passage>>");
 		let expected = vec![
 			TokPassage {name: "Passage".to_string()},
-			TokMakroPassageName {passage_name: "Passage".to_string()},
-			TokMakroEnd
+			TokMacroPassageName {passage_name: "Passage".to_string()},
+			TokMacroEnd
 		];
 
 		assert_eq!(expected, tokens);

@@ -33,8 +33,8 @@ pub enum NonTerminalType {
     MonoFormatting,
     MonoContent,
     Link,
-    Makro,
-    Makrof,
+    Macro,
+    Macrof,
     ExpressionList,
     ExpressionListf,
     Expression,
@@ -147,9 +147,9 @@ impl Parser {
                 (PassageContent, &TokSet) |
                 (PassageContent, &TokIf) |
                 (PassageContent, &TokVariable { .. } ) |
-                (PassageContent, &TokMakroVar { .. } ) |
-                (PassageContent, &TokMakroPassageName { .. } ) => {
-                    new_nodes.push(PNode::new_non_terminal(Makro));
+                (PassageContent, &TokMacroVar { .. } ) |
+                (PassageContent, &TokMacroPassageName { .. } ) => {
+                    new_nodes.push(PNode::new_non_terminal(Macro));
                     new_nodes.push(PNode::new_non_terminal(PassageContent));
                 },
                 (PassageContent, &TokEndIf) => {
@@ -237,52 +237,52 @@ impl Parser {
                     self.ast.add_child(tok.clone());
                 },
 
-                // Makro
-                (Makro, &TokSet) => {
+                // Macro
+                (Macro, &TokSet) => {
                     new_nodes.push(PNode::new_terminal(TokSet));
                     new_nodes.push(PNode::new_non_terminal(ExpressionList));
-                    new_nodes.push(PNode::new_terminal(TokMakroEnd));
+                    new_nodes.push(PNode::new_terminal(TokMacroEnd));
                 },
-                (Makro, &TokIf) => {
+                (Macro, &TokIf) => {
                     new_nodes.push(PNode::new_terminal(TokIf));
                     new_nodes.push(PNode::new_non_terminal(ExpressionList));
-                    new_nodes.push(PNode::new_terminal(TokMakroEnd));
+                    new_nodes.push(PNode::new_terminal(TokMacroEnd));
                     new_nodes.push(PNode::new_non_terminal(PassageContent));
-                    new_nodes.push(PNode::new_non_terminal(Makrof));
+                    new_nodes.push(PNode::new_non_terminal(Macrof));
 
                     // ast
                     self.ast.two_childs_down(TokIf, TokPseudo);
                 },
                 // means <<$var>>
-                (Makro, tok @ &TokMakroVar { .. }) => {
+                (Macro, tok @ &TokMacroVar { .. }) => {
                     new_nodes.push(PNode::new_terminal(tok.clone()));
-                    new_nodes.push(PNode::new_terminal(TokMakroEnd));
+                    new_nodes.push(PNode::new_terminal(TokMacroEnd));
 
                     // ast
                     self.ast.add_child(tok.clone());
                 },
                 // means <<passagename>>
-                (Makro, tok @ &TokMakroPassageName { .. } ) => {
+                (Macro, tok @ &TokMacroPassageName { .. } ) => {
                     new_nodes.push(PNode::new_terminal(tok.clone()));
-                    new_nodes.push(PNode::new_terminal(TokMakroEnd));
+                    new_nodes.push(PNode::new_terminal(TokMacroEnd));
 
                     // ast
                     self.ast.add_child(tok.clone());
                 },
-                // Makrof
-                (Makrof, &TokElse) => {
+                // Macrof
+                (Macrof, &TokElse) => {
                     new_nodes.push(PNode::new_terminal(TokElse));
-                    new_nodes.push(PNode::new_terminal(TokMakroEnd));
+                    new_nodes.push(PNode::new_terminal(TokMacroEnd));
                     new_nodes.push(PNode::new_non_terminal(PassageContent));
                     new_nodes.push(PNode::new_terminal(TokEndIf));
-                    new_nodes.push(PNode::new_terminal(TokMakroEnd));
+                    new_nodes.push(PNode::new_terminal(TokMacroEnd));
 
                     // ast
                     self.ast.up_child_down(TokElse);
                 },
-                (Makrof, &TokEndIf) => {
+                (Macrof, &TokEndIf) => {
                     new_nodes.push(PNode::new_terminal(TokEndIf));
-                    new_nodes.push(PNode::new_terminal(TokMakroEnd));
+                    new_nodes.push(PNode::new_terminal(TokMacroEnd));
 
                     // ast
                     self.ast.up_child(TokEndIf, false);
@@ -299,8 +299,8 @@ impl Parser {
                 },
 
                 // ExpressionListf
-                (ExpressionListf, &TokMakroEnd) => {
-                    debug!("pop TokMakroEnd");
+                (ExpressionListf, &TokMacroEnd) => {
+                    debug!("pop TokMacroEnd");
                     self.ast.up();
                     
                 },

@@ -185,7 +185,7 @@ fn gen_zcode<'a>(node: &'a ASTNode, mut out: &mut zfile::Zfile, mut manager: &mu
                     let after_else_label = format!("after_else_{}", manager.ids_if.pop_id());
                     vec![ZOP::Label{name: after_else_label}]
                 },
-                &Token::TokMakroVar {ref var_name} => {
+                &Token::TokMacroVar {ref var_name} => {
                     let var_id = manager.symbol_table.get_symbol_id(&*var_name);
                     match manager.symbol_table.get_symbol_type(&*var_name) {
                         Type::Integer => {
