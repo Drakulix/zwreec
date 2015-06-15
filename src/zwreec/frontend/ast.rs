@@ -328,10 +328,6 @@ impl AST {
                 code.push(instr);
             }
         }
-        debug!("emit zcode:");
-        for instr in &code {
-            debug!("{:?}", instr);
-        }
         out.emit(code);
     }
 
