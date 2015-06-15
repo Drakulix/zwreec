@@ -1018,7 +1018,7 @@ fn test_zfile_label_and_jump_loop() {
     //[] [Zjump { from_addr: 2056, name: "loop", jump_type: Jump }] [140, 255, 255]
     // 0xffff is -1 as i16 because we have a relative jump
     assert_eq!(zfile.data.bytes[pos], bytes[0]);  // jump op
-    let to_addr: i16 = (zfile.data.bytes[pos+1] as u16 * 256 + zfile.data.bytes[pos+2] as u16) as i16;
-    assert_eq!((labels[0].to_addr as i32 - jumps[0].from_addr as i32) as i16, to_addr);  // specified as in write_jumps()
-    assert_eq!(-1 as i16, to_addr);  // this is the expected result, jump one address back
+    let rel_addr: i16 = (zfile.data.bytes[pos+1] as u16 * 256 + zfile.data.bytes[pos+2] as u16) as i16;
+    assert_eq!((labels[0].to_addr as i32 - jumps[0].from_addr as i32) as i16, rel_addr);  // specified as in write_jumps()
+    assert_eq!(-1 as i16, rel_addr);  // this is the expected result, jump one address back
 }
