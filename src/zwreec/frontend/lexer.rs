@@ -118,8 +118,8 @@ rustlex! TweeLexer {
 	let UNDERSCORE = '_';
 	let NEWLINE = '\n';
 
-	let INITIAL_START_CHAR = [^":"'\n'] | ':' [^":"'\n'];
-	let INITIAL_CHAR = [^'\n'];
+	let INITIAL_START_CHAR = [^": "'\n''\t'] | ':' [^": "'\n''\t'];
+	let INITIAL_CHAR = [^" "'\n''\t'];
 	let TEXT_INITIAL = INITIAL_START_CHAR INITIAL_CHAR*;
 
 	// If for example // is at a beginning of a line, then // is matched and not just /
@@ -196,15 +196,21 @@ rustlex! TweeLexer {
 	let LINK_SIMPLE = "[[" (PASSAGE_NAME | VAR_NAME) "]";
 	let LINK_LABELED = "[[" LINK_TEXT "|" (PASSAGE_NAME | VAR_NAME) "]";
 
+    let COMMENT = "/%" ([^"%"]*(("%")*[^"%/"])?)* ("%")* "%/";
+
 	INITIAL {
 		PASSAGE_START => |lexer:&mut TweeLexer<R>| -> Option<Token> {
 			lexer.PASSAGE();
 			None
 		}
-		TEXT_INITIAL =>  |lexer:&mut TweeLexer<R>| -> Option<Token> {
-			lexer.INITIAL_NON_NEWLINE();
-			None
-		}
+
+        TEXT_INITIAL =>  |_:&mut TweeLexer<R>| -> Option<Token> { None }
+
+        WHITESPACE =>  |_:&mut TweeLexer<R>| -> Option<Token> { None }
+
+        NEWLINE => |_:&mut TweeLexer<R>| Some(TokNewLine)
+
+        COMMENT =>  |_:&mut TweeLexer<R>| -> Option<Token> { None }
 
 	}
 
@@ -305,6 +311,11 @@ rustlex! TweeLexer {
 		FORMAT_HORIZONTAL_LINE  =>  |_:&mut TweeLexer<R>| Some(TokFormatHorizontalLine)
 		FORMAT_INDENT_BLOCK  =>  |_:&mut TweeLexer<R>| Some(TokFormatIndentBlock)
 
+        COMMENT =>  |lexer:&mut TweeLexer<R>| -> Option<Token> {
+			lexer.NON_NEWLINE();
+            None
+		}
+
 		NEWLINE => |_:&mut TweeLexer<R>| Some(TokNewLine)
 	}
 
@@ -374,6 +385,8 @@ rustlex! TweeLexer {
 			lexer.NEWLINE();
 			Some(TokNewLine)
 		}
+
+        COMMENT =>  |_:&mut TweeLexer<R>| -> Option<Token> { None }
 
 		TEXT =>  |lexer:&mut TweeLexer<R>| Some(TokText {text: lexer.yystr()} )
 	}
