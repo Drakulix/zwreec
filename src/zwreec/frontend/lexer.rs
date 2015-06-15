@@ -10,8 +10,6 @@ pub struct ScanState {
 
 pub fn lex<R: Read>(input: &mut R) -> FilteringScan<Peeking<TweeLexer<BufReader<&mut R>>, Token>, ScanState, fn(&mut ScanState, (Token, Option<Token>)) -> Option<Token>>  {
 
-    info!("Nicht in Tokens verarbeitete Zeichen: ");
-
 	TweeLexer::new(BufReader::new(input)).peeking().scan_filter(
 		ScanState {
            	current_text: String::new(),
@@ -208,7 +206,7 @@ rustlex! TweeLexer {
 
         WHITESPACE =>  |_:&mut TweeLexer<R>| -> Option<Token> { None }
 
-        NEWLINE => |_:&mut TweeLexer<R>| Some(TokNewLine)
+        NEWLINE => |_:&mut TweeLexer<R>| -> Option<Token> { None }
 
         COMMENT =>  |_:&mut TweeLexer<R>| -> Option<Token> { None }
 
