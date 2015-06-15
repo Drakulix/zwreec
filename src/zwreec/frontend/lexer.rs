@@ -25,19 +25,19 @@ pub fn lex<R: Read>(input: &mut R) -> FilteringScan<Peeking<TweeLexer<BufReader<
 				}
 
 				match elem {
-					(TokText(text), Some(TokText(_))) => {
+					(TokText {text}, Some(TokText{ .. })) => {
 						state.current_text.push_str(&text);
 						None
 					}
-					(TokText(text), _) => {
+					(TokText {text}, _) => {
 						state.current_text.push_str(&text);
-						let val = TokText(state.current_text.clone());
+						let val = TokText {text: state.current_text.clone()};
 						state.current_text.clear();
 						Some(val)
 					},
-					(TokVariable(var), Some(TokAssign(_, op))) => {
+					(TokVariable {name: var}, Some(TokAssign {op_name: op, ..} )) => {
 						state.skip_next = true;
-						Some(TokAssign(var, op))
+						Some(TokAssign {var_name: var, op_name: op} )
 					},
 					(x, _) => Some(x),
 				}
@@ -49,14 +49,14 @@ pub fn lex<R: Read>(input: &mut R) -> FilteringScan<Peeking<TweeLexer<BufReader<
 
 #[derive(PartialEq,Debug,Clone)]
 pub enum Token {
-	TokPassageName (String),
+	TokPassage {name: String},
 	TokTagStart,
 	TokTagEnd,
 	TokVarSetStart,
 	TokVarSetEnd,
-	TokPassageLink (String, String),
-	TokTag (String),
-	TokText (String),
+	TokPassageLink {display_name: String, passage_name: String},
+	TokTag {tag_name: String},
+	TokText {text: String},
 	TokFormatBoldStart, TokFormatBoldEnd,
 	TokFormatItalicStart, TokFormatItalicEnd,
 	TokFormatUnderStart, TokFormatUnderEnd,
@@ -68,26 +68,26 @@ pub enum Token {
 	TokFormatNumbList,
 	TokFormatIndentBlock,
 	TokFormatHorizontalLine,
-	TokFormatHeading (usize),
+	TokFormatHeading {rank: usize},
 	TokMakroStart,
 	TokMakroEnd,
 	TokBracketOpen,
 	TokBracketClose,
-	TokVariable (String),
-	TokInt (i32),
-	TokFloat (f32),
-	TokString (String),
-	TokBoolean (String),
-	TokFunction (String),
+	TokVariable {name: String},
+	TokInt {value: i32},
+	TokFloat {value: f32},
+	TokString {value: String},
+	TokBoolean {value: String},
+	TokFunction {name: String},
 	TokColon,
 	TokArgsEnd,
 	TokArrayStart,
 	TokArrayEnd,
 	TokSet,
-	TokAssign (String, String),
-	TokNumOp (String),
-	TokCompOp (String),
-	TokLogOp (String),
+	TokAssign {var_name: String, op_name: String},
+	TokNumOp {op_name: String},
+	TokCompOp {op_name: String},
+	TokLogOp {op_name: String},
 	TokSemiColon,
 	TokIf,
 	TokElse,
@@ -96,10 +96,10 @@ pub enum Token {
 	TokDisplay,
 	TokSilently,
 	TokEndSilently,
-	TokMakroVar(String),
+	TokMakroVar {var_name: String},
 	TokNewLine,
 	TokPseudo,
-	TokMakroPassageName(String)
+	TokMakroPassageName {passage_name: String}
 }
 
 rustlex! TweeLexer {
@@ -232,7 +232,7 @@ rustlex! TweeLexer {
 			let s =  lexer.yystr();
 			let trimmed = &s[2 .. s.len()-1];
 			let name = &trimmed.to_string();
-			Some(TokPassageLink(name.clone(), name.clone()))
+			Some(TokPassageLink {display_name: name.clone(), passage_name: name.clone()} )
 		}
 
 		LINK_LABELED =>  |lexer:&mut TweeLexer<R>| {
@@ -243,7 +243,7 @@ rustlex! TweeLexer {
 			assert_eq!(matches.len(), 2);
 			let text = matches[0].to_string();
 			let name = matches[1].to_string();
-			Some(TokPassageLink(text, name))
+			Some(TokPassageLink {display_name: text, passage_name: name} )
 		}
 
 		FORMAT_ITALIC => |lexer:&mut TweeLexer<R>| {
@@ -296,11 +296,11 @@ rustlex! TweeLexer {
 		}
 		FORMAT_HEADING  =>  |lexer:&mut TweeLexer<R>| {
 			lexer.NON_NEWLINE();
-			Some(TokFormatHeading(lexer.yystr().len()))
+			Some(TokFormatHeading {rank: lexer.yystr().trim().len()} )
 		}
 		TEXT_START_CHAR => |lexer:&mut TweeLexer<R>| {
 			lexer.NON_NEWLINE();
-			Some(TokText(lexer.yystr()))
+			Some(TokText {text: lexer.yystr()} )
 		}
 		FORMAT_HORIZONTAL_LINE  =>  |_:&mut TweeLexer<R>| Some(TokFormatHorizontalLine)
 		FORMAT_INDENT_BLOCK  =>  |_:&mut TweeLexer<R>| Some(TokFormatIndentBlock)
@@ -321,7 +321,7 @@ rustlex! TweeLexer {
 			let s =  lexer.yystr();
 			let trimmed = &s[2 .. s.len()-1];
 			let name = &trimmed.to_string();
-			Some(TokPassageLink(name.clone(), name.clone()))
+			Some(TokPassageLink {display_name: name.clone(), passage_name: name.clone()} )
 		}
 
 		LINK_LABELED =>  |lexer:&mut TweeLexer<R>| {
@@ -332,7 +332,7 @@ rustlex! TweeLexer {
 			assert_eq!(matches.len(), 2);
 			let text = matches[0].to_string();
 			let name = matches[1].to_string();
-			Some(TokPassageLink(text, name))
+			Some(TokPassageLink {display_name: text, passage_name: name} )
 		}
 
 		FORMAT_ITALIC => |lexer:&mut TweeLexer<R>| {
@@ -375,11 +375,11 @@ rustlex! TweeLexer {
 			Some(TokNewLine)
 		}
 
-		TEXT =>  |lexer:&mut TweeLexer<R>| Some(TokText(lexer.yystr()))
+		TEXT =>  |lexer:&mut TweeLexer<R>| Some(TokText {text: lexer.yystr()} )
 	}
 
 	PASSAGE {
-		PASSAGE_NAME => |lexer:&mut TweeLexer<R>| Some(TokPassageName(lexer.yystr().trim().to_string()))
+		PASSAGE_NAME => |lexer:&mut TweeLexer<R>| Some(TokPassage {name: lexer.yystr().trim().to_string()} )
 		TAG_START => |lexer:&mut TweeLexer<R>| {
 			lexer.TAGS();
 			Some(TokTagStart)
@@ -391,7 +391,7 @@ rustlex! TweeLexer {
 	}
 
 	TAGS {
-		TAG => |lexer:&mut TweeLexer<R>| Some(TokTag(lexer.yystr()))
+		TAG => |lexer:&mut TweeLexer<R>| Some(TokTag {tag_name: lexer.yystr()} )
 		WHITESPACE =>  |_:&mut TweeLexer<R>| -> Option<Token> { None }
 		TAG_END => |lexer:&mut TweeLexer<R>| {
 			lexer.PASSAGE();
@@ -400,13 +400,13 @@ rustlex! TweeLexer {
 	}
 
 	MONO_TEXT {
-		TEXT_MONO =>  |lexer:&mut TweeLexer<R>| Some(TokText(lexer.yystr()))
+		TEXT_MONO =>  |lexer:&mut TweeLexer<R>| Some(TokText {text: lexer.yystr()} )
 		FORMAT_MONO_END => |lexer:&mut TweeLexer<R>| {
 			lexer.NON_NEWLINE();
 			Some(TokFormatMonoEnd)
 		}
 		NEWLINE =>  |_:&mut TweeLexer<R>| -> Option<Token> {
-            Some(TokText(" ".to_string()))
+            Some(TokText {text: " ".to_string()} )
         }
 	}
 
@@ -452,14 +452,14 @@ rustlex! TweeLexer {
 				},
 				_ => {
 					lexer.MAKRO_CONTENT();
-					Some(TokMakroPassageName(lexer.yystr().trim().to_string()))
+					Some(TokMakroPassageName {passage_name: lexer.yystr().trim().to_string()} )
 				}
 			}
 		}
 
 		VAR_NAME =>  |lexer:&mut TweeLexer<R>| {
 			lexer.MAKRO_CONTENT();
-			Some(TokMakroVar(lexer.yystr()))
+			Some(TokMakroVar {var_name: lexer.yystr()} )
 		}
 	}
 
@@ -478,7 +478,7 @@ rustlex! TweeLexer {
 			let name = &trimmed.to_string();
 			lexer.function_brackets = 1;
 			lexer.FUNCTION_ARGS();
-			Some(TokFunction(name.clone()))
+			Some(TokFunction {name: name.clone()} )
 		}
 
 		// Expression Stuff
@@ -501,21 +501,21 @@ rustlex! TweeLexer {
 				unescaped.push(c);
 			}
 
-			Some(TokString(unescaped))
+			Some(TokString {value: unescaped} )
 		}
 
-		VAR_NAME =>  |lexer:&mut TweeLexer<R>| Some(TokVariable(lexer.yystr()))
-		FLOAT =>  |lexer:&mut TweeLexer<R>| Some(TokFloat(lexer.yystr()[..].parse().unwrap()))
-		INT =>  |lexer:&mut TweeLexer<R>| Some(TokInt(lexer.yystr()[..].parse().unwrap()))
-		BOOL =>  |lexer:&mut TweeLexer<R>| Some(TokBoolean(lexer.yystr()))
-		NUM_OP =>  |lexer:&mut TweeLexer<R>| Some(TokNumOp(lexer.yystr()))
-		COMP_OP =>  |lexer:&mut TweeLexer<R>| Some(TokCompOp(lexer.yystr()))
-		LOG_OP =>  |lexer:&mut TweeLexer<R>| Some(TokLogOp(lexer.yystr()))
-		BR_OPEN =>  |_:&mut TweeLexer<R>| Some(TokBracketOpen)
-		BR_CLOSE =>  |_:&mut TweeLexer<R>| Some(TokBracketClose)
-		SEMI_COLON =>  |_:&mut TweeLexer<R>| Some(TokSemiColon)
-		ASSIGN =>  |lexer:&mut TweeLexer<R>| Some(TokAssign("".to_string(), lexer.yystr()))
-		COLON =>  |_:&mut TweeLexer<R>| Some(TokColon)
+		VAR_NAME =>   |lexer:&mut TweeLexer<R>| Some(TokVariable{name: lexer.yystr()} )
+		FLOAT =>      |lexer:&mut TweeLexer<R>| Some(TokFloat   {value: lexer.yystr()[..].parse().unwrap()} )
+		INT =>        |lexer:&mut TweeLexer<R>| Some(TokInt     {value: lexer.yystr()[..].parse().unwrap()} )
+		BOOL =>       |lexer:&mut TweeLexer<R>| Some(TokBoolean {value: lexer.yystr()} )
+		NUM_OP =>     |lexer:&mut TweeLexer<R>| Some(TokNumOp   {op_name: lexer.yystr()} )
+		COMP_OP =>    |lexer:&mut TweeLexer<R>| Some(TokCompOp  {op_name: lexer.yystr()} )
+		LOG_OP =>     |lexer:&mut TweeLexer<R>| Some(TokLogOp   {op_name: lexer.yystr()} )
+		BR_OPEN =>    |_:&mut TweeLexer<R>|     Some(TokBracketOpen)
+		BR_CLOSE =>   |_:&mut TweeLexer<R>|     Some(TokBracketClose)
+		SEMI_COLON => |_:&mut TweeLexer<R>|     Some(TokSemiColon)
+		ASSIGN =>     |lexer:&mut TweeLexer<R>| Some(TokAssign {var_name: "".to_string(), op_name: lexer.yystr()} )
+		COLON =>      |_:&mut TweeLexer<R>|     Some(TokColon)
 		// Expression Stuff End
 
 		WHITESPACE =>  |_:&mut TweeLexer<R>| -> Option<Token> {
@@ -524,15 +524,15 @@ rustlex! TweeLexer {
 	}
 
 	FUNCTION_ARGS {
-		COLON =>  |_:&mut TweeLexer<R>| Some(TokColon)
-		VAR_NAME =>  |lexer:&mut TweeLexer<R>| Some(TokVariable(lexer.yystr()))
-		FLOAT =>  |lexer:&mut TweeLexer<R>| Some(TokFloat(lexer.yystr()[..].parse().unwrap()))
-		INT =>  |lexer:&mut TweeLexer<R>| Some(TokInt(lexer.yystr()[..].parse().unwrap()))
-		STRING =>  |lexer:&mut TweeLexer<R>| Some(TokString(lexer.yystr()))
-		BOOL =>  |lexer:&mut TweeLexer<R>| Some(TokBoolean(lexer.yystr()))
-		NUM_OP =>  |lexer:&mut TweeLexer<R>| Some(TokNumOp(lexer.yystr()))
-		COMP_OP =>  |lexer:&mut TweeLexer<R>| Some(TokCompOp(lexer.yystr()))
-		LOG_OP =>  |lexer:&mut TweeLexer<R>| Some(TokLogOp(lexer.yystr()))
+		COLON =>    |_:&mut TweeLexer<R>| Some(TokColon)
+		VAR_NAME => |lexer:&mut TweeLexer<R>| Some(TokVariable{name: lexer.yystr()} )
+		FLOAT =>    |lexer:&mut TweeLexer<R>| Some(TokFloat   {value: lexer.yystr()[..].parse().unwrap()} )
+		INT =>      |lexer:&mut TweeLexer<R>| Some(TokInt     {value: lexer.yystr()[..].parse().unwrap()} )
+		STRING =>   |lexer:&mut TweeLexer<R>| Some(TokString  {value: lexer.yystr()} )
+		BOOL =>     |lexer:&mut TweeLexer<R>| Some(TokBoolean {value: lexer.yystr()} )
+		NUM_OP =>   |lexer:&mut TweeLexer<R>| Some(TokNumOp   {op_name: lexer.yystr()} )
+		COMP_OP =>  |lexer:&mut TweeLexer<R>| Some(TokCompOp  {op_name: lexer.yystr()} )
+		LOG_OP =>   |lexer:&mut TweeLexer<R>| Some(TokLogOp   {op_name: lexer.yystr()} )
 		BR_OPEN =>  |lexer:&mut TweeLexer<R>| {
 			lexer.function_brackets += 1;
 			Some(TokBracketOpen)
@@ -554,8 +554,8 @@ rustlex! TweeLexer {
 			Some(TokMakroEnd)
 		}
 
-		VAR_NAME =>  |lexer:&mut TweeLexer<R>| Some(TokVariable(lexer.yystr()))
-		PASSAGE_NAME => |lexer:&mut TweeLexer<R>| Some(TokPassageName(lexer.yystr().trim().to_string()))
+		VAR_NAME =>  |lexer:&mut TweeLexer<R>| Some(TokVariable {name: lexer.yystr()} )
+		PASSAGE_NAME => |lexer:&mut TweeLexer<R>| Some(TokPassage {name: lexer.yystr().trim().to_string()} )
 	}
 
 	LINK_VAR_CHECK {
@@ -572,18 +572,18 @@ rustlex! TweeLexer {
 
 	LINK_VAR_SET {
 		// Expression Stuff
-		VAR_NAME =>  |lexer:&mut TweeLexer<R>| Some(TokVariable(lexer.yystr()))
-		FLOAT =>  |lexer:&mut TweeLexer<R>| Some(TokFloat(lexer.yystr()[..].parse().unwrap()))
-		INT =>  |lexer:&mut TweeLexer<R>| Some(TokInt(lexer.yystr()[..].parse().unwrap()))
-		STRING =>  |lexer:&mut TweeLexer<R>| Some(TokString(lexer.yystr()))
-		BOOL =>  |lexer:&mut TweeLexer<R>| Some(TokBoolean(lexer.yystr()))
-		NUM_OP =>  |lexer:&mut TweeLexer<R>| Some(TokNumOp(lexer.yystr()))
-		COMP_OP =>  |lexer:&mut TweeLexer<R>| Some(TokCompOp(lexer.yystr()))
-		LOG_OP =>  |lexer:&mut TweeLexer<R>| Some(TokLogOp(lexer.yystr()))
-		BR_OPEN =>  |_:&mut TweeLexer<R>| Some(TokBracketOpen)
-		BR_CLOSE =>  |_:&mut TweeLexer<R>| Some(TokBracketClose)
-		SEMI_COLON =>  |_:&mut TweeLexer<R>| Some(TokSemiColon)
-		ASSIGN =>  |lexer:&mut TweeLexer<R>| Some(TokAssign("".to_string(),lexer.yystr()))
+		VAR_NAME =>   |lexer:&mut TweeLexer<R>| Some(TokVariable{name: lexer.yystr()} )
+		FLOAT =>      |lexer:&mut TweeLexer<R>| Some(TokFloat   {value: lexer.yystr()[..].parse().unwrap()} )
+		INT =>        |lexer:&mut TweeLexer<R>| Some(TokInt     {value: lexer.yystr()[..].parse().unwrap()} )
+		STRING =>     |lexer:&mut TweeLexer<R>| Some(TokString  {value: lexer.yystr()} )
+		BOOL =>       |lexer:&mut TweeLexer<R>| Some(TokBoolean {value: lexer.yystr()} )
+		NUM_OP =>     |lexer:&mut TweeLexer<R>| Some(TokNumOp   {op_name: lexer.yystr()} )
+		COMP_OP =>    |lexer:&mut TweeLexer<R>| Some(TokCompOp  {op_name: lexer.yystr()} )
+		LOG_OP =>     |lexer:&mut TweeLexer<R>| Some(TokLogOp   {op_name: lexer.yystr()} )
+		BR_OPEN =>    |_:&mut TweeLexer<R>|     Some(TokBracketOpen)
+		BR_CLOSE =>   |_:&mut TweeLexer<R>|     Some(TokBracketClose)
+		SEMI_COLON => |_:&mut TweeLexer<R>|     Some(TokSemiColon)
+		ASSIGN =>     |lexer:&mut TweeLexer<R>| Some(TokAssign  {var_name: "".to_string(), op_name: lexer.yystr()} )
 		// Expression Stuff End
 
 		LINK_CLOSE => |lexer:&mut TweeLexer<R>| -> Option<Token> {
@@ -621,7 +621,7 @@ mod tests {
 		// This should detect the ::Start passage
 		let start_tokens = test_lex("::Start");
 		let expected = vec!(
-			TokPassageName("Start".to_string())
+			TokPassage {name: "Start".to_string()}
 		);
 
 		assert_eq!(expected, start_tokens);
@@ -636,12 +636,12 @@ mod tests {
 		// This should return a passage with a body text
 		let tokens = test_lex("::Passage\nTestText\nTestNextLine\n::NextPassage");
 		let expected = vec!(
-			TokPassageName("Passage".to_string()),
-			TokText("TestText".to_string()),
+			TokPassage {name: "Passage".to_string()},
+			TokText {text: "TestText".to_string()},
 			TokNewLine,
-			TokText("TestNextLine".to_string()),
+			TokText {text: "TestNextLine".to_string()},
 			TokNewLine,
-			TokPassageName("NextPassage".to_string())
+			TokPassage {name: "NextPassage".to_string()}
 		);
 
 		assert_eq!(expected, tokens);
@@ -652,12 +652,12 @@ mod tests {
 		// This should return a passage with tags
 		let tokens = test_lex("::TagPassage [tag1 tag2]\nContent");
 		let expected = vec!(
-			TokPassageName("TagPassage".to_string()),
+			TokPassage {name: "TagPassage".to_string()},
 			TokTagStart,
-			TokTag("tag1".to_string()),
-			TokTag("tag2".to_string()),
+			TokTag {tag_name: "tag1".to_string()},
+			TokTag {tag_name: "tag2".to_string()},
 			TokTagEnd,
-			TokText("Content".to_string())
+			TokText {text: "Content".to_string()}
 		);
 
 		assert_eq!(expected, tokens);
@@ -668,10 +668,10 @@ mod tests {
 		// This should return a passage with a set macro
 		let tokens = test_lex("::Passage\n<<set $var = 1>>");
 		let expected = vec!(
-			TokPassageName("Passage".to_string()),
+			TokPassage {name: "Passage".to_string()},
 			TokSet,
-			TokAssign("$var".to_string(), "=".to_string()),
-			TokInt(1),
+			TokAssign {var_name: "$var".to_string(), op_name: "=".to_string()},
+			TokInt {value: 1},
 			TokMakroEnd
 		);
 
@@ -683,22 +683,22 @@ mod tests {
 		// This should return a passage with an if macro
 		let tokens = test_lex("::Passage\n<<if $var == 1>>1<<else if var is 2>>2<<else>>3<<endif>>");
 		let expected = vec!(
-			TokPassageName("Passage".to_string()),
+			TokPassage {name: "Passage".to_string()},
 			TokIf,
-			TokVariable("$var".to_string()),
-			TokCompOp("==".to_string()),
-			TokInt(1),
+			TokVariable {name: "$var".to_string()},
+			TokCompOp {op_name: "==".to_string()},
+			TokInt {value: 1},
 			TokMakroEnd,
-			TokText("1".to_string()),
+			TokText {text: "1".to_string()},
 			TokElse,
 			/* TODO: Fix else if */
-			TokCompOp("is".to_string()),
-			TokInt(2),
+			TokCompOp {op_name: "is".to_string()},
+			TokInt {value: 2},
 			TokMakroEnd,
-			TokText("2".to_string()),
+			TokText {text: "2".to_string()},
 			TokElse,
 			TokMakroEnd,
-			TokText("3".to_string()),
+			TokText {text: "3".to_string()},
 			TokEndIf,
 			TokMakroEnd
 		);
@@ -710,13 +710,13 @@ mod tests {
 	fn macro_print_test() {
 		let tokens = test_lex("::Passage\n<<print \"Test with escaped \\\"Quotes\">>\n<<print $var>>");
 		let expected = vec!(
-			TokPassageName("Passage".to_string()),
+			TokPassage {name: "Passage".to_string()},
 			TokPrint,
-			TokString("Test with escaped \"Quotes".to_string()),
+			TokString {value: "Test with escaped \"Quotes".to_string()},
 			TokMakroEnd,
 			TokNewLine,
 			TokPrint,
-			TokVariable("$var".to_string()),
+			TokVariable {name: "$var".to_string()},
 			TokMakroEnd
 		);
 
@@ -727,12 +727,12 @@ mod tests {
 	fn macro_display_test() {
 		let tokens = test_lex("::Passage\n<<display DisplayedPassage>>\n::DisplayedPassage");
 		let expected = vec!(
-			TokPassageName("Passage".to_string()),
+			TokPassage {name: "Passage".to_string()},
 			TokDisplay,
-			TokPassageName("DisplayedPassage".to_string()),
+			TokPassage {name: "DisplayedPassage".to_string()},
 			TokMakroEnd,
 			TokNewLine,
-			TokPassageName("DisplayedPassage".to_string())
+			TokPassage {name: "DisplayedPassage".to_string()}
 		);
 
 		assert_eq!(expected, tokens);
@@ -743,8 +743,8 @@ mod tests {
 		// Should fail because it contains an invalid macro
 		let tokens = test_lex("::Passage\n<<Passage>>");
 		let expected = vec![
-			TokPassageName("Passage".to_string()),
-			TokMakroPassageName("Passage".to_string()),
+			TokPassage {name: "Passage".to_string()},
+			TokMakroPassageName {passage_name: "Passage".to_string()},
 			TokMakroEnd
 		];
 
