@@ -681,7 +681,7 @@ impl Zfile {
         self.data.append_byte(variable);
     }
 
-    /// prints the value of a variable (only ints a possibe)
+    /// Prints the value of a variable (only ints a possibe)
     pub fn op_print_num_var(&mut self, variable: u8) {
         let args: Vec<ArgType> = vec![ArgType::Variable, ArgType::Nothing, ArgType::Nothing, ArgType::Nothing];
         self.op_var(0x06, args);
@@ -690,16 +690,16 @@ impl Zfile {
     }
     /// prints string at given packet adress TODO: needs testing
     pub fn op_print_paddr(&mut self, address: u8) {
-        let args: Vec<ArgType> = vec![ArgType::Variable, ArgType::Nothing, ArgType::Nothing, ArgType::Nothing];
-        self.op_var(0x8D, args);
+        self.op_1(0x0D, ArgType::Variable);
+		self.data.append_byte(address);
 
         self.data.append_byte(address);
     }
 
     /// prints string at given adress TODO: needs testing
     pub fn op_print_addr(&mut self, address: u8) {
-        let args: Vec<ArgType> = vec![ArgType::Variable, ArgType::Nothing, ArgType::Nothing, ArgType::Nothing];
-        self.op_var(0x87, args);
+        self.op_1(0x07, ArgType::Variable);
+		self.data.append_byte(address);
 
         self.data.append_byte(address);
     }
