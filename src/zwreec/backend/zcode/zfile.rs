@@ -691,7 +691,6 @@ impl Zfile {
     /// prints string at given packet adress TODO: needs testing
     pub fn op_print_paddr(&mut self, address: u8) {
         self.op_1(0x0D, ArgType::Variable);
-		self.data.append_byte(address);
 
         self.data.append_byte(address);
     }
@@ -699,7 +698,6 @@ impl Zfile {
     /// prints string at given adress TODO: needs testing
     pub fn op_print_addr(&mut self, address: u8) {
         self.op_1(0x07, ArgType::Variable);
-		self.data.append_byte(address);
 
         self.data.append_byte(address);
     }

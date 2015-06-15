@@ -21,8 +21,8 @@ pub fn temp_create_zcode_example<W: Write>(output: &mut W) {
     zfile.op_call_1n("Start");
     zfile.routine("Start", 0);
     zfile.gen_print_ops("Address of var 200: ");
-    zfile.op_store_u16(200, 0x0812);
-    zfile.op_print_addr(200);
+    zfile.op_store_u16(200, 0x103);
+    zfile.op_print_paddr(200);
     zfile.op_newline();
     zfile.op_newline();
 
