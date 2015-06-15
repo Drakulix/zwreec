@@ -30,7 +30,7 @@ fn gen_zcode<'a>(node: &'a ASTNode, mut out: &mut zfile::Zfile, mut manager: &mu
         &ASTNode::Passage(ref node) => {
             let mut code: Vec<ZOP> = vec![];
             match &node.category {
-                &Token::TokPassage {ref name} => {
+                &Token::TokPassage {ref name, .. } => {
                     code.push(ZOP::Routine{name: name.to_string(), count_variables: 0});
                 },
                 _ => {
@@ -51,28 +51,28 @@ fn gen_zcode<'a>(node: &'a ASTNode, mut out: &mut zfile::Zfile, mut manager: &mu
         },
         &ASTNode::Default(ref t) => {
             let mut code: Vec<ZOP> = match &t.category {
-                &Token::TokText {ref text} => {
+                &Token::TokText {ref text, .. } => {
                     vec![ZOP::PrintOps{text: text.to_string()}]
                 },
-                &Token::TokNewLine => {
+                &Token::TokNewLine { .. } => {
                     vec![ZOP::Newline]
                 },
-                &Token::TokFormatBoldStart => {
+                &Token::TokFormatBoldStart { .. } => {
                     state_copy.bold = true;
                     set_formatting = true;
                     vec![ZOP::SetTextStyle{bold: state_copy.bold, reverse: state_copy.inverted, monospace: state_copy.mono, italic: state_copy.italic}]
                 },
-                &Token::TokFormatMonoStart => {
+                &Token::TokFormatMonoStart { .. } => {
                     state_copy.mono = true;
                     set_formatting = true;
                     vec![ZOP::SetTextStyle{bold: state_copy.bold, reverse: state_copy.inverted, monospace: state_copy.mono, italic: state_copy.italic}]
                 },
-                &Token::TokFormatItalicStart => {
+                &Token::TokFormatItalicStart { .. } => {
                     state_copy.italic = true;
                     set_formatting = true;
                     vec![ZOP::SetTextStyle{bold: state_copy.bold, reverse: state_copy.inverted, monospace: state_copy.mono, italic: state_copy.italic}]
                 },
-                &Token::TokPassageLink {ref display_name, ref passage_name} => {
+                &Token::TokPassageLink {ref display_name, ref passage_name, .. } => {
                     set_formatting = true;
                     vec![
                     ZOP::Call2NWithAddress{jump_to_label: "system_add_link".to_string(), address: passage_name.to_string()},
@@ -83,18 +83,18 @@ fn gen_zcode<'a>(node: &'a ASTNode, mut out: &mut zfile::Zfile, mut manager: &mu
                     ZOP::SetColor{foreground: 9, background: 2},
                     ]
                 },
-                &Token::TokAssign {ref var_name, ref op_name} => {
+                &Token::TokAssign {ref var_name, ref op_name, .. } => {
                     if op_name == "=" || op_name == "to" {
                         if t.childs.len() == 1 {
                             match t.childs[0].as_default().category {
-                                Token::TokInt {value} => {
+                                Token::TokInt {value, .. } => {
                                     if !manager.symbol_table.is_known_symbol(var_name) {
                                         manager.symbol_table.insert_new_symbol(&var_name, Type::Integer);
                                     }
                                     let symbol_id = manager.symbol_table.get_symbol_id(var_name);
                                     vec![ZOP::StoreU16{variable: symbol_id, value: value as u16}]
                                 },
-                                Token::TokBoolean {ref value} => {
+                                Token::TokBoolean {ref value, .. } => {
                                     if !manager.symbol_table.is_known_symbol(var_name) {
                                         manager.symbol_table.insert_new_symbol(&var_name, Type::Bool);
                                     }
@@ -109,7 +109,7 @@ fn gen_zcode<'a>(node: &'a ASTNode, mut out: &mut zfile::Zfile, mut manager: &mu
                         }
                     } else { vec![] }
                 },
-                &Token::TokIf => {
+                &Token::TokMacroIf { .. } => {
                     if t.childs.len() < 2 {
                         panic!("Unsupported if-expression!");
                     }
@@ -124,14 +124,14 @@ fn gen_zcode<'a>(node: &'a ASTNode, mut out: &mut zfile::Zfile, mut manager: &mu
 
                     // Check if first token is variable
                     let var_name = match pseudo_node.childs[0].as_default().category {
-                        Token::TokVariable {ref name} => name,
+                        Token::TokVariable {ref name, .. } => name,
                         _ =>  panic!("Unsupported if-expression!")
                     };
 
                     if pseudo_node.childs.len() > 1 {
                         // Check if second token is compare operator
                         match pseudo_node.childs[1].as_default().category {
-                            Token::TokCompOp {ref op_name} => {
+                            Token::TokCompOp {ref op_name, .. } => {
                                 match &*(*op_name) {
                                     "==" | "is" => {} ,
                                     _ => panic!("Unsupported Compare Operator!")
@@ -141,10 +141,10 @@ fn gen_zcode<'a>(node: &'a ASTNode, mut out: &mut zfile::Zfile, mut manager: &mu
 
                         // Check if third token is number
                         compare = match pseudo_node.childs[2].as_default().category {
-                            Token::TokInt {ref value} => {
+                            Token::TokInt {ref value, .. } => {
                                 *value as u8
                             },
-                            Token::TokBoolean {ref value} => {
+                            Token::TokBoolean {ref value, .. } => {
                                 boolstr_to_u8(&*value)
                             }, _ => panic!("Unsupported assign value!") 
                         };
@@ -172,7 +172,7 @@ fn gen_zcode<'a>(node: &'a ASTNode, mut out: &mut zfile::Zfile, mut manager: &mu
                     code.push(ZOP::Label{name: after_if_label});
                     code
                 },
-                &Token::TokElse => {
+                &Token::TokMacroElse { .. } => {
                     let mut code: Vec<ZOP> = vec![];
                     for child in &t.childs {
                         for instr in gen_zcode(child, out, manager) {
@@ -181,11 +181,11 @@ fn gen_zcode<'a>(node: &'a ASTNode, mut out: &mut zfile::Zfile, mut manager: &mu
                     }
                     code
                 },
-                &Token::TokEndIf => {
+                &Token::TokMacroEndIf { .. } => {
                     let after_else_label = format!("after_else_{}", manager.ids_if.pop_id());
                     vec![ZOP::Label{name: after_else_label}]
                 },
-                &Token::TokMacroVar {ref var_name} => {
+                &Token::TokMacroContentVar {ref var_name, .. } => {
                     let var_id = manager.symbol_table.get_symbol_id(&*var_name);
                     match manager.symbol_table.get_symbol_type(&*var_name) {
                         Type::Integer => {
@@ -282,7 +282,7 @@ impl AST {
      /// goes one lvl up and adds and child
     pub fn up_child(&mut self, token: Token, is_in_passage: bool) {
         match token {
-            Token::TokEndIf => {
+            Token::TokMacroEndIf { .. } => {
                 if is_in_passage == false {
                     self.up();
                     self.add_child(token);
@@ -303,7 +303,7 @@ impl AST {
     pub fn up_child_down(&mut self, token: Token) {
         
         match token {
-            Token::TokElse => {
+            Token::TokMacroElse { .. } => {
                 self.is_in_else += 1;
             },
             _ => {
