@@ -156,7 +156,7 @@ impl Parser {
                     // jump one ast-level higher
                     debug!("pop TokEndIf Passage;");
 
-                    self.ast.up_child(TokEndIf, true);
+                    self.ast.up_child(TokEndIf);
                 },
                 (PassageContent, &TokFormatBoldEnd) => {
                     // jump one ast-level higher
@@ -285,7 +285,7 @@ impl Parser {
                     new_nodes.push(PNode::new_terminal(TokMacroEnd));
 
                     // ast
-                    self.ast.up_child(TokEndIf, false);
+                    //self.ast.up_child(TokEndIf);
                 }
 
                 // ExpressionList
