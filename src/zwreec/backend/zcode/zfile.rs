@@ -9,6 +9,8 @@ pub enum ZOP {
   PrintUnicode{c: u16},
   Print{text: String},
   PrintNumVar{variable: u8},
+  PrintPaddr{address: u8},
+  PrintAddr{address: u8},
   PrintOps{text: String},
   Call1N{jump_to_label: String},
   Call2NWithAddress{jump_to_label: String, address: String},
@@ -275,6 +277,8 @@ impl Zfile {
             &ZOP::Print{ref text} => self.op_print(text),
             &ZOP::PrintNumVar{variable} => self.op_print_num_var(variable),
             &ZOP::PrintOps{ref text} => self.gen_print_ops(text),
+            &ZOP::PrintPaddr{address} => self.op_print_paddr(address),
+            &ZOP::PrintAddr{address} => self.op_print_addr(address),
             &ZOP::Call1N{ref jump_to_label} => self.op_call_1n(jump_to_label),
             &ZOP::Call2NWithAddress{ref jump_to_label, ref address} => self.op_call_2n_with_address(jump_to_label, address),
             &ZOP::Call1NVar{variable} => self.op_call_1n_var(variable),
@@ -677,12 +681,25 @@ impl Zfile {
         self.data.append_byte(variable);
     }
 
-    /// prints the value of a variable (only ints a possibe)
+    /// Prints the value of a variable (only ints a possibe)
     pub fn op_print_num_var(&mut self, variable: u8) {
         let args: Vec<ArgType> = vec![ArgType::Variable, ArgType::Nothing, ArgType::Nothing, ArgType::Nothing];
         self.op_var(0x06, args);
 
         self.data.append_byte(variable);
+    }
+    /// prints string at given packet adress TODO: needs testing
+    pub fn op_print_paddr(&mut self, address: u8) {
+        self.op_1(0x0D, ArgType::Variable);
+
+        self.data.append_byte(address);
+    }
+
+    /// prints string at given adress TODO: needs testing
+    pub fn op_print_addr(&mut self, address: u8) {
+        self.op_1(0x07, ArgType::Variable);
+
+        self.data.append_byte(address);
     }
 
     /// calculates a random numer from 1 to range
