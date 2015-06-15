@@ -91,6 +91,7 @@ pub enum Token {
 	TokSemiColon,
 	TokIf,
 	TokElse,
+    TokElseIf,
 	TokEndIf,
 	TokPrint,
 	TokDisplay,
@@ -180,7 +181,7 @@ rustlex! TweeLexer {
 
 	let FUNCTION = LETTER+ '(';
 
-	let MACRO_NAME = [^" >"'\n']*;
+    let MACRO_NAME = [^" >"'\n']* (WHITESPACE+ "if")?;
 
 	let ASSIGN = "=" | "to" | "+=" | "-=" | "*=" | "/=";
 	let SEMI_COLON = ';';
@@ -417,7 +418,10 @@ rustlex! TweeLexer {
 		}
 
 		MACRO_NAME =>  |lexer:&mut TweeLexer<R>| -> Option<Token> {
-			match lexer.yystr().trim().as_ref() {
+            // "else if" and "else    if" should be matched with "elseif"
+            let replaced_string = str::replace(lexer.yystr().trim(), " ", "");
+
+            match replaced_string.as_ref() {
 				"set" => {
 					lexer.MACRO_CONTENT();
 					Some(TokSet)
@@ -429,6 +433,10 @@ rustlex! TweeLexer {
 				"else" => {
 					lexer.MACRO_CONTENT();
 					Some(TokElse)
+				},
+                "elseif" => {
+					lexer.MACRO_CONTENT();
+                    Some(TokElseIf)
 				},
 				"endif" => {
 					lexer.MACRO_CONTENT();
