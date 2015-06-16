@@ -4,12 +4,27 @@ pub use super::zfile::ArgType;
 
 
 
+/// sets the colors of the foreground (font) and background
+pub fn op_set_color(foreground: u8, background: u8) -> Vec<u8> {
+    let args: Vec<ArgType> = vec![ArgType::SmallConst, ArgType::SmallConst];
+    let mut bytes = op_2(0x1b, args);
+    bytes.push(foreground);
+    bytes.push(background);
+    bytes
+}
+
+
+/// prints string at given packet adress TODO: needs testing
+pub fn op_print_paddr(address: u8) -> Vec<u8> {
+   let mut bytes = op_1(0x0D, ArgType::Variable);
+   bytes.push(address);
+   bytes
+}
 
 
 /// prints string at given adress TODO: needs testing
 pub fn op_print_addr(address: u8) -> Vec<u8> {
-    let mut bytes = op_1(0x07, ArgType::Variable);
-
+   let mut bytes = op_1(0x07, ArgType::Variable);
    bytes.push(address);
    bytes
 }

@@ -287,7 +287,8 @@ impl Zfile {
             &ZOP::StoreU8{variable, value} => op::op_store_u8(variable, value),
             &ZOP::Ret{value} => op::op_ret(value),
             &ZOP::PrintAddr{address} => op::op_print_addr(address),
-
+            &ZOP::PrintPaddr{address} => op::op_print_paddr(address),
+            &ZOP::SetColor{foreground, background} => op::op_set_color(foreground, background),
             _ => Vec::new()
         };
         self.data.append_bytes(&bytes);
@@ -296,13 +297,11 @@ impl Zfile {
             &ZOP::Print{ref text} => self.op_print(text),
             &ZOP::PrintNumVar{variable} => self.op_print_num_var(variable),
             &ZOP::PrintOps{ref text} => self.gen_print_ops(text),
-            &ZOP::PrintPaddr{address} => self.op_print_paddr(address),
             &ZOP::Call1N{ref jump_to_label} => self.op_call_1n(jump_to_label),
             &ZOP::Call2NWithAddress{ref jump_to_label, ref address} => self.op_call_2n_with_address(jump_to_label, address),
             &ZOP::Call1NVar{variable} => self.op_call_1n_var(variable),
             &ZOP::Routine{ref name, count_variables} => self.routine(name, count_variables),
             &ZOP::Label{ref name} => self.label(name),
-            &ZOP::SetColor{foreground, background} => self.op_set_color(foreground, background),
             &ZOP::SetColorVar{foreground, background} => self.op_set_color_var(foreground, background),
             &ZOP::SetTextStyle{bold, reverse, monospace, italic} => self.op_set_text_style(bold, reverse, monospace, italic),
             &ZOP::StoreW{array_address, index, variable} => self.op_storew(array_address, index, variable),
@@ -640,12 +639,7 @@ impl Zfile {
 
         self.data.append_byte(variable);
     }
-    /// prints string at given packet adress TODO: needs testing
-    pub fn op_print_paddr(&mut self, address: u8) {
-        self.op_1(0x0D, ArgType::Variable);
-
-        self.data.append_byte(address);
-    }
+    
 
     /// calculates a random numer from 1 to range
     pub fn op_random(&mut self, range: u8, variable: u8) {
@@ -656,14 +650,7 @@ impl Zfile {
         self.data.append_byte(variable);
     }
 
-    /// sets the colors of the foreground (font) and background
-    pub fn op_set_color(&mut self, foreground: u8, background: u8){
-        let args: Vec<ArgType> = vec![ArgType::SmallConst, ArgType::SmallConst];
-        self.op_2(0x1b, args);
-
-        self.data.append_byte(foreground);
-        self.data.append_byte(background);
-    }
+    
 
     /// sets the colors of the foreground (font) and background (but with variables
     pub fn op_set_color_var(&mut self, foreground: u8, background: u8){
