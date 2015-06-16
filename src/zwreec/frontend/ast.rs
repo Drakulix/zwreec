@@ -283,7 +283,7 @@ impl AST {
         self.add_child(token);
     }
 
-    /// goeas one lvl up, adds an child and goes one lvl down
+    /// goes one lvl up, adds an child and goes one lvl down
     pub fn up_child_down(&mut self, token: Token) {
         self.up();
         self.child_down(token);
