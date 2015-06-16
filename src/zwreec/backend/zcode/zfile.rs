@@ -431,6 +431,13 @@ impl Zfile {
         ]);
     }
 
+    /// exits the program
+    /// quit is 0OP
+    pub fn op_quit(&mut self) {
+        self.op_0(0x0a);
+    }
+
+
     /// checks all stored links and make them choiceable
     /// with the keyboard
     pub fn routine_check_links(&mut self) {

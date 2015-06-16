@@ -27,7 +27,7 @@ pub fn temp_create_zcode_example<W: Write>(output: &mut W) {
     op::op_newline();
     op::op_newline();
 
-    op::quit();
+    zfile.op_quit();
     zfile.end();
 
     match output.write_all(&(*zfile.data.bytes)) {

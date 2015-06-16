@@ -4,7 +4,7 @@ use std::error::Error;
 use std::io::Write;
 use frontend::ast;
 use super::super::backend::zcode::zfile;
-use backend::zcode::op;
+
 pub fn generate_zcode<W: Write>(ast: ast::AST, output: &mut W) {
     let mut codegenerator = Codegen::new(ast);
     codegenerator.start_codegen();
@@ -38,8 +38,8 @@ impl Codegen {
         //self.zfile.routine("main", 0);
 
         self.ast.to_zcode(&mut self.zfile);
-
-        op::quit(); //TODO
+        
+        self.zfile.op_quit();
 
         self.zfile.end();
     }
