@@ -294,7 +294,8 @@ impl Zfile {
             &ZOP::PrintNumVar{variable} => op::op_print_num_var(variable),
             &ZOP::SetTextStyle{bold, reverse, monospace, italic} => op::op_set_text_style(bold, reverse, monospace, italic),
             &ZOP::ReadChar{local_var_id} => op::op_read_char(local_var_id),
-
+            &ZOP::LoadW{array_address, index, variable} => op::op_loadw(array_address, index, variable,self.object_addr),
+            &ZOP::StoreW{array_address, index, variable} => op::op_storew(array_address, index, variable,self.object_addr),
 
             _ => Vec::new()
         };
@@ -308,12 +309,10 @@ impl Zfile {
             &ZOP::Call1NVar{variable} => self.op_call_1n_var(variable),
             &ZOP::Routine{ref name, count_variables} => self.routine(name, count_variables),
             &ZOP::Label{ref name} => self.label(name),
-            &ZOP::StoreW{array_address, index, variable} => self.op_storew(array_address, index, variable),
             &ZOP::JE{local_var_id, equal_to_const, ref jump_to_label} => self.op_je(local_var_id, equal_to_const, jump_to_label),
             &ZOP::ReadCharTimer{local_var_id, timer, ref routine} => self.op_read_char_timer(local_var_id, timer, routine),
             &ZOP::JL{local_var_id, local_var_id2, ref jump_to_label} => self.op_jl(local_var_id, local_var_id2, jump_to_label),
             &ZOP::Jump{ref jump_to_label} => self.op_jump(jump_to_label),
-            &ZOP::LoadW{array_address, index, variable} => self.op_loadw(array_address, index, variable),
             &ZOP::EraseWindow{value} => self.op_erase_window(value),
             _ => ()
         }
@@ -643,39 +642,6 @@ impl Zfile {
         self.data.append_u16(value as u16);
     }
 
-    /// loads a word from an array in a variable
-    /// loadw is an 2op, BUT with 3 ops -.-
-    pub fn op_loadw(&mut self, array_address: u16, index: u8, variable: u8) {
-
-        self.op_2(0x0f, vec![ArgType::LargeConst, ArgType::Variable]);
-
-        // array address
-        self.data.append_u16(self.object_addr + array_address);
-
-        // array index
-        self.data.append_byte(index);
-
-        // variable
-        self.data.append_byte(variable);
-    }
-
-    /// stores a value to an array
-    /// stores the value of variable to the address in: array_address + 2*index
-    pub fn op_storew(&mut self, array_address: u16, index: u8, variable: u8) {
-        assert!(array_address > 0, "not allowed array-address, becouse in _some_ interpreters (for example zoom) it crahs. -.-");
-
-        let args: Vec<ArgType> = vec![ArgType::LargeConst, ArgType::Variable, ArgType::Variable, ArgType::Nothing];
-        self.op_var(0x01, args);
-
-        // array address
-        self.data.append_u16(self.object_addr + array_address);
-
-        // array index
-        self.data.append_byte(index);
-
-        // value
-        self.data.append_byte(variable);
-    }
 
     /// jumps to a label
     pub fn op_jump(&mut self, jump_to_label: &str) {

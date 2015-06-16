@@ -11,6 +11,46 @@ pub use super::zfile::ArgType;
 
 
 
+
+
+
+
+/// stores a value to an array
+/// stores the value of variable to the address in: array_address + 2*index
+pub fn op_storew(array_address: u16, index: u8, variable: u8, object_addr: u16) -> Vec<u8> {
+    assert!(array_address > 0, "not allowed array-address, becouse in _some_ interpreters (for example zoom) it crahs. -.-");
+    let args: Vec<ArgType> = vec![ArgType::LargeConst, ArgType::Variable, ArgType::Variable, ArgType::Nothing];
+    let mut bytes = op_var(0x01, args);
+
+    // array address
+    write_u16(object_addr + array_address, &mut bytes);
+
+    // array index
+    bytes.push(index);
+
+    // value
+    bytes.push(variable);
+    bytes
+}
+
+
+/// loads a word from an array in a variable
+/// loadw is an 2op, BUT with 3 ops -.-
+pub fn op_loadw(array_address: u16, index: u8, variable: u8, object_addr: u16) -> Vec<u8> {
+    let mut bytes = op_2(0x0f, vec![ArgType::LargeConst, ArgType::Variable]);
+
+    // array address
+    write_u16(object_addr + array_address, &mut bytes);
+
+    // array index
+    bytes.push(index);
+
+    // variable
+    bytes.push(variable);
+    bytes
+}
+
+
 /// reads keys from the keyboard and saves the asci-value in local_var_id
 /// read_char is VAROP
 pub fn op_read_char(local_var_id: u8) -> Vec<u8> {
