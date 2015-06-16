@@ -283,6 +283,8 @@ impl Zfile {
             &ZOP::Inc{variable} => op::op_inc(variable),
             &ZOP::Add{variable1, add_const, variable2} => op::op_add(variable1, add_const, variable2),
             &ZOP::Sub{variable1, sub_const, variable2} => op::op_sub(variable1, sub_const, variable2),
+            &ZOP::StoreU16{variable, value} => op::op_store_u16(variable, value),
+            &ZOP::StoreU8{variable, value} => op::op_store_u8(variable, value),
 
             _ => Vec::new()
         };
@@ -302,8 +304,6 @@ impl Zfile {
             &ZOP::SetColor{foreground, background} => self.op_set_color(foreground, background),
             &ZOP::SetColorVar{foreground, background} => self.op_set_color_var(foreground, background),
             &ZOP::SetTextStyle{bold, reverse, monospace, italic} => self.op_set_text_style(bold, reverse, monospace, italic),
-            &ZOP::StoreU16{variable, value} => self.op_store_u16(variable, value),
-            &ZOP::StoreU8{variable, value} => self.op_store_u8(variable, value),
             &ZOP::StoreW{array_address, index, variable} => self.op_storew(array_address, index, variable),
             &ZOP::Ret{value} => self.op_ret(value),
             &ZOP::JE{local_var_id, equal_to_const, ref jump_to_label} => self.op_je(local_var_id, equal_to_const, jump_to_label),
@@ -578,12 +578,6 @@ impl Zfile {
         self.data.write_bytes(&text_bytes.bytes, index + 1);
     }
 
-    /// exits the program
-    /// quit is 0OP
-    pub fn op_quit(&mut self) {
-        self.op_0(0x0a);
-    }
-
     /// calls a routine
     /// call_1n is 1OP
     pub fn op_call_1n(&mut self, jump_to_label: &str) {
@@ -613,38 +607,6 @@ impl Zfile {
         self.add_jump(address.to_string(), JumpType::Routine);
     }
 
-
-
-    /// subtraktion
-    /// variable2 = variable1 - sub_const
-    pub fn op_sub(&mut self, variable1: u8, sub_const: u16, variable2: u8) {
-        let args: Vec<ArgType> = vec![ArgType::Variable, ArgType::LargeConst];
-        self.op_2(0x15, args);
-        
-        self.data.append_byte(variable1);
-        self.data.append_u16(sub_const);
-        self.data.append_byte(variable2);
-    }
-
-    // saves an u8 to the variable
-    pub fn op_store_u8(&mut self, variable: u8, value: u8) {
-        let args: Vec<ArgType> = vec![ArgType::Reference, ArgType::SmallConst];
-        self.op_2(0x0d, args);
-
-        self.data.append_byte(variable);
-        self.data.append_byte(value);
-    }
-
-    // saves an u16 to the variable
-    pub fn op_store_u16(&mut self, variable: u8, value: u16) {
-        let args: Vec<ArgType> = vec![ArgType::Reference, ArgType::LargeConst];
-        self.op_2(0x0d, args);
-
-        self.data.append_byte(variable);
-        self.data.append_u16(value);
-    }
-
-    
 
     /// returns a SmallConst
     pub fn op_ret(&mut self, value: u8) {

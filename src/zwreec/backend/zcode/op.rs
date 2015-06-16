@@ -5,13 +5,40 @@ pub use super::zfile::ArgType;
 
 
 
+
+
+
+
+
+
+
+// saves an u16 to the variable
+pub fn op_store_u16(variable: u8, value: u16) -> Vec<u8> {
+    let args: Vec<ArgType> = vec![ArgType::Reference, ArgType::LargeConst];
+    let mut bytes = op_2(0x0d, args);
+    bytes.push(variable);
+    write_u16(value, &mut bytes);
+    bytes
+}
+
+
+// saves an u8 to the variable
+pub fn op_store_u8(variable: u8, value: u8) -> Vec<u8> {
+    let args: Vec<ArgType> = vec![ArgType::Reference, ArgType::SmallConst];
+    let mut bytes = op_2(0x0d, args);
+    bytes.push(variable);
+    bytes.push(value);
+    bytes
+}
+
+
 /// subtraktion
 /// variable2 = variable1 - sub_const
-pub fn op_sub(&mut self, variable1: u8, sub_const: u16, variable2: u8) {
+pub fn op_sub(variable1: u8, sub_const: u16, variable2: u8) -> Vec<u8> {
     let args: Vec<ArgType> = vec![ArgType::Variable, ArgType::LargeConst];
     let mut bytes = op_2(0x15, args);
     bytes.push(variable1);
-	write_u16(add_const, &mut bytes);
+	write_u16(sub_const, &mut bytes);
     bytes.push(variable2);
     bytes
 }
@@ -19,7 +46,7 @@ pub fn op_sub(&mut self, variable1: u8, sub_const: u16, variable2: u8) {
 
 /// addition
 /// variable2 = variable1 + sub_const
-pub fn op_add( variable1: u8, add_const: u16, variable2: u8) -> Vec<u8> {
+pub fn op_add(variable1: u8, add_const: u16, variable2: u8) -> Vec<u8> {
     let args: Vec<ArgType> = vec![ArgType::Variable, ArgType::LargeConst];
     let mut bytes = op_2(0x14, args);
     bytes.push(variable1);
