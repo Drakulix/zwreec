@@ -10,7 +10,6 @@ use frontend::ast;
 use frontend::parsetree::{PNode};
 use self::NonTerminalType::*;
 use frontend::lexer::Token::*;
-use frontend::lexer::InputFileLocation;
 use config::Config;
 
 pub fn parse_tokens(cfg: &Config, tokens: Vec<Token>) -> ast::AST {

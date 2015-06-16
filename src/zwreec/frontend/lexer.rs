@@ -112,12 +112,8 @@ pub enum Token {
     TokPseudo,
 }
 
-pub trait InputFileLocation {
-    fn location(&self) -> (u64, u64);
-}
-
-impl InputFileLocation for Token {
-    fn location(&self) -> (u64, u64) {
+impl Token {
+    pub fn location(&self) -> (u64, u64) {
         match self {
             &TokPassage{location, ..} |
             &TokTagStart{location} |
