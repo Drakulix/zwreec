@@ -10,9 +10,10 @@ use frontend::ast;
 use frontend::parsetree::{PNode};
 use self::NonTerminalType::*;
 use frontend::lexer::Token::*;
+use config::Config;
 
-pub fn parse_tokens(tokens: Vec<Token>) -> ast::AST {
-    let mut parser: Parser = Parser::new(tokens);
+pub fn parse_tokens(cfg: &Config, tokens: Vec<Token>) -> ast::AST {
+    let mut parser: Parser = Parser::new(cfg, tokens);
     parser.parsing();
     parser.ast
 }
@@ -56,16 +57,19 @@ pub enum NonTerminalType {
 //==============================
 // parser
 
-struct Parser {
+#[allow(dead_code)]
+struct Parser<'a> {
+    cfg: &'a Config,
     ast: ast::AST,
     stack: Vec<PNode>,
     tokens: Vec<Token>,
     lookahead: usize
 }
 
-impl Parser {
-    pub fn new(tokens: Vec<Token>) -> Parser {
+impl<'a> Parser<'a> {
+    pub fn new(cfg: &Config, tokens: Vec<Token>) -> Parser {
         Parser {
+            cfg: cfg,
             ast: ast::AST::new(),
             stack: Vec::new(),
             tokens: tokens,
@@ -127,9 +131,9 @@ impl Parser {
                     // ast
                     self.ast.add_child(tok.clone());
                 },
-                (PassageContent, &TokFormatBoldStart) | 
-                (PassageContent, &TokFormatItalicStart) |
-                (PassageContent, &TokFormatMonoStart) => {
+                (PassageContent, &TokFormatBoldStart   { .. }) | 
+                (PassageContent, &TokFormatItalicStart { .. }) |
+                (PassageContent, &TokFormatMonoStart   { .. }) => {
                     new_nodes.push(PNode::new_non_terminal(Formating));
                     new_nodes.push(PNode::new_non_terminal(PassageContent));
                 },
@@ -137,32 +141,32 @@ impl Parser {
                     new_nodes.push(PNode::new_non_terminal(Link));
                     new_nodes.push(PNode::new_non_terminal(PassageContent));
                 },
-                (PassageContent, &TokNewLine) => {
-                    new_nodes.push(PNode::new_terminal(TokNewLine));
+                (PassageContent, tok @ &TokNewLine { .. }) => {
+                    new_nodes.push(PNode::new_terminal(tok.clone()));
                     new_nodes.push(PNode::new_non_terminal(PassageContent));
 
                     // ast
-                    self.ast.add_child(TokNewLine);
+                    self.ast.add_child(tok.clone());
                 },
-                (PassageContent, &TokSet) |
-                (PassageContent, &TokIf) |
+                (PassageContent, &TokMacroSet { .. } ) |
+                (PassageContent, &TokMacroIf  { .. } ) |
                 (PassageContent, &TokVariable { .. } ) |
-                (PassageContent, &TokMacroVar { .. } ) |
-                (PassageContent, &TokMacroPassageName { .. } ) => {
+                (PassageContent, &TokMacroContentVar { .. } ) |
+                (PassageContent, &TokMacroContentPassageName { .. } ) => {
                     new_nodes.push(PNode::new_non_terminal(Macro));
                     new_nodes.push(PNode::new_non_terminal(PassageContent));
                 },
-                (PassageContent, &TokEndIf) => {
+                (PassageContent, tok @ &TokMacroEndIf { .. }) => {
                     // jump one ast-level higher
-                    debug!("pop TokEndIf Passage;");
+                    debug!("pop TokMacroEndIf Passage;");
 
-                    self.ast.up_child(TokEndIf, true);
+                    self.ast.up_child(tok.clone());
                 },
-                (PassageContent, &TokFormatBoldEnd) => {
+                (PassageContent, &TokFormatBoldEnd { .. } ) => {
                     // jump one ast-level higher
                     self.ast.up();
                 },
-                (PassageContent, &TokFormatItalicEnd) => {
+                (PassageContent, &TokFormatItalicEnd { .. } ) => {
                     // jump one ast-level higher
                     self.ast.up();
                 },
@@ -171,44 +175,44 @@ impl Parser {
                 },
 
                 // Formating
-                (Formating, &TokFormatBoldStart) => {
+                (Formating, &TokFormatBoldStart { .. } ) => {
                     new_nodes.push(PNode::new_non_terminal(BoldFormatting));
                 },
-                (Formating, &TokFormatItalicStart) => {
+                (Formating, &TokFormatItalicStart { .. } ) => {
                     new_nodes.push(PNode::new_non_terminal(ItalicFormatting));
                 },
-                (Formating, &TokFormatMonoStart) => {
+                (Formating, &TokFormatMonoStart { .. } ) => {
                     new_nodes.push(PNode::new_non_terminal(MonoFormatting));
                 },
 
                 // BoldFormatting
-                (BoldFormatting, &TokFormatBoldStart) => {
-                    new_nodes.push(PNode::new_terminal(TokFormatBoldStart));
+                (BoldFormatting, tok @ &TokFormatBoldStart { .. } ) => {
+                    new_nodes.push(PNode::new_terminal(tok.clone()));
                     new_nodes.push(PNode::new_non_terminal(PassageContent));
-                    new_nodes.push(PNode::new_terminal(TokFormatBoldEnd));
+                    new_nodes.push(PNode::new_terminal(TokFormatBoldEnd {location: (0, 0)} ));
 
                     //ast
-                    self.ast.child_down(TokFormatBoldStart);
+                    self.ast.child_down(tok.clone());
                 },
 
                 // ItalicFormatting
-                (ItalicFormatting, &TokFormatItalicStart) => {
-                    new_nodes.push(PNode::new_terminal(TokFormatItalicStart));
+                (ItalicFormatting, tok @ &TokFormatItalicStart { .. } ) => {
+                    new_nodes.push(PNode::new_terminal(tok.clone()));
                     new_nodes.push(PNode::new_non_terminal(PassageContent));
-                    new_nodes.push(PNode::new_terminal(TokFormatItalicEnd));
+                    new_nodes.push(PNode::new_terminal(TokFormatItalicEnd {location: (0, 0)} ));
 
                     //ast
-                    self.ast.child_down(TokFormatItalicStart);
+                    self.ast.child_down(tok.clone());
                 },
 
                 // MonoFormatting
-                (MonoFormatting, &TokFormatMonoStart) => {
-                    new_nodes.push(PNode::new_terminal(TokFormatMonoStart));
+                (MonoFormatting, tok @ &TokFormatMonoStart { .. } ) => {
+                    new_nodes.push(PNode::new_terminal(tok.clone()));
                     new_nodes.push(PNode::new_non_terminal(MonoContent));
-                    new_nodes.push(PNode::new_terminal(TokFormatMonoEnd));
+                    new_nodes.push(PNode::new_terminal(TokFormatMonoEnd {location: (0, 0)} ));
 
                     //ast
-                    self.ast.child_down(TokFormatMonoStart);
+                    self.ast.child_down(tok.clone());
                 },
 
                 // MonoContent
@@ -219,12 +223,12 @@ impl Parser {
                     // ast
                     self.ast.add_child(tok.clone());
                 },
-                (MonoContent, &TokNewLine) => {
-                    new_nodes.push(PNode::new_terminal(TokNewLine));
+                (MonoContent, tok @ &TokNewLine { .. } ) => {
+                    new_nodes.push(PNode::new_terminal(tok.clone()));
                     new_nodes.push(PNode::new_non_terminal(MonoContent));
                 },
 
-                (MonoContent, &TokFormatMonoEnd) => {
+                (MonoContent, &TokFormatMonoEnd { .. } ) => {
                     // jump one ast-level higher
                     self.ast.up();
                 },
@@ -238,54 +242,54 @@ impl Parser {
                 },
 
                 // Macro
-                (Macro, &TokSet) => {
-                    new_nodes.push(PNode::new_terminal(TokSet));
+                (Macro, tok @ &TokMacroSet { .. } ) => {
+                    new_nodes.push(PNode::new_terminal(tok.clone()));
                     new_nodes.push(PNode::new_non_terminal(ExpressionList));
-                    new_nodes.push(PNode::new_terminal(TokMacroEnd));
+                    new_nodes.push(PNode::new_terminal(TokMacroEnd {location: (0, 0)} ));
                 },
-                (Macro, &TokIf) => {
-                    new_nodes.push(PNode::new_terminal(TokIf));
+                (Macro, tok @ &TokMacroIf { .. } ) => {
+                    new_nodes.push(PNode::new_terminal(tok.clone()));
                     new_nodes.push(PNode::new_non_terminal(ExpressionList));
-                    new_nodes.push(PNode::new_terminal(TokMacroEnd));
+                    new_nodes.push(PNode::new_terminal(TokMacroEnd {location: (0, 0)} ));
                     new_nodes.push(PNode::new_non_terminal(PassageContent));
                     new_nodes.push(PNode::new_non_terminal(Macrof));
 
                     // ast
-                    self.ast.two_childs_down(TokIf, TokPseudo);
+                    self.ast.two_childs_down(tok.clone(), TokPseudo);
                 },
                 // means <<$var>>
-                (Macro, tok @ &TokMacroVar { .. }) => {
+                (Macro, tok @ &TokMacroContentVar { .. }) => {
                     new_nodes.push(PNode::new_terminal(tok.clone()));
-                    new_nodes.push(PNode::new_terminal(TokMacroEnd));
+                    new_nodes.push(PNode::new_terminal(TokMacroEnd {location: (0, 0)} ));
 
                     // ast
                     self.ast.add_child(tok.clone());
                 },
                 // means <<passagename>>
-                (Macro, tok @ &TokMacroPassageName { .. } ) => {
+                (Macro, tok @ &TokMacroContentPassageName { .. } ) => {
                     new_nodes.push(PNode::new_terminal(tok.clone()));
-                    new_nodes.push(PNode::new_terminal(TokMacroEnd));
+                    new_nodes.push(PNode::new_terminal(TokMacroEnd {location: (0, 0)} ));
 
                     // ast
                     self.ast.add_child(tok.clone());
                 },
                 // Macrof
-                (Macrof, &TokElse) => {
-                    new_nodes.push(PNode::new_terminal(TokElse));
-                    new_nodes.push(PNode::new_terminal(TokMacroEnd));
+                (Macrof, tok @ &TokMacroElse { .. } ) => {
+                    new_nodes.push(PNode::new_terminal(tok.clone()));
+                    new_nodes.push(PNode::new_terminal(TokMacroEnd {location: (0, 0)} ));
                     new_nodes.push(PNode::new_non_terminal(PassageContent));
-                    new_nodes.push(PNode::new_terminal(TokEndIf));
-                    new_nodes.push(PNode::new_terminal(TokMacroEnd));
+                    new_nodes.push(PNode::new_terminal(TokMacroEndIf {location: (0, 0)} ));
+                    new_nodes.push(PNode::new_terminal(TokMacroEnd {location: (0, 0)} ));
 
                     // ast
-                    self.ast.up_child_down(TokElse);
+                    self.ast.up_child_down(tok.clone());
                 },
-                (Macrof, &TokEndIf) => {
-                    new_nodes.push(PNode::new_terminal(TokEndIf));
-                    new_nodes.push(PNode::new_terminal(TokMacroEnd));
+                (Macrof, tok @ &TokMacroEndIf { .. } ) => {
+                    new_nodes.push(PNode::new_terminal(tok.clone()));
+                    new_nodes.push(PNode::new_terminal(TokMacroEnd {location: (0, 0)} ));
 
                     // ast
-                    self.ast.up_child(TokEndIf, false);
+                    //self.ast.up_child(tok.clone());
                 }
 
                 // ExpressionList
@@ -299,10 +303,9 @@ impl Parser {
                 },
 
                 // ExpressionListf
-                (ExpressionListf, &TokMacroEnd) => {
+                (ExpressionListf, &TokMacroEnd { .. } ) => {
                     debug!("pop TokMacroEnd");
                     self.ast.up();
-                    
                 },
                 (ExpressionListf, _) => {
                     // ExpressionListf -> ε
@@ -437,11 +440,10 @@ impl Parser {
 
                     // ast
                     self.ast.add_child(tok.clone());
-                }
-
-                
-                _ => {
-                    panic!("not supported grammar: {:?}", state_first);
+                },
+                (_, tok) => {
+                    let (line, character) = tok.location();
+                    panic!("Unexpected token at {}:{}", line, character);
                 }
             }
 

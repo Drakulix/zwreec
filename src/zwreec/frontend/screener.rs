@@ -1,7 +1,9 @@
 use std::io::{Cursor, Read};
 use std::error::Error;
+use config::Config;
 
-pub fn screen<R: Read>(input: &mut R) -> Cursor<Vec<u8>> {
+#[allow(unused_variables)]
+pub fn screen<R: Read>(cfg: &Config, input: &mut R) -> Cursor<Vec<u8>> {
 
     let mut content = String::new();
     match input.read_to_string(&mut content) {

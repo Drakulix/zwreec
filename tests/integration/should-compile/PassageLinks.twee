@@ -1,0 +1,7 @@
+::Start
+link1 [[p1]]
+link2 [[p2]]
+::p1
+back to start: [[Start]]
+::p2
+p2 text
