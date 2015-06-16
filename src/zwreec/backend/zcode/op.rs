@@ -15,6 +15,28 @@ pub use super::zfile::ArgType;
 
 
 
+
+
+/// clears spcified window
+pub fn op_erase_window(value: i8) -> Vec<u8> {
+    let args: Vec<ArgType> = vec![ArgType::LargeConst, ArgType::Nothing, ArgType::Nothing, ArgType::Nothing];
+    let mut bytes = op_var(0x0d, args);
+
+    // signed to unsigned value
+    write_u16(value as u16, &mut bytes);
+    bytes
+}
+
+
+/// calls a routine (the address is stored in a variable)
+pub fn op_call_1n_var(variable: u8) -> Vec<u8> {
+    let mut bytes = op_1(0x0f, ArgType::Variable);
+    //self.add_jump(jump_to_label.to_string(), JumpType::Routine);
+    bytes.push(variable);
+    bytes
+}
+
+
 /// stores a value to an array
 /// stores the value of variable to the address in: array_address + 2*index
 pub fn op_storew(array_address: u16, index: u8, variable: u8, object_addr: u16) -> Vec<u8> {

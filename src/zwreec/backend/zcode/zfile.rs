@@ -296,6 +296,8 @@ impl Zfile {
             &ZOP::ReadChar{local_var_id} => op::op_read_char(local_var_id),
             &ZOP::LoadW{array_address, index, variable} => op::op_loadw(array_address, index, variable,self.object_addr),
             &ZOP::StoreW{array_address, index, variable} => op::op_storew(array_address, index, variable,self.object_addr),
+            &ZOP::Call1NVar{variable} => op::op_call_1n_var(variable),
+            &ZOP::EraseWindow{value} => op::op_erase_window(value),
 
             _ => Vec::new()
         };
@@ -306,14 +308,12 @@ impl Zfile {
             &ZOP::PrintOps{ref text} => self.gen_print_ops(text),
             &ZOP::Call1N{ref jump_to_label} => self.op_call_1n(jump_to_label),
             &ZOP::Call2NWithAddress{ref jump_to_label, ref address} => self.op_call_2n_with_address(jump_to_label, address),
-            &ZOP::Call1NVar{variable} => self.op_call_1n_var(variable),
             &ZOP::Routine{ref name, count_variables} => self.routine(name, count_variables),
             &ZOP::Label{ref name} => self.label(name),
             &ZOP::JE{local_var_id, equal_to_const, ref jump_to_label} => self.op_je(local_var_id, equal_to_const, jump_to_label),
             &ZOP::ReadCharTimer{local_var_id, timer, ref routine} => self.op_read_char_timer(local_var_id, timer, routine),
             &ZOP::JL{local_var_id, local_var_id2, ref jump_to_label} => self.op_jl(local_var_id, local_var_id2, jump_to_label),
             &ZOP::Jump{ref jump_to_label} => self.op_jump(jump_to_label),
-            &ZOP::EraseWindow{value} => self.op_erase_window(value),
             _ => ()
         }
         let mut new_jumps: Vec<Zjump> = vec![];
@@ -592,13 +592,6 @@ impl Zfile {
         self.add_jump(jump_to_label.to_string(), JumpType::Routine);
     }
 
-    /// calls a routine (the address is stored in a variable)
-    pub fn op_call_1n_var(&mut self, variable: u8) {
-        self.op_1(0x0f, ArgType::Variable);
-        //self.add_jump(jump_to_label.to_string(), JumpType::Routine);
-        self.data.append_byte(variable);
-    }
-
     /// calls a routine with an argument(variable) an throws result away
     /// becouse the value isn't known until all routines are set, it
     /// inserts a pseudo routoune_address
@@ -632,14 +625,6 @@ impl Zfile {
 
         // write varible id
         self.data.append_byte(local_var_id);
-    }
-
-    pub fn op_erase_window(&mut self, value: i8) {
-        let args: Vec<ArgType> = vec![ArgType::LargeConst, ArgType::Nothing, ArgType::Nothing, ArgType::Nothing];
-        self.op_var(0x0d, args);
-
-        // signed to unsigned value
-        self.data.append_u16(value as u16);
     }
 
 
