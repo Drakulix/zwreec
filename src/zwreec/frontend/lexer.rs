@@ -110,6 +110,76 @@ pub enum Token {
     TokPseudo,
 }
 
+pub trait InputFileLocation {
+    fn location(&self) -> (u64, u64);
+}
+
+impl InputFileLocation for Token {
+    fn location(&self) -> (u64, u64) {
+        match self {
+            &TokPassage{location, ..} |
+            &TokTagStart{location} |
+            &TokTagEnd{location} |
+            &TokVarSetStart{location} |
+            &TokVarSetEnd{location} |
+            &TokPassageLink{location, ..} |
+            &TokTag{location, ..} |
+            &TokText{location, ..} |
+            &TokFormatBoldStart{location} |
+            &TokFormatBoldEnd{location} |
+            &TokFormatItalicStart{location} |
+            &TokFormatItalicEnd{location} |
+            &TokFormatUnderStart {location} |
+            &TokFormatUnderEnd{location} |
+            &TokFormatStrikeStart{location} |
+            &TokFormatStrikeEnd{location} |
+            &TokFormatSubStart{location} |
+            &TokFormatSubEnd{location} |
+            &TokFormatSupStart{location} |
+            &TokFormatSupEnd{location} |
+            &TokFormatMonoStart{location} |
+            &TokFormatMonoEnd{location} |
+            &TokFormatBulList{location} |
+            &TokFormatNumbList{location} |
+            &TokFormatIndentBlock{location} |
+            &TokFormatHorizontalLine{location} |
+            &TokFormatHeading{location, ..} |
+            &TokMacroStart{location} |
+            &TokMacroEnd{location} |
+            &TokMacroContentVar{location, ..} |
+            &TokMacroContentPassageName{location, ..} |
+            &TokMacroSet{location} |
+            &TokMacroIf{location} |
+            &TokMacroElse{location} |
+            &TokMacroEndIf{location} |
+            &TokMacroPrint{location} |
+            &TokMacroDisplay{location} |
+            &TokMacroSilently{location} |
+            &TokMacroEndSilently{location} |
+            &TokParenOpen{location} |
+            &TokParenClose{location} |
+            &TokVariable{location, ..} |
+            &TokInt{location, ..} |
+            &TokFloat{location, ..} |
+            &TokString{location, ..} |
+            &TokBoolean{location, ..} |
+            &TokFunction{location, ..} |
+            &TokColon{location} |
+            &TokArgsEnd{location} |
+            &TokArrayStart{location} |
+            &TokArrayEnd{location} |
+            &TokAssign{location, ..} |
+            &TokNumOp{location, ..} |
+            &TokCompOp{location, ..} |
+            &TokLogOp{location, ..} |
+            &TokSemiColon{location} |
+            &TokNewLine{location}
+                => location,
+            &TokPseudo => (0, 0)
+        }
+    }
+}
+
 rustlex! TweeLexer {
     // Properties
     property new_line:bool = true;
