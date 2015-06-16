@@ -1,4 +1,5 @@
-use std::io::{BufReader, Read};
+use std::io::{Cursor, BufReader, Read};
+use std::error::Error;
 use utils::extensions::{Peeking, PeekingExt, FilteringScan, FilteringScanExt};
 use config::Config;
 
@@ -8,6 +9,18 @@ pub struct ScanState {
     current_text: String,
     current_text_location: (u64, u64),
     skip_next: bool,
+}
+
+#[allow(unused_variables)]
+pub fn screen<R: Read>(cfg: &Config, input: &mut R) -> Cursor<Vec<u8>> {
+
+    let mut content = String::new();
+    match input.read_to_string(&mut content) {
+        Err(why) => panic!("could not read from input: {}", Error::description(&why)),
+        Ok(_) => debug!("read input to buffer"),
+    };
+
+    Cursor::new(content.bytes().collect())
 }
 
 #[allow(unused_variables)]
