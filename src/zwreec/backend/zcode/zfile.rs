@@ -3,6 +3,7 @@
 
 pub use super::zbytes::Bytes;
 pub use super::ztext;
+pub use super::op;
 
 #[derive(Debug)]
 pub enum ZOP {
@@ -251,7 +252,7 @@ impl Zfile {
             if other_label.name == label.name {
                 panic!("label has to be unique, but \"{}\" isn't.", other_label.name);
             }
-     }
+        }
         self.labels.push(label);
     }
 
@@ -272,6 +273,14 @@ impl Zfile {
         let beginning = self.data.bytes.len();
         let old_jumps: Vec<Zjump> = self.jumps.clone();
         let old_labels: Vec<Zlabel> = self.labels.clone();
+
+
+        //self.data.write_bytes()
+        let bytes: Vec<u8> = match instr {
+            &ZOP::Quit => op::quit(),
+            _ => Vec::new()
+        };
+        self.data.write_bytes(bytes);
         match instr {
             &ZOP::PrintUnicode{c} => self.op_print_unicode_char(c),
             &ZOP::Print{ref text} => self.op_print(text),
