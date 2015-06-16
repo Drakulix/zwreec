@@ -8,6 +8,30 @@ pub use super::zfile::ArgType;
 
 
 
+
+
+
+
+
+/// calculates a random numer from 1 to range
+pub fn op_random(range: u8, variable: u8) -> Vec<u8> {
+    let args: Vec<ArgType> = vec![ArgType::SmallConst, ArgType::Nothing, ArgType::Nothing, ArgType::Nothing];
+    let mut bytes = op_var(0x07, args);
+    bytes.push(range);
+    bytes.push(variable);
+    bytes
+}
+
+
+/// pushs an u16 value (for example an address) on the stack
+pub fn op_push_u16(value: u16) -> Vec<u8> {
+    let args: Vec<ArgType> = vec![ArgType::LargeConst, ArgType::Nothing, ArgType::Nothing, ArgType::Nothing];
+    let mut bytes = op_var(0x08, args);
+    write_u16(value, &mut bytes);
+    bytes
+}
+
+
 /// sets the colors of the foreground (font) and background (but with variables
 pub fn op_set_color_var(foreground: u8, background: u8) -> Vec<u8> {
     let args: Vec<ArgType> = vec![ArgType::Variable, ArgType::Variable];
@@ -122,6 +146,16 @@ fn op_0(value: u8) -> Vec<u8> {
     let byte = value | 0xb0;
     vec![byte]
 }
+
+
+/// op-codes with variable operators (4 are possible)
+fn op_var(value: u8, arg_types: Vec<ArgType>) -> Vec<u8> {
+	let mut ret = Vec::new();
+	ret.push(value | 0xe0);
+    ret.push(encode_variable_arguments(arg_types));
+    ret
+}
+
 
 /// op-codes with 1 operator
 fn op_1( value: u8, arg_type: ArgType) -> Vec<u8> {

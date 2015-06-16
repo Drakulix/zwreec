@@ -290,6 +290,7 @@ impl Zfile {
             &ZOP::PrintPaddr{address} => op::op_print_paddr(address),
             &ZOP::SetColor{foreground, background} => op::op_set_color(foreground, background),
             &ZOP::SetColorVar{foreground, background} => op::op_set_color_var(foreground, background),
+            &ZOP::Random{range, variable} => op::op_random(range, variable),
 
             _ => Vec::new()
         };
@@ -307,7 +308,6 @@ impl Zfile {
             &ZOP::SetTextStyle{bold, reverse, monospace, italic} => self.op_set_text_style(bold, reverse, monospace, italic),
             &ZOP::StoreW{array_address, index, variable} => self.op_storew(array_address, index, variable),
             &ZOP::JE{local_var_id, equal_to_const, ref jump_to_label} => self.op_je(local_var_id, equal_to_const, jump_to_label),
-            &ZOP::Random{range, variable} => self.op_random(range, variable),
             &ZOP::ReadChar{local_var_id} => self.op_read_char(local_var_id),
             &ZOP::ReadCharTimer{local_var_id, timer, ref routine} => self.op_read_char_timer(local_var_id, timer, routine),
             &ZOP::JL{local_var_id, local_var_id2, ref jump_to_label} => self.op_jl(local_var_id, local_var_id2, jump_to_label),
@@ -617,12 +617,7 @@ impl Zfile {
 
     
 
-    /// pushs an u16 value (for example an address) on the stack
-    pub fn op_push_u16(&mut self, value: u16) {
-        let args: Vec<ArgType> = vec![ArgType::LargeConst, ArgType::Nothing, ArgType::Nothing, ArgType::Nothing];
-        self.op_var(0x08, args);
-        self.data.append_u16(value);
-    }
+
 
     /// pulls an value off the stack to an variable
     /// SmallConst becouse pull takes an reference to an variable
@@ -642,14 +637,7 @@ impl Zfile {
     }
     
 
-    /// calculates a random numer from 1 to range
-    pub fn op_random(&mut self, range: u8, variable: u8) {
-        let args: Vec<ArgType> = vec![ArgType::SmallConst, ArgType::Nothing, ArgType::Nothing, ArgType::Nothing];
-        self.op_var(0x07, args);
 
-        self.data.append_byte(range);
-        self.data.append_byte(variable);
-    }
 
     
 
