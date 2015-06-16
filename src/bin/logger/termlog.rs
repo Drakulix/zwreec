@@ -63,77 +63,103 @@ impl Log for TermLogger {
 
             let cur_time = time::now();
 
-            let _ = match record.level() {
-                LogLevel::Error => {
-                    write!(stderr_lock, "[").unwrap();
-                    stderr_lock.fg(color::RED).unwrap();
-                    write!(stderr_lock, "{}", record.level()).unwrap();
-                    let _ = stderr_lock.reset();
-                    writeln!(stderr_lock,
-                        "] {}: ({}:{}:{}) - {}",
-                            record.target(),
-                            cur_time.tm_hour,
-                            cur_time.tm_min,
-                            cur_time.tm_sec,
-                            record.args()
-                    ).unwrap();
-                },
-                LogLevel::Warn => {
-                    write!(stderr_lock, "[").unwrap();
-                    stderr_lock.fg(color::YELLOW).unwrap();
-                    write!(stderr_lock, "{}", record.level()).unwrap();
-                    let _ = stderr_lock.reset();
-                    writeln!(stderr_lock,
-                        "] {}: ({}:{}:{}) - {}",
-                            record.target(),
-                            cur_time.tm_hour,
-                            cur_time.tm_min,
-                            cur_time.tm_sec,
-                            record.args()
-                    ).unwrap();
-                },
-                LogLevel::Info => {
-                    write!(stderr_lock, "[").unwrap();
-                    stderr_lock.fg(color::BLUE).unwrap();
-                    write!(stderr_lock, "{}", record.level()).unwrap();
-                    let _ = stderr_lock.reset();
-                    writeln!(stderr_lock,
-                        "] {}: ({}:{}:{}) - {}",
-                            record.target(),
-                            cur_time.tm_hour,
-                            cur_time.tm_min,
-                            cur_time.tm_sec,
-                            record.args()
-                    ).unwrap();
-                },
-                LogLevel::Debug => {
-                    write!(stderr_lock, "[").unwrap();
-                    stderr_lock.fg(color::CYAN).unwrap();
-                    write!(stderr_lock, "{}", record.level()).unwrap();
-                    let _ = stderr_lock.reset();
-                    writeln!(stderr_lock,
-                        "] {}: ({}:{}:{}) - {}",
-                            record.target(),
-                            cur_time.tm_hour,
-                            cur_time.tm_min,
-                            cur_time.tm_sec,
-                            record.args()
-                    ).unwrap();
-                },
-                LogLevel::Trace => {
-                    writeln!(stderr_lock,
-                        "[{}] {}: ({}:{}:{}) [{}:{}] - {}",
-                            record.level(),
-                            record.target(),
-                            cur_time.tm_hour,
-                            cur_time.tm_min,
-                            cur_time.tm_sec,
-                            record.location().file(),
-                            record.location().line(),
-                            record.args()
-                    ).unwrap();
-                },
-            };
+            if self.level() <= LogLevel::Warn {
+                let _ = match record.level() {
+                    LogLevel::Error => {
+                        write!(stderr_lock, "[").unwrap();
+                        stderr_lock.fg(color::RED).unwrap();
+                        write!(stderr_lock, "{}", record.level()).unwrap();
+                        let _ = stderr_lock.reset();
+                        writeln!(stderr_lock,
+                            "] {}",
+                                record.args()
+                        ).unwrap();
+                    },
+                    LogLevel::Warn => {
+                        write!(stderr_lock, "[").unwrap();
+                        stderr_lock.fg(color::YELLOW).unwrap();
+                        write!(stderr_lock, "{}", record.level()).unwrap();
+                        let _ = stderr_lock.reset();
+                        writeln!(stderr_lock,
+                            "] {}",
+                                record.args()
+                        ).unwrap();
+                    },
+                    _ => {}
+                };
+            } else {
+                let _ = match record.level() {
+                    LogLevel::Error => {
+                        write!(stderr_lock, "[").unwrap();
+                        stderr_lock.fg(color::RED).unwrap();
+                        write!(stderr_lock, "{}", record.level()).unwrap();
+                        let _ = stderr_lock.reset();
+                        writeln!(stderr_lock,
+                            "] {}: ({:02}:{:02}:{:02}) - {}",
+                                record.target(),
+                                cur_time.tm_hour,
+                                cur_time.tm_min,
+                                cur_time.tm_sec,
+                                record.args()
+                        ).unwrap();
+                    },
+                    LogLevel::Warn => {
+                        write!(stderr_lock, "[").unwrap();
+                        stderr_lock.fg(color::YELLOW).unwrap();
+                        write!(stderr_lock, "{}", record.level()).unwrap();
+                        let _ = stderr_lock.reset();
+                        writeln!(stderr_lock,
+                            "] {}: ({:02}:{:02}:{:02}) - {}",
+                                record.target(),
+                                cur_time.tm_hour,
+                                cur_time.tm_min,
+                                cur_time.tm_sec,
+                                record.args()
+                        ).unwrap();
+                    },
+                    LogLevel::Info => {
+                        write!(stderr_lock, "[").unwrap();
+                        stderr_lock.fg(color::BLUE).unwrap();
+                        write!(stderr_lock, "{}", record.level()).unwrap();
+                        let _ = stderr_lock.reset();
+                        writeln!(stderr_lock,
+                            "] {}: ({:02}:{:02}:{:02}) - {}",
+                                record.target(),
+                                cur_time.tm_hour,
+                                cur_time.tm_min,
+                                cur_time.tm_sec,
+                                record.args()
+                        ).unwrap();
+                    },
+                    LogLevel::Debug => {
+                        write!(stderr_lock, "[").unwrap();
+                        stderr_lock.fg(color::CYAN).unwrap();
+                        write!(stderr_lock, "{}", record.level()).unwrap();
+                        let _ = stderr_lock.reset();
+                        writeln!(stderr_lock,
+                            "] {}: ({:02}:{:02}:{:02}) - {}",
+                                record.target(),
+                                cur_time.tm_hour,
+                                cur_time.tm_min,
+                                cur_time.tm_sec,
+                                record.args()
+                        ).unwrap();
+                    },
+                    LogLevel::Trace => {
+                        writeln!(stderr_lock,
+                            "[{}] {}: ({:02}:{:02}:{:02}) [{}:{}] - {}",
+                                record.level(),
+                                record.target(),
+                                cur_time.tm_hour,
+                                cur_time.tm_min,
+                                cur_time.tm_sec,
+                                record.location().file(),
+                                record.location().line(),
+                                record.args()
+                        ).unwrap();
+                    },
+                };
+            }
 
             stderr_lock.flush().unwrap();
         }
