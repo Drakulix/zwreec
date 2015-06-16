@@ -56,6 +56,11 @@ fn unicode_test() {
 }
 
 #[test]
+fn passage_links_test() {
+    test_compile(TESTFOLDER_PASS.to_string() + "PassageLinks.twee");
+}
+
+#[test]
 fn current_status_test() {
     test_compile(TESTFOLDER_PASS.to_string() + "CurrentStatus.twee");
 }
