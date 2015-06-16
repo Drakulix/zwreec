@@ -10,6 +10,7 @@ struct ScanState {
     skip_next: bool,
 }
 
+#[allow(unused_variables)]
 pub fn screen<R: Read>(cfg: &Config, input: &mut R) -> Cursor<Vec<u8>> {
 
     let mut content = String::new();

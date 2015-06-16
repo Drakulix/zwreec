@@ -57,6 +57,7 @@ pub enum NonTerminalType {
 //==============================
 // parser
 
+#[allow(dead_code)]
 struct Parser<'a> {
     cfg: &'a Config,
     ast: ast::AST,

@@ -19,6 +19,7 @@ pub fn generate_zcode<W: Write>(cfg: &Config, ast: ast::AST, output: &mut W) {
     };
 }
 
+#[allow(dead_code)]
 struct Codegen<'a> {
     cfg: &'a Config,
     ast: ast::AST,

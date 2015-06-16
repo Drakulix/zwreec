@@ -9,6 +9,7 @@ pub struct ScanState {
     skip_next: bool,
 }
 
+#[allow(unused_variables)]
 pub fn lex<'a, R: Read>(cfg: &Config, input: &'a mut R) -> FilteringScan<Peeking<TweeLexer<BufReader<&'a mut R>>, Token>, ScanState, fn(&mut ScanState, (Token, Option<Token>)) -> Option<Token>>  {
 
     info!("Nicht in Tokens verarbeitete Zeichen: ");
