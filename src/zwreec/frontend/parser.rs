@@ -10,6 +10,7 @@ use frontend::ast;
 use frontend::parsetree::{PNode};
 use self::NonTerminalType::*;
 use frontend::lexer::Token::*;
+use frontend::lexer::InputFileLocation;
 
 pub fn parse_tokens(tokens: Vec<Token>) -> ast::AST {
     let mut parser: Parser = Parser::new(tokens);
@@ -436,11 +437,10 @@ impl Parser {
 
                     // ast
                     self.ast.add_child(tok.clone());
-                }
-
-                
-                _ => {
-                    panic!("not supported grammar: {:?}", state_first);
+                },
+                (_, tok) => {
+                    let (line, character) = tok.location();
+                    panic!("Unexpected token at {}:{}", line, character);
                 }
             }
 
