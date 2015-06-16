@@ -526,7 +526,7 @@ rustlex! TweeLexer {
                 },
                 "endsilently" => {
                     lexer.MACRO_CONTENT();
-                    Some(TokMacroSilently {location: lexer.yylloc()} )
+                    Some(TokMacroEndSilently {location: lexer.yylloc()} )
                 },
                 _ => {
                     lexer.MACRO_CONTENT();
