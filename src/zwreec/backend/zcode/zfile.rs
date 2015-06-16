@@ -280,6 +280,8 @@ impl Zfile {
             &ZOP::Quit => op::quit(),
             &ZOP::Newline => op::op_newline(),
             &ZOP::Dec{variable} => op::op_dec(variable),
+            &ZOP::Inc{variable} => op::op_inc(variable),
+            &ZOP::Add{variable1, add_const, variable2} => op::op_add(variable1, add_const, variable2),
 
             _ => Vec::new()
         };
@@ -302,13 +304,11 @@ impl Zfile {
             &ZOP::StoreU16{variable, value} => self.op_store_u16(variable, value),
             &ZOP::StoreU8{variable, value} => self.op_store_u8(variable, value),
             &ZOP::StoreW{array_address, index, variable} => self.op_storew(array_address, index, variable),
-            &ZOP::Inc{variable} => self.op_inc(variable),
             &ZOP::Ret{value} => self.op_ret(value),
             &ZOP::JE{local_var_id, equal_to_const, ref jump_to_label} => self.op_je(local_var_id, equal_to_const, jump_to_label),
             &ZOP::Random{range, variable} => self.op_random(range, variable),
             &ZOP::ReadChar{local_var_id} => self.op_read_char(local_var_id),
             &ZOP::ReadCharTimer{local_var_id, timer, ref routine} => self.op_read_char_timer(local_var_id, timer, routine),
-            &ZOP::Add{variable1, add_const, variable2} => self.op_add(variable1, add_const, variable2),
             &ZOP::Sub{variable1, sub_const, variable2} => self.op_sub(variable1, sub_const, variable2),
             &ZOP::JL{local_var_id, local_var_id2, ref jump_to_label} => self.op_jl(local_var_id, local_var_id2, jump_to_label),
             &ZOP::Jump{ref jump_to_label} => self.op_jump(jump_to_label),
@@ -613,16 +613,7 @@ impl Zfile {
         self.add_jump(address.to_string(), JumpType::Routine);
     }
 
-    /// addition
-    /// variable2 = variable1 + sub_const
-    pub fn op_add(&mut self, variable1: u8, add_const: u16, variable2: u8) {
-        let args: Vec<ArgType> = vec![ArgType::Variable, ArgType::LargeConst];
-        self.op_2(0x14, args);
-        
-        self.data.append_byte(variable1);
-        self.data.append_u16(add_const);
-        self.data.append_byte(variable2);
-    }
+
 
     /// subtraktion
     /// variable2 = variable1 - sub_const
@@ -653,11 +644,7 @@ impl Zfile {
         self.data.append_u16(value);
     }
 
-    /// increments the value of the variable
-    pub fn op_inc(&mut self, variable: u8) {
-        self.op_1(0x05, ArgType::Reference);
-        self.data.append_byte(variable);
-    }
+    
 
     /// returns a SmallConst
     pub fn op_ret(&mut self, value: u8) {
