@@ -282,6 +282,7 @@ impl Zfile {
             &ZOP::Dec{variable} => op::op_dec(variable),
             &ZOP::Inc{variable} => op::op_inc(variable),
             &ZOP::Add{variable1, add_const, variable2} => op::op_add(variable1, add_const, variable2),
+            &ZOP::Sub{variable1, sub_const, variable2} => op::op_sub(variable1, sub_const, variable2),
 
             _ => Vec::new()
         };
@@ -309,7 +310,6 @@ impl Zfile {
             &ZOP::Random{range, variable} => self.op_random(range, variable),
             &ZOP::ReadChar{local_var_id} => self.op_read_char(local_var_id),
             &ZOP::ReadCharTimer{local_var_id, timer, ref routine} => self.op_read_char_timer(local_var_id, timer, routine),
-            &ZOP::Sub{variable1, sub_const, variable2} => self.op_sub(variable1, sub_const, variable2),
             &ZOP::JL{local_var_id, local_var_id2, ref jump_to_label} => self.op_jl(local_var_id, local_var_id2, jump_to_label),
             &ZOP::Jump{ref jump_to_label} => self.op_jump(jump_to_label),
             &ZOP::LoadW{array_address, index, variable} => self.op_loadw(array_address, index, variable),
