@@ -1,5 +1,6 @@
 use std::io::{BufReader, Read};
 use utils::extensions::{Peeking, PeekingExt, FilteringScan, FilteringScanExt};
+use config::Config;
 
 use self::Token::*;
 
@@ -9,7 +10,8 @@ pub struct ScanState {
     skip_next: bool,
 }
 
-pub fn lex<R: Read>(input: &mut R) -> FilteringScan<Peeking<TweeLexer<BufReader<&mut R>>, Token>, ScanState, fn(&mut ScanState, (Token, Option<Token>)) -> Option<Token>>  {
+#[allow(unused_variables)]
+pub fn lex<'a, R: Read>(cfg: &Config, input: &'a mut R) -> FilteringScan<Peeking<TweeLexer<BufReader<&'a mut R>>, Token>, ScanState, fn(&mut ScanState, (Token, Option<Token>)) -> Option<Token>>  {
 
     TweeLexer::new(BufReader::new(input)).peeking().scan_filter(
         ScanState {
@@ -686,13 +688,15 @@ rustlex! TweeLexer {
 mod tests {
     use std::io::Cursor;
     use std::fmt::Write;
+    use config;
 
     use super::*;
     use super::Token::*;
 
     fn test_lex(input: &str) -> Vec<Token> {
+        let cfg = config::default_config();
         let mut cursor: Cursor<Vec<u8>> = Cursor::new(input.to_string().into_bytes());
-        lex(&mut cursor).collect()
+        lex(&cfg, &mut cursor).collect()
     }
 
     fn assert_tok_eq(expected: Vec<Token>, tokens: Vec<Token>) {

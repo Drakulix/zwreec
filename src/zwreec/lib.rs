@@ -22,19 +22,19 @@ use std::io::{Read,Write};
 #[allow(unused_variables)]
 pub fn compile<R: Read, W: Write>(cfg: Config, input: &mut R, output: &mut W) {
     //screen
-    let mut clean_input = frontend::screener::screen(input);
+    let mut clean_input = frontend::screener::screen(&cfg, input);
 
     // tokenize
-    let tokens = frontend::lexer::lex(&mut clean_input);
+    let tokens = frontend::lexer::lex(&cfg, &mut clean_input);
 
     // parse tokens and create ast
-    let ast = frontend::parser::parse_tokens(tokens.inspect(|ref token| {
+    let ast = frontend::parser::parse_tokens(&cfg, tokens.inspect(|ref token| {
         debug!("{:?}", token);
     }).collect()); //use collect until we work on iterators directly
     ast.print();
 
     // create code
-    codegen::generate_zcode(ast, output);
+    codegen::generate_zcode(&cfg, ast, output);
 }
 
 #[allow(unused_variables)]

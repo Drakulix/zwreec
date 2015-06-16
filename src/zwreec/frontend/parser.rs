@@ -11,9 +11,10 @@ use frontend::parsetree::{PNode};
 use self::NonTerminalType::*;
 use frontend::lexer::Token::*;
 use frontend::lexer::InputFileLocation;
+use config::Config;
 
-pub fn parse_tokens(tokens: Vec<Token>) -> ast::AST {
-    let mut parser: Parser = Parser::new(tokens);
+pub fn parse_tokens(cfg: &Config, tokens: Vec<Token>) -> ast::AST {
+    let mut parser: Parser = Parser::new(cfg, tokens);
     parser.parsing();
     parser.ast
 }
@@ -57,16 +58,19 @@ pub enum NonTerminalType {
 //==============================
 // parser
 
-struct Parser {
+#[allow(dead_code)]
+struct Parser<'a> {
+    cfg: &'a Config,
     ast: ast::AST,
     stack: Vec<PNode>,
     tokens: Vec<Token>,
     lookahead: usize
 }
 
-impl Parser {
-    pub fn new(tokens: Vec<Token>) -> Parser {
+impl<'a> Parser<'a> {
+    pub fn new(cfg: &Config, tokens: Vec<Token>) -> Parser {
         Parser {
+            cfg: cfg,
             ast: ast::AST::new(),
             stack: Vec::new(),
             tokens: tokens,
