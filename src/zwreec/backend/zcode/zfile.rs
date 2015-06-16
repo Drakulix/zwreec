@@ -49,7 +49,7 @@ pub enum JumpType {
 }
 
 /// types of possible arguments
-enum ArgType {
+pub enum ArgType {
     LargeConst,
     SmallConst,
     Variable,
@@ -278,9 +278,12 @@ impl Zfile {
         //self.data.write_bytes()
         let bytes: Vec<u8> = match instr {
             &ZOP::Quit => op::quit(),
+            &ZOP::Newline => op::op_newline(),
+            &ZOP::Dec{variable} => op::op_dec(variable),
+
             _ => Vec::new()
         };
-        self.data.write_bytes(bytes);
+        self.data.append_bytes(&bytes);
         match instr {
             &ZOP::PrintUnicode{c} => self.op_print_unicode_char(c),
             &ZOP::Print{ref text} => self.op_print(text),
@@ -293,7 +296,6 @@ impl Zfile {
             &ZOP::Call1NVar{variable} => self.op_call_1n_var(variable),
             &ZOP::Routine{ref name, count_variables} => self.routine(name, count_variables),
             &ZOP::Label{ref name} => self.label(name),
-            &ZOP::Newline => self.op_newline(),
             &ZOP::SetColor{foreground, background} => self.op_set_color(foreground, background),
             &ZOP::SetColorVar{foreground, background} => self.op_set_color_var(foreground, background),
             &ZOP::SetTextStyle{bold, reverse, monospace, italic} => self.op_set_text_style(bold, reverse, monospace, italic),
@@ -310,10 +312,9 @@ impl Zfile {
             &ZOP::Sub{variable1, sub_const, variable2} => self.op_sub(variable1, sub_const, variable2),
             &ZOP::JL{local_var_id, local_var_id2, ref jump_to_label} => self.op_jl(local_var_id, local_var_id2, jump_to_label),
             &ZOP::Jump{ref jump_to_label} => self.op_jump(jump_to_label),
-            &ZOP::Dec{variable} => self.op_dec(variable),
             &ZOP::LoadW{array_address, index, variable} => self.op_loadw(array_address, index, variable),
             &ZOP::EraseWindow{value} => self.op_erase_window(value),
-            &ZOP::Quit => self.op_quit(),
+            _ => ()
         }
         let mut new_jumps: Vec<Zjump> = vec![];
         let mut new_labels: Vec<Zlabel> = vec![];
@@ -583,10 +584,6 @@ impl Zfile {
         self.op_0(0x0a);
     }
 
-    pub fn op_newline(&mut self) {
-        self.op_0(0x0b);
-    }
-
     /// calls a routine
     /// call_1n is 1OP
     pub fn op_call_1n(&mut self, jump_to_label: &str) {
@@ -659,12 +656,6 @@ impl Zfile {
     /// increments the value of the variable
     pub fn op_inc(&mut self, variable: u8) {
         self.op_1(0x05, ArgType::Reference);
-        self.data.append_byte(variable);
-    }
-
-    /// decrements the value of the variable
-    pub fn op_dec(&mut self, variable: u8) {
-        self.op_1(0x06, ArgType::Reference);
         self.data.append_byte(variable);
     }
 
