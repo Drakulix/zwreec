@@ -18,7 +18,6 @@ enum Type{
 pub struct AST {
     passages: Vec<ASTNode>,
     path: Vec<usize>,
-    is_in_else: u8
 }
 
  /// add zcode based on tokens
@@ -233,7 +232,6 @@ impl AST {
         AST {
             passages: Vec::new(),
             path: Vec::new(),
-            is_in_else: 0
         }
     }
 
@@ -279,45 +277,18 @@ impl AST {
         self.path.pop();
     }
 
-     /// goes one lvl up and adds and child
-    pub fn up_child(&mut self, token: Token, is_in_passage: bool) {
-        match token {
-            Token::TokMacroEndIf { .. } => {
-                if is_in_passage == false {
-                    self.up();
-                    self.add_child(token);
-                } else if self.is_in_else > 0 {
-                    self.is_in_else -= 1;
-                    self.up();
-                    self.add_child(token);
-                }
-                
-            },
-            _ => {
-                panic!{"no supported"}
-            }
-        }
+    /// goes one lvl up and adds and child
+    pub fn up_child(&mut self, token: Token) {
+        self.up();
+        self.add_child(token);
     }
 
-    /// goeas one lvl up, adds an child and goes one lvl down
+    /// goes one lvl up, adds an child and goes one lvl down
     pub fn up_child_down(&mut self, token: Token) {
-        
-        match token {
-            Token::TokMacroElse { .. } => {
-                self.is_in_else += 1;
-            },
-            _ => {
-                panic!{"no supported"}
-            }
-        }
-
         self.up();
         self.child_down(token);
     }
 
-
-
-    
 
     /// convert ast to zcode
     pub fn to_zcode(& self, out: &mut zfile::Zfile) {

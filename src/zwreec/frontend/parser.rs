@@ -157,7 +157,7 @@ impl Parser {
                     // jump one ast-level higher
                     debug!("pop TokMacroEndIf Passage;");
 
-                    self.ast.up_child(tok.clone(), true);
+                    self.ast.up_child(tok.clone());
                 },
                 (PassageContent, &TokFormatBoldEnd { .. } ) => {
                     // jump one ast-level higher
@@ -286,7 +286,7 @@ impl Parser {
                     new_nodes.push(PNode::new_terminal(TokMacroEnd {location: (0, 0)} ));
 
                     // ast
-                    self.ast.up_child(tok.clone(), false);
+                    //self.ast.up_child(tok.clone());
                 }
 
                 // ExpressionList
