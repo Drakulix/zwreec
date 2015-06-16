@@ -7,11 +7,10 @@ pub use super::zfile::ArgType;
 pub fn op_add( variable1: u8, add_const: u16, variable2: u8) -> Vec<u8> {
     let args: Vec<ArgType> = vec![ArgType::Variable, ArgType::LargeConst];
     let mut bytes = op_2(0x14, args);
-    let b1 = add_const as u8;
- 	let b2 = (add_const>>8) as u8;
+    let b1 = (add_const >> 8) as u8;
+ 	let b2 = (add_const & 0xff) as u8;
     bytes.push(variable1);
-    bytes.push(b1);
-    bytes.push(b2);
+    write_u16(add_const, bytes);
     bytes.push(variable2);
     bytes
 }
@@ -105,3 +104,9 @@ fn encode_variable_arguments( arg_types: Vec<ArgType>) -> u8 {
         byte
         
     }
+
+///writes u16 to a vec<u8>
+pub fn write_u16(value: u16, &mut v: Vec<u8>) {
+        v.push((value >> 8) as u8);
+        v.push((value & 0xff) as u8);
+}
