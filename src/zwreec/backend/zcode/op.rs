@@ -13,6 +13,26 @@ pub use super::zfile::ArgType;
 
 
 
+
+/// Prints the value of a variable (only ints a possibe)
+pub fn op_print_num_var(variable: u8) -> Vec<u8> {
+    let args: Vec<ArgType> = vec![ArgType::Variable, ArgType::Nothing, ArgType::Nothing, ArgType::Nothing];
+    let mut bytes = op_var(0x06, args);
+    bytes.push(variable);
+    bytes
+}
+
+
+/// pulls an value off the stack to an variable
+/// SmallConst becouse pull takes an reference to an variable
+pub fn op_pull(variable: u8) -> Vec<u8> {
+    let args: Vec<ArgType> = vec![ArgType::SmallConst, ArgType::Nothing, ArgType::Nothing, ArgType::Nothing];
+    let mut bytes = op_var(0x09, args);
+    bytes.push(variable);
+    bytes
+}
+
+
 /// calculates a random numer from 1 to range
 pub fn op_random(range: u8, variable: u8) -> Vec<u8> {
     let args: Vec<ArgType> = vec![ArgType::SmallConst, ArgType::Nothing, ArgType::Nothing, ArgType::Nothing];

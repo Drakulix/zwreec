@@ -291,6 +291,8 @@ impl Zfile {
             &ZOP::SetColor{foreground, background} => op::op_set_color(foreground, background),
             &ZOP::SetColorVar{foreground, background} => op::op_set_color_var(foreground, background),
             &ZOP::Random{range, variable} => op::op_random(range, variable),
+            &ZOP::PrintNumVar{variable} => op::op_print_num_var(variable),
+
 
             _ => Vec::new()
         };
@@ -298,7 +300,6 @@ impl Zfile {
         match instr {
             &ZOP::PrintUnicode{c} => self.op_print_unicode_char(c),
             &ZOP::Print{ref text} => self.op_print(text),
-            &ZOP::PrintNumVar{variable} => self.op_print_num_var(variable),
             &ZOP::PrintOps{ref text} => self.gen_print_ops(text),
             &ZOP::Call1N{ref jump_to_label} => self.op_call_1n(jump_to_label),
             &ZOP::Call2NWithAddress{ref jump_to_label, ref address} => self.op_call_2n_with_address(jump_to_label, address),
@@ -619,22 +620,9 @@ impl Zfile {
 
 
 
-    /// pulls an value off the stack to an variable
-    /// SmallConst becouse pull takes an reference to an variable
-    pub fn op_pull(&mut self, variable: u8) {
-        let args: Vec<ArgType> = vec![ArgType::SmallConst, ArgType::Nothing, ArgType::Nothing, ArgType::Nothing];
-        self.op_var(0x09, args);
 
-        self.data.append_byte(variable);
-    }
 
-    /// Prints the value of a variable (only ints a possibe)
-    pub fn op_print_num_var(&mut self, variable: u8) {
-        let args: Vec<ArgType> = vec![ArgType::Variable, ArgType::Nothing, ArgType::Nothing, ArgType::Nothing];
-        self.op_var(0x06, args);
 
-        self.data.append_byte(variable);
-    }
     
 
 
