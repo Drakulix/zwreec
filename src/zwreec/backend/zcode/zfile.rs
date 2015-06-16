@@ -285,6 +285,8 @@ impl Zfile {
             &ZOP::Sub{variable1, sub_const, variable2} => op::op_sub(variable1, sub_const, variable2),
             &ZOP::StoreU16{variable, value} => op::op_store_u16(variable, value),
             &ZOP::StoreU8{variable, value} => op::op_store_u8(variable, value),
+            &ZOP::Ret{value} => op::op_ret(value),
+            &ZOP::PrintAddr{address} => op::op_print_addr(address),
 
             _ => Vec::new()
         };
@@ -295,7 +297,6 @@ impl Zfile {
             &ZOP::PrintNumVar{variable} => self.op_print_num_var(variable),
             &ZOP::PrintOps{ref text} => self.gen_print_ops(text),
             &ZOP::PrintPaddr{address} => self.op_print_paddr(address),
-            &ZOP::PrintAddr{address} => self.op_print_addr(address),
             &ZOP::Call1N{ref jump_to_label} => self.op_call_1n(jump_to_label),
             &ZOP::Call2NWithAddress{ref jump_to_label, ref address} => self.op_call_2n_with_address(jump_to_label, address),
             &ZOP::Call1NVar{variable} => self.op_call_1n_var(variable),
@@ -305,7 +306,6 @@ impl Zfile {
             &ZOP::SetColorVar{foreground, background} => self.op_set_color_var(foreground, background),
             &ZOP::SetTextStyle{bold, reverse, monospace, italic} => self.op_set_text_style(bold, reverse, monospace, italic),
             &ZOP::StoreW{array_address, index, variable} => self.op_storew(array_address, index, variable),
-            &ZOP::Ret{value} => self.op_ret(value),
             &ZOP::JE{local_var_id, equal_to_const, ref jump_to_label} => self.op_je(local_var_id, equal_to_const, jump_to_label),
             &ZOP::Random{range, variable} => self.op_random(range, variable),
             &ZOP::ReadChar{local_var_id} => self.op_read_char(local_var_id),
@@ -615,11 +615,7 @@ impl Zfile {
     }
 
 
-    /// returns a SmallConst
-    pub fn op_ret(&mut self, value: u8) {
-        self.op_1(0x0b, ArgType::SmallConst);
-        self.data.append_byte(value);
-    }
+    
 
     /// pushs an u16 value (for example an address) on the stack
     pub fn op_push_u16(&mut self, value: u16) {
@@ -647,13 +643,6 @@ impl Zfile {
     /// prints string at given packet adress TODO: needs testing
     pub fn op_print_paddr(&mut self, address: u8) {
         self.op_1(0x0D, ArgType::Variable);
-
-        self.data.append_byte(address);
-    }
-
-    /// prints string at given adress TODO: needs testing
-    pub fn op_print_addr(&mut self, address: u8) {
-        self.op_1(0x07, ArgType::Variable);
 
         self.data.append_byte(address);
     }

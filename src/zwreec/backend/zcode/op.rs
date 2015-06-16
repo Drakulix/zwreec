@@ -6,10 +6,21 @@ pub use super::zfile::ArgType;
 
 
 
+/// prints string at given adress TODO: needs testing
+pub fn op_print_addr(address: u8) -> Vec<u8> {
+    let mut bytes = op_1(0x07, ArgType::Variable);
+
+   bytes.push(address);
+   bytes
+}
 
 
-
-
+/// returns a SmallConst
+pub fn op_ret(value: u8) -> Vec<u8> {
+    let mut bytes = op_1(0x0b, ArgType::SmallConst);
+    bytes.push(value);
+    bytes
+}
 
 
 // saves an u16 to the variable
