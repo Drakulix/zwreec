@@ -289,6 +289,8 @@ impl Zfile {
             &ZOP::PrintAddr{address} => op::op_print_addr(address),
             &ZOP::PrintPaddr{address} => op::op_print_paddr(address),
             &ZOP::SetColor{foreground, background} => op::op_set_color(foreground, background),
+            &ZOP::SetColorVar{foreground, background} => op::op_set_color_var(foreground, background),
+
             _ => Vec::new()
         };
         self.data.append_bytes(&bytes);
@@ -302,7 +304,6 @@ impl Zfile {
             &ZOP::Call1NVar{variable} => self.op_call_1n_var(variable),
             &ZOP::Routine{ref name, count_variables} => self.routine(name, count_variables),
             &ZOP::Label{ref name} => self.label(name),
-            &ZOP::SetColorVar{foreground, background} => self.op_set_color_var(foreground, background),
             &ZOP::SetTextStyle{bold, reverse, monospace, italic} => self.op_set_text_style(bold, reverse, monospace, italic),
             &ZOP::StoreW{array_address, index, variable} => self.op_storew(array_address, index, variable),
             &ZOP::JE{local_var_id, equal_to_const, ref jump_to_label} => self.op_je(local_var_id, equal_to_const, jump_to_label),
@@ -652,14 +653,7 @@ impl Zfile {
 
     
 
-    /// sets the colors of the foreground (font) and background (but with variables
-    pub fn op_set_color_var(&mut self, foreground: u8, background: u8){
-        let args: Vec<ArgType> = vec![ArgType::Variable, ArgType::Variable];
-        self.op_2(0x1b, args);
-
-        self.data.append_byte(foreground);
-        self.data.append_byte(background);
-    }
+    
 
     /// set the style of the text
     pub fn op_set_text_style(&mut self, bold: bool, reverse: bool, monospace: bool, italic: bool){

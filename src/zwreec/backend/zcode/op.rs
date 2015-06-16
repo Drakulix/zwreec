@@ -4,6 +4,20 @@ pub use super::zfile::ArgType;
 
 
 
+
+
+
+
+/// sets the colors of the foreground (font) and background (but with variables
+pub fn op_set_color_var(foreground: u8, background: u8) -> Vec<u8> {
+    let args: Vec<ArgType> = vec![ArgType::Variable, ArgType::Variable];
+    let mut bytes = op_2(0x1b, args);
+    bytes.push(foreground);
+    bytes.push(background);
+    bytes
+}
+
+
 /// sets the colors of the foreground (font) and background
 pub fn op_set_color(foreground: u8, background: u8) -> Vec<u8> {
     let args: Vec<ArgType> = vec![ArgType::SmallConst, ArgType::SmallConst];
