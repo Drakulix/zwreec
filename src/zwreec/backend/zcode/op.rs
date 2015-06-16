@@ -11,7 +11,43 @@ pub use super::zfile::ArgType;
 
 
 
+/// reads keys from the keyboard and saves the asci-value in local_var_id
+/// read_char is VAROP
+pub fn op_read_char(local_var_id: u8) -> Vec<u8> {
+    let args: Vec<ArgType> = vec![ArgType::SmallConst, ArgType::Nothing, ArgType::Nothing, ArgType::Nothing];
+    let mut bytes = op_var(0x16, args);
 
+    // write argument value
+    bytes.push(0x00);
+
+    // write varible id
+    bytes.push(local_var_id);
+    bytes
+}
+
+
+/// set the style of the text
+pub fn op_set_text_style(bold: bool, reverse: bool, monospace: bool, italic: bool) -> Vec<u8> {
+    let args: Vec<ArgType> = vec![ArgType::SmallConst, ArgType::Nothing, ArgType::Nothing, ArgType::Nothing];
+    let mut bytes = op_var(0x11, args);
+
+    let mut style_byte : u8;
+    style_byte = 0x00;
+    if bold {
+        style_byte |=0x02
+    }
+     if reverse {
+        style_byte |=0x01
+    }
+     if monospace {
+        style_byte |=0x08
+    }
+     if italic {
+        style_byte |=0x04
+    }
+    bytes.push(style_byte);
+    bytes
+}
 
 
 /// Prints the value of a variable (only ints a possibe)

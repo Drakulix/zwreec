@@ -292,6 +292,8 @@ impl Zfile {
             &ZOP::SetColorVar{foreground, background} => op::op_set_color_var(foreground, background),
             &ZOP::Random{range, variable} => op::op_random(range, variable),
             &ZOP::PrintNumVar{variable} => op::op_print_num_var(variable),
+            &ZOP::SetTextStyle{bold, reverse, monospace, italic} => op::op_set_text_style(bold, reverse, monospace, italic),
+            &ZOP::ReadChar{local_var_id} => op::op_read_char(local_var_id),
 
 
             _ => Vec::new()
@@ -306,10 +308,8 @@ impl Zfile {
             &ZOP::Call1NVar{variable} => self.op_call_1n_var(variable),
             &ZOP::Routine{ref name, count_variables} => self.routine(name, count_variables),
             &ZOP::Label{ref name} => self.label(name),
-            &ZOP::SetTextStyle{bold, reverse, monospace, italic} => self.op_set_text_style(bold, reverse, monospace, italic),
             &ZOP::StoreW{array_address, index, variable} => self.op_storew(array_address, index, variable),
             &ZOP::JE{local_var_id, equal_to_const, ref jump_to_label} => self.op_je(local_var_id, equal_to_const, jump_to_label),
-            &ZOP::ReadChar{local_var_id} => self.op_read_char(local_var_id),
             &ZOP::ReadCharTimer{local_var_id, timer, ref routine} => self.op_read_char_timer(local_var_id, timer, routine),
             &ZOP::JL{local_var_id, local_var_id2, ref jump_to_label} => self.op_jl(local_var_id, local_var_id2, jump_to_label),
             &ZOP::Jump{ref jump_to_label} => self.op_jump(jump_to_label),
@@ -615,56 +615,6 @@ impl Zfile {
         self.add_jump(address.to_string(), JumpType::Routine);
     }
 
-
-    
-
-
-
-
-
-
-    
-
-
-
-    
-
-    
-
-    /// set the style of the text
-    pub fn op_set_text_style(&mut self, bold: bool, reverse: bool, monospace: bool, italic: bool){
-        let args: Vec<ArgType> = vec![ArgType::SmallConst, ArgType::Nothing, ArgType::Nothing, ArgType::Nothing];
-        self.op_var(0x11, args);
-
-        let mut style_byte : u8;
-        style_byte = 0x00;
-        if bold {
-            style_byte |=0x02
-        }
-         if reverse {
-            style_byte |=0x01
-        }
-         if monospace {
-            style_byte |=0x08
-        }
-         if italic {
-            style_byte |=0x04
-        }
-        self.data.append_byte(style_byte);
-    }
-
-    /// reads keys from the keyboard and saves the asci-value in local_var_id
-    /// read_char is VAROP
-    pub fn op_read_char(&mut self, local_var_id: u8) {
-        let args: Vec<ArgType> = vec![ArgType::SmallConst, ArgType::Nothing, ArgType::Nothing, ArgType::Nothing];
-        self.op_var(0x16, args);
-
-        // write argument value
-        self.data.append_byte(0x00);
-
-        // write varible id
-        self.data.append_byte(local_var_id);
-    }
 
     /// reads keys from the keyboard and saves the asci-value in local_var_id
     /// read_char is VAROP
