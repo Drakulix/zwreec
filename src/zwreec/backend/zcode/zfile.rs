@@ -268,7 +268,7 @@ impl Zfile {
 
     /// write opcodes to file but also return written bytes for testing purposes
     /// as well as the resulting new labels and jumps
-    pub fn write_zop(&mut self, instr: &ZOP) -> (Vec<Zlabel>, Vec<Zjump>, &[u8]){
+    pub fn write_zop(&mut self, instr: &ZOP) -> (Vec<Zlabel>, Vec<Zjump>, Vec<u8>){
         let beginning = self.data.bytes.len();
         let old_jumps: Vec<Zjump> = self.jumps.clone();
         let old_labels: Vec<Zlabel> = self.labels.clone();
@@ -318,7 +318,7 @@ impl Zfile {
                 new_jumps.push(jump.clone());
             }
         }
-        (new_labels, new_jumps, &self.data.bytes[beginning..self.data.bytes.len()])
+        (new_labels, new_jumps, self.data.bytes[beginning..self.data.bytes.len()].to_vec())
     }
 
     /// generates normal print opcodes for ASCII characters and unicode print
@@ -1015,4 +1015,27 @@ fn test_zfile_general_op_length() {
     let args: Vec<ArgType> = vec![ArgType::SmallConst, ArgType::Nothing, ArgType::Nothing, ArgType::Nothing];
     zfile.op_var(0x00, args);
     assert_eq!(zfile.data.len(), 5);
+}
+
+#[test]
+fn test_zfile_label_and_jump_loop() {
+    let mut zfile: Zfile = Zfile::new();
+    zfile.start();
+    let (labels, jumps1, bytes1) =  zfile.write_zop(&ZOP::Label{name: "loop".to_string()});
+    assert_eq!(jumps1.len() + bytes1.len(), 0);
+    assert_eq!(labels.len(), 1);
+    let (labels2, jumps, bytes) =  zfile.write_zop(&ZOP::Jump{jump_to_label: "loop".to_string()});
+    assert_eq!(labels2.len(), 0);
+    assert_eq!(jumps.len(), 1);
+    assert_eq!(bytes.len(), 3);
+    let pos = zfile.data.len() - bytes.len();  // start position of written bytes
+    zfile.end();
+    // in this example we have the following data:
+    //[Zlabel { to_addr: 2055, name: "loop" }] [] []
+    //[] [Zjump { from_addr: 2056, name: "loop", jump_type: Jump }] [140, 255, 255]
+    // 0xffff is -1 as i16 because we have a relative jump
+    assert_eq!(zfile.data.bytes[pos], bytes[0]);  // jump op
+    let rel_addr: i16 = (zfile.data.bytes[pos+1] as u16 * 256 + zfile.data.bytes[pos+2] as u16) as i16;
+    assert_eq!((labels[0].to_addr as i32 - jumps[0].from_addr as i32) as i16, rel_addr);  // specified as in write_jumps()
+    assert_eq!(-1 as i16, rel_addr);  // this is the expected result, jump one address back
 }
