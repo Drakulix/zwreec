@@ -255,7 +255,7 @@ rustlex! TweeLexer {
     let COLON = ',';
 
     let FUNCTION_NAME = (LETTER | UNDERSCORE) VAR_CHAR*;
-    let FUNCTION = FUNCTION_NAME + '(';
+    let FUNCTION = FUNCTION_NAME '(';
 
     let MACRO_NAME = [^" >"'\n']*;
 
