@@ -33,7 +33,6 @@ impl Codegen {
 
     pub fn start_codegen(&mut self) {
         self.zfile.start();
-        self.zfile.op_call_1n("Start");
         //self.zfile.op_quit();
         //self.zfile.routine("main", 0);
 

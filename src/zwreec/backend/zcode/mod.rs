@@ -19,7 +19,7 @@ pub fn temp_create_zcode_example<W: Write>(output: &mut W) {
     let mut zfile: Zfile = zfile::Zfile::new();
 
     zfile.start();
-    zfile.op_call_1n("Start");
+    // zfile.op_call_1n("Start");
     zfile.routine("Start", 0);
     zfile.gen_print_ops("Address of var 200: \n");
     op::op_store_u16(200, 0x103);

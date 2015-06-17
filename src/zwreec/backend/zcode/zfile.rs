@@ -586,15 +586,6 @@ impl Zfile {
         self.data.write_bytes(&text_bytes.bytes, index + 1);
     }
 
-    /// calls a routine
-    /// call_1n is 1OP
-    pub fn op_call_1n(&mut self, jump_to_label: &str) {
-        self.op_1(0x0f, ArgType::SmallConst);
-        self.add_jump(jump_to_label.to_string(), JumpType::Routine);
-    }
-
-
-
     /// jumps to a label
     pub fn op_jump(&mut self, jump_to_label: &str) {
         self.op_1(0x0c, ArgType::SmallConst);
@@ -633,54 +624,6 @@ impl Zfile {
         }
 
         self.data.append_byte(byte);
-    }
-
-    /// op-codes with 2 operators
-    fn op_2(&mut self, value: u8, arg_types: Vec<ArgType>) {
-        let mut byte: u8 = 0x00;
-        let mut is_variable: bool = false;
-        for (i, arg_type) in arg_types.iter().enumerate() {
-            let shift: u8 = 6 - i as u8;
-            match arg_type {
-                &ArgType::SmallConst => byte |= 0x00 << shift,
-                &ArgType::Variable   => byte |= 0x01 << shift,
-                &ArgType::Reference  => byte |= 0x00 << shift,
-                &ArgType::LargeConst => is_variable = true,
-                _                    => panic!("no possible 2OP")
-            }
-        }
-
-        if is_variable {
-            let mut byte: u8 = 0xc0 | value;
-            byte = byte | value;
-            self.data.append_byte(byte);
-
-            let mut byte2 = self.encode_variable_arguments(arg_types);
-            byte2 = byte2 | 0xf;
-            self.data.append_byte(byte2);
-        } else {
-            byte = byte | value;
-            self.data.append_byte(byte);
-        }
-    }
-
-    /// encodes the argtypes for variable some 2OPs and varOPs
-    fn encode_variable_arguments(&mut self, arg_types: Vec<ArgType>) -> u8 {
-        let mut byte: u8 = 0x00;
-        for (i, arg_type) in arg_types.iter().enumerate() {
-            let shift: u8 = 6 - 2 * i as u8;
-            match arg_type {
-                &ArgType::LargeConst => byte |= 0x00 << shift,
-                &ArgType::SmallConst => byte |= 0x01 << shift,
-                &ArgType::Variable   => byte |= 0x02 << shift,
-                &ArgType::Nothing    => byte |= 0x03 << shift,
-                &ArgType::Reference  => byte |= 0x01 << shift,
-                //_                    => panic!("no possible varOP")
-            }
-        }
-
-        byte
-        
     }
 }
 

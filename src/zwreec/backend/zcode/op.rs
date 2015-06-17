@@ -22,7 +22,7 @@ pub fn op_call_1n(jump_to_label: &str, zf: &mut Zfile) -> Vec<u8> {
 /// call_2n is 2OP
 pub fn op_call_2n_with_address(jump_to_label: &str, address: &str, zf: &mut Zfile) -> Vec<u8> {
     let args: Vec<ArgType> = vec![ArgType::LargeConst, ArgType::LargeConst];
-    let mut bytes = op_2(0x1a, args);
+    let bytes = op_2(0x1a, args);
 
     // the address of the jump_to_label
     zf.add_jump(jump_to_label.to_string(), JumpType::Routine);
