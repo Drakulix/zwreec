@@ -254,7 +254,8 @@ rustlex! TweeLexer {
 
     let COLON = ',';
 
-    let FUNCTION = LETTER+ '(';
+    let FUNCTION_NAME = (LETTER | UNDERSCORE) VAR_CHAR*;
+    let FUNCTION = FUNCTION_NAME + '(';
 
     let MACRO_NAME = [^" >"'\n']*;
 
@@ -591,7 +592,7 @@ rustlex! TweeLexer {
         PAREN_CLOSE =>|lexer:&mut TweeLexer<R>| Some(TokParenClose{location: lexer.yylloc()} )
         SEMI_COLON => |lexer:&mut TweeLexer<R>| Some(TokSemiColon {location: lexer.yylloc()} )
         ASSIGN =>     |lexer:&mut TweeLexer<R>| Some(TokAssign    {location: lexer.yylloc(), var_name: "".to_string(), op_name: lexer.yystr()} )
-        COLON =>      |lexer:&mut TweeLexer<R>| Some(TokColon     {location: lexer.yylloc()} )
+        COLON =>      |lexer:&mut TweeLexer<R>| Some(TokColon     {location: lexer.yylloc()} ),
         // Expression Stuff End
 
         WHITESPACE =>  |_:&mut TweeLexer<R>| -> Option<Token> {
@@ -600,6 +601,7 @@ rustlex! TweeLexer {
     }
 
     FUNCTION_ARGS {
+        WHITESPACE =>   |_:&mut TweeLexer<R>| -> Option<Token> {None}
         COLON =>    |lexer:&mut TweeLexer<R>| Some(TokColon   {location: lexer.yylloc()} )
         VAR_NAME => |lexer:&mut TweeLexer<R>| Some(TokVariable{location: lexer.yylloc(), name: lexer.yystr()} )
         FLOAT =>    |lexer:&mut TweeLexer<R>| Some(TokFloat   {location: lexer.yylloc(), value: lexer.yystr()[..].parse().unwrap()} )
@@ -842,6 +844,23 @@ mod tests {
             TokPassage {name: "Passage".to_string(), location: (1, 3)},
             TokMacroContentPassageName {location: (2, 3), passage_name: "Passage".to_string()},
             TokMacroEnd {location: (2, 10)}
+        ];
+
+        assert_tok_eq(expected, tokens);
+    }
+
+    #[test]
+    fn macro_print_function_test() {
+        let tokens = test_lex("::Start\n<<print random(1, 100)>>");
+        let expected = vec![
+            TokPassage {name: "Start".to_string(), location: (1, 3)},
+            TokMacroPrint {location: (2, 3)},
+            TokFunction {name: "random".to_string(), location: (2, 9)},
+            TokInt {value: 1, location: (2, 16)},
+            TokColon {location: (2, 17)},
+            TokInt {value: 100, location: (2, 19)},
+            TokArgsEnd {location: (2, 22)},
+            TokMacroEnd {location: (2, 23)}
         ];
 
         assert_tok_eq(expected, tokens);
