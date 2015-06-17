@@ -172,6 +172,69 @@ fn gen_zcode<'a>(node: &'a ASTNode, mut out: &mut zfile::Zfile, mut manager: &mu
                     code.push(ZOP::Label{name: after_if_label});
                     code
                 },
+                &TokMacroElseIf { .. } => {
+                    if t.childs.len() < 2 {
+                        panic!("Unsupported elseif-expression!");
+                    }
+
+                    let mut compare: u8 = 1;
+
+                    // check if the first node is a pseudonode
+                    let pseudo_node = match t.childs[0].as_default().category {
+                        TokExpression => t.childs[0].as_default(),
+                        _ =>  panic!("Unsupported elseif-expression!")
+                    };
+
+                    // Check if first token is variable
+                    let var_name = match pseudo_node.childs[0].as_default().category {
+                        TokVariable {ref name, .. } => name,
+                        _ =>  panic!("Unsupported elseif-expression!")
+                    };
+
+                    if pseudo_node.childs.len() > 1 {
+                        // Check if second token is compare operator
+                        match pseudo_node.childs[1].as_default().category {
+                            TokCompOp {ref op_name, .. } => {
+                                match &*(*op_name) {
+                                    "==" | "is" => {} ,
+                                    _ => panic!("Unsupported Compare Operator!")
+                                }
+                            }, _ =>  panic!("Unsupported elseif-expression!")
+                        }
+
+                        // Check if third token is number
+                        compare = match pseudo_node.childs[2].as_default().category {
+                            TokInt {ref value, .. } => {
+                                *value as u8
+                            },
+                            TokBoolean {ref value, .. } => {
+                                boolstr_to_u8(&*value)
+                            }, _ => panic!("Unsupported assign value!")
+                        };
+                    }
+
+                    let symbol_id = manager.symbol_table.get_symbol_id(&*var_name);
+                    let if_id = manager.ids_if.start_next();
+
+                    let if_label = format!("if_{}", if_id);
+                    let after_if_label = format!("after_if_{}", manager.ids_if.pop_id());
+                    let after_else_label = format!("after_else_{}", manager.ids_if.peek());
+                    let mut code: Vec<ZOP> = vec![
+                        ZOP::JE{local_var_id: symbol_id, equal_to_const: compare, jump_to_label: if_label.to_string()},
+                        ZOP::Jump{jump_to_label: after_if_label.to_string()},
+                        ZOP::Label{name: if_label.to_string()}
+                    ];
+
+                    for i in 1..t.childs.len() {
+                        for instr in gen_zcode(&t.childs[i], out, manager) {
+                            code.push(instr);
+                        }
+                    }
+
+                    code.push(ZOP::Jump{jump_to_label: after_else_label});
+                    code.push(ZOP::Label{name: after_if_label});
+                    code
+                },
                 &TokMacroElse { .. } => {
                     let mut code: Vec<ZOP> = vec![];
                     for child in &t.childs {
@@ -457,6 +520,11 @@ impl IdentifierProvider {
         self.current_id += 1;
         self.id_stack.push(id);
         id
+    }
+
+    // Pops the last id from the stack
+    pub fn peek(&mut self) -> u32 {
+        self.id_stack.last().unwrap().clone()
     }
 
     // Pops the last id from the stack
