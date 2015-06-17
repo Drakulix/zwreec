@@ -32,6 +32,10 @@ pub enum NonTerminalType {
     Link,
     Macro,
     Macrof,
+    Function,
+    Functionf,
+    Arguments,
+    Argumentsf,
     ExpressionList,
     ExpressionListf,
     Expression,
@@ -173,8 +177,10 @@ impl<'a> Parser<'a> {
 
                     Some(AddChild(tok))
                 },
+                (PassageContent, TokMacroDisplay { .. } ) |
                 (PassageContent, TokMacroSet { .. } ) |
                 (PassageContent, TokMacroIf  { .. } ) |
+                (PassageContent, &TokMacroPrint { .. } ) |
                 (PassageContent, TokVariable { .. } ) |
                 (PassageContent, TokMacroContentVar { .. } ) |
                 (PassageContent, TokMacroContentPassageName { .. } ) => {
@@ -272,12 +278,20 @@ impl<'a> Parser<'a> {
                 },
 
                 // Macro
+<<<<<<< HEAD
                 (Macro, tok @ TokMacroSet { .. } ) => {
                     stack.push(Terminal(TokMacroEnd {location: (0, 0)} ));
                     stack.push(NonTerminal(ExpressionList));
                     stack.push(Terminal(tok));
 
                     None
+=======
+                (Macro, tok @ &TokMacroDisplay { .. } ) |
+                (Macro, tok @ &TokMacroSet { .. } ) => {
+                    new_nodes.push(PNode::new_terminal(tok.clone()));
+                    new_nodes.push(PNode::new_non_terminal(ExpressionList));
+                    new_nodes.push(PNode::new_terminal(TokMacroEnd {location: (0, 0)} ));
+>>>>>>> master
                 },
                 (Macro, tok @ TokMacroIf { .. } ) => {
                     stack.push(NonTerminal(Macrof));
@@ -288,6 +302,15 @@ impl<'a> Parser<'a> {
 
                     Some(TwoChildsDown(tok, TokPseudo))
                 },
+                (Macro, tok @ &TokMacroPrint { .. } ) => {
+                    new_nodes.push(PNode::new_terminal(tok.clone()));
+                    new_nodes.push(PNode::new_non_terminal(ExpressionList));
+                    new_nodes.push(PNode::new_terminal(TokMacroEnd {location: (0, 0)} ));
+
+                    // ast
+                    self.ast.child_down(tok.clone());
+                }
+
                 // means <<$var>>
                 (Macro, tok @ TokMacroContentVar { .. }) => {
                     stack.push(Terminal(TokMacroEnd {location: (0, 0)} ));
@@ -320,6 +343,7 @@ impl<'a> Parser<'a> {
                 }
 
                 // ExpressionList
+<<<<<<< HEAD
                 (ExpressionList, TokVariable { .. } ) |
                 (ExpressionList, TokInt      { .. } ) |
                 (ExpressionList, TokString   { .. } ) |
@@ -329,6 +353,16 @@ impl<'a> Parser<'a> {
                     stack.push(NonTerminal(Expression));
 
                     None
+=======
+                (ExpressionList, &TokVariable { .. } ) |
+                (ExpressionList, &TokInt      { .. } ) |
+                (ExpressionList, &TokString   { .. } ) |
+                (ExpressionList, &TokBoolean  { .. } ) |
+                (ExpressionList, &TokAssign   { .. } ) |
+                (ExpressionList, &TokFunction { .. } ) => {
+                    new_nodes.push(PNode::new_non_terminal(Expression));
+                    new_nodes.push(PNode::new_non_terminal(ExpressionListf));
+>>>>>>> master
                 },
 
                 // ExpressionListf
@@ -342,6 +376,7 @@ impl<'a> Parser<'a> {
                 },
 
                 // Expression
+<<<<<<< HEAD
                 (Expression, TokVariable { .. } ) |
                 (Expression, TokInt      { .. } ) |
                 (Expression, TokString   { .. } ) |
@@ -349,6 +384,14 @@ impl<'a> Parser<'a> {
                     stack.push(NonTerminal(E));
 
                     None
+=======
+                (Expression, &TokVariable { .. } ) |
+                (Expression, &TokInt      { .. } ) |
+                (Expression, &TokString   { .. } ) |
+                (Expression, &TokBoolean  { .. } ) |
+                (Expression, &TokFunction { .. } ) => {
+                    new_nodes.push(PNode::new_non_terminal(E));
+>>>>>>> master
                 },
                 (Expression, TokAssign { .. } ) => {
                     stack.push(NonTerminal(AssignVariable));
@@ -357,6 +400,7 @@ impl<'a> Parser<'a> {
                 },
 
                 // E
+<<<<<<< HEAD
                 (E, TokVariable { .. } ) |
                 (E, TokInt      { .. } ) |
                 (E, TokString   { .. } ) |
@@ -365,6 +409,15 @@ impl<'a> Parser<'a> {
                     stack.push(NonTerminal(T));
 
                     None
+=======
+                (E, &TokVariable { .. } ) |
+                (E, &TokInt      { .. } ) |
+                (E, &TokString   { .. } ) |
+                (E, &TokBoolean  { .. } ) |
+                (E, &TokFunction { .. } ) => {
+                    new_nodes.push(PNode::new_non_terminal(T));
+                    new_nodes.push(PNode::new_non_terminal(E2));
+>>>>>>> master
                 },
 
                 // E2
@@ -374,6 +427,7 @@ impl<'a> Parser<'a> {
                 },
 
                 // T
+<<<<<<< HEAD
                 (T, TokVariable { .. } ) |
                 (T, TokInt      { .. } ) |
                 (T, TokString   { .. } ) |
@@ -382,6 +436,15 @@ impl<'a> Parser<'a> {
                     stack.push(NonTerminal(B));
 
                     None
+=======
+                (T, &TokVariable { .. } ) |
+                (T, &TokInt      { .. } ) |
+                (T, &TokString   { .. } ) |
+                (T, &TokBoolean  { .. } ) |
+                (T, &TokFunction { .. } ) => {
+                    new_nodes.push(PNode::new_non_terminal(B));
+                    new_nodes.push(PNode::new_non_terminal(T2));
+>>>>>>> master
                 },
 
                 // T2
@@ -391,6 +454,7 @@ impl<'a> Parser<'a> {
                 },
 
                 // B
+<<<<<<< HEAD
                 (B, TokVariable { .. } ) |
                 (B, TokInt      { .. } ) |
                 (B, TokString   { .. } ) |
@@ -399,6 +463,15 @@ impl<'a> Parser<'a> {
                     stack.push(NonTerminal(F));
 
                     None
+=======
+                (B, &TokVariable { .. } ) |
+                (B, &TokInt      { .. } ) |
+                (B, &TokString   { .. } ) |
+                (B, &TokBoolean  { .. } ) |
+                (B, &TokFunction { .. } ) => {
+                    new_nodes.push(PNode::new_non_terminal(F));
+                    new_nodes.push(PNode::new_non_terminal(B2));
+>>>>>>> master
                 },
 
                 // B2
@@ -415,6 +488,7 @@ impl<'a> Parser<'a> {
                 },
 
                 // F
+<<<<<<< HEAD
                 (F, TokVariable { .. } ) |
                 (F, TokInt      { .. } ) |
                 (F, TokString   { .. } ) |
@@ -423,6 +497,15 @@ impl<'a> Parser<'a> {
                     stack.push(NonTerminal(G));
 
                     None
+=======
+                (F, &TokVariable { .. } ) |
+                (F, &TokInt      { .. } ) |
+                (F, &TokString   { .. } ) |
+                (F, &TokBoolean  { .. } ) |
+                (F, &TokFunction { .. } ) => {
+                    new_nodes.push(PNode::new_non_terminal(G));
+                    new_nodes.push(PNode::new_non_terminal(F2));
+>>>>>>> master
                 },
 
                 // F2
@@ -432,6 +515,7 @@ impl<'a> Parser<'a> {
                 },
 
                 // G
+<<<<<<< HEAD
                 (G, TokVariable { .. } ) |
                 (G, TokInt      { .. } ) |
                 (G, TokString   { .. } ) |
@@ -440,6 +524,15 @@ impl<'a> Parser<'a> {
                     stack.push(NonTerminal(H));
 
                     None
+=======
+                (G, &TokVariable { .. } ) |
+                (G, &TokInt      { .. } ) |
+                (G, &TokString   { .. } ) |
+                (G, &TokBoolean  { .. } ) |
+                (G, &TokFunction { .. } ) => {
+                    new_nodes.push(PNode::new_non_terminal(H));
+                    new_nodes.push(PNode::new_non_terminal(G2));
+>>>>>>> master
                 },
 
                 // G2
@@ -459,6 +552,68 @@ impl<'a> Parser<'a> {
                     stack.push(Terminal(tok.clone()));
 
                     Some(AddChild(tok))
+                },
+                (H, &TokFunction { .. } ) => {
+                    new_nodes.push(PNode::new_non_terminal(Function));
+                },
+
+                // Function
+                (Function, tok @ &TokFunction { .. } ) => {
+                    new_nodes.push(PNode::new_terminal(tok.clone()));
+                    new_nodes.push(PNode::new_non_terminal(Functionf));
+
+                    // ast
+                    self.ast.child_down(tok.clone())
+                },
+
+                // Functionf
+                (Functionf, tok @ &TokArgsEnd { .. } ) => {
+                    new_nodes.push(PNode::new_terminal(tok.clone()));
+
+                    // ast
+                    // Get out of empty function
+                    self.ast.up();
+                },
+                (Functionf, &TokVariable { .. } ) |
+                (Functionf, &TokInt      { .. } ) |
+                (Functionf, &TokString   { .. } ) |
+                (Functionf, &TokBoolean  { .. } ) |
+                (Functionf, &TokFunction { .. } ) => {
+                    new_nodes.push(PNode::new_non_terminal(Arguments));
+                    new_nodes.push(PNode::new_terminal(TokArgsEnd {location: (0, 0)} ));
+                },
+
+                // Arguments
+                (Arguments, &TokVariable { .. } ) |
+                (Arguments, &TokInt      { .. } ) |
+                (Arguments, &TokString   { .. } ) |
+                (Arguments, &TokBoolean  { .. } ) |
+                (Arguments, &TokFunction { .. } ) => {
+                    new_nodes.push(PNode::new_non_terminal(Expression));
+                    new_nodes.push(PNode::new_non_terminal(Argumentsf));
+
+                    self.ast.child_down(TokPseudo);
+                },
+
+                // Argumentsf
+                (Argumentsf, &TokArgsEnd { .. } ) => {
+                    // Argumentsf -> ε
+                    // TokArgsEnd is already on the stack
+
+                    // We still need to get out of the expression
+                    self.ast.up();
+
+                    // And out of the function
+                    self.ast.up();
+                },
+                (Argumentsf, tok @ &TokColon { .. } ) => {
+                    new_nodes.push(PNode::new_terminal(tok.clone()));
+                    new_nodes.push(PNode::new_non_terminal(Arguments));
+
+                    self.ast.up();
+                },
+                (Argumentsf, _) => {
+                    // Argumentsf -> ε
                 },
 
                 // AssignVariable
