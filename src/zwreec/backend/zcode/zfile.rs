@@ -427,8 +427,11 @@ impl Zfile {
         self.emit(vec![
             ZOP::Routine{name: "system_check_links".to_string(), count_variables: 2},
 
+            // jumps to the end, if this passage was called as <<display>>
+            ZOP::JE{local_var_id: 17, equal_to_const: 0x01, jump_to_label: "system_check_links_end_ret".to_string()},
+
             // jumps to the end, if there a no links
-            ZOP::JE{local_var_id: 16, equal_to_const: 0x00, jump_to_label: "system_check_links_end".to_string()},
+            ZOP::JE{local_var_id: 16, equal_to_const: 0x00, jump_to_label: "system_check_links_end_quit".to_string()},
             ZOP::Print{text: "--------------------".to_string()},
             ZOP::Newline,
             ZOP::Print{text: "press a key... ".to_string()},
@@ -466,7 +469,10 @@ impl Zfile {
 
             // jump to the new passage
             ZOP::Call1NVar{variable: 0x02},
-            ZOP::Label{name: "system_check_links_end".to_string()},
+            ZOP::Label{name: "system_check_links_end_ret".to_string()},
+            ZOP::Ret{value: 0},
+
+            ZOP::Label{name: "system_check_links_end_quit".to_string()},
             ZOP::Quit
         ]);
     }

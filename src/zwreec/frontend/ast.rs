@@ -47,6 +47,7 @@ fn gen_zcode<'a>(node: &'a ASTNode, mut out: &mut zfile::Zfile, mut manager: &mu
 
             code.push(ZOP::Newline);
             code.push(ZOP::Call1N{jump_to_label: "system_check_links".to_string()});
+            code.push(ZOP::Ret{value: 0});
             code
         },
         &ASTNode::Default(ref t) => {
@@ -269,10 +270,20 @@ fn gen_zcode<'a>(node: &'a ASTNode, mut out: &mut zfile::Zfile, mut manager: &mu
                         }
                     }
                 },
+                &Token::TokMacroContentPassageName {ref passage_name, .. } => {
+                    vec![
+                    // activates the display-modus
+                    ZOP::StoreU8{variable: 17, value: 1},
+                    ZOP::Call1N{jump_to_label: passage_name.to_string()},
+
+                    // deactivates the display-modus
+                    ZOP::StoreU8{variable: 17, value: 0},
+                    ]
+                },
                 _ => {
                     debug!("no match if");
                     vec![]
-                }
+                },
             };
             if set_formatting {
                 for child in &t.childs {
