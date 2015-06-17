@@ -272,8 +272,11 @@ fn gen_zcode<'a>(node: &'a ASTNode, mut out: &mut zfile::Zfile, mut manager: &mu
                 },
                 &Token::TokMacroContentPassageName {ref passage_name, .. } => {
                     vec![
+                    // activates the display-modus
                     ZOP::StoreU8{variable: 17, value: 1},
                     ZOP::Call1N{jump_to_label: passage_name.to_string()},
+
+                    // deactivates the display-modus
                     ZOP::StoreU8{variable: 17, value: 0},
                     ]
                 },
