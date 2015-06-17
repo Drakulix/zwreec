@@ -302,6 +302,7 @@ impl Zfile {
             &ZOP::JL{local_var_id, local_var_id2, ref jump_to_label} => op::op_jl(local_var_id, local_var_id2, jump_to_label,self),
             &ZOP::JE{local_var_id, equal_to_const, ref jump_to_label} => op::op_je(local_var_id, equal_to_const, jump_to_label,self),
             &ZOP::Call2NWithAddress{ref jump_to_label, ref address} => op::op_call_2n_with_address(jump_to_label, address,self),
+            &ZOP::Call1N{ref jump_to_label} => op::op_call_1n(jump_to_label,self),
 
             _ => Vec::new()
         };
@@ -310,7 +311,6 @@ impl Zfile {
             &ZOP::PrintUnicode{c} => self.op_print_unicode_char(c),
             &ZOP::Print{ref text} => self.op_print(text),
             &ZOP::PrintOps{ref text} => self.gen_print_ops(text),
-            &ZOP::Call1N{ref jump_to_label} => self.op_call_1n(jump_to_label),
             &ZOP::Routine{ref name, count_variables} => self.routine(name, count_variables),
             &ZOP::Label{ref name} => self.label(name),
             &ZOP::Jump{ref jump_to_label} => self.op_jump(jump_to_label),
@@ -384,6 +384,7 @@ impl Zfile {
         self.emit(vec![
             ZOP::SetColor{foreground: 9, background: 2},
             ZOP::EraseWindow{value: -1},
+            ZOP::Call1N{jump_to_label: "Start".to_string()},
         ]);
     }
 

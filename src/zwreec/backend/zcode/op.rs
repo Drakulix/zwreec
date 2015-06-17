@@ -7,6 +7,13 @@ pub use super::zfile::Zfile;
 
 
 
+/// calls a routine
+/// call_1n is 1OP
+pub fn op_call_1n(jump_to_label: &str, zf: &mut Zfile) -> Vec<u8> {
+    let bytes = op_1(0x0f, ArgType::SmallConst);
+    zf.add_jump(jump_to_label.to_string(), JumpType::Routine);
+    bytes
+}
 
 
 /// calls a routine with an argument(variable) an throws result away
