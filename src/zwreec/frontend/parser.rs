@@ -446,6 +446,7 @@ impl<'a> Parser<'a> {
                     self.ast.child_down(tok.clone())
                 },
 
+                // Functionf
                 (Functionf, tok @ &TokArgsEnd { .. } ) => {
                     new_nodes.push(PNode::new_terminal(tok.clone()));
 
@@ -462,6 +463,7 @@ impl<'a> Parser<'a> {
                     new_nodes.push(PNode::new_terminal(TokArgsEnd {location: (0, 0)} ));
                 },
 
+                // Arguments
                 (Arguments, &TokVariable { .. } ) |
                 (Arguments, &TokInt      { .. } ) |
                 (Arguments, &TokString   { .. } ) |
@@ -473,6 +475,7 @@ impl<'a> Parser<'a> {
                     self.ast.child_down(TokPseudo);
                 },
 
+                // Argumentsf
                 (Argumentsf, &TokArgsEnd { .. } ) => {
                     // Argumentsf -> ε
                     // TokArgsEnd is already on the stack
@@ -488,6 +491,9 @@ impl<'a> Parser<'a> {
                     new_nodes.push(PNode::new_non_terminal(Arguments));
 
                     self.ast.up();
+                },
+                (Argumentsf, _) => {
+                    // Argumentsf -> ε
                 },
 
                 // AssignVariable
