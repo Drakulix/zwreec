@@ -854,26 +854,26 @@ mod tests {
     #[test]
     fn macro_if_test() {
         // This should return a passage with an if macro
-        let tokens = test_lex("::Passage\n<<if $var == 1>>1<<else if var is 2>>2<<else>>3<<endif>>");
+        let tokens = test_lex("::Passage\n<<if $var1 == 1>>1<<else if $var2 is 2>>2<<else>>3<<endif>>");
         let expected = vec!(
             TokPassage {name: "Passage".to_string(), location: (1, 3)},
             TokMacroIf {location: (2, 3)},
-            TokVariable {location: (2, 6), name: "$var".to_string()},
-            TokCompOp {location: (2, 11), op_name: "==".to_string()},
-            TokInt {location: (2, 14), value: 1},
-            TokMacroEnd {location: (2, 15)},
-            TokText {location: (2, 17), text: "1".to_string()},
-            TokMacroElse {location: (2, 20)},
-            /* TODO: Fix else if */
-            TokCompOp {location: (2, 32), op_name: "is".to_string()},
-            TokInt {location: (2, 35), value: 2},
-            TokMacroEnd {location: (2, 36)},
-            TokText {location: (2, 38), text: "2".to_string()},
-            TokMacroElse {location: (2, 41)},
-            TokMacroEnd {location: (2, 45)},
-            TokText {location: (2, 47), text: "3".to_string()},
-            TokMacroEndIf {location: (2, 50)},
-            TokMacroEnd {location: (2, 55)}
+            TokVariable {location: (2, 6), name: "$var1".to_string()},
+            TokCompOp {location: (2, 12), op_name: "==".to_string()},
+            TokInt {location: (2, 15), value: 1},
+            TokMacroEnd {location: (2, 16)},
+            TokText {text: "1".to_string(), location: (2, 18) },
+            TokMacroElseIf {location: (2, 21)},
+            TokVariable {name: "$var2".to_string(), location: (2, 29)},
+            TokCompOp {op_name: "is".to_string(), location: (2, 35)},
+            TokInt {location: (2, 38), value: 2},
+            TokMacroEnd {location: (2, 39)},
+            TokText {text: "2".to_string(), location: (2, 41)},
+            TokMacroElse {location: (2, 44)},
+            TokMacroEnd {location: (2, 48)},
+            TokText {text: "3".to_string(), location: (2, 50)},
+            TokMacroEndIf {location: (2, 53)},
+            TokMacroEnd {location: (2, 58)}
         );
 
         assert_tok_eq(expected, tokens);
