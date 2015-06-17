@@ -1,10 +1,5 @@
 ::Start
-ASCII-Zeichensatz: [[ASCII|Ascii]]
-Unicode-Zeichen: [[Unicode]]
-Variablen set und print: [[Variablen]]
-If: [[If and Else|If]]
-Format: [[Format]]
-Links: (siehe links oben)
+<<linksToAllPassages>>
 
 ::Ascii
 ASCII-Zeichen
@@ -14,12 +9,7 @@ ASCII-Zeichen
 @ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]_
 'abcdefghijklmnopqrstuvwxyz{|}~ 
 
-ASCII-Zeichensatz: [[ASCII|Ascii]]
-Unicode-Zeichen: [[Unicode]]
-Variablen set und print: [[Variablen]]
-If: [[If and Else|If]]
-Format: [[Format]]
-Links: (siehe links oben)
+<<linksToAllPassages>>
 
 ::Unicode
 Unicode
@@ -90,12 +80,7 @@ Musical Symbols:
 Braille Patterns:
  ⠁⠇⠖⠥⠵⠽⡅
 
-ASCII-Zeichensatz: [[ASCII|Ascii]]
-Unicode-Zeichen: [[Unicode]]
-Variablen set und print: [[Variablen]]
-If: [[If and Else|If]]
-Format: [[Format]]
-Links: (siehe links oben)
+<<linksToAllPassages>>
 
 ::Variablen
 Variablen<<set $last to 3>>
@@ -106,12 +91,7 @@ variable set:
 print value of $var2: <<$var2>>
 print value of $var3: <<$var3>>
 
-ASCII-Zeichensatz: [[ASCII|Ascii]]
-Unicode-Zeichen: [[Unicode]]
-Variablen set und print: [[Variablen]]
-If: [[If and Else|If]]
-Format: [[Format]]
-Links: (siehe links oben)
+<<linksToAllPassages>>
 
 ::If
 Verzweigungen:
@@ -126,12 +106,7 @@ last passage was: Ascii
 last passage was: Unicode
 <<endif>>
 
-ASCII-Zeichensatz: [[ASCII|Ascii]]
-Unicode-Zeichen: [[Unicode]]
-Variablen set und print: [[Variablen]]
-If: [[If and Else|If]]
-Format: [[Format]]
-Links: (siehe links oben)
+<<linksToAllPassages>>
 
 :: Format
 Formatierung
@@ -177,6 +152,10 @@ current   --------------------------
   A2        0123456789.,!?_#'"/\-:()
           --------------------------}}}
 
+<<linksToAllPassages>>
+
+
+::linksToAllPassages
 ASCII-Zeichensatz: [[ASCII|Ascii]]
 Unicode-Zeichen: [[Unicode]]
 Variablen set und print: [[Variablen]]
