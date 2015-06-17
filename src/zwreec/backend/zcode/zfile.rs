@@ -236,7 +236,7 @@ impl Zfile {
     }
 
     /// adds jump to write the jump-addresses after reading all commands
-    fn add_jump(&mut self, name: String, jump_type: JumpType) {
+    pub fn add_jump(&mut self, name: String, jump_type: JumpType) {
         let from_addr: u16 = self.data.bytes.len() as u16;
         let jump: Zjump = Zjump{ from_addr: from_addr, name: name, jump_type: jump_type};
         self.jumps.push(jump);
@@ -298,6 +298,7 @@ impl Zfile {
             &ZOP::StoreW{array_address, index, variable} => op::op_storew(array_address, index, variable,self.object_addr),
             &ZOP::Call1NVar{variable} => op::op_call_1n_var(variable),
             &ZOP::EraseWindow{value} => op::op_erase_window(value),
+            &ZOP::ReadCharTimer{local_var_id, timer, ref routine} => op::op_read_char_timer(local_var_id, timer, routine,self),
 
             _ => Vec::new()
         };
@@ -311,7 +312,6 @@ impl Zfile {
             &ZOP::Routine{ref name, count_variables} => self.routine(name, count_variables),
             &ZOP::Label{ref name} => self.label(name),
             &ZOP::JE{local_var_id, equal_to_const, ref jump_to_label} => self.op_je(local_var_id, equal_to_const, jump_to_label),
-            &ZOP::ReadCharTimer{local_var_id, timer, ref routine} => self.op_read_char_timer(local_var_id, timer, routine),
             &ZOP::JL{local_var_id, local_var_id2, ref jump_to_label} => self.op_jl(local_var_id, local_var_id2, jump_to_label),
             &ZOP::Jump{ref jump_to_label} => self.op_jump(jump_to_label),
             _ => ()
@@ -608,25 +608,6 @@ impl Zfile {
     }
 
 
-    /// reads keys from the keyboard and saves the asci-value in local_var_id
-    /// read_char is VAROP
-    pub fn op_read_char_timer(&mut self, local_var_id: u8, timer: u8, routine: &str) {
-        let args: Vec<ArgType> = vec![ArgType::SmallConst, ArgType::SmallConst, ArgType::LargeConst, ArgType::Nothing];
-        self.op_var(0x16, args);
-
-        // write argument value
-        self.data.append_byte(0x00);
-
-        // write timer
-        self.data.append_byte(timer);
-
-        // writes routine
-        self.add_jump(routine.to_string(), JumpType::Routine);
-
-        // write varible id
-        self.data.append_byte(local_var_id);
-    }
-
 
     /// jumps to a label
     pub fn op_jump(&mut self, jump_to_label: &str) {
@@ -727,16 +708,6 @@ impl Zfile {
             byte = byte | value;
             self.data.append_byte(byte);
         }
-    }
-
-    /// op-codes with variable operators (4 are possible)
-    fn op_var(&mut self, value: u8, arg_types: Vec<ArgType>) {
-        // opcode
-        let byte = value | 0xe0;
-        self.data.append_byte(byte);
-
-        let byte2: u8 = self.encode_variable_arguments(arg_types);
-        self.data.append_byte(byte2);
     }
 
     /// encodes the argtypes for variable some 2OPs and varOPs

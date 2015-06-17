@@ -1,6 +1,7 @@
 pub use super::zfile::ArgType;
 pub use super::zfile::JumpType;
 pub use super::zfile::Zjump;
+pub use super::zfile::Zfile;
 
 
 
@@ -9,7 +10,25 @@ pub use super::zfile::Zjump;
 
 
 
+/// reads keys from the keyboard and saves the asci-value in local_var_id
+/// read_char is VAROP
+pub fn op_read_char_timer(local_var_id: u8, timer: u8, routine: &str, zf: &mut Zfile) -> Vec<u8> {
+    let args: Vec<ArgType> = vec![ArgType::SmallConst, ArgType::SmallConst, ArgType::LargeConst, ArgType::Nothing];
+    let mut bytes = op_var(0x16, args);
 
+    // write argument value
+    bytes.push(0x00);
+
+    // write timer
+    bytes.push(timer);
+
+    // writes routine
+    zf.add_jump(routine.to_string(), JumpType::Routine);
+
+    // write varible id
+    bytes.push(local_var_id);
+    bytes
+}
 
 
 /// clears spcified window
