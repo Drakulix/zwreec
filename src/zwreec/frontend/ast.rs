@@ -185,6 +185,76 @@ fn gen_zcode<'a>(node: &'a ASTNode, mut out: &mut zfile::Zfile, mut manager: &mu
                     let after_else_label = format!("after_else_{}", manager.ids_if.pop_id());
                     vec![ZOP::Label{name: after_else_label}]
                 },
+
+                &TokMacroPrint { .. } => {
+                    if t.childs.len() != 1 {
+                        panic!("Doesn't support print with 0 or more than one argument");
+                    }
+
+                    let mut code: Vec<ZOP> = vec![];
+
+                    let child = &t.childs[0];
+
+                    match child.as_default().category {
+                        TokInt {ref value, ..} => {
+                            code.push(ZOP::Print{text: format!("{}", value)},);
+                        },
+                        TokBoolean {ref value, ..} => {
+                            code.push(ZOP::Print{text: format!("{}", value)},);
+                        },
+                        TokFunction {ref name, ..} => {
+                            if *name == "random" {
+                                let args = &child.as_default().childs;
+                                if args.len() != 2 {
+                                    panic!("Function random only supports 2 args");
+                                }
+
+                                if args[0].as_default().childs.len() != 1 ||
+                                   args[0].as_default().childs.len() != 1 {
+                                    panic!("Unsupported Expression");
+                                }
+
+                                let from = args[0].as_default().childs[0].as_default();
+                                let to = args[1].as_default().childs[0].as_default();
+
+                                let mut from_value;
+                                let mut to_value;
+
+                                if let TokInt {value, ..} = from.category {
+                                    from_value = value as u16;
+                                } else {
+                                    panic!("Unsupported Expression");
+                                };
+
+                                if let TokInt {value, ..} = to.category {
+                                    to_value = value as u16;
+                                } else {
+                                    panic!("Unsupported Expression");
+                                };
+
+                                let range = (to_value - from_value + 1) as u8;
+
+                                let var = manager.symbol_table.get_symbol_id("int0");
+
+                                code.push(ZOP::Random {range: range, variable: var} );
+
+                                if from_value <= 0 {
+                                    code.push(ZOP::Sub {variable1: var, sub_const: 1, variable2: var} );
+                                } else {
+                                    code.push(ZOP::Add {variable1: var, add_const: from_value - 1, variable2: var} );
+                                }
+                                code.push(ZOP::PrintNumVar {variable: var} );
+                            } else {
+                                panic!("Unsupported function '{}'", name);
+                            }
+                        },
+                        _ => {
+                            panic!("Unsupported Expression");
+                        }
+                    };
+                    code
+                }
+
                 &TokMacroContentVar {ref var_name, .. } => {
                     let var_id = manager.symbol_table.get_symbol_id(&*var_name);
                     match manager.symbol_table.get_symbol_type(&*var_name) {
@@ -294,6 +364,10 @@ impl AST {
     /// convert ast to zcode
     pub fn to_zcode(& self, out: &mut zfile::Zfile) {
         let mut manager = CodeGenManager::new();
+
+        // Insert temp variables for internal calculations
+        manager.symbol_table.insert_new_symbol("int0", Type::Integer);
+
         let mut code: Vec<ZOP> = vec![];
         for child in &self.passages {
             for instr in gen_zcode(child, out, &mut manager) {
