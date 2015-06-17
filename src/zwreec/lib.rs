@@ -22,7 +22,7 @@ use std::io::{Read,Write};
 #[allow(unused_variables)]
 pub fn compile<R: Read, W: Write>(cfg: Config, input: &mut R, output: &mut W) {
     //screen
-    let mut clean_input = frontend::screener::screen(&cfg, input);
+    let mut clean_input = frontend::lexer::screen(&cfg, input);
 
     // tokenize
     let tokens = frontend::lexer::lex(&cfg, &mut clean_input);

@@ -1,4 +1,5 @@
-use std::io::{BufReader, Read};
+use std::io::{Cursor, BufReader, Read};
+use std::error::Error;
 use utils::extensions::{Peeking, PeekingExt, FilteringScan, FilteringScanExt};
 use config::Config;
 
@@ -8,6 +9,18 @@ pub struct ScanState {
     current_text: String,
     current_text_location: (u64, u64),
     skip_next: bool,
+}
+
+#[allow(unused_variables)]
+pub fn screen<R: Read>(cfg: &Config, input: &mut R) -> Cursor<Vec<u8>> {
+
+    let mut content = String::new();
+    match input.read_to_string(&mut content) {
+        Err(why) => panic!("could not read from input: {}", Error::description(&why)),
+        Ok(_) => debug!("read input to buffer"),
+    };
+
+    Cursor::new(content.bytes().collect())
 }
 
 #[allow(unused_variables)]
@@ -179,6 +192,7 @@ impl Token {
 }
 
 rustlex! TweeLexer {
+
     // Properties
     property new_line:bool = true;
     property format_bold_open:bool = false;
@@ -194,8 +208,8 @@ rustlex! TweeLexer {
     let UNDERSCORE = '_';
     let NEWLINE = '\n';
 
-    let INITIAL_START_CHAR = [^":"'\n'] | ':' [^":"'\n'];
-    let INITIAL_CHAR = [^'\n'];
+    let INITIAL_START_CHAR = [^": "'\n''\t'] | ':' [^": "'\n''\t'];
+    let INITIAL_CHAR = [^" "'\n''\t'];
     let TEXT_INITIAL = INITIAL_START_CHAR INITIAL_CHAR*;
 
     // If for example // is at a beginning of a line, then // is matched and not just /
@@ -272,23 +286,22 @@ rustlex! TweeLexer {
     let LINK_SIMPLE = "[[" (PASSAGE_NAME | VAR_NAME) "]";
     let LINK_LABELED = "[[" LINK_TEXT "|" (PASSAGE_NAME | VAR_NAME) "]";
 
+    let COMMENT = "/%" ([^"%"]*(("%")*[^"%/"])?)* ("%")* "%/";
+
     INITIAL {
         PASSAGE_START => |lexer:&mut TweeLexer<R>| -> Option<Token> {
             lexer.PASSAGE();
             None
         }
-        TEXT_INITIAL =>  |lexer:&mut TweeLexer<R>| -> Option<Token> {
-            lexer.INITIAL_NON_NEWLINE();
-            None
-        }
 
-    }
+        TEXT_INITIAL =>  |_:&mut TweeLexer<R>| -> Option<Token> { None }
 
-    INITIAL_NON_NEWLINE {
-        NEWLINE =>  |lexer:&mut TweeLexer<R>| -> Option<Token> {
-            lexer.INITIAL();
-            None
-        }
+        WHITESPACE =>  |_:&mut TweeLexer<R>| -> Option<Token> { None }
+
+        NEWLINE => |_:&mut TweeLexer<R>| -> Option<Token> { None }
+
+        COMMENT =>  |_:&mut TweeLexer<R>| -> Option<Token> { None }
+
     }
 
     NEWLINE {
@@ -381,6 +394,11 @@ rustlex! TweeLexer {
         FORMAT_HORIZONTAL_LINE  =>  |lexer:&mut TweeLexer<R>| Some(TokFormatHorizontalLine {location: lexer.yylloc()} )
         FORMAT_INDENT_BLOCK  =>  |lexer:&mut TweeLexer<R>| Some(TokFormatIndentBlock {location: lexer.yylloc()} )
 
+        COMMENT =>  |lexer:&mut TweeLexer<R>| -> Option<Token> {
+            lexer.NON_NEWLINE();
+            None
+        }
+
         NEWLINE => |lexer:&mut TweeLexer<R>| Some(TokNewLine {location: lexer.yylloc()} )
     }
 
@@ -450,6 +468,8 @@ rustlex! TweeLexer {
             lexer.NEWLINE();
             Some(TokNewLine {location: lexer.yylloc()} )
         }
+
+        COMMENT =>  |_:&mut TweeLexer<R>| -> Option<Token> { None }
 
         TEXT =>  |lexer:&mut TweeLexer<R>| Some(TokText {location: lexer.yylloc(), text: lexer.yystr()} )
     }
@@ -710,6 +730,52 @@ mod tests {
         if panic_msg.len() != 0 {
             panic!(panic_msg);
         }
+    }
+
+    #[test]
+    fn preprocessing_test() {
+        // This should remove all comments
+        let tokens = test_lex("/%\nVortest1\n%/\n   /% Vortest2 %/\n        bla\nLorem Ipsum doloris!\n\n::Start /% Test %/\nText1, der bleiben muss\n/% Test1 %/\nText2, der bleiben muss\n/% /% Test2 %/\nText3, der bleiben muss\n/%% Test3 %/\nText4, der bleiben muss\n/% Test4 %%/ ! TestHeading1\nText5, der bleiben muss\n/% /% Test5 %/ %/\nText6, der bleiben muss\n/%%%%%%\nTest6\n%%%%%%%/\nText7, der bleiben muss /%\n/%\nTest7\n%/ ! TestHeading2\n/%%/\nText Text /% Test8 %/ Text Text\n{{{ Monospace /% Kommentar %/ }}}\n<<if true>> Bla /% Test10 %/ <<endif>>");
+        let expected = vec!(
+            TokPassage {name: "Start /% Test %/".to_string(), location: (8, 3)},
+            TokText { text: "Text1, der bleiben muss".to_string(), location: (9, 1) },
+            TokNewLine { location: (9, 24) },
+            TokNewLine { location: (10, 12) },
+            TokText { text: "Text2, der bleiben muss".to_string(), location: (11, 1) },
+            TokNewLine { location: (11, 24) },
+            TokNewLine { location: (12, 15) },
+            TokText { text: "Text3, der bleiben muss".to_string(), location: (13, 1) },
+            TokNewLine { location: (13, 24) },
+            TokNewLine { location: (14, 13) },
+            TokText { text: "Text4, der bleiben muss".to_string(), location: (15, 1) },
+            TokNewLine { location: (15, 24) },
+            TokText { text: " ! TestHeading1".to_string(), location: (16, 13) },
+            TokNewLine { location: (16, 28) },
+            TokText { text: "Text5, der bleiben muss".to_string(), location: (17, 1) },
+            TokNewLine { location: (17, 24) },
+            TokText { text: " %/".to_string(), location: (18, 15) },
+            TokNewLine { location: (18, 18) },
+            TokText { text: "Text6, der bleiben muss".to_string(), location: (19, 1) },
+            TokNewLine { location: (19, 24) },
+            TokNewLine { location: (22, 9) },
+            TokText { text: "Text7, der bleiben muss  ! TestHeading2".to_string(), location: (23, 1) },
+            TokNewLine { location: (26, 18) },
+            TokNewLine { location: (27, 5) },
+            TokText { text: "Text Text  Text Text".to_string(), location: (28, 1) },
+            TokNewLine { location: (28, 32) },
+            TokFormatMonoStart { location: (29, 1) },
+            TokText { text: " Monospace /% Kommentar %/ ".to_string(), location: (29, 4) },
+            TokFormatMonoEnd { location: (29, 31) },
+            TokNewLine { location: (29, 34) },
+            TokMacroIf { location: (30, 3) },
+            TokBoolean { value: "true".to_string(), location: (30, 6) },
+            TokMacroEnd { location: (30, 10) },
+            TokText { text: " Bla  ".to_string(), location: (30, 12) },
+            TokMacroEndIf { location: (30, 32) },
+            TokMacroEnd { location: (30, 37) }
+        );
+
+        assert_tok_eq(expected, tokens);
     }
 
     #[test]
