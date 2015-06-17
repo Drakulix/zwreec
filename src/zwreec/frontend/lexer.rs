@@ -124,7 +124,7 @@ pub enum Token {
     TokLogOp                  {location: (u64, u64), op_name: String},
     TokSemiColon              {location: (u64, u64)},
     TokNewLine                {location: (u64, u64)},
-    TokPseudo,
+    TokExpression,
 }
 
 impl Token {
@@ -189,7 +189,7 @@ impl Token {
             &TokSemiColon{location} |
             &TokNewLine{location}
                 => location,
-            &TokPseudo => (0, 0)
+            &TokExpression => (0, 0)
         }
     }
 }

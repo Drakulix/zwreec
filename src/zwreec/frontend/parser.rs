@@ -180,7 +180,7 @@ impl<'a> Parser<'a> {
                     // PassageContent -> ε
                 },
 
-                // Formating
+                // Formatting
                 (Formating, &TokFormatBoldStart { .. } ) => {
                     new_nodes.push(PNode::new_non_terminal(BoldFormatting));
                 },
@@ -262,8 +262,7 @@ impl<'a> Parser<'a> {
                     new_nodes.push(PNode::new_non_terminal(EndIf));
 
                     // ast
-                    self.ast.up_child_down(tok.clone());
-                    self.ast.child_down(TokPseudo);
+                    self.ast.two_childs_down(tok.clone(), TokExpression);
                 },
                 (Macro, tok @ &TokMacroPrint { .. } ) => {
                     new_nodes.push(PNode::new_terminal(tok.clone()));
@@ -302,7 +301,7 @@ impl<'a> Parser<'a> {
 
                     // ast
                     self.ast.up_child_down(tok.clone());
-                    self.ast.child_down(TokPseudo);
+                    self.ast.child_down(TokExpression);
                 },
                 (ElseIf, _) => {
                     // ElseIf -> ε
@@ -323,8 +322,6 @@ impl<'a> Parser<'a> {
                     new_nodes.push(PNode::new_terminal(tok.clone()));
                     new_nodes.push(PNode::new_terminal(TokMacroEnd {location: (0, 0)} ));
 
-                    // ast
-                    //self.ast.up_child(tok.clone());
                 }
 
                 // ExpressionList
@@ -493,7 +490,7 @@ impl<'a> Parser<'a> {
                     new_nodes.push(PNode::new_non_terminal(Expression));
                     new_nodes.push(PNode::new_non_terminal(Argumentsf));
 
-                    self.ast.child_down(TokPseudo);
+                    self.ast.child_down(TokExpression);
                 },
 
                 // Argumentsf
