@@ -1,6 +1,7 @@
 use std::io::{Cursor, Read};
 use std::error::Error;
 use utils::extensions::{PeekingExt, FilteringScanExt};
+use config::Config;
 
 // TODO: do not remove if in passage name, monospace etc.
 
@@ -9,7 +10,8 @@ struct ScanState {
     skip_next: bool,
 }
 
-pub fn screen<R: Read>(input: &mut R) -> Cursor<Vec<u8>> {
+#[allow(unused_variables)]
+pub fn screen<R: Read>(cfg: &Config, input: &mut R) -> Cursor<Vec<u8>> {
 
     let mut content = String::new();
     match input.read_to_string(&mut content) {

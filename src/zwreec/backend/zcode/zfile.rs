@@ -9,6 +9,8 @@ pub enum ZOP {
   PrintUnicode{c: u16},
   Print{text: String},
   PrintNumVar{variable: u8},
+  PrintPaddr{address: u8},
+  PrintAddr{address: u8},
   PrintOps{text: String},
   Call1N{jump_to_label: String},
   Call2NWithAddress{jump_to_label: String, address: String},
@@ -266,7 +268,7 @@ impl Zfile {
 
     /// write opcodes to file but also return written bytes for testing purposes
     /// as well as the resulting new labels and jumps
-    pub fn write_zop(&mut self, instr: &ZOP) -> (Vec<Zlabel>, Vec<Zjump>, &[u8]){
+    pub fn write_zop(&mut self, instr: &ZOP) -> (Vec<Zlabel>, Vec<Zjump>, Vec<u8>){
         let beginning = self.data.bytes.len();
         let old_jumps: Vec<Zjump> = self.jumps.clone();
         let old_labels: Vec<Zlabel> = self.labels.clone();
@@ -275,6 +277,8 @@ impl Zfile {
             &ZOP::Print{ref text} => self.op_print(text),
             &ZOP::PrintNumVar{variable} => self.op_print_num_var(variable),
             &ZOP::PrintOps{ref text} => self.gen_print_ops(text),
+            &ZOP::PrintPaddr{address} => self.op_print_paddr(address),
+            &ZOP::PrintAddr{address} => self.op_print_addr(address),
             &ZOP::Call1N{ref jump_to_label} => self.op_call_1n(jump_to_label),
             &ZOP::Call2NWithAddress{ref jump_to_label, ref address} => self.op_call_2n_with_address(jump_to_label, address),
             &ZOP::Call1NVar{variable} => self.op_call_1n_var(variable),
@@ -314,7 +318,7 @@ impl Zfile {
                 new_jumps.push(jump.clone());
             }
         }
-        (new_labels, new_jumps, &self.data.bytes[beginning..self.data.bytes.len()])
+        (new_labels, new_jumps, self.data.bytes[beginning..self.data.bytes.len()].to_vec())
     }
 
     /// generates normal print opcodes for ASCII characters and unicode print
@@ -677,12 +681,25 @@ impl Zfile {
         self.data.append_byte(variable);
     }
 
-    /// prints the value of a variable (only ints a possibe)
+    /// Prints the value of a variable (only ints a possibe)
     pub fn op_print_num_var(&mut self, variable: u8) {
         let args: Vec<ArgType> = vec![ArgType::Variable, ArgType::Nothing, ArgType::Nothing, ArgType::Nothing];
         self.op_var(0x06, args);
 
         self.data.append_byte(variable);
+    }
+    /// prints string at given packet adress TODO: needs testing
+    pub fn op_print_paddr(&mut self, address: u8) {
+        self.op_1(0x0D, ArgType::Variable);
+
+        self.data.append_byte(address);
+    }
+
+    /// prints string at given adress TODO: needs testing
+    pub fn op_print_addr(&mut self, address: u8) {
+        self.op_1(0x07, ArgType::Variable);
+
+        self.data.append_byte(address);
     }
 
     /// calculates a random numer from 1 to range
@@ -998,4 +1015,27 @@ fn test_zfile_general_op_length() {
     let args: Vec<ArgType> = vec![ArgType::SmallConst, ArgType::Nothing, ArgType::Nothing, ArgType::Nothing];
     zfile.op_var(0x00, args);
     assert_eq!(zfile.data.len(), 5);
+}
+
+#[test]
+fn test_zfile_label_and_jump_loop() {
+    let mut zfile: Zfile = Zfile::new();
+    zfile.start();
+    let (labels, jumps1, bytes1) =  zfile.write_zop(&ZOP::Label{name: "loop".to_string()});
+    assert_eq!(jumps1.len() + bytes1.len(), 0);
+    assert_eq!(labels.len(), 1);
+    let (labels2, jumps, bytes) =  zfile.write_zop(&ZOP::Jump{jump_to_label: "loop".to_string()});
+    assert_eq!(labels2.len(), 0);
+    assert_eq!(jumps.len(), 1);
+    assert_eq!(bytes.len(), 3);
+    let pos = zfile.data.len() - bytes.len();  // start position of written bytes
+    zfile.end();
+    // in this example we have the following data:
+    //[Zlabel { to_addr: 2055, name: "loop" }] [] []
+    //[] [Zjump { from_addr: 2056, name: "loop", jump_type: Jump }] [140, 255, 255]
+    // 0xffff is -1 as i16 because we have a relative jump
+    assert_eq!(zfile.data.bytes[pos], bytes[0]);  // jump op
+    let rel_addr: i16 = (zfile.data.bytes[pos+1] as u16 * 256 + zfile.data.bytes[pos+2] as u16) as i16;
+    assert_eq!((labels[0].to_addr as i32 - jumps[0].from_addr as i32) as i16, rel_addr);  // specified as in write_jumps()
+    assert_eq!(-1 as i16, rel_addr);  // this is the expected result, jump one address back
 }
