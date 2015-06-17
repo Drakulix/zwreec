@@ -1,0 +1,4 @@
+::Start
+Random 0..1: <<print random(0, 1)>>
+Random 0..100: <<print random(0, 100)>>
+
