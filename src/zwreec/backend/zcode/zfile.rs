@@ -299,6 +299,9 @@ impl Zfile {
             &ZOP::Call1NVar{variable} => op::op_call_1n_var(variable),
             &ZOP::EraseWindow{value} => op::op_erase_window(value),
             &ZOP::ReadCharTimer{local_var_id, timer, ref routine} => op::op_read_char_timer(local_var_id, timer, routine,self),
+            &ZOP::JL{local_var_id, local_var_id2, ref jump_to_label} => op::op_jl(local_var_id, local_var_id2, jump_to_label,self),
+            &ZOP::JE{local_var_id, equal_to_const, ref jump_to_label} => op::op_je(local_var_id, equal_to_const, jump_to_label,self),
+            &ZOP::Call2NWithAddress{ref jump_to_label, ref address} => op::op_call_2n_with_address(jump_to_label, address,self),
 
             _ => Vec::new()
         };
@@ -308,11 +311,8 @@ impl Zfile {
             &ZOP::Print{ref text} => self.op_print(text),
             &ZOP::PrintOps{ref text} => self.gen_print_ops(text),
             &ZOP::Call1N{ref jump_to_label} => self.op_call_1n(jump_to_label),
-            &ZOP::Call2NWithAddress{ref jump_to_label, ref address} => self.op_call_2n_with_address(jump_to_label, address),
             &ZOP::Routine{ref name, count_variables} => self.routine(name, count_variables),
             &ZOP::Label{ref name} => self.label(name),
-            &ZOP::JE{local_var_id, equal_to_const, ref jump_to_label} => self.op_je(local_var_id, equal_to_const, jump_to_label),
-            &ZOP::JL{local_var_id, local_var_id2, ref jump_to_label} => self.op_jl(local_var_id, local_var_id2, jump_to_label),
             &ZOP::Jump{ref jump_to_label} => self.op_jump(jump_to_label),
             _ => ()
         }
@@ -592,21 +592,6 @@ impl Zfile {
         self.add_jump(jump_to_label.to_string(), JumpType::Routine);
     }
 
-    /// calls a routine with an argument(variable) an throws result away
-    /// becouse the value isn't known until all routines are set, it
-    /// inserts a pseudo routoune_address
-    /// call_2n is 2OP
-    pub fn op_call_2n_with_address(&mut self, jump_to_label: &str, address: &str) {
-        let args: Vec<ArgType> = vec![ArgType::LargeConst, ArgType::LargeConst];
-        self.op_2(0x1a, args);
-
-        // the address of the jump_to_label
-        self.add_jump(jump_to_label.to_string(), JumpType::Routine);
-
-        // the address of the argument
-        self.add_jump(address.to_string(), JumpType::Routine);
-    }
-
 
 
     /// jumps to a label
@@ -615,39 +600,7 @@ impl Zfile {
         self.add_jump(jump_to_label.to_string(), JumpType::Jump);
     }
 
-    /// jumps to a label if the value of local_var_id is equal to const
-    /// is an 2OP, but with small constant and variable
-    pub fn op_je(&mut self, local_var_id: u8, equal_to_const: u8, jump_to_label: &str) {
 
-        let args: Vec<ArgType> = vec![ArgType::Variable, ArgType::SmallConst];
-        self.op_2(0x01, args);
-        
-        // variable id
-        self.data.append_byte(local_var_id);
-
-        // const
-        self.data.append_byte(equal_to_const);
-
-        // jump
-        self.add_jump(jump_to_label.to_string(), JumpType::Branch);
-    }
-
-    /// jumps to a label if the value of local_var_id is equal to local_var_id2
-    /// is an 2OP, but with variable and variable
-    pub fn op_jl(&mut self, local_var_id: u8, local_var_id2: u8, jump_to_label: &str) {
-
-        let args: Vec<ArgType> = vec![ArgType::Variable, ArgType::Variable];
-        self.op_2(0x02, args);
-        
-        // variable id
-        self.data.append_byte(local_var_id);
-
-        // variable id 2
-        self.data.append_byte(local_var_id2);
-
-        // jump
-        self.add_jump(jump_to_label.to_string(), JumpType::Branch);
-    }
 
     /// prints an unicode char to the current stream
     pub fn op_print_unicode_char(&mut self, character: u16){

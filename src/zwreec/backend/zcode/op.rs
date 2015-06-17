@@ -9,6 +9,60 @@ pub use super::zfile::Zfile;
 
 
 
+/// calls a routine with an argument(variable) an throws result away
+/// becouse the value isn't known until all routines are set, it
+/// inserts a pseudo routoune_address
+/// call_2n is 2OP
+pub fn op_call_2n_with_address(jump_to_label: &str, address: &str, zf: &mut Zfile) -> Vec<u8> {
+    let args: Vec<ArgType> = vec![ArgType::LargeConst, ArgType::LargeConst];
+    let mut bytes = op_2(0x1a, args);
+
+    // the address of the jump_to_label
+    zf.add_jump(jump_to_label.to_string(), JumpType::Routine);
+
+    // the address of the argument
+    zf.add_jump(address.to_string(), JumpType::Routine);
+    bytes
+}
+
+
+/// jumps to a label if the value of local_var_id is equal to const
+/// is an 2OP, but with small constant and variable
+pub fn op_je(local_var_id: u8, equal_to_const: u8, jump_to_label: &str, zf: &mut Zfile) -> Vec<u8> {
+
+    let args: Vec<ArgType> = vec![ArgType::Variable, ArgType::SmallConst];
+    let mut bytes = op_2(0x01, args);
+    
+    // variable id
+    bytes.push(local_var_id);
+
+    // const
+    bytes.push(equal_to_const);
+
+    // jump
+    zf.add_jump(jump_to_label.to_string(), JumpType::Branch);
+    bytes
+}
+
+
+/// jumps to a label if the value of local_var_id is equal to local_var_id2
+/// is an 2OP, but with variable and variable
+pub fn op_jl(local_var_id: u8, local_var_id2: u8, jump_to_label: &str, zf: &mut Zfile) -> Vec<u8> {
+
+    let args: Vec<ArgType> = vec![ArgType::Variable, ArgType::Variable];
+    let mut bytes = op_2(0x02, args);
+    
+    // variable id
+    bytes.push(local_var_id);
+
+    // variable id 2
+    bytes.push(local_var_id2);
+
+    // jump
+    zf.add_jump(jump_to_label.to_string(), JumpType::Branch);
+    bytes
+}
+
 
 /// reads keys from the keyboard and saves the asci-value in local_var_id
 /// read_char is VAROP
