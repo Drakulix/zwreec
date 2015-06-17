@@ -733,6 +733,52 @@ mod tests {
     }
 
     #[test]
+    fn preprocessing_test() {
+        // This should remove all comments
+        let tokens = test_lex("/%\nVortest1\n%/\n   /% Vortest2 %/\n        bla\nLorem Ipsum doloris!\n\n::Start /% Test %/\nText1, der bleiben muss\n/% Test1 %/\nText2, der bleiben muss\n/% /% Test2 %/\nText3, der bleiben muss\n/%% Test3 %/\nText4, der bleiben muss\n/% Test4 %%/ ! TestHeading1\nText5, der bleiben muss\n/% /% Test5 %/ %/\nText6, der bleiben muss\n/%%%%%%\nTest6\n%%%%%%%/\nText7, der bleiben muss /%\n/%\nTest7\n%/ ! TestHeading2\n/%%/\nText Text /% Test8 %/ Text Text\n{{{ Monospace /% Kommentar %/ }}}\n<<if true>> Bla /% Test10 %/ <<endif>>");
+        let expected = vec!(
+            TokPassage {name: "Start /% Test %/".to_string(), location: (8, 3)},
+            TokText { text: "Text1, der bleiben muss".to_string(), location: (9, 1) },
+            TokNewLine { location: (9, 24) },
+            TokNewLine { location: (10, 12) },
+            TokText { text: "Text2, der bleiben muss".to_string(), location: (11, 1) },
+            TokNewLine { location: (11, 24) },
+            TokNewLine { location: (12, 15) },
+            TokText { text: "Text3, der bleiben muss".to_string(), location: (13, 1) },
+            TokNewLine { location: (13, 24) },
+            TokNewLine { location: (14, 13) },
+            TokText { text: "Text4, der bleiben muss".to_string(), location: (15, 1) },
+            TokNewLine { location: (15, 24) },
+            TokText { text: " ! TestHeading1".to_string(), location: (16, 13) },
+            TokNewLine { location: (16, 28) },
+            TokText { text: "Text5, der bleiben muss".to_string(), location: (17, 1) },
+            TokNewLine { location: (17, 24) },
+            TokText { text: " %/".to_string(), location: (18, 15) },
+            TokNewLine { location: (18, 18) },
+            TokText { text: "Text6, der bleiben muss".to_string(), location: (19, 1) },
+            TokNewLine { location: (19, 24) },
+            TokNewLine { location: (22, 9) },
+            TokText { text: "Text7, der bleiben muss  ! TestHeading2".to_string(), location: (23, 1) },
+            TokNewLine { location: (26, 18) },
+            TokNewLine { location: (27, 5) },
+            TokText { text: "Text Text  Text Text".to_string(), location: (28, 1) },
+            TokNewLine { location: (28, 32) },
+            TokFormatMonoStart { location: (29, 1) },
+            TokText { text: " Monospace /% Kommentar %/ ".to_string(), location: (29, 4) },
+            TokFormatMonoEnd { location: (29, 31) },
+            TokNewLine { location: (29, 34) },
+            TokMacroIf { location: (30, 3) },
+            TokBoolean { value: "true".to_string(), location: (30, 6) },
+            TokMacroEnd { location: (30, 10) },
+            TokText { text: " Bla  ".to_string(), location: (30, 12) },
+            TokMacroEndIf { location: (30, 32) },
+            TokMacroEnd { location: (30, 37) }
+        );
+
+        assert_tok_eq(expected, tokens);
+    }
+
+    #[test]
     fn passage_test() {
         // This should detect the ::Start passage
         let start_tokens = test_lex("::Start");
