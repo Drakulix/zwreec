@@ -61,6 +61,11 @@ fn passage_links_test() {
 }
 
 #[test]
+fn random_test() {
+    test_compile(TESTFOLDER_PASS.to_string() + "Random.twee");
+}
+
+#[test]
 fn current_status_test() {
     test_compile(TESTFOLDER_PASS.to_string() + "CurrentStatus.twee");
 }
