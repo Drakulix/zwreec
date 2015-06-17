@@ -621,7 +621,7 @@ rustlex! TweeLexer {
         PAREN_CLOSE =>|lexer:&mut TweeLexer<R>| Some(TokParenClose{location: lexer.yylloc()} )
         SEMI_COLON => |lexer:&mut TweeLexer<R>| Some(TokSemiColon {location: lexer.yylloc()} )
         ASSIGN =>     |lexer:&mut TweeLexer<R>| Some(TokAssign    {location: lexer.yylloc(), var_name: "".to_string(), op_name: lexer.yystr()} )
-        COLON =>      |lexer:&mut TweeLexer<R>| Some(TokColon     {location: lexer.yylloc()} ),
+        COLON =>      |lexer:&mut TweeLexer<R>| Some(TokColon     {location: lexer.yylloc()} )
         // Expression Stuff End
 
         WHITESPACE =>  |_:&mut TweeLexer<R>| -> Option<Token> {
