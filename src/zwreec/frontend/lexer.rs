@@ -100,6 +100,7 @@ pub enum Token {
     TokMacroSet               {location: (u64, u64)},
     TokMacroIf                {location: (u64, u64)},
     TokMacroElse              {location: (u64, u64)},
+    TokMacroElseIf            {location: (u64, u64)},
     TokMacroEndIf             {location: (u64, u64)},
     TokMacroPrint             {location: (u64, u64)},
     TokMacroDisplay           {location: (u64, u64)},
@@ -163,6 +164,7 @@ impl Token {
             &TokMacroSet{location} |
             &TokMacroIf{location} |
             &TokMacroElse{location} |
+            &TokMacroElseIf{location} |
             &TokMacroEndIf{location} |
             &TokMacroPrint{location} |
             &TokMacroDisplay{location} |
@@ -271,7 +273,7 @@ rustlex! TweeLexer {
 
     let FUNCTION = LETTER+ '(';
 
-    let MACRO_NAME = [^" >"'\n']*;
+    let MACRO_NAME = [^" >"'\n']* ( WHITESPACE+ "if")?;
 
     let ASSIGN = "=" | "to" | "+=" | "-=" | "*=" | "/=";
     let SEMI_COLON = ';';
@@ -514,7 +516,9 @@ rustlex! TweeLexer {
         }
 
         MACRO_NAME =>  |lexer:&mut TweeLexer<R>| -> Option<Token> {
-            match lexer.yystr().trim().as_ref() {
+            let replaced_string = str::replace(lexer.yystr().trim(),  " ", "");
+
+            match replaced_string.as_ref() {
                 "set" => {
                     lexer.MACRO_CONTENT();
                     Some(TokMacroSet {location: lexer.yylloc()} )
@@ -526,6 +530,10 @@ rustlex! TweeLexer {
                 "else" => {
                     lexer.MACRO_CONTENT();
                     Some(TokMacroElse {location: lexer.yylloc()} )
+                },
+                "elseif" => {
+                    lexer.MACRO_CONTENT();
+                    Some(TokMacroElseIf {location: lexer.yylloc()} )
                 },
                 "endif" => {
                     lexer.MACRO_CONTENT();
@@ -549,7 +557,7 @@ rustlex! TweeLexer {
                 },
                 _ => {
                     lexer.MACRO_CONTENT();
-                    Some(TokMacroContentPassageName {location: lexer.yylloc(), passage_name: lexer.yystr().trim().to_string()} )
+                    Some(TokMacroContentPassageName {location: lexer.yylloc(), passage_name: replaced_string.to_string()} )
                 }
             }
         }
@@ -695,7 +703,6 @@ rustlex! TweeLexer {
             None
         }
     }
->>>>>>> 7cf13cd391d163d1b1f77a0863d033aadde171bb
 
 }
 
