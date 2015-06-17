@@ -148,6 +148,7 @@ impl<'a> Parser<'a> {
                     // ast
                     self.ast.add_child(tok.clone());
                 },
+                (PassageContent, &TokMacroDisplay { .. } ) |
                 (PassageContent, &TokMacroSet { .. } ) |
                 (PassageContent, &TokMacroIf  { .. } ) |
                 (PassageContent, &TokVariable { .. } ) |
@@ -242,6 +243,7 @@ impl<'a> Parser<'a> {
                 },
 
                 // Macro
+                (Macro, tok @ &TokMacroDisplay { .. } ) |
                 (Macro, tok @ &TokMacroSet { .. } ) => {
                     new_nodes.push(PNode::new_terminal(tok.clone()));
                     new_nodes.push(PNode::new_non_terminal(ExpressionList));
