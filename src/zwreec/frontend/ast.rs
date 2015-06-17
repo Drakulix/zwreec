@@ -24,7 +24,7 @@ pub struct AST {
 fn gen_zcode<'a>(node: &'a ASTNode, mut out: &mut zfile::Zfile, mut manager: &mut CodeGenManager<'a>) -> Vec<ZOP> {
     let mut state_copy = manager.format_state.clone();
     let mut set_formatting = false;
-  
+
     match node {
         &ASTNode::Passage(ref node) => {
             let mut code: Vec<ZOP> = vec![];
@@ -36,7 +36,7 @@ fn gen_zcode<'a>(node: &'a ASTNode, mut out: &mut zfile::Zfile, mut manager: &mu
                     debug!("no match 1");
                 }
             };
-            
+
             for child in &node.childs {
                 for instr in gen_zcode(child, out, manager) {
                     code.push(instr);
@@ -145,7 +145,7 @@ fn gen_zcode<'a>(node: &'a ASTNode, mut out: &mut zfile::Zfile, mut manager: &mu
                             },
                             Token::TokBoolean {ref value, .. } => {
                                 boolstr_to_u8(&*value)
-                            }, _ => panic!("Unsupported assign value!") 
+                            }, _ => panic!("Unsupported assign value!")
                         };
                     }
 
@@ -217,7 +217,7 @@ fn gen_zcode<'a>(node: &'a ASTNode, mut out: &mut zfile::Zfile, mut manager: &mu
         }
     }
 
-   
+
 }
 
 fn boolstr_to_u8(string: &str) -> u8 {
@@ -227,11 +227,38 @@ fn boolstr_to_u8(string: &str) -> u8 {
     }
 }
 
+pub enum ASTOperation {
+    AddPassage(Token),
+    AddChild(Token),
+    ChildDown(Token),
+    TwoChildsDown(Token, Token),
+    Up,
+    UpChild(Token),
+    UpChildDown(Token),
+}
+
 impl AST {
-    pub fn new() -> AST {
-        AST {
+    pub fn build<I: Iterator<Item=ASTOperation>>(ops: I) -> AST {
+        let mut ast = AST {
             passages: Vec::new(),
-            path: Vec::new(),
+            path: Vec::new()
+        };
+        for op in ops {
+            ast.operation(op);
+        }
+        ast
+    }
+
+    pub fn operation(&mut self, op: ASTOperation) {
+        use self::ASTOperation::*;
+        match op {
+            AddPassage(passage) => self.add_passage(passage),
+            AddChild(child) => self.add_child(child),
+            ChildDown(child) => self.child_down(child),
+            TwoChildsDown(child1, child2) => self.two_childs_down(child1, child2),
+            Up => self.up(),
+            UpChild(child) => self.up_child(child),
+            UpChildDown(child) => self.up_child_down(child),
         }
     }
 
@@ -371,7 +398,7 @@ impl <'a> CodeGenManager<'a> {
 impl IdentifierProvider {
     pub fn new() -> IdentifierProvider {
         IdentifierProvider {
-            current_id: 0, 
+            current_id: 0,
             id_stack: Vec::new()
         }
     }
@@ -410,11 +437,11 @@ impl <'a> SymbolTable<'a> {
         self.symbol_map.contains_key(symbol)
     }
 
-    // Returns the id for a given symbol 
+    // Returns the id for a given symbol
     // (check if is_known_symbol, otherwise panics)
     pub fn get_symbol_id(&self, symbol: &str) -> u8 {
-        let (b,_) = self.symbol_map.get(symbol).unwrap().clone();  
-        b 
+        let (b,_) = self.symbol_map.get(symbol).unwrap().clone();
+        b
     }
 
     pub fn get_symbol_type(&self, symbol: &str) -> Type {
@@ -484,8 +511,8 @@ impl ASTNode {
     }
 
     pub fn as_default(&self) -> &NodeDefault {
-        match self { 
-            &ASTNode::Default(ref def) => def, 
+        match self {
+            &ASTNode::Default(ref def) => def,
             _ => panic!("Node cannot be unwrapped as NodeDefault!")
         }
     }
