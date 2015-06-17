@@ -116,21 +116,21 @@ fn gen_zcode<'a>(node: &'a ASTNode, mut out: &mut zfile::Zfile, mut manager: &mu
 
                     let mut compare: u8 = 1;
 
-                    // check if the first node is a pseudonode
-                    let pseudo_node = match t.childs[0].as_default().category {
+                    // check if the first node is an expression node
+                    let expression_node = match t.childs[0].as_default().category {
                         TokExpression => t.childs[0].as_default(),
                         _ =>  panic!("Unsupported if-expression!")
                     };
 
                     // Check if first token is variable
-                    let var_name = match pseudo_node.childs[0].as_default().category {
+                    let var_name = match expression_node.childs[0].as_default().category {
                         TokVariable {ref name, .. } => name,
                         _ =>  panic!("Unsupported if-expression!")
                     };
 
-                    if pseudo_node.childs.len() > 1 {
+                    if expression_node.childs.len() > 1 {
                         // Check if second token is compare operator
-                        match pseudo_node.childs[1].as_default().category {
+                        match expression_node.childs[1].as_default().category {
                             TokCompOp {ref op_name, .. } => {
                                 match &*(*op_name) {
                                     "==" | "is" => {} ,
@@ -140,7 +140,7 @@ fn gen_zcode<'a>(node: &'a ASTNode, mut out: &mut zfile::Zfile, mut manager: &mu
                         }
 
                         // Check if third token is number
-                        compare = match pseudo_node.childs[2].as_default().category {
+                        compare = match expression_node.childs[2].as_default().category {
                             TokInt {ref value, .. } => {
                                 *value as u8
                             },
