@@ -35,7 +35,8 @@ pub enum NonTerminalType {
     MonoContent,
     Link,
     Macro,
-    Macrof,
+    ElseIf,
+    EndIf,
     Function,
     Functionf,
     Arguments,
@@ -135,7 +136,7 @@ impl<'a> Parser<'a> {
                     // ast
                     self.ast.add_child(tok.clone());
                 },
-                (PassageContent, &TokFormatBoldStart   { .. }) | 
+                (PassageContent, &TokFormatBoldStart   { .. }) |
                 (PassageContent, &TokFormatItalicStart { .. }) |
                 (PassageContent, &TokFormatMonoStart   { .. }) => {
                     new_nodes.push(PNode::new_non_terminal(Formating));
@@ -257,10 +258,12 @@ impl<'a> Parser<'a> {
                     new_nodes.push(PNode::new_non_terminal(ExpressionList));
                     new_nodes.push(PNode::new_terminal(TokMacroEnd {location: (0, 0)} ));
                     new_nodes.push(PNode::new_non_terminal(PassageContent));
-                    new_nodes.push(PNode::new_non_terminal(Macrof));
+                    new_nodes.push(PNode::new_non_terminal(ElseIf));
+                    new_nodes.push(PNode::new_non_terminal(EndIf));
 
                     // ast
-                    self.ast.two_childs_down(tok.clone(), TokPseudo);
+                    self.ast.up_child_down(tok.clone());
+                    self.ast.child_down(TokPseudo);
                 },
                 (Macro, tok @ &TokMacroPrint { .. } ) => {
                     new_nodes.push(PNode::new_terminal(tok.clone()));
@@ -287,8 +290,26 @@ impl<'a> Parser<'a> {
                     // ast
                     self.ast.add_child(tok.clone());
                 },
-                // Macrof
-                (Macrof, tok @ &TokMacroElse { .. } ) => {
+
+
+                // ElseIf
+                (ElseIf, tok @ &TokMacroElseIf { .. } ) => {
+                    new_nodes.push(PNode::new_terminal(tok.clone()));
+                    new_nodes.push(PNode::new_non_terminal(ExpressionList));
+                    new_nodes.push(PNode::new_terminal(TokMacroEnd {location: (0, 0)} ));
+                    new_nodes.push(PNode::new_non_terminal(PassageContent));
+                    new_nodes.push(PNode::new_non_terminal(ElseIf));
+
+                    // ast
+                    self.ast.up_child_down(tok.clone());
+                    self.ast.child_down(TokPseudo);
+                },
+                (ElseIf, _) => {
+                    // ElseIf -> ε
+                },
+
+                // EndIf
+                (EndIf, tok @ &TokMacroElse { .. } ) => {
                     new_nodes.push(PNode::new_terminal(tok.clone()));
                     new_nodes.push(PNode::new_terminal(TokMacroEnd {location: (0, 0)} ));
                     new_nodes.push(PNode::new_non_terminal(PassageContent));
@@ -298,7 +319,7 @@ impl<'a> Parser<'a> {
                     // ast
                     self.ast.up_child_down(tok.clone());
                 },
-                (Macrof, tok @ &TokMacroEndIf { .. } ) => {
+                (EndIf, tok @ &TokMacroEndIf { .. } ) => {
                     new_nodes.push(PNode::new_terminal(tok.clone()));
                     new_nodes.push(PNode::new_terminal(TokMacroEnd {location: (0, 0)} ));
 
@@ -538,7 +559,7 @@ impl<'a> Parser<'a> {
         } else {
             // no token left
 
-            // Sf, PassageContent, Linkf, 
+            // Sf, PassageContent, Linkf,
 
             match top {
                 Sf | PassageContent => {
