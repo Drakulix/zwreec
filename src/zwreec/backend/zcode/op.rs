@@ -211,11 +211,11 @@ pub fn op_store_u8(variable: u8, value: u8) -> Vec<u8> {
 
 /// subtraktion
 /// variable2 = variable1 - sub_const
-pub fn op_sub(variable1: u8, sub_const: u16, variable2: u8) -> Vec<u8> {
+pub fn op_sub(variable1: u8, sub_const: i16, variable2: u8) -> Vec<u8> {
     let args: Vec<ArgType> = vec![ArgType::Variable, ArgType::LargeConst];
     let mut bytes = op_2(0x15, args);
     bytes.push(variable1);
-	write_u16(sub_const, &mut bytes);
+	write_i16(sub_const, &mut bytes);
     bytes.push(variable2);
     bytes
 }
@@ -223,11 +223,11 @@ pub fn op_sub(variable1: u8, sub_const: u16, variable2: u8) -> Vec<u8> {
 
 /// addition
 /// variable2 = variable1 + sub_const
-pub fn op_add(variable1: u8, add_const: u16, variable2: u8) -> Vec<u8> {
+pub fn op_add(variable1: u8, add_const: i16, variable2: u8) -> Vec<u8> {
     let args: Vec<ArgType> = vec![ArgType::Variable, ArgType::LargeConst];
     let mut bytes = op_2(0x14, args);
     bytes.push(variable1);
-	write_u16(add_const, &mut bytes);
+	write_i16(add_const, &mut bytes);
     bytes.push(variable2);
     bytes
 }
@@ -333,6 +333,13 @@ fn encode_variable_arguments( arg_types: Vec<ArgType>) -> u8 {
 
 ///writes u16 to a vec<u8>
 pub fn write_u16(value: u16, v: &mut Vec<u8>) {
+        v.push((value >> 8) as u8);
+        v.push((value & 0xff) as u8);
+}
+
+
+///writes u16 to a vec<u8>
+pub fn write_i16(value: i16, v: &mut Vec<u8>) {
         v.push((value >> 8) as u8);
         v.push((value & 0xff) as u8);
 }
