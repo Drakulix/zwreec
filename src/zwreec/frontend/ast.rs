@@ -317,6 +317,7 @@ pub enum ASTOperation {
     Up,
     UpChild(Token),
     UpChildDown(Token),
+    TwoUp,
 }
 
 impl AST {
@@ -341,6 +342,7 @@ impl AST {
             Up => self.up(),
             UpChild(child) => self.up_child(child),
             UpChildDown(child) => self.up_child_down(child),
+            TwoUp => self.two_up(),
         }
     }
 
@@ -396,6 +398,12 @@ impl AST {
     pub fn up_child_down(&mut self, token: Token) {
         self.up();
         self.child_down(token);
+    }
+
+    //goes two lvl up
+    pub fn two_up(&mut self) {
+        self.up();
+        self.up();
     }
 
 
