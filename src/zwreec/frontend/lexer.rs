@@ -57,7 +57,7 @@ pub fn lex<'a, R: Read>(cfg: &Config, input: &'a mut R) -> FilteringScan<Peeking
     )
 }
 
-#[derive(PartialEq,Debug,Clone)]
+#[derive(Debug,Clone)]
 pub enum Token {
     TokPassage                {location: (u64, u64), name: String},
     TokTagStart               {location: (u64, u64)},
@@ -174,6 +174,73 @@ impl Token {
             &TokNewLine{location}
                 => location,
             &TokPseudo => (0, 0)
+        }
+    }
+}
+
+//we re-create tokens with location {0,0} in the parser.
+//so comparing also works this way
+impl PartialEq for Token {
+    fn eq(&self, other: &Token) -> bool {
+        match (self, other) {
+            (&TokPassage{..}, &TokPassage{..}) => true,
+            (&TokTagStart{..}, &TokTagStart{..}) => true,
+            (&TokTagEnd{..}, &TokTagEnd{..}) => true,
+            (&TokVarSetStart{..}, &TokVarSetStart{..}) => true,
+            (&TokVarSetEnd{..}, &TokVarSetEnd{..}) => true,
+            (&TokPassageLink{..}, &TokPassageLink{..}) => true,
+            (&TokTag{..}, &TokTag{..}) => true,
+            (&TokText{..}, &TokText{..}) => true,
+            (&TokFormatBoldStart{..}, &TokFormatBoldStart{..}) => true,
+            (&TokFormatBoldEnd{..}, &TokFormatBoldEnd{..}) => true,
+            (&TokFormatItalicStart{..}, &TokFormatItalicStart{..}) => true,
+            (&TokFormatItalicEnd{..}, &TokFormatItalicEnd{..}) => true,
+            (&TokFormatUnderStart {..}, &TokFormatUnderStart {..}) => true,
+            (&TokFormatUnderEnd{..}, &TokFormatUnderEnd{..}) => true,
+            (&TokFormatStrikeStart{..}, &TokFormatStrikeStart{..}) => true,
+            (&TokFormatStrikeEnd{..}, &TokFormatStrikeEnd{..}) => true,
+            (&TokFormatSubStart{..}, &TokFormatSubStart{..}) => true,
+            (&TokFormatSubEnd{..}, &TokFormatSubEnd{..}) => true,
+            (&TokFormatSupStart{..}, &TokFormatSupStart{..}) => true,
+            (&TokFormatSupEnd{..}, &TokFormatSupEnd{..}) => true,
+            (&TokFormatMonoStart{..}, &TokFormatMonoStart{..}) => true,
+            (&TokFormatMonoEnd{..}, &TokFormatMonoEnd{..}) => true,
+            (&TokFormatBulList{..}, &TokFormatBulList{..}) => true,
+            (&TokFormatNumbList{..}, &TokFormatNumbList{..}) => true,
+            (&TokFormatIndentBlock{..}, &TokFormatIndentBlock{..}) => true,
+            (&TokFormatHorizontalLine{..}, &TokFormatHorizontalLine{..}) => true,
+            (&TokFormatHeading{..}, &TokFormatHeading{..}) => true,
+            (&TokMacroStart{..}, &TokMacroStart{..}) => true,
+            (&TokMacroEnd{..}, &TokMacroEnd{..}) => true,
+            (&TokMacroContentVar{..}, &TokMacroContentVar{..}) => true,
+            (&TokMacroContentPassageName{..}, &TokMacroContentPassageName{..}) => true,
+            (&TokMacroSet{..}, &TokMacroSet{..}) => true,
+            (&TokMacroIf{..}, &TokMacroIf{..}) => true,
+            (&TokMacroElse{..}, &TokMacroElse{..}) => true,
+            (&TokMacroEndIf{..}, &TokMacroEndIf{..}) => true,
+            (&TokMacroPrint{..}, &TokMacroPrint{..}) => true,
+            (&TokMacroDisplay{..}, &TokMacroDisplay{..}) => true,
+            (&TokMacroSilently{..}, &TokMacroSilently{..}) => true,
+            (&TokMacroEndSilently{..}, &TokMacroEndSilently{..}) => true,
+            (&TokParenOpen{..}, &TokParenOpen{..}) => true,
+            (&TokParenClose{..}, &TokParenClose{..}) => true,
+            (&TokVariable{..}, &TokVariable{..}) => true,
+            (&TokInt{..}, &TokInt{..}) => true,
+            (&TokFloat{..}, &TokFloat{..}) => true,
+            (&TokString{..}, &TokString{..}) => true,
+            (&TokBoolean{..}, &TokBoolean{..}) => true,
+            (&TokFunction{..}, &TokFunction{..}) => true,
+            (&TokColon{..}, &TokColon{..}) => true,
+            (&TokArgsEnd{..}, &TokArgsEnd{..}) => true,
+            (&TokArrayStart{..}, &TokArrayStart{..}) => true,
+            (&TokArrayEnd{..}, &TokArrayEnd{..}) => true,
+            (&TokAssign{..}, &TokAssign{..}) => true,
+            (&TokNumOp{..}, &TokNumOp{..}) => true,
+            (&TokCompOp{..}, &TokCompOp{..}) => true,
+            (&TokLogOp{..}, &TokLogOp{..}) => true,
+            (&TokSemiColon{..}, &TokSemiColon{..}) => true,
+            (&TokNewLine{..}, &TokNewLine{..}) => true,
+            _ => false,
         }
     }
 }
