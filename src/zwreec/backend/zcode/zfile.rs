@@ -656,7 +656,7 @@ impl Zfile {
     /// is an 2OP, but with small constant and variable
     pub fn op_je(&mut self, local_var_id: u8, equal_to_const: u8, jump_to_label: &str) {
 
-        let args: Vec<ArgType> = vec![ArgType::Variable, ArgType::LargeConst];
+        let args: Vec<ArgType> = vec![ArgType::Variable, ArgType::SmallConst];
         self.op_2(0x01, args);
         
         // variable id
@@ -709,7 +709,8 @@ impl Zfile {
 
 
     /// prints an unicode char to the current stream
-    pub fn op_print_unicode_char(&mut self, character: u16){
+    pub fn op_print_unicode_char(&mut self, character: u16) {
+
         self.op_1(0xbe, ArgType::SmallConst);
         self.data.append_byte(0x0b);
         let byte = 0x00 << 6 | 0x03 << 4 | 0x03 << 2 | 0x03 << 0;
