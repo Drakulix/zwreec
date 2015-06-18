@@ -2,7 +2,16 @@ language: rust
 rust: nightly-2015-06-02
 branches:
   only:
-    - master
+  - master
+after_success: |
+    cargo doc &&
+    echo "<meta http-equiv=refresh content=0;url=zwreec/index.html>" > target/doc/index.html &&
+    pip install ghp-import &&
+    ghp-import -n target/doc &&
+    git push -fq https://${GH_TOKEN}@github.com/${TRAVIS_REPO_SLUG}.git gh-pages
 notifications:
   slack:
     secure: QpFHoGnFmO56Dc7PZzYEqeVbT0II7QCAYc7V0Xm4cV4NKLcz2DjBw523G+cCa7cewWVdhOooUKA14H6wjCHdqReMR7xO7iOGQm/p7iSMgU9eMlIvem0jBDGqxo/8R5GtA/OVZ6SB93ja+BaZiYaapsaQcTfxNxxeopecKus0z44=
+env:
+  global:
+    secure: SkvLzaTOi2W7aCps8N3w8Hk2C5/KQiDnDFtTyRm+i2gOiDD5ZTIXV3HB73UT6298d3bmr8PBsa9eY0ObHPWER6eR3wKxKmjEfMsNdFvkeTD4rMMPgSB07kP0zw4emVGPGWGcDTYQXNwxCTzC2MsM4jiBXSjDV/tQDRJhjrl5D8A=
