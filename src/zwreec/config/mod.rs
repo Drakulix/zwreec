@@ -231,6 +231,7 @@ impl Config {
 
 // TODO: If this stays only one Test Case, enum should be removed
 /// The Type used to define backend tests for the compiler
+#[derive(PartialEq)]
 pub enum TestCase {
     /// Skips the normal compiler chain and builds an example zcode file by 
     /// using every opcode.
@@ -298,4 +299,60 @@ pub fn zwreec_options(mut opts: getopts::Options) -> getopts::Options {
     opts.optflag("e", "generate-sample-zcode", "writes out a sample zcode file, input file is not used and can be omitted");
 
     opts
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use getopts;
+
+    fn config_from_args(args: Vec<String>) -> Config {
+        let opts = zwreec_options(getopts::Options::new());
+
+        match opts.parse(&args) {
+            Ok(m) => Config::from_matches(&m),
+            Err(f) => { panic!(f.to_string()) }
+        }
+    }
+
+    #[test]
+    fn test_feature_easter_egg_true() {
+        let cfg = config_from_args(vec!["-F".to_string(), "easter-egg".to_string()]);
+
+        assert_eq!(cfg.easter_egg, true);
+    }
+
+    #[test]
+    fn test_feature_easter_egg_false() {
+        let cfg = config_from_args(vec!["-N".to_string(), "easter-egg".to_string()]);
+
+        assert_eq!(cfg.easter_egg, false);
+    }
+
+    #[test]
+    fn test_feature_easter_egg_both() {
+        let cfg = config_from_args(vec![
+                                   "-N".to_string(),
+                                   "easter-egg".to_string(),
+                                   "-F".to_string(),
+                                   "easter-egg".to_string()]);
+
+        assert_eq!(cfg.easter_egg, false);
+    }
+
+    #[test]
+    fn test_generate_sample_zcode() {
+        let cfg = config_from_args(vec!["-e".to_string()]);
+
+        assert_eq!(cfg.test_cases.is_empty(), false);
+
+        let mut contains = false;
+        for tc in cfg.test_cases {
+            if tc == TestCase::ZcodeBackend {
+                contains = true;
+            }
+        }
+
+        assert!(contains);
+    }
 }
