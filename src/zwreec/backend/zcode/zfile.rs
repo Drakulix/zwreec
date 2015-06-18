@@ -10,7 +10,8 @@ pub enum ZOP {
   PrintUnicode{c: u16},
   Print{text: String},
   PrintNumVar{variable: u8},
-  PrintPaddr{address: u8},
+  PrintPaddr{address: u8},  // address is a variable
+  PrintPaddrStatic{address: u16},
   PrintAddr{address: u8},
   PrintOps{text: String},
   Call1N{jump_to_label: String},
@@ -62,6 +63,7 @@ pub struct Zfile {
     unicode_table: Vec<u16>,
     jumps: Vec<Zjump>,
     labels: Vec<Zlabel>,
+    strings: Vec<Zstring>,
     program_addr: u16,
     unicode_table_addr: u16,
     global_addr: u16,
@@ -73,6 +75,13 @@ pub struct Zjump {
     pub from_addr: u16,
     pub name: String,
     pub jump_type: JumpType
+}
+
+#[derive(Debug, PartialEq, Clone)]
+pub struct Zstring {
+    pub from_addr: u16,
+    pub chars: Vec<u8>,
+    pub unicode: bool,
 }
 
 #[derive(Debug, PartialEq, Clone)]
@@ -99,6 +108,7 @@ impl Zfile {
             unicode_table: Vec::new(),
             jumps: Vec::new(),
             labels: Vec::new(),
+            strings: Vec::new(),
             program_addr: 0x800,
             unicode_table_addr: 0,
             global_addr: 0,
@@ -235,6 +245,22 @@ impl Zfile {
         }
     }
 
+    /// saves the zstrings to high mem and writes the resulting address to the
+    /// print_paddr arguments which referencing the string
+    fn write_strings(&mut self) {
+        for string in self.strings.iter_mut() {
+            let str_addr = align_address(self.data.len() as u16, 8);
+            self.data.write_zero_until(str_addr as usize);
+            if string.unicode {
+                // @TODO: write custom routine and alter dummy adress of argument
+            } else {
+                self.data.append_bytes(&string.chars);
+                self.data.write_u16(str_addr, string.from_addr as usize);
+            }
+            
+        }
+    }
+
     /// adds jump to write the jump-addresses after reading all commands
     pub fn add_jump(&mut self, name: String, jump_type: JumpType) {
         let from_addr: u16 = self.data.bytes.len() as u16;
@@ -288,6 +314,7 @@ impl Zfile {
             &ZOP::Ret{value} => op::op_ret(value),
             &ZOP::PrintAddr{address} => op::op_print_addr(address),
             &ZOP::PrintPaddr{address} => op::op_print_paddr(address),
+            &ZOP::PrintPaddrStatic{address} => op::op_print_paddr_static(address),
             &ZOP::SetColor{foreground, background} => op::op_set_color(foreground, background),
             &ZOP::SetColorVar{foreground, background} => op::op_set_color_var(foreground, background),
             &ZOP::Random{range, variable} => op::op_random(range, variable),
@@ -298,11 +325,6 @@ impl Zfile {
             &ZOP::StoreW{array_address, index, variable} => op::op_storew(array_address, index, variable,self.object_addr),
             &ZOP::Call1NVar{variable} => op::op_call_1n_var(variable),
             &ZOP::EraseWindow{value} => op::op_erase_window(value),
-            &ZOP::ReadCharTimer{local_var_id, timer, ref routine} => op::op_read_char_timer(local_var_id, timer, routine,self),
-            &ZOP::JL{local_var_id, local_var_id2, ref jump_to_label} => op::op_jl(local_var_id, local_var_id2, jump_to_label,self),
-            &ZOP::JE{local_var_id, equal_to_const, ref jump_to_label} => op::op_je(local_var_id, equal_to_const, jump_to_label,self),
-            &ZOP::Call2NWithAddress{ref jump_to_label, ref address} => op::op_call_2n_with_address(jump_to_label, address,self),
-            &ZOP::Call1N{ref jump_to_label} => op::op_call_1n(jump_to_label,self),
 
             _ => Vec::new()
         };
@@ -314,6 +336,11 @@ impl Zfile {
             &ZOP::Routine{ref name, count_variables} => self.routine(name, count_variables),
             &ZOP::Label{ref name} => self.label(name),
             &ZOP::Jump{ref jump_to_label} => self.op_jump(jump_to_label),
+            &ZOP::ReadCharTimer{local_var_id, timer, ref routine} => self.op_read_char_timer(local_var_id, timer, routine),
+            &ZOP::JL{local_var_id, local_var_id2, ref jump_to_label} => self.op_jl(local_var_id, local_var_id2, jump_to_label),
+            &ZOP::JE{local_var_id, equal_to_const, ref jump_to_label} => self.op_je(local_var_id, equal_to_const, jump_to_label),
+            &ZOP::Call2NWithAddress{ref jump_to_label, ref address} => self.op_call_2n_with_address(jump_to_label, address),
+            &ZOP::Call1N{ref jump_to_label} => self.op_call_1n(jump_to_label),
             _ => ()
         }
         let mut new_jumps: Vec<Zjump> = vec![];
@@ -396,6 +423,7 @@ impl Zfile {
         self.routine_add_link();
         self.routine_check_more();
         self.write_jumps();
+        self.write_strings();
     }
 
     /// command to create a routine
@@ -600,6 +628,86 @@ impl Zfile {
 
 
 
+    /// calls a routine
+    /// call_1n is 1OP
+    pub fn op_call_1n(&mut self, jump_to_label: &str) {
+        self.op_1(0x0f, ArgType::SmallConst);
+        self.add_jump(jump_to_label.to_string(), JumpType::Routine);
+    }
+
+
+    /// calls a routine with an argument(variable) an throws result away
+    /// becouse the value isn't known until all routines are set, it
+    /// inserts a pseudo routoune_address
+    /// call_2n is 2OP
+    pub fn op_call_2n_with_address(&mut self, jump_to_label: &str, address: &str) {
+        let args: Vec<ArgType> = vec![ArgType::LargeConst, ArgType::LargeConst];
+        self.op_2(0x1a, args);
+
+        // the address of the jump_to_label
+        self.add_jump(jump_to_label.to_string(), JumpType::Routine);
+
+        // the address of the argument
+        self.add_jump(address.to_string(), JumpType::Routine);
+    }
+
+
+    /// jumps to a label if the value of local_var_id is equal to const
+    /// is an 2OP, but with small constant and variable
+    pub fn op_je(&mut self, local_var_id: u8, equal_to_const: u8, jump_to_label: &str) {
+
+        let args: Vec<ArgType> = vec![ArgType::Variable, ArgType::SmallConst];
+        self.op_2(0x01, args);
+        
+        // variable id
+        self.data.append_byte(local_var_id);
+
+        // const
+        self.data.append_byte(equal_to_const);
+
+        // jump
+        self.add_jump(jump_to_label.to_string(), JumpType::Branch);
+    }
+
+
+    /// jumps to a label if the value of local_var_id is equal to local_var_id2
+    /// is an 2OP, but with variable and variable
+    pub fn op_jl(&mut self, local_var_id: u8, local_var_id2: u8, jump_to_label: &str) {
+
+        let args: Vec<ArgType> = vec![ArgType::Variable, ArgType::Variable];
+        self.op_2(0x02, args);
+
+        // variable id
+        self.data.append_byte(local_var_id);
+
+        // variable id 2
+        self.data.append_byte(local_var_id2);
+
+        // jump
+        self.add_jump(jump_to_label.to_string(), JumpType::Branch);
+    }
+
+
+    /// reads keys from the keyboard and saves the asci-value in local_var_id
+    /// read_char is VAROP
+    pub fn op_read_char_timer(&mut self, local_var_id: u8, timer: u8, routine: &str) {
+        let args: Vec<ArgType> = vec![ArgType::SmallConst, ArgType::SmallConst, ArgType::LargeConst, ArgType::Nothing];
+        self.op_var(0x16, args);
+
+        // write argument value
+        self.data.append_byte(0x00);
+
+        // write timer
+        self.data.append_byte(timer);
+
+        // writes routine
+        self.add_jump(routine.to_string(), JumpType::Routine);
+
+        // write varible id
+        self.data.append_byte(local_var_id);
+    }
+
+
     /// prints an unicode char to the current stream
     pub fn op_print_unicode_char(&mut self, character: u16){
         self.op_1(0xbe, ArgType::SmallConst);
@@ -614,22 +722,21 @@ impl Zfile {
 
     /// op-codes with 0 operators
     fn op_0(&mut self, value: u8) {
-        let byte = value | 0xb0;
-        self.data.append_byte(byte);
+        self.data.append_bytes(&op::op_0(value));
     }
     
     /// op-codes with 1 operator
     fn op_1(&mut self, value: u8, arg_type: ArgType) {
-        let mut byte: u8 = 0x80 | value;
+        self.data.append_bytes(&op::op_1(value, arg_type));
+    }
 
-         match arg_type {
-            ArgType::Reference  => byte |= 0x01 << 4,
-            ArgType::Variable   => byte |= 0x02 << 4,
-            ArgType::SmallConst => byte |= 0x00 << 4,
-            _                   => panic!("no possible 1OP")
-        }
+    /// op-codes with 1 operator
+    fn op_2(&mut self, value: u8, arg_types: Vec<ArgType>) {
+        self.data.append_bytes(&op::op_2(value, arg_types));
+    }
 
-        self.data.append_byte(byte);
+    fn op_var(&mut self, value: u8, arg_types: Vec<ArgType>) {
+        self.data.append_bytes(&op::op_var(value, arg_types));
     }
 }
 

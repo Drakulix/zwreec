@@ -5,93 +5,6 @@ pub use super::zfile::Zfile;
 
 
 
-
-
-/// calls a routine
-/// call_1n is 1OP
-pub fn op_call_1n(jump_to_label: &str, zf: &mut Zfile) -> Vec<u8> {
-    let bytes = op_1(0x0f, ArgType::SmallConst);
-    zf.add_jump(jump_to_label.to_string(), JumpType::Routine);
-    bytes
-}
-
-
-/// calls a routine with an argument(variable) an throws result away
-/// becouse the value isn't known until all routines are set, it
-/// inserts a pseudo routoune_address
-/// call_2n is 2OP
-pub fn op_call_2n_with_address(jump_to_label: &str, address: &str, zf: &mut Zfile) -> Vec<u8> {
-    let args: Vec<ArgType> = vec![ArgType::LargeConst, ArgType::LargeConst];
-    let bytes = op_2(0x1a, args);
-
-    // the address of the jump_to_label
-    zf.add_jump(jump_to_label.to_string(), JumpType::Routine);
-
-    // the address of the argument
-    zf.add_jump(address.to_string(), JumpType::Routine);
-    bytes
-}
-
-
-/// jumps to a label if the value of local_var_id is equal to const
-/// is an 2OP, but with small constant and variable
-pub fn op_je(local_var_id: u8, equal_to_const: u8, jump_to_label: &str, zf: &mut Zfile) -> Vec<u8> {
-
-    let args: Vec<ArgType> = vec![ArgType::Variable, ArgType::SmallConst];
-    let mut bytes = op_2(0x01, args);
-    
-    // variable id
-    bytes.push(local_var_id);
-
-    // const
-    bytes.push(equal_to_const);
-
-    // jump
-    zf.add_jump(jump_to_label.to_string(), JumpType::Branch);
-    bytes
-}
-
-
-/// jumps to a label if the value of local_var_id is equal to local_var_id2
-/// is an 2OP, but with variable and variable
-pub fn op_jl(local_var_id: u8, local_var_id2: u8, jump_to_label: &str, zf: &mut Zfile) -> Vec<u8> {
-
-    let args: Vec<ArgType> = vec![ArgType::Variable, ArgType::Variable];
-    let mut bytes = op_2(0x02, args);
-    
-    // variable id
-    bytes.push(local_var_id);
-
-    // variable id 2
-    bytes.push(local_var_id2);
-
-    // jump
-    zf.add_jump(jump_to_label.to_string(), JumpType::Branch);
-    bytes
-}
-
-
-/// reads keys from the keyboard and saves the asci-value in local_var_id
-/// read_char is VAROP
-pub fn op_read_char_timer(local_var_id: u8, timer: u8, routine: &str, zf: &mut Zfile) -> Vec<u8> {
-    let args: Vec<ArgType> = vec![ArgType::SmallConst, ArgType::SmallConst, ArgType::LargeConst, ArgType::Nothing];
-    let mut bytes = op_var(0x16, args);
-
-    // write argument value
-    bytes.push(0x00);
-
-    // write timer
-    bytes.push(timer);
-
-    // writes routine
-    zf.add_jump(routine.to_string(), JumpType::Routine);
-
-    // write varible id
-    bytes.push(local_var_id);
-    bytes
-}
-
-
 /// clears spcified window
 pub fn op_erase_window(value: i8) -> Vec<u8> {
     let args: Vec<ArgType> = vec![ArgType::LargeConst, ArgType::Nothing, ArgType::Nothing, ArgType::Nothing];
@@ -197,7 +110,7 @@ pub fn op_print_num_var(variable: u8) -> Vec<u8> {
 
 
 /// pulls an value off the stack to an variable
-/// SmallConst becouse pull takes an reference to an variable
+/// SmallConst because pull takes an reference to an variable
 pub fn op_pull(variable: u8) -> Vec<u8> {
     let args: Vec<ArgType> = vec![ArgType::SmallConst, ArgType::Nothing, ArgType::Nothing, ArgType::Nothing];
     let mut bytes = op_var(0x09, args);
@@ -245,13 +158,19 @@ pub fn op_set_color(foreground: u8, background: u8) -> Vec<u8> {
 }
 
 
-/// prints string at given packet adress TODO: needs testing
+/// prints string at given packet address TODO: needs testing
 pub fn op_print_paddr(address: u8) -> Vec<u8> {
    let mut bytes = op_1(0x0D, ArgType::Variable);
    bytes.push(address);
    bytes
 }
 
+/// prints string at given address which is then divided by 8 to be a packed address TODO: needs testing
+pub fn op_print_paddr_static(address: u16) -> Vec<u8> {
+   let mut bytes = op_1(0x0D, ArgType::LargeConst);
+   write_u16(address/8, &mut bytes);
+   bytes
+}
 
 /// prints string at given adress TODO: needs testing
 pub fn op_print_addr(address: u8) -> Vec<u8> {
@@ -335,6 +254,7 @@ pub fn quit() -> Vec<u8> {
 }
 
 /// op-codes with 0 operators
+/// $b0 -- $bf  short     0OP
 pub fn op_0(value: u8) -> Vec<u8> {
     let byte = value | 0xb0;
     vec![byte]
@@ -342,6 +262,7 @@ pub fn op_0(value: u8) -> Vec<u8> {
 
 
 /// op-codes with variable operators (4 are possible)
+/// $e0 -- $ff  variable  VAR     (operand types in next byte(s))
 pub fn op_var(value: u8, arg_types: Vec<ArgType>) -> Vec<u8> {
 	let mut ret = Vec::new();
 	ret.push(value | 0xe0);
@@ -351,19 +272,28 @@ pub fn op_var(value: u8, arg_types: Vec<ArgType>) -> Vec<u8> {
 
 
 /// op-codes with 1 operator
+/// $80 -- $8f  short     1OP     large constant
+/// $90 -- $9f  short     1OP     small constant
+/// $a0 -- $af  short     1OP     variable
 pub fn op_1( value: u8, arg_type: ArgType) -> Vec<u8> {
-    let mut byte: u8 = 0x80 | value;
-
-     match arg_type {
-        ArgType::Reference  => byte |= 0x01 << 4,
-        ArgType::Variable   => byte |= 0x02 << 4,
-        ArgType::SmallConst => byte |= 0x00 << 4,
+    let byte: u8 = match arg_type {
+        ArgType::Reference  => 0x90 | value,  // same as SmallConst
+        ArgType::Variable   => 0xa0 | value,
+        ArgType::SmallConst => 0x90 | value,
+        ArgType::LargeConst => 0x80 | value,
         _                   => panic!("no possible 1OP")
-    }
+    };
 
     vec![byte]
 }
 
+/// $00 -- $1f  long      2OP     small constant, small constant
+/// $20 -- $3f  long      2OP     small constant, variable
+/// $40 -- $5f  long      2OP     variable, small constant
+/// $60 -- $7f  long      2OP     variable, variable
+/// not handled here:
+/// $c0 -- $df  variable  2OP     (operand types in next byte)
+/// except $be  extended opcode given in next byte
 pub fn op_2( value: u8, arg_types: Vec<ArgType>) -> Vec<u8> {
     let mut byte: u8 = 0x00;
     let mut is_variable: bool = false;
