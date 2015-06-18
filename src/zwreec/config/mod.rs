@@ -20,6 +20,7 @@
 //!
 //! use zwreec::config;
 //! use zwreec::config::Config;
+//! 
 //!
 //! fn main() {
 //!     let args: Vec<String> = std::env::args().collect();
@@ -28,7 +29,7 @@
 //!     let matches = match opts.parse(&args[1..]) {
 //!         Ok(m) => m,
 //!         Err(f) => { panic!(f.to_string()) }
-//!     }
+//!     };
 //!
 //!     let cfg = Config::from_matches(&matches);
 //! }
@@ -44,28 +45,28 @@
 //!     To store your new setting, you need to add it as a field to the `Config` struct. Here we
 //!     add a new boolean `pub italics: bool` to control *italics*. Always add a field-comment.
 //!
-//!     ```
-//! pub struct Config {
-//!     /// Add easter egg to compiler
-//!     pub easter_egg: bool,
-//!     /// Instruct compiler to run these test-cases
-//!     pub test_cases: Vec<TestCase>,
-//!     /// Enables or disalbes Italics
-//!     pub italics: bool,
-//! }
+//!     ```ignore
+//!     pub struct Config {
+//!         /// Add easter egg to compiler
+//!         pub easter_egg: bool,
+//!         /// Instruct compiler to run these test-cases
+//!         pub test_cases: Vec<TestCase>,
+//!         /// Enables or disalbes Italics
+//!         pub italics: bool,
+//!     }
 //!     ```
 //!
 //!     Now you also need to change `Config::default_config()` to provide the
 //!     default value for your new field:
 //!
-//!     ```
-//! pub fn default_config() -> Config {
-//!     Config{
-//!         easter_egg: true,
-//!         test_cases: Vec::new(),
-//!         italics: true,
+//!     ```ignore
+//!     pub fn default_config() -> Config {
+//!         Config{
+//!             easter_egg: true,
+//!             test_cases: Vec::new(),
+//!             italics: true,
+//!         }
 //!     }
-//! }
 //!     ```
 //!
 //! 2. Parse your flag in `from_matches()`
@@ -74,7 +75,7 @@
 //!     Therefore, if you added a new boolean flag, you can now simply add it to the match
 //!     statement.
 //!
-//!     ```
+//!     ```ignore
 //!     for s in matches.opt_strs("F") {
 //!         match s.as_ref() {
 //!             "easter-egg" => {
@@ -114,7 +115,7 @@
 //!     and `default_config()` accordingly (e.g. `pub notaflag: String,`). Then you need to add a new
 //!     `getopts::Option` to `zwreec_options()`:
 //!
-//!     ```
+//!     ```ignore
 //! pub fn zwreec_options(mut opts: getopts::Options) -> getopts::Options {
 //!     opts.optmulti("F", "feature", "", "FEAT");
 //!     opts.optmulti("N", "no-feature", "enable or disable a feature (can occur multiple times).
@@ -131,7 +132,7 @@
 //!     Now you can append `Config::from_matches()` to analyse the provided matches for your new
 //!     option and set the `Config` accordingly:
 //!
-//!     ```
+//!     ```ignore
 //!     if let s = matches.opt_str("n") {
 //!         cfg.notaflag = s;
 //!     }
@@ -152,7 +153,8 @@ use std::vec::Vec;
 /// # Example Usage inside the compiler
 ///
 /// ```
-/// let cfg = Config::default_config();
+/// # use zwreec::config;
+/// let cfg = config::Config::default_config();
 ///
 /// if cfg.easter_egg {
 ///     println!("Egg!");
@@ -167,6 +169,13 @@ pub struct Config {
 
 impl Config {
     /// Returns a `Config` struct with preset defaults
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use zwreec::config::Config;
+    /// let cfg = Config::default_config();
+    /// ```
     pub fn default_config() -> Config {
         Config{
             easter_egg: true,
@@ -182,15 +191,17 @@ impl Config {
     /// # Example
     ///
     /// ```
+    /// # extern crate getopts;
+    /// # extern crate zwreec;
     /// let args: Vec<String> = std::env::args().collect();
-    /// let opts = config::zwreec_options(getopts::Options::new());
+    /// let opts = zwreec::config::zwreec_options(getopts::Options::new());
     ///
     /// let matches = match opts.parse(&args[1..]) {
     ///     Ok(m) => m,
     ///     Err(f) => { panic!(f.to_string()) }
-    /// }
+    /// };
     ///
-    /// let cfg = Config::from_matches(&matches);
+    /// let cfg = zwreec::config::Config::from_matches(&matches);
     /// ```
     pub fn from_matches(matches: &getopts::Matches) -> Config {
         // load defaults
@@ -245,8 +256,7 @@ pub enum TestCase {
 /// This function takes an `getopts::Options` to append it with Options required 
 /// by `from_matches`. It currently adds three fields:
 ///
-/// ``` 
-/// # let mut opts = getopts::Options::new();
+/// ```ignore
 /// opts.optmulti("F", "feature", "", "FEAT"); 
 /// opts.optmulti("N", "no-feature", "enable or disable a feature (can occur multiple times).
 ///                     List of supported features (default):
@@ -259,16 +269,22 @@ pub enum TestCase {
 /// You can use this function to append your `getopts::Options`.
 ///
 /// ```
+/// # extern crate getopts;
+/// # extern crate zwreec;
+///
 /// let mut opts = getopts::Options::new();
 /// opts.optflag("h", "help", "print this message");
 /// 
-/// let opts = config::zwreec_options(opts);
+/// let opts = zwreec::config::zwreec_options(opts);
 /// ```
 ///
 /// Another useful example is to use it to gernerate a more compact usage by
 /// having a function that only returns your options.
 ///
 /// ```
+/// # extern crate getopts;
+/// # extern crate zwreec;
+///
 /// fn options() -> getopts::Options {
 ///     let mut opts = getopts::Options::new();
 ///     opts.optflag("h", "help", "display this help and exit");
@@ -278,15 +294,15 @@ pub enum TestCase {
 /// }
 ///
 /// fn print_usage(program: &str, verbose: bool) {
-///     let brief = format!("Usage: {} [options]", program)
+///     let brief = format!("Usage: {} [options]", program);
 ///
 ///     let opts = if verbose {
-///         config::zwreec_options(options());
+///         zwreec::config::zwreec_options(options())
 ///     } else {
-///         options();
-///     }
+///         options()
+///     };
 ///
-///     print!("{}", opts.usage(&brief);
+///     print!("{}", opts.usage(&brief));
 /// }
 /// ```
 /// As you can see, `options()` returns your own command line options, which are then conditionally
