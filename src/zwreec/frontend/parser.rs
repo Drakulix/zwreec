@@ -31,7 +31,8 @@ pub enum NonTerminalType {
     MonoContent,
     Link,
     Macro,
-    Macrof,
+    ElseIf,
+    EndIf,
     Function,
     Functionf,
     Arguments,
@@ -287,13 +288,14 @@ impl<'a> Parser<'a> {
                     None
                 },
                 (Macro, tok @ TokMacroIf { .. } ) => {
-                    stack.push(NonTerminal(Macrof));
+                    stack.push(NonTerminal(EndIf));
+                    stack.push(NonTerminal(ElseIf));
                     stack.push(NonTerminal(PassageContent));
                     stack.push(Terminal(TokMacroEnd {location: (0, 0)} ));
                     stack.push(NonTerminal(ExpressionList));
                     stack.push(Terminal(tok.clone()));
 
-                    Some(TwoChildsDown(tok, TokPseudo))
+                    Some(TwoChildsDown(tok, TokExpression))
                 },
                 (Macro, tok @ TokMacroPrint { .. } ) => {
                     stack.push(Terminal(TokMacroEnd {location: (0, 0)} ));
@@ -317,8 +319,24 @@ impl<'a> Parser<'a> {
 
                     Some(AddChild(tok))
                 },
-                // Macrof
-                (Macrof, tok @ TokMacroElse { .. } ) => {
+
+                // ElseIf
+                (ElseIf, tok @ TokMacroElseIf { .. } ) => {
+                    stack.push(NonTerminal(ElseIf));
+                    stack.push(NonTerminal(PassageContent));
+                    stack.push(Terminal(TokMacroEnd {location: (0, 0)} ));
+                    stack.push(NonTerminal(ExpressionList));
+                    stack.push(Terminal(tok.clone()));
+
+                    Some(UpTwoChildsDown(tok, TokExpression))
+                },
+                (ElseIf, _) => {
+                    // ElseIf -> ε
+                    None
+                },
+
+                // EndIf
+                (EndIf, tok @ TokMacroElse { .. } ) => {
                     stack.push(Terminal(TokMacroEnd {location: (0, 0)} ));
                     stack.push(Terminal(TokMacroEndIf {location: (0, 0)} ));
                     stack.push(NonTerminal(PassageContent));
@@ -327,12 +345,12 @@ impl<'a> Parser<'a> {
 
                     Some(UpChildDown(tok))
                 },
-                (Macrof, tok @ TokMacroEndIf { .. } ) => {
+                (EndIf, tok @ TokMacroEndIf { .. } ) => {
                     stack.push(Terminal(TokMacroEnd {location: (0, 0)} ));
-                    stack.push(Terminal(tok));
+                    stack.push(Terminal(tok.clone()));
 
                     None
-                }
+                },
 
                 // ExpressionList
                 (ExpressionList, TokVariable { .. } ) |
@@ -350,6 +368,7 @@ impl<'a> Parser<'a> {
                 // ExpressionListf
                 (ExpressionListf, TokMacroEnd { .. } ) => {
                     debug!("pop TokMacroEnd");
+
                     Some(Up)
                 },
                 (ExpressionListf, _) => {
@@ -524,7 +543,7 @@ impl<'a> Parser<'a> {
                     stack.push(NonTerminal(Argumentsf));
                     stack.push(NonTerminal(Expression));
 
-                    Some(ChildDown(TokPseudo))
+                    Some(ChildDown(TokExpression))
                 },
 
                 // Argumentsf

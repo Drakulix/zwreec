@@ -117,16 +117,79 @@ fn gen_zcode<'a>(node: &'a ASTNode, mut out: &mut zfile::Zfile, mut manager: &mu
 
                     let mut compare: u8 = 1;
 
+                    // check if the first node is an expression node
+                    let expression_node = match t.childs[0].as_default().category {
+                        TokExpression => t.childs[0].as_default(),
+                        _ =>  panic!("Unsupported if-expression!")
+                    };
+
+                    // Check if first token is variable
+                    let var_name = match expression_node.childs[0].as_default().category {
+                        TokVariable {ref name, .. } => name,
+                        _ =>  panic!("Unsupported if-expression!")
+                    };
+
+                    if expression_node.childs.len() > 1 {
+                        // Check if second token is compare operator
+                        match expression_node.childs[1].as_default().category {
+                            TokCompOp {ref op_name, .. } => {
+                                match &*(*op_name) {
+                                    "==" | "is" => {} ,
+                                    _ => panic!("Unsupported Compare Operator!")
+                                }
+                            }, _ =>  panic!("Unsupported if-expression!")
+                        }
+
+                        // Check if third token is number
+                        compare = match expression_node.childs[2].as_default().category {
+                            TokInt {ref value, .. } => {
+                                *value as u8
+                            },
+                            TokBoolean {ref value, .. } => {
+                                boolstr_to_u8(&*value)
+                            }, _ => panic!("Unsupported assign value!")
+                        };
+                    }
+
+                    let symbol_id = manager.symbol_table.get_symbol_id(&*var_name);
+                    let if_id = manager.ids_if.start_next();
+
+                    let if_label = format!("if_{}", if_id);
+                    let after_if_label = format!("after_if_{}", if_id);
+                    let after_else_label = format!("after_else_{}", if_id);
+                    let mut code: Vec<ZOP> = vec![
+                        ZOP::JE{local_var_id: symbol_id, equal_to_const: compare, jump_to_label: if_label.to_string()},
+                        ZOP::Jump{jump_to_label: after_if_label.to_string()},
+                        ZOP::Label{name: if_label.to_string()}
+                    ];
+
+                    for i in 1..t.childs.len() {
+                        for instr in gen_zcode(&t.childs[i], out, manager) {
+                            code.push(instr);
+                        }
+                    }
+
+                    code.push(ZOP::Jump{jump_to_label: after_else_label});
+                    code.push(ZOP::Label{name: after_if_label});
+                    code
+                },
+                &TokMacroElseIf { .. } => {
+                    if t.childs.len() < 2 {
+                        panic!("Unsupported elseif-expression!");
+                    }
+
+                    let mut compare: u8 = 1;
+
                     // check if the first node is a pseudonode
                     let pseudo_node = match t.childs[0].as_default().category {
-                        TokPseudo => t.childs[0].as_default(),
-                        _ =>  panic!("Unsupported if-expression!")
+                        TokExpression => t.childs[0].as_default(),
+                        _ =>  panic!("Unsupported elseif-expression!")
                     };
 
                     // Check if first token is variable
                     let var_name = match pseudo_node.childs[0].as_default().category {
                         TokVariable {ref name, .. } => name,
-                        _ =>  panic!("Unsupported if-expression!")
+                        _ =>  panic!("Unsupported elseif-expression!")
                     };
 
                     if pseudo_node.childs.len() > 1 {
@@ -137,7 +200,7 @@ fn gen_zcode<'a>(node: &'a ASTNode, mut out: &mut zfile::Zfile, mut manager: &mu
                                     "==" | "is" => {} ,
                                     _ => panic!("Unsupported Compare Operator!")
                                 }
-                            }, _ =>  panic!("Unsupported if-expression!")
+                            }, _ =>  panic!("Unsupported elseif-expression!")
                         }
 
                         // Check if third token is number
@@ -155,8 +218,8 @@ fn gen_zcode<'a>(node: &'a ASTNode, mut out: &mut zfile::Zfile, mut manager: &mu
                     let if_id = manager.ids_if.start_next();
 
                     let if_label = format!("if_{}", if_id);
-                    let after_if_label = format!("after_if_{}", if_id);
-                    let after_else_label = format!("after_else_{}", if_id);
+                    let after_if_label = format!("after_if_{}", manager.ids_if.pop_id());
+                    let after_else_label = format!("after_else_{}", manager.ids_if.peek());
                     let mut code: Vec<ZOP> = vec![
                         ZOP::JE{local_var_id: symbol_id, equal_to_const: compare, jump_to_label: if_label.to_string()},
                         ZOP::Jump{jump_to_label: after_if_label.to_string()},
@@ -317,6 +380,7 @@ pub enum ASTOperation {
     Up,
     UpChild(Token),
     UpChildDown(Token),
+    UpTwoChildsDown(Token, Token),
     TwoUp,
 }
 
@@ -342,6 +406,7 @@ impl AST {
             Up => self.up(),
             UpChild(child) => self.up_child(child),
             UpChildDown(child) => self.up_child_down(child),
+            UpTwoChildsDown(child1, child2) => self.up_two_childs_down(child1, child2),
             TwoUp => self.two_up(),
         }
     }
@@ -399,6 +464,14 @@ impl AST {
         self.up();
         self.child_down(token);
     }
+
+    /// goes one lvl up, adds one child and goes down. adds child and goes down.
+    pub fn up_two_childs_down(&mut self, child1: Token, child2: Token) {
+        self.up();
+        self.child_down(child1);
+        self.child_down(child2);
+    }
+
 
     //goes two lvl up
     pub fn two_up(&mut self) {
@@ -503,6 +576,11 @@ impl IdentifierProvider {
         self.current_id += 1;
         self.id_stack.push(id);
         id
+    }
+
+    // Pops the last id from the stack
+    pub fn peek(&mut self) -> u32 {
+        self.id_stack.last().unwrap().clone()
     }
 
     // Pops the last id from the stack
