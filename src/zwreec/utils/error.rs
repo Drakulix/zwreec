@@ -1,30 +1,32 @@
 use frontend::lexer::LexerError;
 use frontend::parser::ParserError;
 
-trait Error {
-    fn raise(self) -> ! {
+pub trait Error {
+    fn raise(&self) -> ! {
         self.log();
         panic!();
     }
-    fn log(self);
+    fn log(&self);
 }
 
 impl Error for LexerError {
-    fn log(self) {
+    fn log(&self) {
         error!("[!!!] Critical Lexer Error [!!!]");
     }
 }
 
 impl Error for ParserError {
-    fn log(self) {
+    fn log(&self) {
         error!("[!!!] Critical Parser Error [!!!]");
         match self {
-            TokenDoNotMatch(token, stack) =>
+            &ParserError::TokenDoNotMatch{ref token, ref stack} =>
                 match token {
-                    Some(token) => error!("Stack Token does not match. Token:{:?} Stack:{:?}", token, stack),
-                    None => error!("No Tokens left, but Terminal is left on Stack. Token:{:?}", stack),
+                    &Some(ref token) => error!("Stack Token does not match. Token:{:?} Stack:{:?}", token, stack),
+                    &None => error!("No Tokens left, but Terminal is left on Stack. Token:{:?}", stack),
                 },
-            StackIsEmpty(token) => error!("Tokens left but Stack is empty. Token:{:?}", token),
+            &ParserError::StackIsEmpty{ref token} => error!("Tokens left but Stack is empty. Token:{:?}", token),
+            &ParserError::NoProjection{ref token, ref stack} => error!("No Projection found for Token:{:?} and NonTerminal:{:?}", token, stack),
+            &ParserError::NonTerminalEnd{ref stack} => error!("NonTerminal:{:?} is no allowed End", stack),
         }
     }
 }

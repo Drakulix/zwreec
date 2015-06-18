@@ -18,17 +18,11 @@ use self::Elem::*;
 //=============================
 // error handling
 
-pub struct ParserResult {
-    description: String,
-    current_token: Option<Token>,
-    current_stack_elem: Option<Elem>,
-}
-
 pub enum ParserError {
     TokenDoNotMatch { token: Option<Token>, stack: Token },
     StackIsEmpty { token: Token },
     NoProjection { token: Token, stack: NonTerminalType },
-    
+    NonTerminalEnd { stack: NonTerminalType },
 }
 
 //==============================
@@ -121,14 +115,14 @@ impl<'a> Parser<'a> {
                                 if stack_token == token {
                                     (ParseResult::Continue, None)
                                 } else {
-                                    ParserError::TokenDoNotMatch(Some(token), stack_token).raise()
+                                    ParserError::TokenDoNotMatch{token: Some(token), stack: stack_token}.raise()
                                 }
                             },
-                            None => ParserError::StackIsEmpty(token).raise(),
+                            None => ParserError::StackIsEmpty{token: token}.raise(),
                         },
                         None => match state.stack.pop() {
                             Some(Elem::NonTerminal(non_terminal)) => (ParseResult::Continue, (state.grammar_func)(non_terminal, None, &mut state.stack)),
-                            Some(Elem::Terminal(stack_token)) => ParserError::TokenDoNotMatch(Some(token), stack_token).raise(),
+                            Some(Elem::Terminal(stack_token)) => ParserError::TokenDoNotMatch{token: token, stack: stack_token}.raise(),
                             None => (ParseResult::End, None),
                         }
                     }
@@ -605,9 +599,8 @@ impl<'a> Parser<'a> {
 
                     Some(AddChild(tok))
                 },
-                (_, tok) => {
-                    let (line, character) = tok.location();
-                    panic!("Unexpected token at {}:{}", line, character);
+                (x, tok) => {
+                    ParserError::NoProjection{token: tok, stack: x}.raise()
                 }
             }
 
@@ -622,7 +615,7 @@ impl<'a> Parser<'a> {
                     None
                 },
                 _ => {
-                    panic!("Nonterminal '{:?}' is not an allowed end.", top);
+                    ParserError::NonTerminalEnd{stack: top}.raise()
                 }
             }
         }

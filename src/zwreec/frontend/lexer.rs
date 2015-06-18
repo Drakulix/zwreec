@@ -1,5 +1,4 @@
 use std::io::{BufReader, Read};
-use utils::error::Error;
 use utils::extensions::{Peeking, PeekingExt, FilteringScan, FilteringScanExt};
 use config::Config;
 
