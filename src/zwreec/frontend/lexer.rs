@@ -59,6 +59,7 @@ pub fn lex<'a, R: Read>(cfg: &Config, input: &'a mut R) -> FilteringScan<Peeking
 
 #[derive(Debug,Clone)]
 pub enum Token {
+
     TokPassage                {location: (u64, u64), name: String},
     TokTagStart               {location: (u64, u64)},
     TokTagEnd                 {location: (u64, u64)},
@@ -86,6 +87,7 @@ pub enum Token {
     TokMacroSet               {location: (u64, u64)},
     TokMacroIf                {location: (u64, u64)},
     TokMacroElse              {location: (u64, u64)},
+    TokMacroElseIf            {location: (u64, u64)},
     TokMacroEndIf             {location: (u64, u64)},
     TokMacroPrint             {location: (u64, u64)},
     TokMacroDisplay           {location: (u64, u64)},
@@ -109,7 +111,7 @@ pub enum Token {
     TokLogOp                  {location: (u64, u64), op_name: String},
     TokSemiColon              {location: (u64, u64)},
     TokNewLine                {location: (u64, u64)},
-    TokPseudo,
+    TokExpression,
 }
 
 impl Token {
@@ -149,6 +151,7 @@ impl Token {
             &TokMacroSet{location} |
             &TokMacroIf{location} |
             &TokMacroElse{location} |
+            &TokMacroElseIf{location} |
             &TokMacroEndIf{location} |
             &TokMacroPrint{location} |
             &TokMacroDisplay{location} |
@@ -173,7 +176,7 @@ impl Token {
             &TokSemiColon{location} |
             &TokNewLine{location}
                 => location,
-            &TokPseudo => (0, 0)
+            &TokExpression => (0, 0)
         }
     }
 }
@@ -217,6 +220,7 @@ impl PartialEq for Token {
             (&TokMacroSet{..}, &TokMacroSet{..}) => true,
             (&TokMacroIf{..}, &TokMacroIf{..}) => true,
             (&TokMacroElse{..}, &TokMacroElse{..}) => true,
+            (&TokMacroElseIf{..}, &TokMacroElseIf{..}) => true,
             (&TokMacroEndIf{..}, &TokMacroEndIf{..}) => true,
             (&TokMacroPrint{..}, &TokMacroPrint{..}) => true,
             (&TokMacroDisplay{..}, &TokMacroDisplay{..}) => true,
@@ -325,7 +329,7 @@ rustlex! TweeLexer {
     let FUNCTION_NAME = (LETTER | UNDERSCORE) VAR_CHAR*;
     let FUNCTION = FUNCTION_NAME '(';
 
-    let MACRO_NAME = [^" >"'\n']*;
+    let MACRO_NAME = [^" >"'\n']* ( WHITESPACE+ "if")?;
 
     let ASSIGN = "=" | "to" | "+=" | "-=" | "*=" | "/=";
     let SEMI_COLON = ';';
@@ -568,7 +572,9 @@ rustlex! TweeLexer {
         }
 
         MACRO_NAME =>  |lexer:&mut TweeLexer<R>| -> Option<Token> {
-            match lexer.yystr().trim().as_ref() {
+            let replaced_string = str::replace(lexer.yystr().trim(),  " ", "");
+
+            match replaced_string.as_ref() {
                 "set" => {
                     lexer.MACRO_CONTENT();
                     Some(TokMacroSet {location: lexer.yylloc()} )
@@ -580,6 +586,10 @@ rustlex! TweeLexer {
                 "else" => {
                     lexer.MACRO_CONTENT();
                     Some(TokMacroElse {location: lexer.yylloc()} )
+                },
+                "elseif" => {
+                    lexer.MACRO_CONTENT();
+                    Some(TokMacroElseIf {location: lexer.yylloc()} )
                 },
                 "endif" => {
                     lexer.MACRO_CONTENT();
@@ -603,7 +613,7 @@ rustlex! TweeLexer {
                 },
                 _ => {
                     lexer.MACRO_CONTENT();
-                    Some(TokMacroContentPassageName {location: lexer.yylloc(), passage_name: lexer.yystr().trim().to_string()} )
+                    Some(TokMacroContentPassageName {location: lexer.yylloc(), passage_name: replaced_string.to_string()} )
                 }
             }
         }
@@ -666,7 +676,7 @@ rustlex! TweeLexer {
         PAREN_CLOSE =>|lexer:&mut TweeLexer<R>| Some(TokParenClose{location: lexer.yylloc()} )
         SEMI_COLON => |lexer:&mut TweeLexer<R>| Some(TokSemiColon {location: lexer.yylloc()} )
         ASSIGN =>     |lexer:&mut TweeLexer<R>| Some(TokAssign    {location: lexer.yylloc(), var_name: "".to_string(), op_name: lexer.yystr()} )
-        COLON =>      |lexer:&mut TweeLexer<R>| Some(TokColon     {location: lexer.yylloc()} ),
+        COLON =>      |lexer:&mut TweeLexer<R>| Some(TokColon     {location: lexer.yylloc()} )
         // Expression Stuff End
 
         WHITESPACE =>  |_:&mut TweeLexer<R>| -> Option<Token> {
@@ -899,26 +909,26 @@ mod tests {
     #[test]
     fn macro_if_test() {
         // This should return a passage with an if macro
-        let tokens = test_lex("::Passage\n<<if $var == 1>>1<<else if var is 2>>2<<else>>3<<endif>>");
+        let tokens = test_lex("::Passage\n<<if $var1 == 1>>1<<else if $var2 is 2>>2<<else>>3<<endif>>");
         let expected = vec!(
             TokPassage {name: "Passage".to_string(), location: (1, 3)},
             TokMacroIf {location: (2, 3)},
-            TokVariable {location: (2, 6), name: "$var".to_string()},
-            TokCompOp {location: (2, 11), op_name: "==".to_string()},
-            TokInt {location: (2, 14), value: 1},
-            TokMacroEnd {location: (2, 15)},
-            TokText {location: (2, 17), text: "1".to_string()},
-            TokMacroElse {location: (2, 20)},
-            /* TODO: Fix else if */
-            TokCompOp {location: (2, 32), op_name: "is".to_string()},
-            TokInt {location: (2, 35), value: 2},
-            TokMacroEnd {location: (2, 36)},
-            TokText {location: (2, 38), text: "2".to_string()},
-            TokMacroElse {location: (2, 41)},
-            TokMacroEnd {location: (2, 45)},
-            TokText {location: (2, 47), text: "3".to_string()},
-            TokMacroEndIf {location: (2, 50)},
-            TokMacroEnd {location: (2, 55)}
+            TokVariable {location: (2, 6), name: "$var1".to_string()},
+            TokCompOp {location: (2, 12), op_name: "==".to_string()},
+            TokInt {location: (2, 15), value: 1},
+            TokMacroEnd {location: (2, 16)},
+            TokText {text: "1".to_string(), location: (2, 18) },
+            TokMacroElseIf {location: (2, 21)},
+            TokVariable {name: "$var2".to_string(), location: (2, 29)},
+            TokCompOp {op_name: "is".to_string(), location: (2, 35)},
+            TokInt {location: (2, 38), value: 2},
+            TokMacroEnd {location: (2, 39)},
+            TokText {text: "2".to_string(), location: (2, 41)},
+            TokMacroElse {location: (2, 44)},
+            TokMacroEnd {location: (2, 48)},
+            TokText {text: "3".to_string(), location: (2, 50)},
+            TokMacroEndIf {location: (2, 53)},
+            TokMacroEnd {location: (2, 58)}
         );
 
         assert_tok_eq(expected, tokens);
