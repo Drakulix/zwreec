@@ -698,18 +698,18 @@ fn test_zfile_general_op_length() {
 fn test_zfile_label_and_jump_loop() {
     let mut zfile: Zfile = Zfile::new();
     zfile.start();
-    let (labels, jumps1, bytes1) =  zfile.write_zop(&ZOP::Label{name: "loop".to_string()});
+    let (labels, jumps1, bytes1) =  zfile.write_zop(&ZOP::Label{name: "Start".to_string()});
     assert_eq!(jumps1.len() + bytes1.len(), 0);
     assert_eq!(labels.len(), 1);
-    let (labels2, jumps, bytes) =  zfile.write_zop(&ZOP::Jump{jump_to_label: "loop".to_string()});
+    let (labels2, jumps, bytes) =  zfile.write_zop(&ZOP::Jump{jump_to_label: "Start".to_string()});
     assert_eq!(labels2.len(), 0);
     assert_eq!(jumps.len(), 1);
     assert_eq!(bytes.len(), 3);
     let pos = zfile.data.len() - bytes.len();  // start position of written bytes
     zfile.end();
     // in this example we have the following data:
-    //[Zlabel { to_addr: 2055, name: "loop" }] [] []
-    //[] [Zjump { from_addr: 2056, name: "loop", jump_type: Jump }] [140, 255, 255]
+    //[Zlabel { to_addr: 2055, name: "Start" }] [] []
+    //[] [Zjump { from_addr: 2056, name: "Start", jump_type: Jump }] [140, 255, 255]
     // 0xffff is -1 as i16 because we have a relative jump
     assert_eq!(zfile.data.bytes[pos], bytes[0]);  // jump op
     let rel_addr: i16 = (zfile.data.bytes[pos+1] as u16 * 256 + zfile.data.bytes[pos+2] as u16) as i16;
