@@ -737,16 +737,16 @@ impl ASTNode {
 #[cfg(test)]
 mod tests {
     use std::io::Cursor;
-    use config;
 
     use super::*;
     use frontend::*;
     use frontend::lexer::Token;
     use frontend::lexer::Token::*;
+    use config::Config;
 
     /// creates an ast from the inputs str
     fn test_ast(input: &str) -> AST {
-        let cfg = config::default_config();
+        let cfg = Config::default_config();
         let mut cursor: Cursor<Vec<u8>> = Cursor::new(input.to_string().into_bytes());
         let tokens = lexer::lex(&cfg, &mut cursor);
         let parser = parser::Parser::new(&cfg);
