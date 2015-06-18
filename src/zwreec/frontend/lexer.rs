@@ -770,13 +770,13 @@ rustlex! TweeLexer {
 mod tests {
     use std::io::Cursor;
     use std::fmt::Write;
-    use config;
+    use config::Config;
 
     use super::*;
     use super::Token::*;
 
     fn test_lex(input: &str) -> Vec<Token> {
-        let cfg = config::default_config();
+        let cfg = Config::default_config();
         let mut cursor: Cursor<Vec<u8>> = Cursor::new(input.to_string().into_bytes());
         lex(&cfg, &mut cursor).collect()
     }
