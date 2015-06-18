@@ -31,7 +31,7 @@ pub fn compile<R: Read, W: Write>(cfg: Config, input: &mut R, output: &mut W) {
     let ast = frontend::ast::AST::build(parser.parse(tokens.inspect(|ref token| {
         debug!("{:?}", token);
     })));
-    ast.print();
+    ast.print(false);
 
     // create code
     codegen::generate_zcode(&cfg, ast, output);

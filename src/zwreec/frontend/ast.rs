@@ -497,10 +497,10 @@ impl AST {
     }
 
     /// prints the tree
-    pub fn print(&self) {
+    pub fn print(&self, force_print: bool) {
         debug!("Abstract Syntax Tree: ");
         for child in &self.passages {
-            child.print(0);
+            child.print(0, force_print);
         }
         debug!("");
     }
@@ -514,6 +514,18 @@ impl AST {
             self.passages[*index].count_childs(new_path)
         } else {
             self.passages.len()
+        }
+    }
+
+    /// checks in the ast if there is the token "token"
+    pub fn is_specific_token(&self, token: Token, path: Vec<usize>) -> bool {
+        if let Some(index) = path.first() {
+            let mut new_path: Vec<usize> = path.to_vec();
+            new_path.remove(0);
+
+            self.passages[*index].is_specific_token(token, new_path)
+        } else {
+            false
         }
     }
 }
@@ -659,8 +671,30 @@ impl ASTNode {
         }
     }
 
+    /// checks the current path if there is the token "token"
+    pub fn is_specific_token(&self, token: Token, path: Vec<usize>) -> bool {
+        if let Some(index) = path.first() {
+            let mut new_path: Vec<usize> = path.to_vec();
+            new_path.remove(0);
+
+            match self {
+                &ASTNode::Default(ref node) => node.childs[*index].is_specific_token(token, new_path),
+                &ASTNode::Passage(ref node) => node.childs[*index].is_specific_token(token, new_path),
+            }
+        } else {
+            match self {
+                &ASTNode::Default(ref node) => {
+                    token == node.category
+                },
+                &ASTNode::Passage(ref node) => {
+                    token == node.category
+                },
+            }
+        }
+    }
+
     /// prints an node of an ast
-    pub fn print(&self, indent: usize) {
+    pub fn print(&self, indent: usize, force_print: bool) {
         let mut spaces = "".to_string();
         for _ in 0..indent {
             spaces.push_str(" ");
@@ -668,15 +702,23 @@ impl ASTNode {
 
         match self {
             &ASTNode::Passage(ref t) => {
-                debug!("{}|- : {:?}", spaces, t.category);
+                if force_print {
+                    println!("{}|- : {:?}", spaces, t.category);
+                } else {
+                    debug!("{}|- : {:?}", spaces, t.category);
+                }
                 for child in &t.childs {
-                    child.print(indent+2);
+                    child.print(indent+2, force_print);
                 }
             },
             &ASTNode::Default(ref t) => {
-                debug!("{}|- : {:?}", spaces, t.category);
+                if force_print {
+                    println!("{}|- : {:?}", spaces, t.category);
+                } else {
+                    debug!("{}|- : {:?}", spaces, t.category);
+                }
                 for child in &t.childs {
-                    child.print(indent+2);
+                    child.print(indent+2, force_print);
                 }
             }
         }
@@ -687,5 +729,57 @@ impl ASTNode {
             &ASTNode::Default(ref def) => def,
             _ => panic!("Node cannot be unwrapped as NodeDefault!")
         }
+    }
+}
+
+// ================================
+// test functions
+#[cfg(test)]
+mod tests {
+    use std::io::Cursor;
+    use config;
+
+    use super::*;
+    use frontend::*;
+    use frontend::lexer::Token;
+    use frontend::lexer::Token::*;
+
+    /// creates an ast from the inputs str
+    fn test_ast(input: &str) -> AST {
+        let cfg = config::default_config();
+        let mut cursor: Cursor<Vec<u8>> = Cursor::new(input.to_string().into_bytes());
+        let tokens = lexer::lex(&cfg, &mut cursor);
+        let parser = parser::Parser::new(&cfg);
+        AST::build(parser.parse(tokens.inspect(|ref token| {
+            println!("{:?}", token);
+        })))
+    }
+
+    /// checks exptexted
+    fn test_expected(expected: Vec<(Vec<usize>, Token)>, ast: AST) {
+        for item in expected.iter() {
+            let b = ast.is_specific_token(item.1.clone(), item.0.to_vec());
+            if b == false {
+                ast.print(true);
+            }
+            assert!(ast.is_specific_token(item.1.clone(), item.0.to_vec()));
+        }
+    }
+
+    #[test]
+    fn text_test() {
+        let ast = test_ast("::Passage\nTestText\nTestNextLine\n::NextPassage");
+
+        let expected = vec!(
+            (vec![0]  , TokPassage {name: "Passage".to_string(), location: (0, 0)}),
+            (vec![0,0], TokText {location: (0, 0), text: "TestText".to_string()}),
+            (vec![0,1], TokNewLine {location: (0, 0)} ),
+            (vec![0,2], TokText {location: (0, 0), text: "".to_string()}),
+            (vec![0,1], TokNewLine {location: (0, 0)}),
+            (vec![1]  , TokPassage {name: "".to_string(), location: (0, 0)}),
+
+        );
+
+        test_expected(expected, ast);
     }
 }
