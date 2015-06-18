@@ -47,6 +47,7 @@ fn gen_zcode<'a>(node: &'a ASTNode, mut out: &mut zfile::Zfile, mut manager: &mu
 
             code.push(ZOP::Newline);
             code.push(ZOP::Call1N{jump_to_label: "system_check_links".to_string()});
+            code.push(ZOP::Ret{value: 0});
             code
         },
         &ASTNode::Default(ref t) => {
@@ -332,10 +333,20 @@ fn gen_zcode<'a>(node: &'a ASTNode, mut out: &mut zfile::Zfile, mut manager: &mu
                         }
                     }
                 },
+                &Token::TokMacroContentPassageName {ref passage_name, .. } => {
+                    vec![
+                    // activates the display-modus
+                    ZOP::StoreU8{variable: 17, value: 1},
+                    ZOP::Call1N{jump_to_label: passage_name.to_string()},
+
+                    // deactivates the display-modus
+                    ZOP::StoreU8{variable: 17, value: 0},
+                    ]
+                },
                 _ => {
                     debug!("no match if");
                     vec![]
-                }
+                },
             };
             if set_formatting {
                 for child in &t.childs {
@@ -361,11 +372,42 @@ fn boolstr_to_u8(string: &str) -> u8 {
     }
 }
 
+pub enum ASTOperation {
+    AddPassage(Token),
+    AddChild(Token),
+    ChildDown(Token),
+    TwoChildsDown(Token, Token),
+    Up,
+    UpChild(Token),
+    UpChildDown(Token),
+    UpTwoChildsDown(Token, Token),
+    TwoUp,
+}
+
 impl AST {
-    pub fn new() -> AST {
-        AST {
+    pub fn build<I: Iterator<Item=ASTOperation>>(ops: I) -> AST {
+        let mut ast = AST {
             passages: Vec::new(),
-            path: Vec::new(),
+            path: Vec::new()
+        };
+        for op in ops {
+            ast.operation(op);
+        }
+        ast
+    }
+
+    pub fn operation(&mut self, op: ASTOperation) {
+        use self::ASTOperation::*;
+        match op {
+            AddPassage(passage) => self.add_passage(passage),
+            AddChild(child) => self.add_child(child),
+            ChildDown(child) => self.child_down(child),
+            TwoChildsDown(child1, child2) => self.two_childs_down(child1, child2),
+            Up => self.up(),
+            UpChild(child) => self.up_child(child),
+            UpChildDown(child) => self.up_child_down(child),
+            UpTwoChildsDown(child1, child2) => self.up_two_childs_down(child1, child2),
+            TwoUp => self.two_up(),
         }
     }
 
@@ -421,6 +463,20 @@ impl AST {
     pub fn up_child_down(&mut self, token: Token) {
         self.up();
         self.child_down(token);
+    }
+
+    /// goes one lvl up, adds one child and goes down. adds child and goes down.
+    pub fn up_two_childs_down(&mut self, child1: Token, child2: Token) {
+        self.up();
+        self.child_down(child1);
+        self.child_down(child2);
+    }
+
+
+    //goes two lvl up
+    pub fn two_up(&mut self) {
+        self.up();
+        self.up();
     }
 
 
