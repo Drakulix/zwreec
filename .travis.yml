@@ -3,8 +3,9 @@ rust: nightly-2015-06-02
 branches:
   only:
   - master
+sudo: true
 install:
-  - pip install ghp-import
+  - sudo pip install ghp-import
 after_success: |
     cargo doc &&
     echo "<meta http-equiv=refresh content=0;url=zwreec/index.html>" > target/doc/index.html &&
