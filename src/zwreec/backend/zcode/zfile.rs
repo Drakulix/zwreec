@@ -27,7 +27,7 @@ pub enum ZOP {
   StoreU8{variable: u8, value: u8},
   StoreW{array_address: u16, index: u8, variable: u8},
   Inc{variable: u8},
-  Ret{value: u8},
+  Ret{value: u16},
   JE{local_var_id: u8, equal_to_const: u8, jump_to_label: String},
   Random{range: u8, variable: u8},
   ReadChar{local_var_id: u8},
@@ -622,7 +622,7 @@ impl Zfile {
 
     /// jumps to a label
     pub fn op_jump(&mut self, jump_to_label: &str) {
-        self.op_1(0x0c, ArgType::SmallConst);
+        self.op_1(0x0c, ArgType::LargeConst);
         self.add_jump(jump_to_label.to_string(), JumpType::Jump);
     }
 
@@ -631,7 +631,7 @@ impl Zfile {
     /// calls a routine
     /// call_1n is 1OP
     pub fn op_call_1n(&mut self, jump_to_label: &str) {
-        self.op_1(0x0f, ArgType::SmallConst);
+        self.op_1(0x0f, ArgType::LargeConst);
         self.add_jump(jump_to_label.to_string(), JumpType::Routine);
     }
 
@@ -656,7 +656,7 @@ impl Zfile {
     /// is an 2OP, but with small constant and variable
     pub fn op_je(&mut self, local_var_id: u8, equal_to_const: u8, jump_to_label: &str) {
 
-        let args: Vec<ArgType> = vec![ArgType::Variable, ArgType::SmallConst];
+        let args: Vec<ArgType> = vec![ArgType::Variable, ArgType::LargeConst];
         self.op_2(0x01, args);
         
         // variable id

@@ -180,10 +180,10 @@ pub fn op_print_addr(address: u8) -> Vec<u8> {
 }
 
 
-/// returns a SmallConst
-pub fn op_ret(value: u8) -> Vec<u8> {
-    let mut bytes = op_1(0x0b, ArgType::SmallConst);
-    bytes.push(value);
+/// returns a LargeConst
+pub fn op_ret(value: u16) -> Vec<u8> {
+    let mut bytes = op_1(0x0b, ArgType::LargeConst);
+    write_u16(value, &mut bytes);
     bytes
 }
 
