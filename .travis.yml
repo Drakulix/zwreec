@@ -1,11 +1,11 @@
 language: rust
 rust: nightly-2015-06-02
-python: "2.7"
 branches:
   only:
   - master
+sudo: true
 install:
-  - pip install ghp-import
+  - sudo pip install ghp-import
 after_success: |
     [ $TRAVIS_BRANCH = master ] &&
     [ $TRAVIS_PULL_REQUEST = false ] &&
