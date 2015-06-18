@@ -10,9 +10,26 @@ use frontend::lexer::Token;
 use frontend::lexer::Token::*;
 use frontend::ast::ASTOperation;
 use frontend::ast::ASTOperation::*;
+use utils::error::Error;
 use utils::extensions::{ParserExt, ParseResult};
 use self::NonTerminalType::*;
 use self::Elem::*;
+
+//=============================
+// error handling
+
+pub struct ParserResult {
+    description: String,
+    current_token: Option<Token>,
+    current_stack_elem: Option<Elem>,
+}
+
+pub enum ParserError {
+    TokenDoNotMatch { token: Option<Token>, stack: Token },
+    StackIsEmpty { token: Token },
+    NoProjection { token: Token, stack: NonTerminalType },
+    
+}
 
 //==============================
 // grammar
@@ -104,17 +121,15 @@ impl<'a> Parser<'a> {
                                 if stack_token == token {
                                     (ParseResult::Continue, None)
                                 } else {
-                                    panic!("parser paniced, stack token does not match. Stack:{:?}, Token:{:?}", stack_token, token);
+                                    ParserError::TokenDoNotMatch(Some(token), stack_token).raise()
                                 }
                             },
-                            None => panic!("parser paniced, tokens left but stack is empty. First Token left at {:?}", token),
+                            None => ParserError::StackIsEmpty(token).raise(),
                         },
                         None => match state.stack.pop() {
-
                             Some(Elem::NonTerminal(non_terminal)) => (ParseResult::Continue, (state.grammar_func)(non_terminal, None, &mut state.stack)),
-                            Some(Elem::Terminal(stack_token)) => panic!("parser paniced, no tokens left and terminal found. Stack:{:?}", stack_token),
+                            Some(Elem::Terminal(stack_token)) => ParserError::TokenDoNotMatch(Some(token), stack_token).raise(),
                             None => (ParseResult::End, None),
-
                         }
                     }
                 }

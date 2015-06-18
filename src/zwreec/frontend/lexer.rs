@@ -1,8 +1,11 @@
 use std::io::{BufReader, Read};
+use utils::error::Error;
 use utils::extensions::{Peeking, PeekingExt, FilteringScan, FilteringScanExt};
 use config::Config;
 
 use self::Token::*;
+
+pub struct LexerError;
 
 pub struct ScanState {
     current_text: String,
