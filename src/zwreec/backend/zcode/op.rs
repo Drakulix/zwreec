@@ -335,14 +335,14 @@ pub fn quit() -> Vec<u8> {
 }
 
 /// op-codes with 0 operators
-fn op_0(value: u8) -> Vec<u8> {
+pub fn op_0(value: u8) -> Vec<u8> {
     let byte = value | 0xb0;
     vec![byte]
 }
 
 
 /// op-codes with variable operators (4 are possible)
-fn op_var(value: u8, arg_types: Vec<ArgType>) -> Vec<u8> {
+pub fn op_var(value: u8, arg_types: Vec<ArgType>) -> Vec<u8> {
 	let mut ret = Vec::new();
 	ret.push(value | 0xe0);
     ret.push(encode_variable_arguments(arg_types));
@@ -351,7 +351,7 @@ fn op_var(value: u8, arg_types: Vec<ArgType>) -> Vec<u8> {
 
 
 /// op-codes with 1 operator
-fn op_1( value: u8, arg_type: ArgType) -> Vec<u8> {
+pub fn op_1( value: u8, arg_type: ArgType) -> Vec<u8> {
     let mut byte: u8 = 0x80 | value;
 
      match arg_type {
@@ -364,7 +364,7 @@ fn op_1( value: u8, arg_type: ArgType) -> Vec<u8> {
     vec![byte]
 }
 
-fn op_2( value: u8, arg_types: Vec<ArgType>) -> Vec<u8> {
+pub fn op_2( value: u8, arg_types: Vec<ArgType>) -> Vec<u8> {
     let mut byte: u8 = 0x00;
     let mut is_variable: bool = false;
     let mut ret = Vec::new();
@@ -394,7 +394,7 @@ fn op_2( value: u8, arg_types: Vec<ArgType>) -> Vec<u8> {
     ret
 }
 
-fn encode_variable_arguments( arg_types: Vec<ArgType>) -> u8 {
+pub fn encode_variable_arguments( arg_types: Vec<ArgType>) -> u8 {
     let mut byte: u8 = 0x00;
     for (i, arg_type) in arg_types.iter().enumerate() {
         let shift: u8 = 6 - 2 * i as u8;

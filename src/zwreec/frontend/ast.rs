@@ -305,7 +305,7 @@ fn gen_zcode<'a>(node: &'a ASTNode, mut out: &mut zfile::Zfile, mut manager: &mu
                                 if from_value <= 0 {
                                     code.push(ZOP::Sub {variable1: var, sub_const: 1, variable2: var} );
                                 } else {
-                                    code.push(ZOP::Add {variable1: var, add_const: from_value - 1, variable2: var} );
+                                    code.push(ZOP::Add {variable1: var, add_const: (from_value - 1) as i16, variable2: var} );
                                 }
                                 code.push(ZOP::PrintNumVar {variable: var} );
                             } else {

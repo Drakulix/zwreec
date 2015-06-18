@@ -690,7 +690,7 @@ fn test_zfile_general_op_length() {
     zfile.op_1(0x00, ArgType::Reference);
     assert_eq!(zfile.data.len(), 3);
     let args: Vec<ArgType> = vec![ArgType::SmallConst, ArgType::Nothing, ArgType::Nothing, ArgType::Nothing];
-    zfile.op_var(0x00, args);
+    zfile.data.append_bytes(&op::op_var(0x00, args));
     assert_eq!(zfile.data.len(), 5);
 }
 
