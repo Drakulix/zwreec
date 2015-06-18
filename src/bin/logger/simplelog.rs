@@ -65,7 +65,7 @@ impl Log for SimpleLogger {
             let _ = match record.level() {
                 LogLevel::Trace =>
                     writeln!(stderr_lock,
-                        "[{}] {}: ({}:{}:{}) [{}:{}] - {}",
+                        "[{}] {}: ({:02}:{:02}:{:02}) [{}:{}] - {}",
                             record.level(),
                             record.target(),
                             cur_time.tm_hour,
@@ -77,7 +77,7 @@ impl Log for SimpleLogger {
                     ),
                 _ =>
                     writeln!(stderr_lock,
-                        "[{}] {}: ({}:{}:{}) - {}",
+                        "[{}] {}: ({:02}:{:02}:{:02}) - {}",
                             record.level(),
                             record.target(),
                             cur_time.tm_hour,

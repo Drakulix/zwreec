@@ -11,7 +11,7 @@ static TESTFOLDER_PASS: &'static str = "./tests/integration/should-compile/";
 static TESTFOLDER_FAIL: &'static str = "./tests/integration/should-fail/";
 
 fn test_compile(input_filename: String) {
-	let path = Path::new(&input_filename);
+    let path = Path::new(&input_filename);
     let mut input = match File::open(path) {
         Err(why) => {
             panic!("Couldn't open {}: {}",
@@ -32,7 +32,7 @@ fn test_compile(input_filename: String) {
 
 #[test]
 fn helloworld_test() {
-	test_compile(TESTFOLDER_PASS.to_string() + "HelloWorld.twee");
+    test_compile(TESTFOLDER_PASS.to_string() + "HelloWorld.twee");
 }
 
 #[test]
@@ -42,12 +42,12 @@ fn long_text_test() {
 
 #[test]
 fn zscii_test() {
-	test_compile(TESTFOLDER_PASS.to_string() + "ZSCII.twee");
+    test_compile(TESTFOLDER_PASS.to_string() + "ZSCII.twee");
 }
 
 #[test]
 fn ascii_test() {
-	test_compile(TESTFOLDER_PASS.to_string() + "ASCII.twee");
+    test_compile(TESTFOLDER_PASS.to_string() + "ASCII.twee");
 }
 
 #[test]
@@ -58,6 +58,16 @@ fn unicode_test() {
 #[test]
 fn passage_links_test() {
     test_compile(TESTFOLDER_PASS.to_string() + "PassageLinks.twee");
+}
+
+#[test]
+fn random_test() {
+    test_compile(TESTFOLDER_PASS.to_string() + "Random.twee");
+}
+
+#[test]
+fn if_else_test() {
+    test_compile(TESTFOLDER_PASS.to_string() + "If-Else.twee");
 }
 
 #[test]

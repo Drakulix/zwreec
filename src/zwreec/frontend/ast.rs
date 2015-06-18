@@ -2,6 +2,7 @@
 //! to create and walk through the ast (abstract syntaxtree)
 
 use frontend::lexer::Token;
+use frontend::lexer::Token::*;
 use backend::zcode::zfile;
 use backend::zcode::zfile::{FormattingState, ZOP};
 use std::collections::HashMap;
@@ -24,19 +25,19 @@ pub struct AST {
 fn gen_zcode<'a>(node: &'a ASTNode, mut out: &mut zfile::Zfile, mut manager: &mut CodeGenManager<'a>) -> Vec<ZOP> {
     let mut state_copy = manager.format_state.clone();
     let mut set_formatting = false;
-  
+
     match node {
         &ASTNode::Passage(ref node) => {
             let mut code: Vec<ZOP> = vec![];
             match &node.category {
-                &Token::TokPassage {ref name} => {
+                &TokPassage {ref name, .. } => {
                     code.push(ZOP::Routine{name: name.to_string(), count_variables: 0});
                 },
                 _ => {
                     debug!("no match 1");
                 }
             };
-            
+
             for child in &node.childs {
                 for instr in gen_zcode(child, out, manager) {
                     code.push(instr);
@@ -46,32 +47,33 @@ fn gen_zcode<'a>(node: &'a ASTNode, mut out: &mut zfile::Zfile, mut manager: &mu
 
             code.push(ZOP::Newline);
             code.push(ZOP::Call1N{jump_to_label: "system_check_links".to_string()});
+            code.push(ZOP::Ret{value: 0});
             code
         },
         &ASTNode::Default(ref t) => {
             let mut code: Vec<ZOP> = match &t.category {
-                &Token::TokText {ref text} => {
+                &TokText {ref text, .. } => {
                     vec![ZOP::PrintOps{text: text.to_string()}]
                 },
-                &Token::TokNewLine => {
+                &TokNewLine { .. } => {
                     vec![ZOP::Newline]
                 },
-                &Token::TokFormatBoldStart => {
+                &TokFormatBoldStart { .. } => {
                     state_copy.bold = true;
                     set_formatting = true;
                     vec![ZOP::SetTextStyle{bold: state_copy.bold, reverse: state_copy.inverted, monospace: state_copy.mono, italic: state_copy.italic}]
                 },
-                &Token::TokFormatMonoStart => {
+                &TokFormatMonoStart { .. } => {
                     state_copy.mono = true;
                     set_formatting = true;
                     vec![ZOP::SetTextStyle{bold: state_copy.bold, reverse: state_copy.inverted, monospace: state_copy.mono, italic: state_copy.italic}]
                 },
-                &Token::TokFormatItalicStart => {
+                &TokFormatItalicStart { .. } => {
                     state_copy.italic = true;
                     set_formatting = true;
                     vec![ZOP::SetTextStyle{bold: state_copy.bold, reverse: state_copy.inverted, monospace: state_copy.mono, italic: state_copy.italic}]
                 },
-                &Token::TokPassageLink {ref display_name, ref passage_name} => {
+                &TokPassageLink {ref display_name, ref passage_name, .. } => {
                     set_formatting = true;
                     vec![
                     ZOP::Call2NWithAddress{jump_to_label: "system_add_link".to_string(), address: passage_name.to_string()},
@@ -82,18 +84,18 @@ fn gen_zcode<'a>(node: &'a ASTNode, mut out: &mut zfile::Zfile, mut manager: &mu
                     ZOP::SetColor{foreground: 9, background: 2},
                     ]
                 },
-                &Token::TokAssign {ref var_name, ref op_name} => {
+                &TokAssign {ref var_name, ref op_name, .. } => {
                     if op_name == "=" || op_name == "to" {
                         if t.childs.len() == 1 {
                             match t.childs[0].as_default().category {
-                                Token::TokInt {value} => {
+                                TokInt {value, .. } => {
                                     if !manager.symbol_table.is_known_symbol(var_name) {
                                         manager.symbol_table.insert_new_symbol(&var_name, Type::Integer);
                                     }
                                     let symbol_id = manager.symbol_table.get_symbol_id(var_name);
                                     vec![ZOP::StoreU16{variable: symbol_id, value: value as u16}]
                                 },
-                                Token::TokBoolean {ref value} => {
+                                TokBoolean {ref value, .. } => {
                                     if !manager.symbol_table.is_known_symbol(var_name) {
                                         manager.symbol_table.insert_new_symbol(&var_name, Type::Bool);
                                     }
@@ -108,29 +110,29 @@ fn gen_zcode<'a>(node: &'a ASTNode, mut out: &mut zfile::Zfile, mut manager: &mu
                         }
                     } else { vec![] }
                 },
-                &Token::TokIf => {
+                &TokMacroIf { .. } => {
                     if t.childs.len() < 2 {
                         panic!("Unsupported if-expression!");
                     }
 
                     let mut compare: u8 = 1;
 
-                    // check if the first node is a pseudonode
-                    let pseudo_node = match t.childs[0].as_default().category {
-                        Token::TokPseudo => t.childs[0].as_default(),
+                    // check if the first node is an expression node
+                    let expression_node = match t.childs[0].as_default().category {
+                        TokExpression => t.childs[0].as_default(),
                         _ =>  panic!("Unsupported if-expression!")
                     };
 
                     // Check if first token is variable
-                    let var_name = match pseudo_node.childs[0].as_default().category {
-                        Token::TokVariable {ref name} => name,
+                    let var_name = match expression_node.childs[0].as_default().category {
+                        TokVariable {ref name, .. } => name,
                         _ =>  panic!("Unsupported if-expression!")
                     };
 
-                    if pseudo_node.childs.len() > 1 {
+                    if expression_node.childs.len() > 1 {
                         // Check if second token is compare operator
-                        match pseudo_node.childs[1].as_default().category {
-                            Token::TokCompOp {ref op_name} => {
+                        match expression_node.childs[1].as_default().category {
+                            TokCompOp {ref op_name, .. } => {
                                 match &*(*op_name) {
                                     "==" | "is" => {} ,
                                     _ => panic!("Unsupported Compare Operator!")
@@ -139,13 +141,13 @@ fn gen_zcode<'a>(node: &'a ASTNode, mut out: &mut zfile::Zfile, mut manager: &mu
                         }
 
                         // Check if third token is number
-                        compare = match pseudo_node.childs[2].as_default().category {
-                            Token::TokInt {ref value} => {
+                        compare = match expression_node.childs[2].as_default().category {
+                            TokInt {ref value, .. } => {
                                 *value as u8
                             },
-                            Token::TokBoolean {ref value} => {
+                            TokBoolean {ref value, .. } => {
                                 boolstr_to_u8(&*value)
-                            }, _ => panic!("Unsupported assign value!") 
+                            }, _ => panic!("Unsupported assign value!")
                         };
                     }
 
@@ -171,7 +173,70 @@ fn gen_zcode<'a>(node: &'a ASTNode, mut out: &mut zfile::Zfile, mut manager: &mu
                     code.push(ZOP::Label{name: after_if_label});
                     code
                 },
-                &Token::TokElse => {
+                &TokMacroElseIf { .. } => {
+                    if t.childs.len() < 2 {
+                        panic!("Unsupported elseif-expression!");
+                    }
+
+                    let mut compare: u8 = 1;
+
+                    // check if the first node is a pseudonode
+                    let pseudo_node = match t.childs[0].as_default().category {
+                        TokExpression => t.childs[0].as_default(),
+                        _ =>  panic!("Unsupported elseif-expression!")
+                    };
+
+                    // Check if first token is variable
+                    let var_name = match pseudo_node.childs[0].as_default().category {
+                        TokVariable {ref name, .. } => name,
+                        _ =>  panic!("Unsupported elseif-expression!")
+                    };
+
+                    if pseudo_node.childs.len() > 1 {
+                        // Check if second token is compare operator
+                        match pseudo_node.childs[1].as_default().category {
+                            TokCompOp {ref op_name, .. } => {
+                                match &*(*op_name) {
+                                    "==" | "is" => {} ,
+                                    _ => panic!("Unsupported Compare Operator!")
+                                }
+                            }, _ =>  panic!("Unsupported elseif-expression!")
+                        }
+
+                        // Check if third token is number
+                        compare = match pseudo_node.childs[2].as_default().category {
+                            TokInt {ref value, .. } => {
+                                *value as u8
+                            },
+                            TokBoolean {ref value, .. } => {
+                                boolstr_to_u8(&*value)
+                            }, _ => panic!("Unsupported assign value!")
+                        };
+                    }
+
+                    let symbol_id = manager.symbol_table.get_symbol_id(&*var_name);
+                    let if_id = manager.ids_if.start_next();
+
+                    let if_label = format!("if_{}", if_id);
+                    let after_if_label = format!("after_if_{}", manager.ids_if.pop_id());
+                    let after_else_label = format!("after_else_{}", manager.ids_if.peek());
+                    let mut code: Vec<ZOP> = vec![
+                        ZOP::JE{local_var_id: symbol_id, equal_to_const: compare, jump_to_label: if_label.to_string()},
+                        ZOP::Jump{jump_to_label: after_if_label.to_string()},
+                        ZOP::Label{name: if_label.to_string()}
+                    ];
+
+                    for i in 1..t.childs.len() {
+                        for instr in gen_zcode(&t.childs[i], out, manager) {
+                            code.push(instr);
+                        }
+                    }
+
+                    code.push(ZOP::Jump{jump_to_label: after_else_label});
+                    code.push(ZOP::Label{name: after_if_label});
+                    code
+                },
+                &TokMacroElse { .. } => {
                     let mut code: Vec<ZOP> = vec![];
                     for child in &t.childs {
                         for instr in gen_zcode(child, out, manager) {
@@ -180,11 +245,81 @@ fn gen_zcode<'a>(node: &'a ASTNode, mut out: &mut zfile::Zfile, mut manager: &mu
                     }
                     code
                 },
-                &Token::TokEndIf => {
+                &TokMacroEndIf { .. } => {
                     let after_else_label = format!("after_else_{}", manager.ids_if.pop_id());
                     vec![ZOP::Label{name: after_else_label}]
                 },
-                &Token::TokMacroVar {ref var_name} => {
+
+                &TokMacroPrint { .. } => {
+                    if t.childs.len() != 1 {
+                        panic!("Doesn't support print with 0 or more than one argument");
+                    }
+
+                    let mut code: Vec<ZOP> = vec![];
+
+                    let child = &t.childs[0];
+
+                    match child.as_default().category {
+                        TokInt {ref value, ..} => {
+                            code.push(ZOP::Print{text: format!("{}", value)},);
+                        },
+                        TokBoolean {ref value, ..} => {
+                            code.push(ZOP::Print{text: format!("{}", value)},);
+                        },
+                        TokFunction {ref name, ..} => {
+                            if *name == "random" {
+                                let args = &child.as_default().childs;
+                                if args.len() != 2 {
+                                    panic!("Function random only supports 2 args");
+                                }
+
+                                if args[0].as_default().childs.len() != 1 ||
+                                   args[0].as_default().childs.len() != 1 {
+                                    panic!("Unsupported Expression");
+                                }
+
+                                let from = args[0].as_default().childs[0].as_default();
+                                let to = args[1].as_default().childs[0].as_default();
+
+                                let mut from_value;
+                                let mut to_value;
+
+                                if let TokInt {value, ..} = from.category {
+                                    from_value = value as u16;
+                                } else {
+                                    panic!("Unsupported Expression");
+                                };
+
+                                if let TokInt {value, ..} = to.category {
+                                    to_value = value as u16;
+                                } else {
+                                    panic!("Unsupported Expression");
+                                };
+
+                                let range = (to_value - from_value + 1) as u8;
+
+                                let var = manager.symbol_table.get_symbol_id("int0");
+
+                                code.push(ZOP::Random {range: range, variable: var} );
+
+                                if from_value <= 0 {
+                                    code.push(ZOP::Sub {variable1: var, sub_const: 1, variable2: var} );
+                                } else {
+                                    code.push(ZOP::Add {variable1: var, add_const: from_value - 1, variable2: var} );
+                                }
+                                code.push(ZOP::PrintNumVar {variable: var} );
+                            } else {
+                                panic!("Unsupported function '{}'", name);
+                            }
+                        },
+                        _ => {
+                            panic!("Unsupported Expression");
+                        }
+                    };
+                    code
+                }
+
+                &TokMacroContentVar {ref var_name, .. } => {
                     let var_id = manager.symbol_table.get_symbol_id(&*var_name);
                     match manager.symbol_table.get_symbol_type(&*var_name) {
                         Type::Integer => {
@@ -198,10 +333,20 @@ fn gen_zcode<'a>(node: &'a ASTNode, mut out: &mut zfile::Zfile, mut manager: &mu
                         }
                     }
                 },
+                &Token::TokMacroContentPassageName {ref passage_name, .. } => {
+                    vec![
+                    // activates the display-modus
+                    ZOP::StoreU8{variable: 17, value: 1},
+                    ZOP::Call1N{jump_to_label: passage_name.to_string()},
+
+                    // deactivates the display-modus
+                    ZOP::StoreU8{variable: 17, value: 0},
+                    ]
+                },
                 _ => {
                     debug!("no match if");
                     vec![]
-                }
+                },
             };
             if set_formatting {
                 for child in &t.childs {
@@ -217,7 +362,7 @@ fn gen_zcode<'a>(node: &'a ASTNode, mut out: &mut zfile::Zfile, mut manager: &mu
         }
     }
 
-   
+
 }
 
 fn boolstr_to_u8(string: &str) -> u8 {
@@ -227,11 +372,42 @@ fn boolstr_to_u8(string: &str) -> u8 {
     }
 }
 
+pub enum ASTOperation {
+    AddPassage(Token),
+    AddChild(Token),
+    ChildDown(Token),
+    TwoChildsDown(Token, Token),
+    Up,
+    UpChild(Token),
+    UpChildDown(Token),
+    UpTwoChildsDown(Token, Token),
+    TwoUp,
+}
+
 impl AST {
-    pub fn new() -> AST {
-        AST {
+    pub fn build<I: Iterator<Item=ASTOperation>>(ops: I) -> AST {
+        let mut ast = AST {
             passages: Vec::new(),
-            path: Vec::new(),
+            path: Vec::new()
+        };
+        for op in ops {
+            ast.operation(op);
+        }
+        ast
+    }
+
+    pub fn operation(&mut self, op: ASTOperation) {
+        use self::ASTOperation::*;
+        match op {
+            AddPassage(passage) => self.add_passage(passage),
+            AddChild(child) => self.add_child(child),
+            ChildDown(child) => self.child_down(child),
+            TwoChildsDown(child1, child2) => self.two_childs_down(child1, child2),
+            Up => self.up(),
+            UpChild(child) => self.up_child(child),
+            UpChildDown(child) => self.up_child_down(child),
+            UpTwoChildsDown(child1, child2) => self.up_two_childs_down(child1, child2),
+            TwoUp => self.two_up(),
         }
     }
 
@@ -277,7 +453,7 @@ impl AST {
         self.path.pop();
     }
 
-     /// goes one lvl up and adds and child
+    /// goes one lvl up and adds and child
     pub fn up_child(&mut self, token: Token) {
         self.up();
         self.add_child(token);
@@ -289,10 +465,28 @@ impl AST {
         self.child_down(token);
     }
 
+    /// goes one lvl up, adds one child and goes down. adds child and goes down.
+    pub fn up_two_childs_down(&mut self, child1: Token, child2: Token) {
+        self.up();
+        self.child_down(child1);
+        self.child_down(child2);
+    }
+
+
+    //goes two lvl up
+    pub fn two_up(&mut self) {
+        self.up();
+        self.up();
+    }
+
 
     /// convert ast to zcode
     pub fn to_zcode(& self, out: &mut zfile::Zfile) {
         let mut manager = CodeGenManager::new();
+
+        // Insert temp variables for internal calculations
+        manager.symbol_table.insert_new_symbol("int0", Type::Integer);
+
         let mut code: Vec<ZOP> = vec![];
         for child in &self.passages {
             for instr in gen_zcode(child, out, &mut manager) {
@@ -371,7 +565,7 @@ impl <'a> CodeGenManager<'a> {
 impl IdentifierProvider {
     pub fn new() -> IdentifierProvider {
         IdentifierProvider {
-            current_id: 0, 
+            current_id: 0,
             id_stack: Vec::new()
         }
     }
@@ -382,6 +576,11 @@ impl IdentifierProvider {
         self.current_id += 1;
         self.id_stack.push(id);
         id
+    }
+
+    // Pops the last id from the stack
+    pub fn peek(&mut self) -> u32 {
+        self.id_stack.last().unwrap().clone()
     }
 
     // Pops the last id from the stack
@@ -410,11 +609,11 @@ impl <'a> SymbolTable<'a> {
         self.symbol_map.contains_key(symbol)
     }
 
-    // Returns the id for a given symbol 
+    // Returns the id for a given symbol
     // (check if is_known_symbol, otherwise panics)
     pub fn get_symbol_id(&self, symbol: &str) -> u8 {
-        let (b,_) = self.symbol_map.get(symbol).unwrap().clone();  
-        b 
+        let (b,_) = self.symbol_map.get(symbol).unwrap().clone();
+        b
     }
 
     pub fn get_symbol_type(&self, symbol: &str) -> Type {
@@ -484,8 +683,8 @@ impl ASTNode {
     }
 
     pub fn as_default(&self) -> &NodeDefault {
-        match self { 
-            &ASTNode::Default(ref def) => def, 
+        match self {
+            &ASTNode::Default(ref def) => def,
             _ => panic!("Node cannot be unwrapped as NodeDefault!")
         }
     }
