@@ -3,6 +3,7 @@
 
 pub use super::zbytes::Bytes;
 pub use super::ztext;
+pub use super::op;
 
 #[derive(Debug)]
 pub enum ZOP {
@@ -30,8 +31,8 @@ pub enum ZOP {
   Random{range: u8, variable: u8},
   ReadChar{local_var_id: u8},
   ReadCharTimer{local_var_id: u8, timer: u8, routine: String},
-  Add{variable1: u8, add_const: u16, variable2: u8},
-  Sub{variable1: u8, sub_const: u16, variable2: u8},
+  Add{variable1: u8, add_const: i16, variable2: u8},
+  Sub{variable1: u8, sub_const: i16, variable2: u8},
   JL{local_var_id: u8, local_var_id2: u8, jump_to_label: String},
   Jump{jump_to_label: String},
   Dec{variable: u8},
@@ -48,7 +49,7 @@ pub enum JumpType {
 }
 
 /// types of possible arguments
-enum ArgType {
+pub enum ArgType {
     LargeConst,
     SmallConst,
     Variable,
@@ -235,7 +236,7 @@ impl Zfile {
     }
 
     /// adds jump to write the jump-addresses after reading all commands
-    fn add_jump(&mut self, name: String, jump_type: JumpType) {
+    pub fn add_jump(&mut self, name: String, jump_type: JumpType) {
         let from_addr: u16 = self.data.bytes.len() as u16;
         let jump: Zjump = Zjump{ from_addr: from_addr, name: name, jump_type: jump_type};
         self.jumps.push(jump);
@@ -251,7 +252,7 @@ impl Zfile {
             if other_label.name == label.name {
                 panic!("label has to be unique, but \"{}\" isn't.", other_label.name);
             }
-     }
+        }
         self.labels.push(label);
     }
 
@@ -272,39 +273,48 @@ impl Zfile {
         let beginning = self.data.bytes.len();
         let old_jumps: Vec<Zjump> = self.jumps.clone();
         let old_labels: Vec<Zlabel> = self.labels.clone();
+
+
+        //self.data.write_bytes()
+        let bytes: Vec<u8> = match instr {
+            &ZOP::Quit => op::quit(),
+            &ZOP::Newline => op::op_newline(),
+            &ZOP::Dec{variable} => op::op_dec(variable),
+            &ZOP::Inc{variable} => op::op_inc(variable),
+            &ZOP::Add{variable1, add_const, variable2} => op::op_add(variable1, add_const, variable2),
+            &ZOP::Sub{variable1, sub_const, variable2} => op::op_sub(variable1, sub_const, variable2),
+            &ZOP::StoreU16{variable, value} => op::op_store_u16(variable, value),
+            &ZOP::StoreU8{variable, value} => op::op_store_u8(variable, value),
+            &ZOP::Ret{value} => op::op_ret(value),
+            &ZOP::PrintAddr{address} => op::op_print_addr(address),
+            &ZOP::PrintPaddr{address} => op::op_print_paddr(address),
+            &ZOP::SetColor{foreground, background} => op::op_set_color(foreground, background),
+            &ZOP::SetColorVar{foreground, background} => op::op_set_color_var(foreground, background),
+            &ZOP::Random{range, variable} => op::op_random(range, variable),
+            &ZOP::PrintNumVar{variable} => op::op_print_num_var(variable),
+            &ZOP::SetTextStyle{bold, reverse, monospace, italic} => op::op_set_text_style(bold, reverse, monospace, italic),
+            &ZOP::ReadChar{local_var_id} => op::op_read_char(local_var_id),
+            &ZOP::LoadW{array_address, index, variable} => op::op_loadw(array_address, index, variable,self.object_addr),
+            &ZOP::StoreW{array_address, index, variable} => op::op_storew(array_address, index, variable,self.object_addr),
+            &ZOP::Call1NVar{variable} => op::op_call_1n_var(variable),
+            &ZOP::EraseWindow{value} => op::op_erase_window(value),
+            &ZOP::ReadCharTimer{local_var_id, timer, ref routine} => op::op_read_char_timer(local_var_id, timer, routine,self),
+            &ZOP::JL{local_var_id, local_var_id2, ref jump_to_label} => op::op_jl(local_var_id, local_var_id2, jump_to_label,self),
+            &ZOP::JE{local_var_id, equal_to_const, ref jump_to_label} => op::op_je(local_var_id, equal_to_const, jump_to_label,self),
+            &ZOP::Call2NWithAddress{ref jump_to_label, ref address} => op::op_call_2n_with_address(jump_to_label, address,self),
+            &ZOP::Call1N{ref jump_to_label} => op::op_call_1n(jump_to_label,self),
+
+            _ => Vec::new()
+        };
+        self.data.append_bytes(&bytes);
         match instr {
             &ZOP::PrintUnicode{c} => self.op_print_unicode_char(c),
             &ZOP::Print{ref text} => self.op_print(text),
-            &ZOP::PrintNumVar{variable} => self.op_print_num_var(variable),
             &ZOP::PrintOps{ref text} => self.gen_print_ops(text),
-            &ZOP::PrintPaddr{address} => self.op_print_paddr(address),
-            &ZOP::PrintAddr{address} => self.op_print_addr(address),
-            &ZOP::Call1N{ref jump_to_label} => self.op_call_1n(jump_to_label),
-            &ZOP::Call2NWithAddress{ref jump_to_label, ref address} => self.op_call_2n_with_address(jump_to_label, address),
-            &ZOP::Call1NVar{variable} => self.op_call_1n_var(variable),
             &ZOP::Routine{ref name, count_variables} => self.routine(name, count_variables),
             &ZOP::Label{ref name} => self.label(name),
-            &ZOP::Newline => self.op_newline(),
-            &ZOP::SetColor{foreground, background} => self.op_set_color(foreground, background),
-            &ZOP::SetColorVar{foreground, background} => self.op_set_color_var(foreground, background),
-            &ZOP::SetTextStyle{bold, reverse, monospace, italic} => self.op_set_text_style(bold, reverse, monospace, italic),
-            &ZOP::StoreU16{variable, value} => self.op_store_u16(variable, value),
-            &ZOP::StoreU8{variable, value} => self.op_store_u8(variable, value),
-            &ZOP::StoreW{array_address, index, variable} => self.op_storew(array_address, index, variable),
-            &ZOP::Inc{variable} => self.op_inc(variable),
-            &ZOP::Ret{value} => self.op_ret(value),
-            &ZOP::JE{local_var_id, equal_to_const, ref jump_to_label} => self.op_je(local_var_id, equal_to_const, jump_to_label),
-            &ZOP::Random{range, variable} => self.op_random(range, variable),
-            &ZOP::ReadChar{local_var_id} => self.op_read_char(local_var_id),
-            &ZOP::ReadCharTimer{local_var_id, timer, ref routine} => self.op_read_char_timer(local_var_id, timer, routine),
-            &ZOP::Add{variable1, add_const, variable2} => self.op_add(variable1, add_const, variable2),
-            &ZOP::Sub{variable1, sub_const, variable2} => self.op_sub(variable1, sub_const, variable2),
-            &ZOP::JL{local_var_id, local_var_id2, ref jump_to_label} => self.op_jl(local_var_id, local_var_id2, jump_to_label),
             &ZOP::Jump{ref jump_to_label} => self.op_jump(jump_to_label),
-            &ZOP::Dec{variable} => self.op_dec(variable),
-            &ZOP::LoadW{array_address, index, variable} => self.op_loadw(array_address, index, variable),
-            &ZOP::EraseWindow{value} => self.op_erase_window(value),
-            &ZOP::Quit => self.op_quit(),
+            _ => ()
         }
         let mut new_jumps: Vec<Zjump> = vec![];
         let mut new_labels: Vec<Zlabel> = vec![];
@@ -374,6 +384,7 @@ impl Zfile {
         self.emit(vec![
             ZOP::SetColor{foreground: 9, background: 2},
             ZOP::EraseWindow{value: -1},
+            ZOP::Call1N{jump_to_label: "Start".to_string()},
         ]);
     }
 
@@ -420,6 +431,13 @@ impl Zfile {
             ZOP::Ret{value: 0}
         ]);
     }
+
+    /// exits the program
+    /// quit is 0OP
+    pub fn op_quit(&mut self) {
+        self.op_0(0x0a);
+    }
+
 
     /// checks all stored links and make them choiceable
     /// with the keyboard
@@ -574,302 +592,13 @@ impl Zfile {
         self.data.write_bytes(&text_bytes.bytes, index + 1);
     }
 
-    /// exits the program
-    /// quit is 0OP
-    pub fn op_quit(&mut self) {
-        self.op_0(0x0a);
-    }
-
-    pub fn op_newline(&mut self) {
-        self.op_0(0x0b);
-    }
-
-    /// calls a routine
-    /// call_1n is 1OP
-    pub fn op_call_1n(&mut self, jump_to_label: &str) {
-        self.op_1(0x0f, ArgType::SmallConst);
-        self.add_jump(jump_to_label.to_string(), JumpType::Routine);
-    }
-
-    /// calls a routine (the address is stored in a variable)
-    pub fn op_call_1n_var(&mut self, variable: u8) {
-        self.op_1(0x0f, ArgType::Variable);
-        //self.add_jump(jump_to_label.to_string(), JumpType::Routine);
-        self.data.append_byte(variable);
-    }
-
-    /// calls a routine with an argument(variable) an throws result away
-    /// becouse the value isn't known until all routines are set, it
-    /// inserts a pseudo routoune_address
-    /// call_2n is 2OP
-    pub fn op_call_2n_with_address(&mut self, jump_to_label: &str, address: &str) {
-        let args: Vec<ArgType> = vec![ArgType::LargeConst, ArgType::LargeConst];
-        self.op_2(0x1a, args);
-
-        // the address of the jump_to_label
-        self.add_jump(jump_to_label.to_string(), JumpType::Routine);
-
-        // the address of the argument
-        self.add_jump(address.to_string(), JumpType::Routine);
-    }
-
-    /// addition
-    /// variable2 = variable1 + sub_const
-    pub fn op_add(&mut self, variable1: u8, add_const: u16, variable2: u8) {
-        let args: Vec<ArgType> = vec![ArgType::Variable, ArgType::LargeConst];
-        self.op_2(0x14, args);
-        
-        self.data.append_byte(variable1);
-        self.data.append_u16(add_const);
-        self.data.append_byte(variable2);
-    }
-
-    /// subtraktion
-    /// variable2 = variable1 - sub_const
-    pub fn op_sub(&mut self, variable1: u8, sub_const: u16, variable2: u8) {
-        let args: Vec<ArgType> = vec![ArgType::Variable, ArgType::LargeConst];
-        self.op_2(0x15, args);
-        
-        self.data.append_byte(variable1);
-        self.data.append_u16(sub_const);
-        self.data.append_byte(variable2);
-    }
-
-    // saves an u8 to the variable
-    pub fn op_store_u8(&mut self, variable: u8, value: u8) {
-        let args: Vec<ArgType> = vec![ArgType::Reference, ArgType::SmallConst];
-        self.op_2(0x0d, args);
-
-        self.data.append_byte(variable);
-        self.data.append_byte(value);
-    }
-
-    // saves an u16 to the variable
-    pub fn op_store_u16(&mut self, variable: u8, value: u16) {
-        let args: Vec<ArgType> = vec![ArgType::Reference, ArgType::LargeConst];
-        self.op_2(0x0d, args);
-
-        self.data.append_byte(variable);
-        self.data.append_u16(value);
-    }
-
-    /// increments the value of the variable
-    pub fn op_inc(&mut self, variable: u8) {
-        self.op_1(0x05, ArgType::Reference);
-        self.data.append_byte(variable);
-    }
-
-    /// decrements the value of the variable
-    pub fn op_dec(&mut self, variable: u8) {
-        self.op_1(0x06, ArgType::Reference);
-        self.data.append_byte(variable);
-    }
-
-    /// returns a SmallConst
-    pub fn op_ret(&mut self, value: u8) {
-        self.op_1(0x0b, ArgType::SmallConst);
-        self.data.append_byte(value);
-    }
-
-    /// pushs an u16 value (for example an address) on the stack
-    pub fn op_push_u16(&mut self, value: u16) {
-        let args: Vec<ArgType> = vec![ArgType::LargeConst, ArgType::Nothing, ArgType::Nothing, ArgType::Nothing];
-        self.op_var(0x08, args);
-        self.data.append_u16(value);
-    }
-
-    /// pulls an value off the stack to an variable
-    /// SmallConst becouse pull takes an reference to an variable
-    pub fn op_pull(&mut self, variable: u8) {
-        let args: Vec<ArgType> = vec![ArgType::SmallConst, ArgType::Nothing, ArgType::Nothing, ArgType::Nothing];
-        self.op_var(0x09, args);
-
-        self.data.append_byte(variable);
-    }
-
-    /// Prints the value of a variable (only ints a possibe)
-    pub fn op_print_num_var(&mut self, variable: u8) {
-        let args: Vec<ArgType> = vec![ArgType::Variable, ArgType::Nothing, ArgType::Nothing, ArgType::Nothing];
-        self.op_var(0x06, args);
-
-        self.data.append_byte(variable);
-    }
-    /// prints string at given packet adress TODO: needs testing
-    pub fn op_print_paddr(&mut self, address: u8) {
-        self.op_1(0x0D, ArgType::Variable);
-
-        self.data.append_byte(address);
-    }
-
-    /// prints string at given adress TODO: needs testing
-    pub fn op_print_addr(&mut self, address: u8) {
-        self.op_1(0x07, ArgType::Variable);
-
-        self.data.append_byte(address);
-    }
-
-    /// calculates a random numer from 1 to range
-    pub fn op_random(&mut self, range: u8, variable: u8) {
-        let args: Vec<ArgType> = vec![ArgType::SmallConst, ArgType::Nothing, ArgType::Nothing, ArgType::Nothing];
-        self.op_var(0x07, args);
-
-        self.data.append_byte(range);
-        self.data.append_byte(variable);
-    }
-
-    /// sets the colors of the foreground (font) and background
-    pub fn op_set_color(&mut self, foreground: u8, background: u8){
-        let args: Vec<ArgType> = vec![ArgType::SmallConst, ArgType::SmallConst];
-        self.op_2(0x1b, args);
-
-        self.data.append_byte(foreground);
-        self.data.append_byte(background);
-    }
-
-    /// sets the colors of the foreground (font) and background (but with variables
-    pub fn op_set_color_var(&mut self, foreground: u8, background: u8){
-        let args: Vec<ArgType> = vec![ArgType::Variable, ArgType::Variable];
-        self.op_2(0x1b, args);
-
-        self.data.append_byte(foreground);
-        self.data.append_byte(background);
-    }
-
-    /// set the style of the text
-    pub fn op_set_text_style(&mut self, bold: bool, reverse: bool, monospace: bool, italic: bool){
-        let args: Vec<ArgType> = vec![ArgType::SmallConst, ArgType::Nothing, ArgType::Nothing, ArgType::Nothing];
-        self.op_var(0x11, args);
-
-        let mut style_byte : u8;
-        style_byte = 0x00;
-        if bold {
-            style_byte |=0x02
-        }
-         if reverse {
-            style_byte |=0x01
-        }
-         if monospace {
-            style_byte |=0x08
-        }
-         if italic {
-            style_byte |=0x04
-        }
-        self.data.append_byte(style_byte);
-    }
-
-    /// reads keys from the keyboard and saves the asci-value in local_var_id
-    /// read_char is VAROP
-    pub fn op_read_char(&mut self, local_var_id: u8) {
-        let args: Vec<ArgType> = vec![ArgType::SmallConst, ArgType::Nothing, ArgType::Nothing, ArgType::Nothing];
-        self.op_var(0x16, args);
-
-        // write argument value
-        self.data.append_byte(0x00);
-
-        // write varible id
-        self.data.append_byte(local_var_id);
-    }
-
-    /// reads keys from the keyboard and saves the asci-value in local_var_id
-    /// read_char is VAROP
-    pub fn op_read_char_timer(&mut self, local_var_id: u8, timer: u8, routine: &str) {
-        let args: Vec<ArgType> = vec![ArgType::SmallConst, ArgType::SmallConst, ArgType::LargeConst, ArgType::Nothing];
-        self.op_var(0x16, args);
-
-        // write argument value
-        self.data.append_byte(0x00);
-
-        // write timer
-        self.data.append_byte(timer);
-
-        // writes routine
-        self.add_jump(routine.to_string(), JumpType::Routine);
-
-        // write varible id
-        self.data.append_byte(local_var_id);
-    }
-
-    pub fn op_erase_window(&mut self, value: i8) {
-        let args: Vec<ArgType> = vec![ArgType::LargeConst, ArgType::Nothing, ArgType::Nothing, ArgType::Nothing];
-        self.op_var(0x0d, args);
-
-        // signed to unsigned value
-        self.data.append_u16(value as u16);
-    }
-
-    /// loads a word from an array in a variable
-    /// loadw is an 2op, BUT with 3 ops -.-
-    pub fn op_loadw(&mut self, array_address: u16, index: u8, variable: u8) {
-
-        self.op_2(0x0f, vec![ArgType::LargeConst, ArgType::Variable]);
-
-        // array address
-        self.data.append_u16(self.object_addr + array_address);
-
-        // array index
-        self.data.append_byte(index);
-
-        // variable
-        self.data.append_byte(variable);
-    }
-
-    /// stores a value to an array
-    /// stores the value of variable to the address in: array_address + 2*index
-    pub fn op_storew(&mut self, array_address: u16, index: u8, variable: u8) {
-        assert!(array_address > 0, "not allowed array-address, becouse in _some_ interpreters (for example zoom) it crahs. -.-");
-
-        let args: Vec<ArgType> = vec![ArgType::LargeConst, ArgType::Variable, ArgType::Variable, ArgType::Nothing];
-        self.op_var(0x01, args);
-
-        // array address
-        self.data.append_u16(self.object_addr + array_address);
-
-        // array index
-        self.data.append_byte(index);
-
-        // value
-        self.data.append_byte(variable);
-    }
-
     /// jumps to a label
     pub fn op_jump(&mut self, jump_to_label: &str) {
         self.op_1(0x0c, ArgType::SmallConst);
         self.add_jump(jump_to_label.to_string(), JumpType::Jump);
     }
 
-    /// jumps to a label if the value of local_var_id is equal to const
-    /// is an 2OP, but with small constant and variable
-    pub fn op_je(&mut self, local_var_id: u8, equal_to_const: u8, jump_to_label: &str) {
 
-        let args: Vec<ArgType> = vec![ArgType::Variable, ArgType::SmallConst];
-        self.op_2(0x01, args);
-        
-        // variable id
-        self.data.append_byte(local_var_id);
-
-        // const
-        self.data.append_byte(equal_to_const);
-
-        // jump
-        self.add_jump(jump_to_label.to_string(), JumpType::Branch);
-    }
-
-    /// jumps to a label if the value of local_var_id is equal to local_var_id2
-    /// is an 2OP, but with variable and variable
-    pub fn op_jl(&mut self, local_var_id: u8, local_var_id2: u8, jump_to_label: &str) {
-
-        let args: Vec<ArgType> = vec![ArgType::Variable, ArgType::Variable];
-        self.op_2(0x02, args);
-        
-        // variable id
-        self.data.append_byte(local_var_id);
-
-        // variable id 2
-        self.data.append_byte(local_var_id2);
-
-        // jump
-        self.add_jump(jump_to_label.to_string(), JumpType::Branch);
-    }
 
     /// prints an unicode char to the current stream
     pub fn op_print_unicode_char(&mut self, character: u16){
@@ -901,64 +630,6 @@ impl Zfile {
         }
 
         self.data.append_byte(byte);
-    }
-
-    /// op-codes with 2 operators
-    fn op_2(&mut self, value: u8, arg_types: Vec<ArgType>) {
-        let mut byte: u8 = 0x00;
-        let mut is_variable: bool = false;
-        for (i, arg_type) in arg_types.iter().enumerate() {
-            let shift: u8 = 6 - i as u8;
-            match arg_type {
-                &ArgType::SmallConst => byte |= 0x00 << shift,
-                &ArgType::Variable   => byte |= 0x01 << shift,
-                &ArgType::Reference  => byte |= 0x00 << shift,
-                &ArgType::LargeConst => is_variable = true,
-                _                    => panic!("no possible 2OP")
-            }
-        }
-
-        if is_variable {
-            let mut byte: u8 = 0xc0 | value;
-            byte = byte | value;
-            self.data.append_byte(byte);
-
-            let mut byte2 = self.encode_variable_arguments(arg_types);
-            byte2 = byte2 | 0xf;
-            self.data.append_byte(byte2);
-        } else {
-            byte = byte | value;
-            self.data.append_byte(byte);
-        }
-    }
-
-    /// op-codes with variable operators (4 are possible)
-    fn op_var(&mut self, value: u8, arg_types: Vec<ArgType>) {
-        // opcode
-        let byte = value | 0xe0;
-        self.data.append_byte(byte);
-
-        let byte2: u8 = self.encode_variable_arguments(arg_types);
-        self.data.append_byte(byte2);
-    }
-
-    /// encodes the argtypes for variable some 2OPs and varOPs
-    fn encode_variable_arguments(&mut self, arg_types: Vec<ArgType>) -> u8 {
-        let mut byte: u8 = 0x00;
-        for (i, arg_type) in arg_types.iter().enumerate() {
-            let shift: u8 = 6 - 2 * i as u8;
-            match arg_type {
-                &ArgType::LargeConst => byte |= 0x00 << shift,
-                &ArgType::SmallConst => byte |= 0x01 << shift,
-                &ArgType::Variable   => byte |= 0x02 << shift,
-                &ArgType::Nothing    => byte |= 0x03 << shift,
-                &ArgType::Reference  => byte |= 0x01 << shift,
-                //_                    => panic!("no possible varOP")
-            }
-        }
-
-        byte
-        
     }
 }
 
@@ -1019,7 +690,7 @@ fn test_zfile_general_op_length() {
     zfile.op_1(0x00, ArgType::Reference);
     assert_eq!(zfile.data.len(), 3);
     let args: Vec<ArgType> = vec![ArgType::SmallConst, ArgType::Nothing, ArgType::Nothing, ArgType::Nothing];
-    zfile.op_var(0x00, args);
+    zfile.data.append_bytes(&op::op_var(0x00, args));
     assert_eq!(zfile.data.len(), 5);
 }
 
@@ -1027,18 +698,18 @@ fn test_zfile_general_op_length() {
 fn test_zfile_label_and_jump_loop() {
     let mut zfile: Zfile = Zfile::new();
     zfile.start();
-    let (labels, jumps1, bytes1) =  zfile.write_zop(&ZOP::Label{name: "loop".to_string()});
+    let (labels, jumps1, bytes1) =  zfile.write_zop(&ZOP::Label{name: "Start".to_string()});
     assert_eq!(jumps1.len() + bytes1.len(), 0);
     assert_eq!(labels.len(), 1);
-    let (labels2, jumps, bytes) =  zfile.write_zop(&ZOP::Jump{jump_to_label: "loop".to_string()});
+    let (labels2, jumps, bytes) =  zfile.write_zop(&ZOP::Jump{jump_to_label: "Start".to_string()});
     assert_eq!(labels2.len(), 0);
     assert_eq!(jumps.len(), 1);
     assert_eq!(bytes.len(), 3);
     let pos = zfile.data.len() - bytes.len();  // start position of written bytes
     zfile.end();
     // in this example we have the following data:
-    //[Zlabel { to_addr: 2055, name: "loop" }] [] []
-    //[] [Zjump { from_addr: 2056, name: "loop", jump_type: Jump }] [140, 255, 255]
+    //[Zlabel { to_addr: 2055, name: "Start" }] [] []
+    //[] [Zjump { from_addr: 2056, name: "Start", jump_type: Jump }] [140, 255, 255]
     // 0xffff is -1 as i16 because we have a relative jump
     assert_eq!(zfile.data.bytes[pos], bytes[0]);  // jump op
     let rel_addr: i16 = (zfile.data.bytes[pos+1] as u16 * 256 + zfile.data.bytes[pos+2] as u16) as i16;

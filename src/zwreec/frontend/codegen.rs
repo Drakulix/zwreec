@@ -37,12 +37,11 @@ impl<'a> Codegen<'a> {
 
     pub fn start_codegen(&mut self) {
         self.zfile.start();
-        self.zfile.op_call_1n("Start");
         //self.zfile.op_quit();
         //self.zfile.routine("main", 0);
 
         self.ast.to_zcode(&mut self.zfile);
-
+        
         self.zfile.op_quit();
 
         self.zfile.end();
