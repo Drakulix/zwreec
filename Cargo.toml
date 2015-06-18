@@ -9,6 +9,7 @@ authors = [
 ]
 description = "Twee to Z-Code Compiler in Rust"
 repository = "https://github.com/Drakulix/zwreec"
+documentation = "https://drakulix.github.io/zwreec/zwreec/index.html"
 readme = "README.md"
 license = "BSD-2-Clause"
 

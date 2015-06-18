@@ -1,3 +1,5 @@
+#![doc(html_root_url="https://drakulix.github.io/zwreec/",
+    html_logo_url="https://dl.dropboxusercontent.com/u/70410095/zwreec/logo.png")]
 #![feature(plugin)]
 #![plugin(rustlex)]
 #[allow(plugin_as_library)]
