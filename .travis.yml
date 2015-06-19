@@ -3,9 +3,9 @@ rust: nightly-2015-06-02
 branches:
   only:
   - master
-sudo: true
+sudo: false
 install:
-  - sudo pip install ghp-import
+  - pip install --user ghp-import
 after_success: |
     [ $TRAVIS_BRANCH = master ] &&
     [ $TRAVIS_PULL_REQUEST = false ] &&
