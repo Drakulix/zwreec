@@ -291,9 +291,9 @@ pub fn op_1( value: u8, arg_type: ArgType) -> Vec<u8> {
 /// $20 -- $3f  long      2OP     small constant, variable
 /// $40 -- $5f  long      2OP     variable, small constant
 /// $60 -- $7f  long      2OP     variable, variable
-/// not handled here:
+///
 /// $c0 -- $df  variable  2OP     (operand types in next byte)
-/// except $be  extended opcode given in next byte
+/// not handled here: $be  extended opcode given in next byte
 pub fn op_2( value: u8, arg_types: Vec<ArgType>) -> Vec<u8> {
     let mut byte: u8 = 0x00;
     let mut is_variable: bool = false;

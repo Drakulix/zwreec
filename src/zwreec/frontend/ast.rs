@@ -115,7 +115,7 @@ fn gen_zcode<'a>(node: &'a ASTNode, mut out: &mut zfile::Zfile, mut manager: &mu
                         panic!("Unsupported if-expression!");
                     }
 
-                    let mut compare: u8 = 1;
+                    let mut compare: i16 = 1;
 
                     // check if the first node is an expression node
                     let expression_node = match t.childs[0].as_default().category {
@@ -143,10 +143,10 @@ fn gen_zcode<'a>(node: &'a ASTNode, mut out: &mut zfile::Zfile, mut manager: &mu
                         // Check if third token is number
                         compare = match expression_node.childs[2].as_default().category {
                             TokInt {ref value, .. } => {
-                                *value as u8
+                                *value as i16
                             },
                             TokBoolean {ref value, .. } => {
-                                boolstr_to_u8(&*value)
+                                boolstr_to_u8(&*value) as i16
                             }, _ => panic!("Unsupported assign value!")
                         };
                     }
@@ -178,7 +178,7 @@ fn gen_zcode<'a>(node: &'a ASTNode, mut out: &mut zfile::Zfile, mut manager: &mu
                         panic!("Unsupported elseif-expression!");
                     }
 
-                    let mut compare: u8 = 1;
+                    let mut compare: i16 = 1;
 
                     // check if the first node is a pseudonode
                     let pseudo_node = match t.childs[0].as_default().category {
@@ -206,10 +206,10 @@ fn gen_zcode<'a>(node: &'a ASTNode, mut out: &mut zfile::Zfile, mut manager: &mu
                         // Check if third token is number
                         compare = match pseudo_node.childs[2].as_default().category {
                             TokInt {ref value, .. } => {
-                                *value as u8
+                                *value as i16
                             },
                             TokBoolean {ref value, .. } => {
-                                boolstr_to_u8(&*value)
+                                boolstr_to_u8(&*value) as i16
                             }, _ => panic!("Unsupported assign value!")
                         };
                     }

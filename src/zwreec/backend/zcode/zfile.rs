@@ -28,7 +28,7 @@ pub enum ZOP {
   StoreW{array_address: u16, index: u8, variable: u8},
   Inc{variable: u8},
   Ret{value: u16},
-  JE{local_var_id: u8, equal_to_const: u8, jump_to_label: String},
+  JE{local_var_id: u8, equal_to_const: i16, jump_to_label: String},
   Random{range: u8, variable: u8},
   ReadChar{local_var_id: u8},
   ReadCharTimer{local_var_id: u8, timer: u8, routine: String},
@@ -654,16 +654,16 @@ impl Zfile {
 
     /// jumps to a label if the value of local_var_id is equal to const
     /// is an 2OP, but with small constant and variable
-    pub fn op_je(&mut self, local_var_id: u8, equal_to_const: u8, jump_to_label: &str) {
+    pub fn op_je(&mut self, local_var_id: u8, equal_to_const: i16, jump_to_label: &str) {
 
-        let args: Vec<ArgType> = vec![ArgType::Variable, ArgType::SmallConst];
+        let args: Vec<ArgType> = vec![ArgType::Variable, ArgType::LargeConst];
         self.op_2(0x01, args);
         
         // variable id
         self.data.append_byte(local_var_id);
 
         // const
-        self.data.append_byte(equal_to_const);
+        self.data.append_u16(equal_to_const as u16);
 
         // jump
         self.add_jump(jump_to_label.to_string(), JumpType::Branch);
