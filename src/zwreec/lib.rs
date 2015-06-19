@@ -34,6 +34,11 @@
 //! ```rust
 //! extern crate zwreec;
 //! ```
+//!  
+//! # Features 
+//!
+//! Only rudimentary Twee features are supported right now. This is about to change in the upcoming weeks. 
+//! Check the github issues for more information on the currently supported features.
 //!
 //! # Example
 //!
@@ -77,10 +82,10 @@
 //! Usage](#requirements-and-usage). Then you can build the binary using
 //!
 //! ```sh
-//! $ cargo build --release
+//! $ cargo build
 //! ```
 //! 
-//! The resulting binary can be found at `target/release/zwreec`. 
+//! The resulting binary can be found at `target/debug/zwreec`. 
 //!
 //! # Logging
 //!
