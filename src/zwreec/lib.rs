@@ -105,15 +105,35 @@ extern crate getopts;
 pub mod config;
 pub mod frontend;
 pub mod backend;
-pub use backend::zcode::zfile;
 pub mod utils;
-
-use frontend::codegen;
 
 use config::{Config,TestCase};
 use std::io::{Read,Write};
 
 
+/// Compiles a Twee Input to Zcode
+///
+/// This is the main call into the Zwreec compiler. It will process `input: Read`
+/// by calling the different parts of the compiler-chain, notably `frontend::lexer`
+/// to generate a tokenstream, `frontend::parser` and `frontend::ast` to generate
+/// the Abstract Syntax Tree and lastly `frontend::codegen` to generate the Zcode.
+///
+/// # Example
+///
+/// ```no_run
+/// # use std::env;
+/// # use std::fs::File;
+/// # use std::path::Path;
+/// # let mut args: Vec<String> = env::args().collect();
+/// # 
+/// # if args.len() != 2 { panic!("Need exactly one input file!"); }
+/// # 
+/// let cfg = zwreec::config::Config::default_config();
+/// let mut input = File::open(Path::new(&args[1])).unwrap();
+/// let mut output = File::create(Path::new("a.z8")).unwrap();
+///
+/// zwreec::compile(cfg, &mut input, &mut output);
+/// ```
 #[allow(unused_variables)]
 pub fn compile<R: Read, W: Write>(cfg: Config, input: &mut R, output: &mut W) {
     // tokenize
@@ -129,9 +149,32 @@ pub fn compile<R: Read, W: Write>(cfg: Config, input: &mut R, output: &mut W) {
     ast.print(false);
 
     // create code
-    codegen::generate_zcode(&cfg, ast, output);
+    frontend::codegen::generate_zcode(&cfg, ast, output);
 }
 
+/// Run internal library tests
+///
+/// This function is used to circumvent certain parts of the compiler toolchain. 
+/// It currently only processes `TestCase::ZcodeBackend` which creates a Zcode
+/// file using all available OP-Codes.
+///
+/// **Warning:** This function should be considered unstable and might be removed
+/// in later versions.
+///
+/// # Example
+///
+/// ```
+/// # use std::env;
+/// # use std::fs::File;
+/// # use std::path::Path;
+/// let mut cfg = zwreec::config::Config::default_config();
+/// cfg.test_cases.push(zwreec::config::TestCase::ZcodeBackend);
+///
+/// let mut input: Option<File> = None;
+/// let mut output = Some(File::create(Path::new("a.z8")).unwrap());
+///
+/// zwreec::test_library(cfg, &mut input, &mut output);
+/// ```
 #[allow(unused_variables)]
 pub fn test_library<R: Read, W: Write>(cfg: Config, input: &mut Option<R>, output: &mut Option<W>) {
     for case in cfg.test_cases {
