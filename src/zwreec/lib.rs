@@ -1,6 +1,6 @@
 #![doc(html_root_url="https://drakulix.github.io/zwreec/",
     html_logo_url="https://dl.dropboxusercontent.com/u/70410095/zwreec/logo.png")]
-//! Twee-to-Zcode compile library
+//! Twee-to-Zcode compile library.
 //!
 //! Zwreec is a compiler for [interactive fiction](http://en.wikipedia.org/wiki/Interactive_fiction)
 //! in the Twee format (created by the [Twine software](http://en.wikipedia.org/wiki/Twine_(software))) 
@@ -152,7 +152,7 @@ pub fn compile<R: Read, W: Write>(cfg: Config, input: &mut R, output: &mut W) {
     frontend::codegen::generate_zcode(&cfg, ast, output);
 }
 
-/// Run internal library tests
+/// Run internal library tests.
 ///
 /// This function is used to circumvent certain parts of the compiler toolchain. 
 /// It currently only processes `TestCase::ZcodeBackend` which creates a Zcode

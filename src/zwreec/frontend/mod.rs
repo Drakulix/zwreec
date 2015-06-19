@@ -1,4 +1,4 @@
-//! Processes Twee files and generates an AST
+//! Processes Twee files and builds an abstract syntax tree.
 //!
 //! The Frontend is responsible for processing a Twee file by
 //! generating a Token Stream from the input and parsing this stream to build
