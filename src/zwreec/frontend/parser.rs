@@ -393,12 +393,12 @@ impl<'a> Parser<'a> {
                 (Expression, TokFunction { .. } ) => {
                     stack.push(NonTerminal(E));
 
-                    None
+                    Some(ChildDown(TokExpression))
                 },
                 (Expression, TokAssign { .. } ) => {
                     stack.push(NonTerminal(AssignVariable));
 
-                    None
+                    Some(ChildDown(TokExpression))
                 },
 
                 // E
@@ -475,9 +475,21 @@ impl<'a> Parser<'a> {
                 },
 
                 // F2
+                (F2, TokNumOp { location, op_name: op }) =>  match &*op {
+                    "+" | "-" => {
+                        stack.push(NonTerminal(F2));
+                        stack.push(NonTerminal(G));
+                        stack.push(Terminal(TokNumOp{location: location.clone(), op_name: op.clone()}));
+                        
+                        //Some(ChildDown(TokNumOp{location: location, op_name: op}))
+                        Some(AddChild(TokNumOp{location: location, op_name: op}))
+                    }
+                    _ => None
+                },
                 (F2, _) => {
                     // F2 -> ε
-                    None
+                    //None
+                    Some(Up)
                 },
 
                 // G
@@ -493,9 +505,21 @@ impl<'a> Parser<'a> {
                 },
 
                 // G2
+                (G2, TokNumOp { location, op_name: op }) => match &*op {
+                    "*" | "/" | "%" => {
+                        stack.push(NonTerminal(G2));
+                        stack.push(NonTerminal(H));
+                        stack.push(Terminal(TokNumOp{location: location.clone(), op_name: op.clone()}));
+                        
+                        //Some(ChildDown(TokNumOp{location: location, op_name: op}))
+                        Some(AddChild(TokNumOp{location: location, op_name: op}))
+                    }
+                    _ => None
+                },
                 (G2, _) => {
                     // G2 -> ε
-                    None
+                    //None
+                    Some(Up)
                 },
 
                 // H
@@ -552,7 +576,8 @@ impl<'a> Parser<'a> {
                     stack.push(NonTerminal(Argumentsf));
                     stack.push(NonTerminal(Expression));
 
-                    Some(ChildDown(TokExpression))
+                    //Some(ChildDown(TokExpression))
+                    None
                 },
 
                 // Argumentsf

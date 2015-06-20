@@ -372,7 +372,7 @@ rustlex! TweeLexer {
     let VAR_CHAR = LETTER | DIGIT | UNDERSCORE;
     let VAR_NAME = '$' (LETTER | UNDERSCORE) VAR_CHAR*;
 
-    let INT = "-"? DIGIT+;
+    let INT = /*"-"?*/ DIGIT+;
     let FLOAT = "-"? (DIGIT+ "." DIGIT*) | "-"? (DIGIT* "." DIGIT+) | "-"? "Infinity";
 
     let STRING = '"' ([^'\\''"']|'\\'.)* '"' | "'" ([^'\\'"'"]|'\\'.)* "'";

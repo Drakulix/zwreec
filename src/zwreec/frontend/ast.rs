@@ -388,11 +388,13 @@ impl AST {
     pub fn build<I: Iterator<Item=ASTOperation>>(ops: I) -> AST {
         let mut ast = AST {
             passages: Vec::new(),
-            path: Vec::new()
+            path: Vec::new(),
         };
         for op in ops {
             ast.operation(op);
         }
+        ast.parse_expressions();
+
         ast
     }
 
@@ -411,6 +413,13 @@ impl AST {
         }
     }
 
+    /// goes through the whole tree and parse the expressions
+    fn parse_expressions(&mut self) {
+        for child in &mut self.passages {
+            child.parse_expressions();
+        }
+    }
+
     /// adds a passage to the path in the ast
     pub fn add_passage(&mut self, token: Token) {
         self.path.clear();
@@ -424,12 +433,10 @@ impl AST {
 
     /// adds a child to the path in the ast
     pub fn add_child(&mut self, token: Token) {
-
         if let Some(index) = self.path.first() {
             let mut new_path: Vec<usize> = self.path.to_vec();
             new_path.remove(0);
-
-            self.passages[*index].add_child(new_path, token)
+            self.passages[*index].add_child(new_path, token);
         } else {
             self.passages.push(ASTNode::Default(NodeDefault { category: token, childs: Vec::new() }));
         }
@@ -472,8 +479,7 @@ impl AST {
         self.child_down(child2);
     }
 
-
-    //goes two lvl up
+    /// goes two lvl up
     pub fn two_up(&mut self) {
         self.up();
         self.up();
@@ -481,7 +487,7 @@ impl AST {
 
 
     /// convert ast to zcode
-    pub fn to_zcode(& self, out: &mut zfile::Zfile) {
+    pub fn to_zcode(&self, out: &mut zfile::Zfile) {
         let mut manager = CodeGenManager::new();
 
         // Insert temp variables for internal calculations
@@ -727,6 +733,21 @@ impl ASTNode {
     pub fn as_default(&self) -> &NodeDefault {
         match self {
             &ASTNode::Default(ref def) => def,
+            _ => panic!("Node cannot be unwrapped as NodeDefault!")
+        }
+    }
+
+    /// goes through the whole tree and parse the expressions
+    fn parse_expressions(&mut self) {
+        match self {
+            &mut ASTNode::Default(ref node) => {
+                match &node.category {
+                    &TokExpression => {
+                        println!("!!!!!!!!!!!!!!!!!!!!");
+                    },
+                    _ => ()
+                }
+            }
             _ => panic!("Node cannot be unwrapped as NodeDefault!")
         }
     }
