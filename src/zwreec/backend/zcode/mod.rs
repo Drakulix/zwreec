@@ -20,16 +20,21 @@ pub fn temp_create_zcode_example<W: Write>(output: &mut W) {
     let mut zfile: Zfile = zfile::Zfile::new();
 
     zfile.start();
-    let store_addr = zfile.object_addr + 200;
+    let store_addr = zfile.object_addr + 2;
     zfile.emit(vec![
-        ZOP::Routine{name: "Start".to_string(), count_variables: 0},
-        ZOP::PrintOps{text: "Content at memory pointed by variable (expected 1042): \n".to_string()},
-        ZOP::StoreU16{variable: 200, value: 0x412}, // = 1042
-        ZOP::StoreW{array_address: 200, index: 0, variable: 200},
+        ZOP::Routine{name: "Start".to_string(), count_variables: 1},
+        ZOP::PrintOps{text: "Content at memory pointed by variable (expected 8729): \n".to_string()},
+        ZOP::StoreU16{variable: 200, value: 0x2219},
+        ZOP::StoreW{array_address: 2, index: 1, variable: 200},  // index at var:1 is 0
         ZOP::StoreU16{variable: 200, value: store_addr},
-        ZOP::LoadWvar{array_address_var: 200, index: 0, variable: 190},
+        ZOP::LoadWvar{array_address_var: 200, index: 1, variable: 190},
         ZOP::Newline,
         ZOP::PrintNumVar{variable: 190},
+        ZOP::Newline,
+        ZOP::PrintUnicodeVar{var: 200}, // should output ∙
+        ZOP::Newline,
+        ZOP::PrintOps{text: "expected ∙ in the previous line and in the next\n".to_string()},
+        ZOP::PrintUnicode{c: '∙' as u16},
         ZOP::Newline,
         ZOP::Quit,
         ]);

@@ -684,16 +684,16 @@ impl Zfile {
     /// only works if the string is within the address space up to 0xffff
     pub fn routine_print_unicode(&mut self) {
         self.emit(vec![
-            ZOP::Routine{name: "print_unicode".to_string(), count_variables: 3},
-            // addr in 0x01, length in 0x02
-            ZOP::LoadWvar{array_address_var: 0x01, index: 0, variable: 0x02},
+            ZOP::Routine{name: "print_unicode".to_string(), count_variables: 4},
+            // addr as arg1 in 0x01, copy length to 0x02
+            ZOP::LoadWvar{array_address_var: 0x01, index: 4, variable: 0x02},  // index at var:4 is 0
             ZOP::AddVar{variable1: 0x02, variable2: 0x02, result: 0x02}, // double length
             ZOP::AddVar{variable1: 0x01, variable2: 0x02, result: 0x02}, // add 'offset' addr to length,
             // so it marks the position after the last char
             ZOP::Add{variable1: 0x01, add_const: 2i16, variable2: 0x01}, // point to first char
             ZOP::Label{name: "inter_char".to_string()},
             // load u16 char to 0x3
-            ZOP::LoadWvar{array_address_var: 0x01, index: 0, variable: 0x03},
+            ZOP::LoadWvar{array_address_var: 0x01, index: 4, variable: 0x03},  // index at var:4 is 0
             ZOP::PrintUnicodeVar{var: 0x03},
             ZOP::Add{variable1: 0x01, add_const: 2i16, variable2: 0x01}, // point to next char
             ZOP::JL{local_var_id: 0x01, local_var_id2: 0x02, jump_to_label: "inter_char".to_string()},
