@@ -68,12 +68,12 @@ Additional help:
 This repository contains a few sample Twee-Files used for the library's integration tests. They are located under `tests/integration/should-compile/`. To compile them you can use the following command:
 
 ```
-$ ./target/debug/zwreec -o ASCII.z8 ./tests/integration/should-compile/ASCII.twee
+$ ./target/debug/zwreec -o CurrentStatus.z8 ./tests/integration/should-compile/CurrentStatus.twee
 ```
 
 _Edit the above line to compile different twee adventures._
 
-Then you can run `./ASCII.z8` with your favorite Z-Code interpreter, like [frotz](http://frotz.sourceforge.net).
+Then you can run `./CurrentStatus.z8` with your favorite Z-Code interpreter.
 
 
 ## Development and Documentation
