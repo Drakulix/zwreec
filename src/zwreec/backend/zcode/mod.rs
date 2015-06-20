@@ -31,7 +31,7 @@ pub fn temp_create_zcode_example<W: Write>(output: &mut W) {
         ZOP::Newline,
         ZOP::PrintNumVar{variable: 190},
         ZOP::Newline,
-        ZOP::PrintUnicodeVar{var: 200}, // should output ∙
+        ZOP::PrintUnicodeVar{var: 190}, // should output ∙
         ZOP::Newline,
         ZOP::PrintOps{text: "expected ∙ in the previous line and in the next\n".to_string()},
         ZOP::PrintUnicode{c: '∙' as u16},
