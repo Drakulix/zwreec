@@ -70,10 +70,10 @@ fn if_else_test() {
     test_compile(TESTFOLDER_PASS.to_string() + "If-Else.twee");
 }
 
-// #[test]
-// fn current_status_test() {
-//     test_compile(TESTFOLDER_PASS.to_string() + "CurrentStatus.twee");
-// }
+#[test]
+fn current_status_test() {
+    test_compile(TESTFOLDER_PASS.to_string() + "CurrentStatus.twee");
+}
 
 // #[test]
 // #[should_panic]

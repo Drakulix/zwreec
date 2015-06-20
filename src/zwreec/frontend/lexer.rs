@@ -85,7 +85,6 @@ pub enum Token {
     TokMacroStart             {location: (u64, u64)},
     TokMacroEnd               {location: (u64, u64)},
     TokMacroContentVar        {location: (u64, u64), var_name: String},
-    TokMacroContentPassageName{location: (u64, u64), passage_name: String},
     TokMacroSet               {location: (u64, u64)},
     TokMacroIf                {location: (u64, u64)},
     TokMacroElse              {location: (u64, u64)},
@@ -149,7 +148,6 @@ impl Token {
             &TokMacroStart{location} |
             &TokMacroEnd{location} |
             &TokMacroContentVar{location, ..} |
-            &TokMacroContentPassageName{location, ..} |
             &TokMacroSet{location} |
             &TokMacroIf{location} |
             &TokMacroElse{location} |
@@ -218,7 +216,6 @@ impl PartialEq for Token {
             (&TokMacroStart{..}, &TokMacroStart{..}) => true,
             (&TokMacroEnd{..}, &TokMacroEnd{..}) => true,
             (&TokMacroContentVar{..}, &TokMacroContentVar{..}) => true,
-            (&TokMacroContentPassageName{..}, &TokMacroContentPassageName{..}) => true,
             (&TokMacroSet{..}, &TokMacroSet{..}) => true,
             (&TokMacroIf{..}, &TokMacroIf{..}) => true,
             (&TokMacroElse{..}, &TokMacroElse{..}) => true,
@@ -1041,33 +1038,31 @@ mod tests {
         assert_tok_eq(expected, tokens);
     }
 
-    // #[test]
-    // fn macro_display_test() {
-    //     let tokens = test_lex("::Passage\n<<display DisplayedPassage>>\n::DisplayedPassage");
-    //     let expected = vec!(
-    //         TokPassage {name: "Passage".to_string(), location: (1, 3)},
-    //         // TokMacroDisplay {location: (2, 3)},
-    //         TokPassage {name: "DisplayedPassage".to_string(), location: (2, 10)},
-    //         TokMacroEnd {location: (2, 27)},
-    //         TokNewLine {location: (2, 29)},
-    //         TokPassage {name: "DisplayedPassage".to_string(), location: (3, 3)}
-    //     );
-    //
-    //     assert_tok_eq(expected, tokens);
-    // }
+    #[test]
+    fn macro_display_test() {
+        let tokens = test_lex("::Passage\n<<display DisplayedPassage>>\n::DisplayedPassage");
+        let expected = vec!(
+            TokPassage {name: "Passage".to_string(), location: (1, 3)},
+            TokMacroDisplay {passage_name: "DisplayedPassage".to_string(), location: (2, 11)},
+            TokMacroEnd {location: (2, 27)},
+            TokNewLine {location: (2, 29)},
+            TokPassage {name: "DisplayedPassage".to_string(), location: (3, 3)},
+        );
 
-    // #[test]
-    // fn macro_display_short_test() {
-    //     // Should fail because it contains an invalid macro
-    //     let tokens = test_lex("::Passage\n<<Passage>>");
-    //     let expected = vec![
-    //         TokPassage {name: "Passage".to_string(), location: (1, 3)},
-    //         TokMacroContentPassageName {location: (2, 3), passage_name: "Passage".to_string()},
-    //         TokMacroEnd {location: (2, 10)}
-    //     ];
-    //
-    //     assert_tok_eq(expected, tokens);
-    // }
+        assert_tok_eq(expected, tokens);
+    }
+
+    #[test]
+    fn macro_display_short_test() {
+        let tokens = test_lex("::Passage\n<<Passage>>");
+        let expected = vec![
+            TokPassage {name: "Passage".to_string(), location: (1, 3)},
+            TokMacroDisplay {location: (2, 3), passage_name: "Passage".to_string()},
+            TokMacroEnd {location: (2, 10)}
+        ];
+
+        assert_tok_eq(expected, tokens);
+    }
 
     #[test]
     fn macro_print_function_test() {

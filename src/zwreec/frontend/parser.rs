@@ -192,8 +192,7 @@ impl<'a> Parser<'a> {
                 (PassageContent, TokMacroIf  { .. } ) |
                 (PassageContent, TokMacroPrint { .. } ) |
                 (PassageContent, TokVariable { .. } ) |
-                (PassageContent, TokMacroContentVar { .. } ) |
-                (PassageContent, TokMacroContentPassageName { .. } ) => {
+                (PassageContent, TokMacroContentVar { .. } ) => {
                     stack.push(NonTerminal(PassageContent));
                     stack.push(NonTerminal(Macro));
 
@@ -288,7 +287,12 @@ impl<'a> Parser<'a> {
                 },
 
                 // Macro
-                (Macro, tok @ TokMacroDisplay { .. } ) |
+                (Macro, tok @ TokMacroDisplay { .. } ) => {
+                    stack.push(Terminal(TokMacroEnd {location: (0, 0)} ));
+                    stack.push(Terminal(tok.clone()));
+
+                    Some(AddChild(tok))
+                },
                 (Macro, tok @ TokMacroSet { .. } ) => {
                     stack.push(Terminal(TokMacroEnd {location: (0, 0)} ));
                     stack.push(NonTerminal(ExpressionList));
@@ -316,13 +320,6 @@ impl<'a> Parser<'a> {
 
                 // means <<$var>>
                 (Macro, tok @ TokMacroContentVar { .. }) => {
-                    stack.push(Terminal(TokMacroEnd {location: (0, 0)} ));
-                    stack.push(Terminal(tok.clone()));
-
-                    Some(AddChild(tok))
-                },
-                // means <<passagename>>
-                (Macro, tok @ TokMacroContentPassageName { .. } ) => {
                     stack.push(Terminal(TokMacroEnd {location: (0, 0)} ));
                     stack.push(Terminal(tok.clone()));
 
