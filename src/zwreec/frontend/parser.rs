@@ -1,10 +1,23 @@
-//! The `parser` module contains a lot of useful functionality
-//! to parse tokens from the lexer (and creating the parsetree
-//! and the ast)
-//! its an predictiv parser for a LL(1) grammar
-//! for more info about the parser: look in the Compiler Dragonbook,
-//! Chapter 4.4.4, "Nonrecursive Predictive Parsing"
-
+//! Constructs a parsing iterator for a twee token iterator.
+//!
+//! This is a predictive parser for a twee token stream. It takes an `Token` 
+//! iterator (see [lexer](/zwreec/frontend/lexer/index.html)) and wraps it inside
+//! a parsing iterator that returns operations to construct an abstract syntax
+//! tree. 
+//!
+//! # Parser
+//!
+//! The underlying parser is a predictive top-down parser for a LL(1) grammar. 
+//! For more information about the parser you should refer to *Compilers: 
+//! Principles, Techniques, and Tools* by A. V. Aho, M. S. Lam, R. Sethi, and J. D. Ullman, 
+//! Chapter 4.4.4: "Nonrecursive Predictive Parsing".
+//!
+//! # Grammar
+//!
+//! As mentioned, the parser operates on a LL(1) grammar. It is documented in [Zwreec's
+//! Github Wiki](https://github.com/Drakulix/zwreec/wiki/Underlying-Twee-Grammar#grammar), 
+//! together with the resulting [parse
+//! table](https://github.com/Drakulix/zwreec/wiki/Underlying-Parsetable)
 use config::Config;
 use frontend::lexer::Token;
 use frontend::lexer::Token::*;
@@ -25,11 +38,13 @@ pub enum ParserError {
     NonTerminalEnd { stack: NonTerminalType },
 }
 
-//==============================
-// grammar
-
+/// The Type of nonterminal encountered by the parser.
+///
+/// These are the nonterminals of the underlying LL(1) grammar. For the full grammar,
+/// take a look at Zwreec's [Wiki](https://github.com/Drakulix/zwreec/wiki/Underlying-Twee-Grammar#grammar).
 #[derive(Debug, Copy, Clone)]
 pub enum NonTerminalType {
+    /// Start symbol
     S,
     Sf,
     Passage,
@@ -51,6 +66,7 @@ pub enum NonTerminalType {
     ExpressionList,
     ExpressionListf,
     Expression,
+    /// Start of the expression definition
     E,
     E2,
     T,
@@ -66,11 +82,22 @@ pub enum NonTerminalType {
     AssignVariable,
 }
 
-enum Elem {
+/// The Type that represents an element of the grammar
+///
+/// This enum represents the lexical elements of a grammar. Nonterminals are defined by
+/// `NonTerminalType`, terminals use the lexical token as specification.
+///
+/// For the full grammar, take a look at Zwreec's 
+/// [Wiki](https://github.com/Drakulix/zwreec/wiki/Underlying-Twee-Grammar#grammar).
+pub enum Elem {
     NonTerminal(NonTerminalType),
     Terminal(Token)
 }
 
+/// Stores the stack for the custom iterator `parsing()`
+///
+/// The `zwreec::utils::extensions` module defines a new iterator `Parser`.
+/// This struct stores the state for this iterator.
 pub struct ParseState {
     stack: Vec<Elem>,
     grammar_func: Box<Fn(NonTerminalType, Option<Token>, &mut Vec<Elem>) -> Option<ASTOperation>>,
