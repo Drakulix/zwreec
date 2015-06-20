@@ -174,21 +174,21 @@ pub fn op_set_color(foreground: u8, background: u8) -> Vec<u8> {
 }
 
 
-/// prints string at given packet address TODO: needs testing
+/// prints string at given packet address  which is then multiplied by 8
 pub fn op_print_paddr(address: u8) -> Vec<u8> {
    let mut bytes = op_1(0x0D, ArgType::Variable);
    bytes.push(address);
    bytes
 }
 
-/// prints string at given address which is then divided by 8 to be a packed address TODO: needs testing
+/// prints string at given packed address which is then multiplied by 8
 pub fn op_print_paddr_static(address: u16) -> Vec<u8> {
    let mut bytes = op_1(0x0D, ArgType::LargeConst);
-   write_u16(address/8, &mut bytes);
+   write_u16(address, &mut bytes);
    bytes
 }
 
-/// prints string at given adress TODO: needs testing
+/// prints string at given address
 pub fn op_print_addr(address: u8) -> Vec<u8> {
    let mut bytes = op_1(0x07, ArgType::Variable);
    bytes.push(address);

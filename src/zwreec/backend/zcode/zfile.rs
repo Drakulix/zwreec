@@ -11,8 +11,8 @@ pub enum ZOP {
   PrintUnicodeVar{var: u8},
   Print{text: String},
   PrintNumVar{variable: u8},
-  PrintPaddr{address: u8},  // address is a variable
-  PrintPaddrStatic{address: u16},
+  PrintPaddr{address: u8},  // address is a variable and packed, so it  will be multiplied by 8
+  PrintPaddrStatic{address: u16},  // address is packed and will be multiplied by 8
   PrintAddr{address: u8},
   PrintOps{text: String},
   Call1N{jump_to_label: String},
@@ -71,7 +71,7 @@ pub struct Zfile {
     program_addr: u16,
     unicode_table_addr: u16,
     global_addr: u16,
-    object_addr: u16,
+    pub object_addr: u16,
 }
 
 #[derive(Debug, PartialEq, Clone)]
