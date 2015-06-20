@@ -98,6 +98,74 @@ impl<I: Sized+Iterator> FilteringScanExt for I {
     }
 }
 
+#[derive(Clone)]
+pub enum ParseResult {
+    Continue,
+    Halt,
+    End,
+}
+
+/// An iterator to maintain state while iterating another iterator and allows more complex parsing
+// (allowing holding the current iterator value, continue if its goes empty and filter the output)
+#[must_use = "iterator adaptors are lazy and do nothing unless consumed"]
+#[derive(Clone)]
+pub struct Parser<I, A, St, F> where
+    A: Clone,
+    I: Iterator<Item=A>,
+{
+    iter: I,
+    f: F,
+    state: St,
+
+    iter_state: ParseResult,
+    current_elem: Option<A>,
+}
+
+impl<B, I, St, F, A> Iterator for Parser<I, A, St, F> where
+    A: Clone,
+    I: Iterator<Item=A>,
+    F: FnMut(&mut St, Option<I::Item>) -> (ParseResult, Option<B>),
+{
+    type Item = B;
+
+    #[inline]
+    fn next(&mut self) -> Option<B> {
+        loop {
+            match self.iter_state {
+                ParseResult::Continue => self.current_elem = self.iter.next(),
+                ParseResult::Halt => {},
+                ParseResult::End => return None,
+            };
+
+            let (new_state, result) = (self.f) (&mut self.state, self.current_elem.clone());
+
+            self.iter_state = new_state;
+
+            match result {
+                Some(result) => return Some(result),
+                None => continue,
+            }
+        }
+    }
+
+    #[inline]
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        (0, None) // can't know a lower or upper bound, due to the parse function
+    }
+}
+
+pub trait ParserExt {
+    fn parsing<St, B, F>(self, initial_state: St, f: F) -> Parser<Self, Self::Item, St, F>
+        where Self: Sized+Iterator, Self::Item: Clone, F: Fn(&mut St, Option<Self::Item>) -> (ParseResult, Option<B>);
+}
+
+impl<A:Clone, I: Sized+Iterator<Item=A>>ParserExt for I {
+    fn parsing<St, B, F>(self, initial_state: St, f: F) -> Parser<Self, A, St, F>
+        where F: FnMut(&mut St, Option<A>) -> (ParseResult, Option<B>),
+    {
+        Parser{iter: self, f: f, state: initial_state, iter_state: ParseResult::Continue, current_elem: None}
+    }
+}
 
 #[test]
 fn peeking_test() {
@@ -139,4 +207,57 @@ fn filtering_scan_test() {
         sum += elem;
     }
     assert_eq!(sum, 2);
+}
+
+#[test]
+fn parsing_test() {
+
+    struct ParseState {
+        one_halt_test: u32,
+        two_counter: u32,
+        one_more_test: bool,
+    }
+
+    let mut result = vec![];
+
+    let test = vec![1, 2, 2, 3];
+    for elem in test.into_iter().parsing(
+        ParseState {
+            one_halt_test: 3,
+            two_counter: 1,
+            one_more_test: true,
+        },
+        |state, elem| {
+            match elem {
+                Some(1) => {
+                    state.one_halt_test -= 1;
+                    if state.one_halt_test == 0 {
+                        (ParseResult::Continue, Some(1))
+                    } else {
+                        (ParseResult::Halt, None)
+                    }
+                },
+                Some(2) => {
+                    state.two_counter += 1;
+                    (ParseResult::Continue, Some(state.two_counter))
+                },
+                Some(3) => {
+                    (ParseResult::Continue, Some(4))
+                },
+                Some(_) => { panic!("found a bug in rust") },
+                None => {
+                    if state.one_more_test {
+                        state.one_more_test = false;
+                        (ParseResult::Continue, Some(5))
+                    } else {
+                        (ParseResult::End, None)
+                    }
+                }
+            }
+        }
+    ) {
+        result.push(elem);
+    }
+
+    assert_eq!(result, vec![1, 2, 3, 4, 5]);
 }

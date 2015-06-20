@@ -14,6 +14,7 @@ use std::path::Path;
 use std::process::exit;
 
 use zwreec::config;
+use zwreec::config::Config;
 
 mod logger;
 
@@ -156,7 +157,7 @@ fn parse_arguments(args: Vec<String>, opts: getopts::Options) -> (getopts::Match
     // activate logger
     let _ = logger::CombinedLogger::init(loggers);
 
-    let cfg = config::parse_matches(&matches);
+    let cfg = Config::from_matches(&matches);
     (matches, cfg)
 }
 

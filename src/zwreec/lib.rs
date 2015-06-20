@@ -21,17 +21,17 @@ use std::io::{Read,Write};
 
 #[allow(unused_variables)]
 pub fn compile<R: Read, W: Write>(cfg: Config, input: &mut R, output: &mut W) {
-    //screen
-    let mut clean_input = frontend::lexer::screen(&cfg, input);
-
     // tokenize
-    let tokens = frontend::lexer::lex(&cfg, &mut clean_input);
+    let tokens = frontend::lexer::lex(&cfg, input);
 
-    // parse tokens and create ast
-    let ast = frontend::parser::parse_tokens(&cfg, tokens.inspect(|ref token| {
+    //create parser
+    let parser = frontend::parser::Parser::new(&cfg);
+
+    //build up ast from tokens
+    let ast = frontend::ast::AST::build(parser.parse(tokens.inspect(|ref token| {
         debug!("{:?}", token);
-    }).collect()); //use collect until we work on iterators directly
-    ast.print();
+    })));
+    ast.print(false);
 
     // create code
     codegen::generate_zcode(&cfg, ast, output);

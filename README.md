@@ -32,16 +32,21 @@ Only rudimentary Twee features are supported right now. This is about to change 
 
 ## Usage
 ```
-Usage: target/debug/zwreec [-hV] [-vq] [-l [LOGFILE]] [-o OUTPUT] INPUT
+Usage: zwreec [-hV] [-vq] [-l [LOGFILE]] [-o OUTPUT] INPUT
 
 Options:
-    -v --verbose        be more verbose. can be used multiple times.
+    -v --verbose        be more verbose. Can be used multiple times.
     -q --quiet          be quiet
     -l --logfile [LOGFILE]
                         specify log file (default zwreec.log)
     -o FILE             name of the output file
+    -f --force          force opening of output file
     -h --help           display this help and exit
     -V --version        display version
+
+
+Additional help:
+    --help -v           Print the full set of options zwreec accepts
 ```
 
 ### Build Steps

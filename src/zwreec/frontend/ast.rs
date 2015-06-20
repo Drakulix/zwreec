@@ -25,7 +25,7 @@ pub struct AST {
 fn gen_zcode<'a>(node: &'a ASTNode, mut out: &mut zfile::Zfile, mut manager: &mut CodeGenManager<'a>) -> Vec<ZOP> {
     let mut state_copy = manager.format_state.clone();
     let mut set_formatting = false;
-  
+
     match node {
         &ASTNode::Passage(ref node) => {
             let mut code: Vec<ZOP> = vec![];
@@ -37,7 +37,7 @@ fn gen_zcode<'a>(node: &'a ASTNode, mut out: &mut zfile::Zfile, mut manager: &mu
                     debug!("no match 1");
                 }
             };
-            
+
             for child in &node.childs {
                 for instr in gen_zcode(child, out, manager) {
                     code.push(instr);
@@ -117,16 +117,79 @@ fn gen_zcode<'a>(node: &'a ASTNode, mut out: &mut zfile::Zfile, mut manager: &mu
 
                     let mut compare: u8 = 1;
 
+                    // check if the first node is an expression node
+                    let expression_node = match t.childs[0].as_default().category {
+                        TokExpression => t.childs[0].as_default(),
+                        _ =>  panic!("Unsupported if-expression!")
+                    };
+
+                    // Check if first token is variable
+                    let var_name = match expression_node.childs[0].as_default().category {
+                        TokVariable {ref name, .. } => name,
+                        _ =>  panic!("Unsupported if-expression!")
+                    };
+
+                    if expression_node.childs.len() > 1 {
+                        // Check if second token is compare operator
+                        match expression_node.childs[1].as_default().category {
+                            TokCompOp {ref op_name, .. } => {
+                                match &*(*op_name) {
+                                    "==" | "is" => {} ,
+                                    _ => panic!("Unsupported Compare Operator!")
+                                }
+                            }, _ =>  panic!("Unsupported if-expression!")
+                        }
+
+                        // Check if third token is number
+                        compare = match expression_node.childs[2].as_default().category {
+                            TokInt {ref value, .. } => {
+                                *value as u8
+                            },
+                            TokBoolean {ref value, .. } => {
+                                boolstr_to_u8(&*value)
+                            }, _ => panic!("Unsupported assign value!")
+                        };
+                    }
+
+                    let symbol_id = manager.symbol_table.get_symbol_id(&*var_name);
+                    let if_id = manager.ids_if.start_next();
+
+                    let if_label = format!("if_{}", if_id);
+                    let after_if_label = format!("after_if_{}", if_id);
+                    let after_else_label = format!("after_else_{}", if_id);
+                    let mut code: Vec<ZOP> = vec![
+                        ZOP::JE{local_var_id: symbol_id, equal_to_const: compare, jump_to_label: if_label.to_string()},
+                        ZOP::Jump{jump_to_label: after_if_label.to_string()},
+                        ZOP::Label{name: if_label.to_string()}
+                    ];
+
+                    for i in 1..t.childs.len() {
+                        for instr in gen_zcode(&t.childs[i], out, manager) {
+                            code.push(instr);
+                        }
+                    }
+
+                    code.push(ZOP::Jump{jump_to_label: after_else_label});
+                    code.push(ZOP::Label{name: after_if_label});
+                    code
+                },
+                &TokMacroElseIf { .. } => {
+                    if t.childs.len() < 2 {
+                        panic!("Unsupported elseif-expression!");
+                    }
+
+                    let mut compare: u8 = 1;
+
                     // check if the first node is a pseudonode
                     let pseudo_node = match t.childs[0].as_default().category {
-                        TokPseudo => t.childs[0].as_default(),
-                        _ =>  panic!("Unsupported if-expression!")
+                        TokExpression => t.childs[0].as_default(),
+                        _ =>  panic!("Unsupported elseif-expression!")
                     };
 
                     // Check if first token is variable
                     let var_name = match pseudo_node.childs[0].as_default().category {
                         TokVariable {ref name, .. } => name,
-                        _ =>  panic!("Unsupported if-expression!")
+                        _ =>  panic!("Unsupported elseif-expression!")
                     };
 
                     if pseudo_node.childs.len() > 1 {
@@ -137,7 +200,7 @@ fn gen_zcode<'a>(node: &'a ASTNode, mut out: &mut zfile::Zfile, mut manager: &mu
                                     "==" | "is" => {} ,
                                     _ => panic!("Unsupported Compare Operator!")
                                 }
-                            }, _ =>  panic!("Unsupported if-expression!")
+                            }, _ =>  panic!("Unsupported elseif-expression!")
                         }
 
                         // Check if third token is number
@@ -147,7 +210,7 @@ fn gen_zcode<'a>(node: &'a ASTNode, mut out: &mut zfile::Zfile, mut manager: &mu
                             },
                             TokBoolean {ref value, .. } => {
                                 boolstr_to_u8(&*value)
-                            }, _ => panic!("Unsupported assign value!") 
+                            }, _ => panic!("Unsupported assign value!")
                         };
                     }
 
@@ -155,8 +218,8 @@ fn gen_zcode<'a>(node: &'a ASTNode, mut out: &mut zfile::Zfile, mut manager: &mu
                     let if_id = manager.ids_if.start_next();
 
                     let if_label = format!("if_{}", if_id);
-                    let after_if_label = format!("after_if_{}", if_id);
-                    let after_else_label = format!("after_else_{}", if_id);
+                    let after_if_label = format!("after_if_{}", manager.ids_if.pop_id());
+                    let after_else_label = format!("after_else_{}", manager.ids_if.peek());
                     let mut code: Vec<ZOP> = vec![
                         ZOP::JE{local_var_id: symbol_id, equal_to_const: compare, jump_to_label: if_label.to_string()},
                         ZOP::Jump{jump_to_label: after_if_label.to_string()},
@@ -242,7 +305,7 @@ fn gen_zcode<'a>(node: &'a ASTNode, mut out: &mut zfile::Zfile, mut manager: &mu
                                 if from_value <= 0 {
                                     code.push(ZOP::Sub {variable1: var, sub_const: 1, variable2: var} );
                                 } else {
-                                    code.push(ZOP::Add {variable1: var, add_const: from_value - 1, variable2: var} );
+                                    code.push(ZOP::Add {variable1: var, add_const: (from_value - 1) as i16, variable2: var} );
                                 }
                                 code.push(ZOP::PrintNumVar {variable: var} );
                             } else {
@@ -299,7 +362,7 @@ fn gen_zcode<'a>(node: &'a ASTNode, mut out: &mut zfile::Zfile, mut manager: &mu
         }
     }
 
-   
+
 }
 
 fn boolstr_to_u8(string: &str) -> u8 {
@@ -309,11 +372,42 @@ fn boolstr_to_u8(string: &str) -> u8 {
     }
 }
 
+pub enum ASTOperation {
+    AddPassage(Token),
+    AddChild(Token),
+    ChildDown(Token),
+    TwoChildsDown(Token, Token),
+    Up,
+    UpChild(Token),
+    UpChildDown(Token),
+    UpTwoChildsDown(Token, Token),
+    TwoUp,
+}
+
 impl AST {
-    pub fn new() -> AST {
-        AST {
+    pub fn build<I: Iterator<Item=ASTOperation>>(ops: I) -> AST {
+        let mut ast = AST {
             passages: Vec::new(),
-            path: Vec::new(),
+            path: Vec::new()
+        };
+        for op in ops {
+            ast.operation(op);
+        }
+        ast
+    }
+
+    pub fn operation(&mut self, op: ASTOperation) {
+        use self::ASTOperation::*;
+        match op {
+            AddPassage(passage) => self.add_passage(passage),
+            AddChild(child) => self.add_child(child),
+            ChildDown(child) => self.child_down(child),
+            TwoChildsDown(child1, child2) => self.two_childs_down(child1, child2),
+            Up => self.up(),
+            UpChild(child) => self.up_child(child),
+            UpChildDown(child) => self.up_child_down(child),
+            UpTwoChildsDown(child1, child2) => self.up_two_childs_down(child1, child2),
+            TwoUp => self.two_up(),
         }
     }
 
@@ -371,6 +465,20 @@ impl AST {
         self.child_down(token);
     }
 
+    /// goes one lvl up, adds one child and goes down. adds child and goes down.
+    pub fn up_two_childs_down(&mut self, child1: Token, child2: Token) {
+        self.up();
+        self.child_down(child1);
+        self.child_down(child2);
+    }
+
+
+    //goes two lvl up
+    pub fn two_up(&mut self) {
+        self.up();
+        self.up();
+    }
+
 
     /// convert ast to zcode
     pub fn to_zcode(& self, out: &mut zfile::Zfile) {
@@ -389,10 +497,10 @@ impl AST {
     }
 
     /// prints the tree
-    pub fn print(&self) {
+    pub fn print(&self, force_print: bool) {
         debug!("Abstract Syntax Tree: ");
         for child in &self.passages {
-            child.print(0);
+            child.print(0, force_print);
         }
         debug!("");
     }
@@ -406,6 +514,18 @@ impl AST {
             self.passages[*index].count_childs(new_path)
         } else {
             self.passages.len()
+        }
+    }
+
+    /// checks in the ast if there is the token "token"
+    pub fn is_specific_token(&self, token: Token, path: Vec<usize>) -> bool {
+        if let Some(index) = path.first() {
+            let mut new_path: Vec<usize> = path.to_vec();
+            new_path.remove(0);
+
+            self.passages[*index].is_specific_token(token, new_path)
+        } else {
+            false
         }
     }
 }
@@ -457,7 +577,7 @@ impl <'a> CodeGenManager<'a> {
 impl IdentifierProvider {
     pub fn new() -> IdentifierProvider {
         IdentifierProvider {
-            current_id: 0, 
+            current_id: 0,
             id_stack: Vec::new()
         }
     }
@@ -468,6 +588,11 @@ impl IdentifierProvider {
         self.current_id += 1;
         self.id_stack.push(id);
         id
+    }
+
+    // Pops the last id from the stack
+    pub fn peek(&mut self) -> u32 {
+        self.id_stack.last().unwrap().clone()
     }
 
     // Pops the last id from the stack
@@ -496,11 +621,11 @@ impl <'a> SymbolTable<'a> {
         self.symbol_map.contains_key(symbol)
     }
 
-    // Returns the id for a given symbol 
+    // Returns the id for a given symbol
     // (check if is_known_symbol, otherwise panics)
     pub fn get_symbol_id(&self, symbol: &str) -> u8 {
-        let (b,_) = self.symbol_map.get(symbol).unwrap().clone();  
-        b 
+        let (b,_) = self.symbol_map.get(symbol).unwrap().clone();
+        b
     }
 
     pub fn get_symbol_type(&self, symbol: &str) -> Type {
@@ -546,8 +671,30 @@ impl ASTNode {
         }
     }
 
+    /// checks the current path if there is the token "token"
+    pub fn is_specific_token(&self, token: Token, path: Vec<usize>) -> bool {
+        if let Some(index) = path.first() {
+            let mut new_path: Vec<usize> = path.to_vec();
+            new_path.remove(0);
+
+            match self {
+                &ASTNode::Default(ref node) => node.childs[*index].is_specific_token(token, new_path),
+                &ASTNode::Passage(ref node) => node.childs[*index].is_specific_token(token, new_path),
+            }
+        } else {
+            match self {
+                &ASTNode::Default(ref node) => {
+                    token == node.category
+                },
+                &ASTNode::Passage(ref node) => {
+                    token == node.category
+                },
+            }
+        }
+    }
+
     /// prints an node of an ast
-    pub fn print(&self, indent: usize) {
+    pub fn print(&self, indent: usize, force_print: bool) {
         let mut spaces = "".to_string();
         for _ in 0..indent {
             spaces.push_str(" ");
@@ -555,24 +702,84 @@ impl ASTNode {
 
         match self {
             &ASTNode::Passage(ref t) => {
-                debug!("{}|- : {:?}", spaces, t.category);
+                if force_print {
+                    println!("{}|- : {:?}", spaces, t.category);
+                } else {
+                    debug!("{}|- : {:?}", spaces, t.category);
+                }
                 for child in &t.childs {
-                    child.print(indent+2);
+                    child.print(indent+2, force_print);
                 }
             },
             &ASTNode::Default(ref t) => {
-                debug!("{}|- : {:?}", spaces, t.category);
+                if force_print {
+                    println!("{}|- : {:?}", spaces, t.category);
+                } else {
+                    debug!("{}|- : {:?}", spaces, t.category);
+                }
                 for child in &t.childs {
-                    child.print(indent+2);
+                    child.print(indent+2, force_print);
                 }
             }
         }
     }
 
     pub fn as_default(&self) -> &NodeDefault {
-        match self { 
-            &ASTNode::Default(ref def) => def, 
+        match self {
+            &ASTNode::Default(ref def) => def,
             _ => panic!("Node cannot be unwrapped as NodeDefault!")
         }
+    }
+}
+
+// ================================
+// test functions
+#[cfg(test)]
+mod tests {
+    use std::io::Cursor;
+
+    use super::*;
+    use frontend::*;
+    use frontend::lexer::Token;
+    use frontend::lexer::Token::*;
+    use config::Config;
+
+    /// creates an ast from the inputs str
+    fn test_ast(input: &str) -> AST {
+        let cfg = Config::default_config();
+        let mut cursor: Cursor<Vec<u8>> = Cursor::new(input.to_string().into_bytes());
+        let tokens = lexer::lex(&cfg, &mut cursor);
+        let parser = parser::Parser::new(&cfg);
+        AST::build(parser.parse(tokens.inspect(|ref token| {
+            println!("{:?}", token);
+        })))
+    }
+
+    /// checks exptexted
+    fn test_expected(expected: Vec<(Vec<usize>, Token)>, ast: AST) {
+        for item in expected.iter() {
+            let b = ast.is_specific_token(item.1.clone(), item.0.to_vec());
+            if b == false {
+                ast.print(true);
+            }
+            assert!(ast.is_specific_token(item.1.clone(), item.0.to_vec()));
+        }
+    }
+
+    #[test]
+    fn text_test() {
+        let ast = test_ast("::Passage\nTestText\nTestNextLine\n::NextPassage");
+
+        let expected = vec!(
+            (vec![0]  , TokPassage {name: "Passage".to_string(), location: (0, 0)}),
+            (vec![0,0], TokText {location: (0, 0), text: "TestText".to_string()}),
+            (vec![0,1], TokNewLine {location: (0, 0)} ),
+            (vec![0,2], TokText {location: (0, 0), text: "".to_string()}),
+            (vec![0,1], TokNewLine {location: (0, 0)}),
+            (vec![1]  , TokPassage {name: "".to_string(), location: (0, 0)}),
+
+        );
+
+        test_expected(expected, ast);
     }
 }

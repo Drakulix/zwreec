@@ -5,17 +5,24 @@
 //! for more info about the parser: look in the Compiler Dragonbook,
 //! Chapter 4.4.4, "Nonrecursive Predictive Parsing"
 
-use frontend::lexer::Token;
-use frontend::ast;
-use frontend::parsetree::{PNode};
-use self::NonTerminalType::*;
-use frontend::lexer::Token::*;
 use config::Config;
+use frontend::lexer::Token;
+use frontend::lexer::Token::*;
+use frontend::ast::ASTOperation;
+use frontend::ast::ASTOperation::*;
+use utils::error::Error;
+use utils::extensions::{ParserExt, ParseResult};
+use self::NonTerminalType::*;
+use self::Elem::*;
 
-pub fn parse_tokens(cfg: &Config, tokens: Vec<Token>) -> ast::AST {
-    let mut parser: Parser = Parser::new(cfg, tokens);
-    parser.parsing();
-    parser.ast
+//=============================
+// error handling
+
+pub enum ParserError {
+    TokenDoNotMatch { token: Option<Token>, stack: Token },
+    StackIsEmpty { token: Token },
+    NoProjection { token: Token, stack: NonTerminalType },
+    NonTerminalEnd { stack: NonTerminalType },
 }
 
 //==============================
@@ -35,7 +42,8 @@ pub enum NonTerminalType {
     MonoContent,
     Link,
     Macro,
-    Macrof,
+    ElseIf,
+    EndIf,
     Function,
     Functionf,
     Arguments,
@@ -58,503 +66,559 @@ pub enum NonTerminalType {
     AssignVariable,
 }
 
+enum Elem {
+    NonTerminal(NonTerminalType),
+    Terminal(Token)
+}
+
+pub struct ParseState {
+    stack: Vec<Elem>,
+    grammar_func: Box<Fn(NonTerminalType, Option<Token>, &mut Vec<Elem>) -> Option<ASTOperation>>,
+}
+
 //==============================
 // parser
 
 #[allow(dead_code)]
-struct Parser<'a> {
-    cfg: &'a Config,
-    ast: ast::AST,
-    stack: Vec<PNode>,
-    tokens: Vec<Token>,
-    lookahead: usize
+pub struct Parser<'a> {
+    cfg: &'a Config
 }
 
 impl<'a> Parser<'a> {
-    pub fn new(cfg: &Config, tokens: Vec<Token>) -> Parser {
+    pub fn new(cfg: &Config) -> Parser {
         Parser {
-            cfg: cfg,
-            ast: ast::AST::new(),
-            stack: Vec::new(),
-            tokens: tokens,
-            lookahead: 0
+            cfg: cfg
         }
     }
 
-    /// the predictive stack ll(1) parsing routine
-    pub fn parsing(&mut self) {
-        // push Start-Non-Terminal to the stack
-        self.stack.push(PNode::new_non_terminal(S));
+    pub fn parse<I: Iterator<Item=Token>>(&self, tokens: I) ->
+       ::utils::extensions::Parser<I, Token, ParseState, fn(&mut ParseState, Option<Token>) -> (ParseResult, Option<ASTOperation>)> {
 
-        while let Some(top) = self.stack.pop() {
-            match top {
-                PNode::NonTerminal(ref node) => {
-                    self.apply_grammar(node.clone());
+        // prepare stack
+        let mut stack: Vec<Elem> = Vec::new();
+        stack.push(NonTerminal(S));
+
+        //create Iterator
+        tokens.parsing(
+            ParseState {
+                stack: stack,
+                grammar_func: Box::new(Parser::apply_grammar),
+            },
+            {
+                /// the predictive stack ll(1) parsing routine
+                fn parse(state: &mut ParseState, token: Option<Token>) -> (ParseResult, Option<ASTOperation>) {
+
+                     match token {
+                        Some(token) => match state.stack.pop() {
+                            Some(Elem::NonTerminal(non_terminal)) => (ParseResult::Halt, (state.grammar_func)(non_terminal, Some(token), &mut state.stack)),
+                            Some(Elem::Terminal(stack_token)) => {
+                                if stack_token == token {
+                                    (ParseResult::Continue, None)
+                                } else {
+                                    ParserError::TokenDoNotMatch{token: Some(token), stack: stack_token}.raise()
+                                }
+                            },
+                            None => ParserError::StackIsEmpty{token: token}.raise(),
+                        },
+                        None => match state.stack.pop() {
+                            Some(Elem::NonTerminal(non_terminal)) => (ParseResult::Continue, (state.grammar_func)(non_terminal, None, &mut state.stack)),
+                            Some(Elem::Terminal(stack_token)) => ParserError::TokenDoNotMatch{token: token, stack: stack_token}.raise(),
+                            None => (ParseResult::End, None),
+                        }
+                    }
                 }
-                PNode::Terminal(_) => {
-                    self.next_token();
-                }
+                parse
             }
-        }
+        )
     }
 
     /// apply the ll(1) grammar
     /// the match-statement simulates the parsing-table behavior
     ///
-    fn apply_grammar(&mut self, top: NonTerminalType) {
-        if let Some(token) = self.tokens.get_mut(self.lookahead) {
+    fn apply_grammar(top: NonTerminalType, maybe_token: Option<Token>, stack: &mut Vec<Elem>) -> Option<ASTOperation> {
+        if let Some(token) = maybe_token {
 
-            // the frst item in the tuple is the current state and
-            // the snd is the current lookup-token
-            let state_first: (NonTerminalType, &Token) = (top, token);
+            let state = (top, token);
 
-            let mut new_nodes = Vec::new();
+            debug!("match {:?}", state);
+            match state {
+                (S, TokPassage { .. } ) => {
+                    stack.push(NonTerminal(Sf));
+                    stack.push(NonTerminal(Passage));
 
-            debug!("match {:?}", state_first);
-            match state_first {
-                (S, &TokPassage { .. } ) => {
-                    new_nodes.push(PNode::new_non_terminal(Passage));
-                    new_nodes.push(PNode::new_non_terminal(Sf));
+                    None
                 },
-                (Sf, &TokPassage { .. } ) => {
-                    new_nodes.push(PNode::new_non_terminal(S));
-                },
-                (Passage, tok @ &TokPassage { .. } ) => {
-                    new_nodes.push(PNode::new_terminal(tok.clone()));
-                    new_nodes.push(PNode::new_non_terminal(PassageContent));
+                (Sf, TokPassage { .. } ) => {
+                    stack.push(NonTerminal(S));
 
-                    // ast
-                    self.ast.add_passage(tok.clone());
+                    None
+                },
+                (Passage, tok @ TokPassage { .. } ) => {
+                    stack.push(NonTerminal(PassageContent));
+                    stack.push(Terminal(tok.clone()));
+
+                    Some(AddPassage(tok))
                 },
 
                 // PassageContent
-                (PassageContent, tok @ &TokText { .. } ) => {
-                    new_nodes.push(PNode::new_terminal(tok.clone()));
-                    new_nodes.push(PNode::new_non_terminal(PassageContent));
+                (PassageContent, tok @ TokText { .. } ) => {
+                    stack.push(NonTerminal(PassageContent));
+                    stack.push(Terminal(tok.clone()));
 
-                    // ast
-                    self.ast.add_child(tok.clone());
+                    Some(AddChild(tok))
                 },
-                (PassageContent, &TokFormatBoldStart   { .. }) | 
-                (PassageContent, &TokFormatItalicStart { .. }) |
-                (PassageContent, &TokFormatMonoStart   { .. }) => {
-                    new_nodes.push(PNode::new_non_terminal(Formating));
-                    new_nodes.push(PNode::new_non_terminal(PassageContent));
-                },
-                (PassageContent, &TokPassageLink { .. } ) => {
-                    new_nodes.push(PNode::new_non_terminal(Link));
-                    new_nodes.push(PNode::new_non_terminal(PassageContent));
-                },
-                (PassageContent, tok @ &TokNewLine { .. }) => {
-                    new_nodes.push(PNode::new_terminal(tok.clone()));
-                    new_nodes.push(PNode::new_non_terminal(PassageContent));
+                (PassageContent, TokFormatBoldStart   { .. }) |
+                (PassageContent, TokFormatItalicStart { .. }) |
+                (PassageContent, TokFormatMonoStart   { .. }) => {
+                    stack.push(NonTerminal(PassageContent));
+                    stack.push(NonTerminal(Formating));
 
-                    // ast
-                    self.ast.add_child(tok.clone());
+                    None
                 },
-                (PassageContent, &TokMacroDisplay { .. } ) |
-                (PassageContent, &TokMacroSet { .. } ) |
-                (PassageContent, &TokMacroIf  { .. } ) |
-                (PassageContent, &TokMacroPrint { .. } ) |
-                (PassageContent, &TokVariable { .. } ) |
-                (PassageContent, &TokMacroContentVar { .. } ) |
-                (PassageContent, &TokMacroContentPassageName { .. } ) => {
-                    new_nodes.push(PNode::new_non_terminal(Macro));
-                    new_nodes.push(PNode::new_non_terminal(PassageContent));
+                (PassageContent, TokPassageLink { .. } ) => {
+                    stack.push(NonTerminal(PassageContent));
+                    stack.push(NonTerminal(Link));
+
+                    None
                 },
-                (PassageContent, tok @ &TokMacroEndIf { .. }) => {
-                    // jump one ast-level higher
+                (PassageContent, tok @ TokNewLine { .. }) => {
+                    stack.push(NonTerminal(PassageContent));
+                    stack.push(Terminal(tok.clone()));
+
+                    Some(AddChild(tok))
+                },
+                (PassageContent, TokMacroDisplay { .. } ) |
+                (PassageContent, TokMacroSet { .. } ) |
+                (PassageContent, TokMacroIf  { .. } ) |
+                (PassageContent, TokMacroPrint { .. } ) |
+                (PassageContent, TokVariable { .. } ) |
+                (PassageContent, TokMacroContentVar { .. } ) |
+                (PassageContent, TokMacroContentPassageName { .. } ) => {
+                    stack.push(NonTerminal(PassageContent));
+                    stack.push(NonTerminal(Macro));
+
+                    None
+                },
+                (PassageContent, tok @ TokMacroEndIf { .. }) => {
                     debug!("pop TokMacroEndIf Passage;");
-
-                    self.ast.up_child(tok.clone());
-                },
-                (PassageContent, &TokFormatBoldEnd { .. } ) => {
                     // jump one ast-level higher
-                    self.ast.up();
+                    Some(UpChild(tok))
                 },
-                (PassageContent, &TokFormatItalicEnd { .. } ) => {
+                (PassageContent, TokFormatBoldEnd { .. } ) => {
                     // jump one ast-level higher
-                    self.ast.up();
+                    Some(Up)
+                },
+                (PassageContent, TokFormatItalicEnd { .. } ) => {
+                    // jump one ast-level higher
+                    Some(Up)
                 },
                 (PassageContent, _) => {
                     // PassageContent -> ε
+                    None
                 },
 
                 // Formating
-                (Formating, &TokFormatBoldStart { .. } ) => {
-                    new_nodes.push(PNode::new_non_terminal(BoldFormatting));
+                (Formating, TokFormatBoldStart { .. } ) => {
+                    stack.push(NonTerminal(BoldFormatting));
+
+                    None
                 },
-                (Formating, &TokFormatItalicStart { .. } ) => {
-                    new_nodes.push(PNode::new_non_terminal(ItalicFormatting));
+                (Formating, TokFormatItalicStart { .. } ) => {
+                    stack.push(NonTerminal(ItalicFormatting));
+
+                    None
                 },
-                (Formating, &TokFormatMonoStart { .. } ) => {
-                    new_nodes.push(PNode::new_non_terminal(MonoFormatting));
+                (Formating, TokFormatMonoStart { .. } ) => {
+                    stack.push(NonTerminal(MonoFormatting));
+
+                    None
                 },
 
-                // BoldFormatting
-                (BoldFormatting, tok @ &TokFormatBoldStart { .. } ) => {
-                    new_nodes.push(PNode::new_terminal(tok.clone()));
-                    new_nodes.push(PNode::new_non_terminal(PassageContent));
-                    new_nodes.push(PNode::new_terminal(TokFormatBoldEnd {location: (0, 0)} ));
+                //BoldFormatting
+                (BoldFormatting, tok @ TokFormatBoldStart { .. } ) => {
+                    stack.push(Terminal(TokFormatBoldEnd {location: (0, 0)} ));
+                    stack.push(NonTerminal(PassageContent));
+                    stack.push(Terminal(tok.clone()));
 
-                    //ast
-                    self.ast.child_down(tok.clone());
+                    Some(ChildDown(tok))
                 },
 
                 // ItalicFormatting
-                (ItalicFormatting, tok @ &TokFormatItalicStart { .. } ) => {
-                    new_nodes.push(PNode::new_terminal(tok.clone()));
-                    new_nodes.push(PNode::new_non_terminal(PassageContent));
-                    new_nodes.push(PNode::new_terminal(TokFormatItalicEnd {location: (0, 0)} ));
+                (ItalicFormatting, tok @ TokFormatItalicStart { .. } ) => {
+                    stack.push(Terminal(TokFormatItalicEnd {location: (0, 0)} ));
+                    stack.push(NonTerminal(PassageContent));
+                    stack.push(Terminal(tok.clone()));
 
-                    //ast
-                    self.ast.child_down(tok.clone());
+                    Some(ChildDown(tok))
                 },
 
                 // MonoFormatting
-                (MonoFormatting, tok @ &TokFormatMonoStart { .. } ) => {
-                    new_nodes.push(PNode::new_terminal(tok.clone()));
-                    new_nodes.push(PNode::new_non_terminal(MonoContent));
-                    new_nodes.push(PNode::new_terminal(TokFormatMonoEnd {location: (0, 0)} ));
+                (MonoFormatting, tok @ TokFormatMonoStart { .. } ) => {
+                    stack.push(Terminal(TokFormatMonoEnd {location: (0, 0)} ));
+                    stack.push(NonTerminal(MonoContent));
+                    stack.push(Terminal(tok.clone()));
 
-                    //ast
-                    self.ast.child_down(tok.clone());
+                    Some(ChildDown(tok))
                 },
 
                 // MonoContent
-                (MonoContent, tok @ &TokText { .. } ) => {
-                    new_nodes.push(PNode::new_terminal(tok.clone()));
-                    new_nodes.push(PNode::new_non_terminal(MonoContent));
+                (MonoContent, tok @ TokText { .. } ) => {
+                    stack.push(NonTerminal(MonoContent));
+                    stack.push(Terminal(tok.clone()));
 
-                    // ast
-                    self.ast.add_child(tok.clone());
+                    Some(AddChild(tok))
                 },
-                (MonoContent, tok @ &TokNewLine { .. } ) => {
-                    new_nodes.push(PNode::new_terminal(tok.clone()));
-                    new_nodes.push(PNode::new_non_terminal(MonoContent));
+                (MonoContent, tok @ TokNewLine { .. } ) => {
+                    stack.push(NonTerminal(MonoContent));
+                    stack.push(Terminal(tok));
+
+                    None
                 },
 
-                (MonoContent, &TokFormatMonoEnd { .. } ) => {
+                (MonoContent, TokFormatMonoEnd { .. } ) => {
                     // jump one ast-level higher
-                    self.ast.up();
+                    Some(Up)
                 },
 
                 // Link
-                (Link, tok @ &TokPassageLink { .. } ) => {
-                    new_nodes.push(PNode::new_terminal(tok.clone()));
+                (Link, tok @ TokPassageLink { .. } ) => {
+                    stack.push(Terminal(tok.clone()));
 
-                    // ast
-                    self.ast.add_child(tok.clone());
+                    Some(AddChild(tok))
                 },
 
                 // Macro
-                (Macro, tok @ &TokMacroDisplay { .. } ) |
-                (Macro, tok @ &TokMacroSet { .. } ) => {
-                    new_nodes.push(PNode::new_terminal(tok.clone()));
-                    new_nodes.push(PNode::new_non_terminal(ExpressionList));
-                    new_nodes.push(PNode::new_terminal(TokMacroEnd {location: (0, 0)} ));
-                },
-                (Macro, tok @ &TokMacroIf { .. } ) => {
-                    new_nodes.push(PNode::new_terminal(tok.clone()));
-                    new_nodes.push(PNode::new_non_terminal(ExpressionList));
-                    new_nodes.push(PNode::new_terminal(TokMacroEnd {location: (0, 0)} ));
-                    new_nodes.push(PNode::new_non_terminal(PassageContent));
-                    new_nodes.push(PNode::new_non_terminal(Macrof));
+                (Macro, tok @ TokMacroDisplay { .. } ) |
+                (Macro, tok @ TokMacroSet { .. } ) => {
+                    stack.push(Terminal(TokMacroEnd {location: (0, 0)} ));
+                    stack.push(NonTerminal(ExpressionList));
+                    stack.push(Terminal(tok));
 
-                    // ast
-                    self.ast.two_childs_down(tok.clone(), TokPseudo);
+                    None
                 },
-                (Macro, tok @ &TokMacroPrint { .. } ) => {
-                    new_nodes.push(PNode::new_terminal(tok.clone()));
-                    new_nodes.push(PNode::new_non_terminal(ExpressionList));
-                    new_nodes.push(PNode::new_terminal(TokMacroEnd {location: (0, 0)} ));
+                (Macro, tok @ TokMacroIf { .. } ) => {
+                    stack.push(NonTerminal(EndIf));
+                    stack.push(NonTerminal(ElseIf));
+                    stack.push(NonTerminal(PassageContent));
+                    stack.push(Terminal(TokMacroEnd {location: (0, 0)} ));
+                    stack.push(NonTerminal(ExpressionList));
+                    stack.push(Terminal(tok.clone()));
 
-                    // ast
-                    self.ast.child_down(tok.clone());
+                    Some(TwoChildsDown(tok, TokExpression))
+                },
+                (Macro, tok @ TokMacroPrint { .. } ) => {
+                    stack.push(Terminal(TokMacroEnd {location: (0, 0)} ));
+                    stack.push(NonTerminal(ExpressionList));
+                    stack.push(Terminal(tok.clone()));
+
+                    Some(ChildDown(tok))
                 }
 
                 // means <<$var>>
-                (Macro, tok @ &TokMacroContentVar { .. }) => {
-                    new_nodes.push(PNode::new_terminal(tok.clone()));
-                    new_nodes.push(PNode::new_terminal(TokMacroEnd {location: (0, 0)} ));
+                (Macro, tok @ TokMacroContentVar { .. }) => {
+                    stack.push(Terminal(TokMacroEnd {location: (0, 0)} ));
+                    stack.push(Terminal(tok.clone()));
 
-                    // ast
-                    self.ast.add_child(tok.clone());
+                    Some(AddChild(tok))
                 },
                 // means <<passagename>>
-                (Macro, tok @ &TokMacroContentPassageName { .. } ) => {
-                    new_nodes.push(PNode::new_terminal(tok.clone()));
-                    new_nodes.push(PNode::new_terminal(TokMacroEnd {location: (0, 0)} ));
+                (Macro, tok @ TokMacroContentPassageName { .. } ) => {
+                    stack.push(Terminal(TokMacroEnd {location: (0, 0)} ));
+                    stack.push(Terminal(tok.clone()));
 
-                    // ast
-                    self.ast.add_child(tok.clone());
+                    Some(AddChild(tok))
                 },
-                // Macrof
-                (Macrof, tok @ &TokMacroElse { .. } ) => {
-                    new_nodes.push(PNode::new_terminal(tok.clone()));
-                    new_nodes.push(PNode::new_terminal(TokMacroEnd {location: (0, 0)} ));
-                    new_nodes.push(PNode::new_non_terminal(PassageContent));
-                    new_nodes.push(PNode::new_terminal(TokMacroEndIf {location: (0, 0)} ));
-                    new_nodes.push(PNode::new_terminal(TokMacroEnd {location: (0, 0)} ));
 
-                    // ast
-                    self.ast.up_child_down(tok.clone());
+                // ElseIf
+                (ElseIf, tok @ TokMacroElseIf { .. } ) => {
+                    stack.push(NonTerminal(ElseIf));
+                    stack.push(NonTerminal(PassageContent));
+                    stack.push(Terminal(TokMacroEnd {location: (0, 0)} ));
+                    stack.push(NonTerminal(ExpressionList));
+                    stack.push(Terminal(tok.clone()));
+
+                    Some(UpTwoChildsDown(tok, TokExpression))
                 },
-                (Macrof, tok @ &TokMacroEndIf { .. } ) => {
-                    new_nodes.push(PNode::new_terminal(tok.clone()));
-                    new_nodes.push(PNode::new_terminal(TokMacroEnd {location: (0, 0)} ));
+                (ElseIf, _) => {
+                    // ElseIf -> ε
+                    None
+                },
 
-                    // ast
-                    //self.ast.up_child(tok.clone());
-                }
+                // EndIf
+                (EndIf, tok @ TokMacroElse { .. } ) => {
+                    stack.push(Terminal(TokMacroEnd {location: (0, 0)} ));
+                    stack.push(Terminal(TokMacroEndIf {location: (0, 0)} ));
+                    stack.push(NonTerminal(PassageContent));
+                    stack.push(Terminal(TokMacroEnd {location: (0, 0)} ));
+                    stack.push(Terminal(tok.clone()));
+
+                    Some(UpChildDown(tok))
+                },
+                (EndIf, tok @ TokMacroEndIf { .. } ) => {
+                    stack.push(Terminal(TokMacroEnd {location: (0, 0)} ));
+                    stack.push(Terminal(tok.clone()));
+
+                    None
+                },
 
                 // ExpressionList
-                (ExpressionList, &TokVariable { .. } ) |
-                (ExpressionList, &TokInt      { .. } ) |
-                (ExpressionList, &TokString   { .. } ) |
-                (ExpressionList, &TokBoolean  { .. } ) |
-                (ExpressionList, &TokAssign   { .. } ) |
-                (ExpressionList, &TokFunction { .. } ) => {
-                    new_nodes.push(PNode::new_non_terminal(Expression));
-                    new_nodes.push(PNode::new_non_terminal(ExpressionListf));
+                (ExpressionList, TokVariable { .. } ) |
+                (ExpressionList, TokInt      { .. } ) |
+                (ExpressionList, TokString   { .. } ) |
+                (ExpressionList, TokBoolean  { .. } ) |
+                (ExpressionList, TokAssign   { .. } ) |
+                (ExpressionList, TokFunction { .. } ) => {
+                    stack.push(NonTerminal(ExpressionListf));
+                    stack.push(NonTerminal(Expression));
+
+                    None
                 },
 
                 // ExpressionListf
-                (ExpressionListf, &TokMacroEnd { .. } ) => {
+                (ExpressionListf, TokMacroEnd { .. } ) => {
                     debug!("pop TokMacroEnd");
-                    self.ast.up();
+
+                    Some(Up)
                 },
                 (ExpressionListf, _) => {
                     // ExpressionListf -> ε
+                    None
                 },
 
                 // Expression
-                (Expression, &TokVariable { .. } ) |
-                (Expression, &TokInt      { .. } ) |
-                (Expression, &TokString   { .. } ) |
-                (Expression, &TokBoolean  { .. } ) |
-                (Expression, &TokFunction { .. } ) => {
-                    new_nodes.push(PNode::new_non_terminal(E));
+                (Expression, TokVariable { .. } ) |
+                (Expression, TokInt      { .. } ) |
+                (Expression, TokString   { .. } ) |
+                (Expression, TokBoolean  { .. } ) |
+                (Expression, TokFunction { .. } ) => {
+                    stack.push(NonTerminal(E));
+
+                    None
                 },
-                (Expression, &TokAssign { .. } ) => {
-                    new_nodes.push(PNode::new_non_terminal(AssignVariable));
+                (Expression, TokAssign { .. } ) => {
+                    stack.push(NonTerminal(AssignVariable));
+
+                    None
                 },
 
                 // E
-                (E, &TokVariable { .. } ) |
-                (E, &TokInt      { .. } ) |
-                (E, &TokString   { .. } ) |
-                (E, &TokBoolean  { .. } ) |
-                (E, &TokFunction { .. } ) => {
-                    new_nodes.push(PNode::new_non_terminal(T));
-                    new_nodes.push(PNode::new_non_terminal(E2));
+                (E, TokVariable { .. } ) |
+                (E, TokInt      { .. } ) |
+                (E, TokString   { .. } ) |
+                (E, TokBoolean  { .. } ) |
+                (E, TokFunction { .. } ) => {
+                    stack.push(NonTerminal(E2));
+                    stack.push(NonTerminal(T));
+
+                    None
                 },
 
                 // E2
                 (E2, _) => {
                     // E2 -> ε
+                    None
                 },
 
                 // T
-                (T, &TokVariable { .. } ) |
-                (T, &TokInt      { .. } ) |
-                (T, &TokString   { .. } ) |
-                (T, &TokBoolean  { .. } ) |
-                (T, &TokFunction { .. } ) => {
-                    new_nodes.push(PNode::new_non_terminal(B));
-                    new_nodes.push(PNode::new_non_terminal(T2));
+                (T, TokVariable { .. } ) |
+                (T, TokInt      { .. } ) |
+                (T, TokString   { .. } ) |
+                (T, TokBoolean  { .. } ) |
+                (T, TokFunction { .. } )=> {
+                    stack.push(NonTerminal(T2));
+                    stack.push(NonTerminal(B));
+
+                    None
                 },
 
                 // T2
                 (T2, _) => {
                     // T2 -> ε
+                    None
                 },
 
                 // B
-                (B, &TokVariable { .. } ) |
-                (B, &TokInt      { .. } ) |
-                (B, &TokString   { .. } ) |
-                (B, &TokBoolean  { .. } ) |
-                (B, &TokFunction { .. } ) => {
-                    new_nodes.push(PNode::new_non_terminal(F));
-                    new_nodes.push(PNode::new_non_terminal(B2));
+                (B, TokVariable { .. } ) |
+                (B, TokInt      { .. } ) |
+                (B, TokString   { .. } ) |
+                (B, TokBoolean  { .. } ) |
+                (B, TokFunction { .. } ) => {
+                    stack.push(NonTerminal(B2));
+                    stack.push(NonTerminal(F));
+
+                    None
                 },
 
                 // B2
-                (B2, tok @ &TokCompOp { .. } ) => {
-                    new_nodes.push(PNode::new_terminal(tok.clone()));
-                    new_nodes.push(PNode::new_non_terminal(F));
-                    new_nodes.push(PNode::new_non_terminal(B2));
+                (B2, tok @ TokCompOp { .. } ) => {
+                    stack.push(NonTerminal(B2));
+                    stack.push(NonTerminal(F));
+                    stack.push(Terminal(tok.clone()));
 
-                    // ast
-                    self.ast.add_child(tok.clone());
+                    Some(AddChild(tok))
                 },
                 (B2, _) => {
                     // B2 -> ε
+                    None
                 },
 
                 // F
-                (F, &TokVariable { .. } ) |
-                (F, &TokInt      { .. } ) |
-                (F, &TokString   { .. } ) |
-                (F, &TokBoolean  { .. } ) |
-                (F, &TokFunction { .. } ) => {
-                    new_nodes.push(PNode::new_non_terminal(G));
-                    new_nodes.push(PNode::new_non_terminal(F2));
+                (F, TokVariable { .. } ) |
+                (F, TokInt      { .. } ) |
+                (F, TokString   { .. } ) |
+                (F, TokBoolean  { .. } ) |
+                (F, TokFunction { .. } ) => {
+                    stack.push(NonTerminal(F2));
+                    stack.push(NonTerminal(G));
+
+                    None
                 },
 
                 // F2
                 (F2, _) => {
                     // F2 -> ε
+                    None
                 },
 
                 // G
-                (G, &TokVariable { .. } ) |
-                (G, &TokInt      { .. } ) |
-                (G, &TokString   { .. } ) |
-                (G, &TokBoolean  { .. } ) |
-                (G, &TokFunction { .. } ) => {
-                    new_nodes.push(PNode::new_non_terminal(H));
-                    new_nodes.push(PNode::new_non_terminal(G2));
+                (G, TokVariable { .. } ) |
+                (G, TokInt      { .. } ) |
+                (G, TokString   { .. } ) |
+                (G, TokBoolean  { .. } ) |
+                (G, TokFunction { .. } ) => {
+                    stack.push(NonTerminal(G2));
+                    stack.push(NonTerminal(H));
+
+                    None
                 },
 
                 // G2
                 (G2, _) => {
                     // G2 -> ε
+                    None
                 },
 
                 // H
-                (H, &TokInt     { .. } ) |
-                (H, &TokString  { .. } ) |
-                (H, &TokBoolean { .. } ) => {
-                    new_nodes.push(PNode::new_non_terminal(DataType));
-                },
-                (H, tok @ &TokVariable { .. } ) => {
-                    new_nodes.push(PNode::new_terminal(tok.clone()));
+                (H, TokInt     { .. } ) |
+                (H, TokString  { .. } ) |
+                (H, TokBoolean { .. } ) => {
+                    stack.push(NonTerminal(DataType));
 
-                    // ast
-                    self.ast.add_child(tok.clone());
+                    None
                 },
-                (H, &TokFunction { .. } ) => {
-                    new_nodes.push(PNode::new_non_terminal(Function));
+                (H, tok @ TokVariable { .. } ) => {
+                    stack.push(Terminal(tok.clone()));
+
+                    Some(AddChild(tok))
+                },
+                (H, TokFunction { .. } ) => {
+                    stack.push(NonTerminal(Function));
+
+                    None
                 },
 
                 // Function
-                (Function, tok @ &TokFunction { .. } ) => {
-                    new_nodes.push(PNode::new_terminal(tok.clone()));
-                    new_nodes.push(PNode::new_non_terminal(Functionf));
+                (Function, tok @ TokFunction { .. } ) => {
+                    stack.push(NonTerminal(Functionf));
+                    stack.push(Terminal(tok.clone()));
 
-                    // ast
-                    self.ast.child_down(tok.clone())
+                    Some(ChildDown(tok))
                 },
 
                 // Functionf
-                (Functionf, tok @ &TokArgsEnd { .. } ) => {
-                    new_nodes.push(PNode::new_terminal(tok.clone()));
+                (Functionf, tok @ TokArgsEnd { .. } ) => {
+                    stack.push(Terminal(tok));
 
-                    // ast
                     // Get out of empty function
-                    self.ast.up();
+                    Some(Up)
                 },
-                (Functionf, &TokVariable { .. } ) |
-                (Functionf, &TokInt      { .. } ) |
-                (Functionf, &TokString   { .. } ) |
-                (Functionf, &TokBoolean  { .. } ) |
-                (Functionf, &TokFunction { .. } ) => {
-                    new_nodes.push(PNode::new_non_terminal(Arguments));
-                    new_nodes.push(PNode::new_terminal(TokArgsEnd {location: (0, 0)} ));
+                (Functionf, TokVariable { .. } ) |
+                (Functionf, TokInt      { .. } ) |
+                (Functionf, TokString   { .. } ) |
+                (Functionf, TokBoolean  { .. } ) |
+                (Functionf, TokFunction { .. } ) => {
+                    stack.push(Terminal(TokArgsEnd {location: (0, 0)} ));
+                    stack.push(NonTerminal(Arguments));
+
+                    None
                 },
 
                 // Arguments
-                (Arguments, &TokVariable { .. } ) |
-                (Arguments, &TokInt      { .. } ) |
-                (Arguments, &TokString   { .. } ) |
-                (Arguments, &TokBoolean  { .. } ) |
-                (Arguments, &TokFunction { .. } ) => {
-                    new_nodes.push(PNode::new_non_terminal(Expression));
-                    new_nodes.push(PNode::new_non_terminal(Argumentsf));
+                (Arguments, TokVariable { .. } ) |
+                (Arguments, TokInt      { .. } ) |
+                (Arguments, TokString   { .. } ) |
+                (Arguments, TokBoolean  { .. } ) |
+                (Arguments, TokFunction { .. } ) => {
+                    stack.push(NonTerminal(Argumentsf));
+                    stack.push(NonTerminal(Expression));
 
-                    self.ast.child_down(TokPseudo);
+                    Some(ChildDown(TokExpression))
                 },
 
                 // Argumentsf
-                (Argumentsf, &TokArgsEnd { .. } ) => {
+                (Argumentsf, TokArgsEnd { .. } ) => {
                     // Argumentsf -> ε
                     // TokArgsEnd is already on the stack
 
                     // We still need to get out of the expression
-                    self.ast.up();
-
                     // And out of the function
-                    self.ast.up();
+                    Some(TwoUp)
                 },
-                (Argumentsf, tok @ &TokColon { .. } ) => {
-                    new_nodes.push(PNode::new_terminal(tok.clone()));
-                    new_nodes.push(PNode::new_non_terminal(Arguments));
+                (Argumentsf, tok @ TokColon { .. } ) => {
+                    stack.push(NonTerminal(Arguments));
+                    stack.push(Terminal(tok));
 
-                    self.ast.up();
+                    Some(Up)
                 },
                 (Argumentsf, _) => {
                     // Argumentsf -> ε
+                    None
                 },
 
                 // AssignVariable
-                (AssignVariable, tok @ &TokAssign { .. } ) => {
-                    new_nodes.push(PNode::new_terminal(tok.clone()));
-                    new_nodes.push(PNode::new_non_terminal(E));
+                (AssignVariable, tok @ TokAssign { .. } ) => {
+                    stack.push(NonTerminal(E));
+                    stack.push(Terminal(tok.clone()));
 
-                    //ast
-                    self.ast.child_down(tok.clone());
+                    Some(ChildDown(tok))
                 },
 
                 // DataType
-                (DataType, tok @ &TokInt { .. } ) => {
-                    new_nodes.push(PNode::new_terminal(tok.clone()));
+                (DataType, tok @ TokInt { .. } ) => {
+                    stack.push(Terminal(tok.clone()));
 
-                    // ast
-                    self.ast.add_child(tok.clone());
+                    Some(AddChild(tok))
                 },
-                (DataType, tok @ &TokString { .. } ) => {
-                    new_nodes.push(PNode::new_terminal(tok.clone()));
+                (DataType, tok @ TokString { .. } ) => {
+                    stack.push(Terminal(tok.clone()));
 
-                    // ast
-                    self.ast.add_child(tok.clone());
+                    Some(AddChild(tok))
                 },
-                (DataType, tok @ &TokBoolean { .. } ) => {
-                    new_nodes.push(PNode::new_terminal(tok.clone()));
+                (DataType, tok @ TokBoolean { .. } ) => {
+                    stack.push(Terminal(tok.clone()));
 
-                    // ast
-                    self.ast.add_child(tok.clone());
+                    Some(AddChild(tok))
                 },
-                (_, tok) => {
-                    let (line, character) = tok.location();
-                    panic!("Unexpected token at {}:{}", line, character);
+                (x, tok) => {
+                    ParserError::NoProjection{token: tok, stack: x}.raise()
                 }
-            }
-
-            // adds the new nodes to the stack (in reversed order)
-            while let Some(child) = new_nodes.pop() {
-                self.stack.push(child);
             }
 
         } else {
             // no token left
 
-            // Sf, PassageContent, Linkf, 
+            // Sf, PassageContent, Linkf,
 
             match top {
                 Sf | PassageContent => {
                     // ... -> ε
+                    None
                 },
                 _ => {
-                    panic!("Nonterminal '{:?}' is not an allowed end.", top);
+                    ParserError::NonTerminalEnd{stack: top}.raise()
                 }
             }
         }
     }
 
-    /// sets the lookahead to the next token
-    fn next_token(&mut self) {
-        self.lookahead = self.lookahead + 1;
-    }
 }

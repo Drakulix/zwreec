@@ -46,6 +46,11 @@ impl Bytes {
         }
     }
 
+    pub fn append_bytes(&mut self, bytes: &[u8]) {
+        let index: usize = self.bytes.len();
+        self.write_bytes(bytes, index);
+    }
+
     /// fills everything with zeros until but not including the index
     /// => [index-1] == 0; [index] == nil;
     pub fn write_zero_until(&mut self, index: usize) {

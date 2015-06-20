@@ -25,7 +25,7 @@ fn test_compile(input_filename: String) {
     let vec: Vec<u8> = vec![];
     let mut output = Cursor::new(vec);
 
-    let cfg = zwreec::config::default_config();
+    let cfg = zwreec::config::Config::default_config();
 
     zwreec::compile(cfg, &mut input, &mut output);
 }
@@ -63,6 +63,11 @@ fn passage_links_test() {
 #[test]
 fn random_test() {
     test_compile(TESTFOLDER_PASS.to_string() + "Random.twee");
+}
+
+#[test]
+fn if_else_test() {
+    test_compile(TESTFOLDER_PASS.to_string() + "If-Else.twee");
 }
 
 // #[test]
