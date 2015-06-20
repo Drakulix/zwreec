@@ -84,7 +84,7 @@ pub struct Zjump {
 #[derive(Debug, PartialEq, Clone)]
 pub struct Zstring {
     pub from_addr: u16,
-    pub chars: Vec<u8>,
+    pub chars: Vec<u8>,  // contains either ztext or [length:u16, utf16char:u16, …]
     pub orig: String,
     pub unicode: bool,
 }
@@ -271,7 +271,6 @@ impl Zfile {
                     debug!("{:#x}: utf16 \"{}\"", str_addr, string.orig);
                     let hexstrs: Vec<String> = string.chars.iter().map(|b| format!("{:02X}", b)).collect();
                     trace!("{:#x}: {}", str_addr, hexstrs.connect(" "));
-                    self.data.append_u16(string.chars.len() as u16);
                     self.data.append_bytes(&string.chars);
                     self.data.write_u16(str_addr/8 as u16, string.from_addr as usize);
                 } else {
@@ -452,6 +451,9 @@ impl Zfile {
                     utf16bytes.push((value >> 8) as u8);
                     utf16bytes.push((value & 0xff) as u8);
                 }
+                let length: u16 = utf16bytes.len() as u16 / 2u16;
+                utf16bytes.insert(0, (length >> 8) as u8);
+                utf16bytes.insert(1, (length & 0xff) as u8);
                 self.emit(vec![ZOP::Call2NWithLargeConst{jump_to_label: "print_unicode".to_string(), arg: 0u16}]);
                 self.strings.push(Zstring{chars: utf16bytes, orig: current_utf16.to_string(), from_addr: (self.data.len()-2) as u16, unicode: true});
             } else {
