@@ -60,6 +60,22 @@ pub fn op_loadw(array_address: u16, index: u8, variable: u8, object_addr: u16) -
     bytes
 }
 
+/// loads a word from an array in a variable
+/// loadw is an 2op, BUT with 3 ops -.-
+pub fn op_loadw_var(array_address_var: u8, index: u8, variable: u8) -> Vec<u8> {
+    let mut bytes = op_2(0x0f, vec![ArgType::Variable, ArgType::Variable]);
+
+    // variable with array address
+    bytes.push(array_address_var);
+
+    // array index
+    bytes.push(index);
+
+    // variable
+    bytes.push(variable);
+    bytes
+}
+
 
 /// reads keys from the keyboard and saves the asci-value in local_var_id
 /// read_char is VAROP
@@ -228,6 +244,18 @@ pub fn op_add(variable1: u8, add_const: i16, variable2: u8) -> Vec<u8> {
     bytes.push(variable1);
 	write_i16(add_const, &mut bytes);
     bytes.push(variable2);
+    bytes
+}
+
+
+/// addition
+/// result = variable1 + variable2
+pub fn op_add_var(variable1: u8, variable2: u8, result: u8) -> Vec<u8> {
+    let args: Vec<ArgType> = vec![ArgType::Variable, ArgType::Variable];
+    let mut bytes = op_2(0x14, args);
+    bytes.push(variable1);
+    bytes.push(variable2);
+    bytes.push(result);
     bytes
 }
 
