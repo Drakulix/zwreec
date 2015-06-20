@@ -31,6 +31,8 @@ use config::Config;
 
 use self::Token::*;
 
+pub struct LexerError;
+
 /// Stores the state for the custom iterator `scan_filter()`
 ///
 /// The `zwreec::utils::extensions` module defines a new iterator `FilteringScan`.
