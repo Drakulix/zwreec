@@ -4,6 +4,8 @@ use config::Config;
 
 use self::Token::*;
 
+pub struct LexerError;
+
 pub struct ScanState {
     current_text: String,
     current_text_location: (u64, u64),
