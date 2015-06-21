@@ -300,6 +300,7 @@ impl PartialEq for Token {
             (&TokLogOp{..}, &TokLogOp{..}) => true,
             (&TokSemiColon{..}, &TokSemiColon{..}) => true,
             (&TokNewLine{..}, &TokNewLine{..}) => true,
+            (&TokExpression, &TokExpression) => true,
             _ => false,
         }
     }

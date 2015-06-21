@@ -376,12 +376,10 @@ pub enum ASTOperation {
     AddPassage(Token),
     AddChild(Token),
     ChildDown(Token),
-    TwoChildsDown(Token, Token),
     Up,
     UpChild(Token),
     UpChildDown(Token),
     UpSpecial,
-    TwoUp,
 }
 
 impl AST {
@@ -405,12 +403,10 @@ impl AST {
             AddPassage(passage) => self.add_passage(passage),
             AddChild(child) => self.add_child(child),
             ChildDown(child) => self.child_down(child),
-            TwoChildsDown(child1, child2) => self.two_childs_down(child1, child2),
             Up => self.up(),
             UpChild(child) => self.up_child(child),
             UpChildDown(child) => self.up_child_down(child),
             UpSpecial => self.up_special(),
-            TwoUp => self.two_up(),
         }
     }
 
@@ -454,10 +450,6 @@ impl AST {
         let ast_count_childs = self.count_childs(self.path.to_vec());
         self.add_child(token);
         self.path.push(ast_count_childs);
-
-        //
-        
-        //TokMacroIf
     }
 
     /// adds one child and goes down. adds snd child and goes down.
@@ -471,14 +463,13 @@ impl AST {
         self.path.pop();
     }
 
-    /// TODO
+    /// special up of the if-expression
     pub fn up_special(&mut self) {
         if !self.is_in_if_expression {
             self.path.pop();
         } else {
             self.is_in_if_expression = false;
         }
-        
     }
 
     /// goes one lvl up and adds and child
@@ -835,6 +826,28 @@ mod tests {
             (vec![0,1], TokNewLine {location: (0, 0)}),
             (vec![1]  , TokPassage {name: "".to_string(), location: (0, 0)}),
 
+        );
+
+        test_expected(expected, ast);
+    }
+
+    #[test]
+    fn test_expression() {
+        let ast = test_ast("::Passage\n<<print 1-2*3-4*5>>");
+
+        let expected = vec!(
+            (vec![0]            , TokPassage { location: (0, 0), name: "Passage".to_string() }),
+            (vec![0,0]          , TokMacroPrint { location: (0, 0) }),
+            (vec![0,0,0]        , TokExpression),
+            (vec![0,0,0,0]      , TokNumOp { location: (0, 0), op_name: "-".to_string() }),
+            (vec![0,0,0,0,0]    , TokNumOp { location: (0, 0), op_name: "-".to_string() }),
+            (vec![0,0,0,0,0,0]  , TokInt { location: (0, 0), value: 1 }),
+            (vec![0,0,0,0,0,1]  , TokNumOp { location: (0, 0), op_name: "*".to_string() }),
+            (vec![0,0,0,0,0,1,0], TokInt { location: (0, 0), value: 2 }),
+            (vec![0,0,0,0,0,1,1], TokInt { location: (0, 0), value: 3}),
+            (vec![0,0,0,0,1]    , TokNumOp { location: (0, 0), op_name: "*".to_string() }),
+            (vec![0,0,0,0,1,0]  , TokInt { location: (0, 0), value: 4 }),
+            (vec![0,0,0,0,1,1]  , TokInt { location: (0, 0), value: 5 }),
         );
 
         test_expected(expected, ast);

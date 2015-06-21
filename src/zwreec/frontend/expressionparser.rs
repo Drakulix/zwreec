@@ -70,7 +70,7 @@ impl ExpressionParser {
     }
 
     /// creates a node with an operator on top
-    fn new_operator_node(&mut self/*, expr_stack: &mut Vec<ASTNode>, oper_stack: &mut Vec<Token>*/) {
+    fn new_operator_node(&mut self) {
         if let Some(top_op) = self.oper_stack.pop() {
             let e2: ASTNode = self.expr_stack.pop().unwrap();
             let e1: ASTNode = self.expr_stack.pop().unwrap();

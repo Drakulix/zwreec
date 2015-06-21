@@ -201,9 +201,9 @@ impl<'a> Parser<'a> {
                 },
                 (PassageContent, tok @ TokMacroEndIf { .. }) => {
                     debug!("pop TokMacroEndIf Passage;");
+                    
                     // jump one ast-level higher
                     Some(UpChild(tok))
-                    //Some(AddChild(tok))
                 },
                 (PassageContent, TokFormatBoldEnd { .. } ) => {
                     // jump one ast-level higher
@@ -305,9 +305,7 @@ impl<'a> Parser<'a> {
                     stack.push(NonTerminal(ExpressionList));
                     stack.push(Terminal(tok.clone()));
 
-                    //Some(TwoChildsDown(tok, TokExpression))
                     Some(ChildDown(tok))
-                    //None
                 },
                 (Macro, tok @ TokMacroPrint { .. } ) => {
                     stack.push(Terminal(TokMacroEnd {location: (0, 0)} ));
@@ -382,12 +380,10 @@ impl<'a> Parser<'a> {
                     debug!("pop TokMacroEnd");
 
                     Some(UpSpecial)
-                    //None
                 },
                 (ExpressionListf, _) => {
-                    debug!("pop ExpressionListf -> ε");
                     // ExpressionListf -> ε
-                    //None
+                    debug!("pop ExpressionListf -> ε");
                     Some(Up)
                 },
 
@@ -399,13 +395,11 @@ impl<'a> Parser<'a> {
                 (Expression, TokFunction { .. } ) => {
                     stack.push(NonTerminal(E));
 
-                    //Some(ChildDown(TokExpression))
                     None
                 },
                 (Expression, TokAssign { .. } ) => {
                     stack.push(NonTerminal(AssignVariable));
 
-                    //Some(ChildDown(TokExpression))
                     None
                 },
 
@@ -425,7 +419,6 @@ impl<'a> Parser<'a> {
                 // E2
                 (E2, _) => {
                     // E2 -> ε
-                    //None
                     debug!("pop E2 -> ε");
                     Some(Up)
                 },
@@ -492,7 +485,6 @@ impl<'a> Parser<'a> {
                         stack.push(NonTerminal(G));
                         stack.push(Terminal(TokNumOp{location: location.clone(), op_name: op.clone()}));
                         
-                        //Some(ChildDown(TokNumOp{location: location, op_name: op}))
                         Some(AddChild(TokNumOp{location: location, op_name: op}))
                     }
                     _ => None
@@ -500,7 +492,6 @@ impl<'a> Parser<'a> {
                 (F2, _) => {
                     // F2 -> ε
                     None
-                    //Some(Up)
                 },
 
                 // G
@@ -522,7 +513,6 @@ impl<'a> Parser<'a> {
                         stack.push(NonTerminal(H));
                         stack.push(Terminal(TokNumOp{location: location.clone(), op_name: op.clone()}));
                         
-                        //Some(ChildDown(TokNumOp{location: location, op_name: op}))
                         Some(AddChild(TokNumOp{location: location, op_name: op}))
                     }
                     _ => None
@@ -530,7 +520,6 @@ impl<'a> Parser<'a> {
                 (G2, _) => {
                     // G2 -> ε
                     None
-                    //Some(Up)
                 },
 
                 // H
@@ -564,8 +553,6 @@ impl<'a> Parser<'a> {
                 (Functionf, tok @ TokArgsEnd { .. } ) => {
                     stack.push(Terminal(tok));
 
-                    // Get out of empty function
-                    //Some(Up)
                     None
                 },
                 (Functionf, TokVariable { .. } ) |
@@ -588,26 +575,19 @@ impl<'a> Parser<'a> {
                     stack.push(NonTerminal(Argumentsf));
                     stack.push(NonTerminal(Expression));
 
-                    //Some(ChildDown(TokExpression))
                     None
                 },
 
                 // Argumentsf
                 (Argumentsf, TokArgsEnd { .. } ) => {
                     // Argumentsf -> ε
-                    // TokArgsEnd is already on the stack
 
-                    // We still need to get out of the expression
-                    // And out of the function
-                    //Some(TwoUp)
                     Some(Up)
-                    //None
                 },
                 (Argumentsf, tok @ TokColon { .. } ) => {
                     stack.push(NonTerminal(Arguments));
                     stack.push(Terminal(tok));
 
-                    //Some(Up)
                     None
                 },
                 (Argumentsf, _) => {
