@@ -138,14 +138,13 @@ pub enum Token {
     TokMacroStart             {location: (u64, u64)},
     TokMacroEnd               {location: (u64, u64)},
     TokMacroContentVar        {location: (u64, u64), var_name: String},
-    TokMacroContentPassageName{location: (u64, u64), passage_name: String},
     TokMacroSet               {location: (u64, u64)},
     TokMacroIf                {location: (u64, u64)},
     TokMacroElse              {location: (u64, u64)},
     TokMacroElseIf            {location: (u64, u64)},
     TokMacroEndIf             {location: (u64, u64)},
     TokMacroPrint             {location: (u64, u64)},
-    TokMacroDisplay           {location: (u64, u64)},
+    TokMacroDisplay           {location: (u64, u64), passage_name: String},
     TokMacroSilently          {location: (u64, u64)},
     TokMacroEndSilently       {location: (u64, u64)},
     TokParenOpen              {location: (u64, u64)},
@@ -203,14 +202,13 @@ impl Token {
             &TokMacroStart{location} |
             &TokMacroEnd{location} |
             &TokMacroContentVar{location, ..} |
-            &TokMacroContentPassageName{location, ..} |
             &TokMacroSet{location} |
             &TokMacroIf{location} |
             &TokMacroElse{location} |
             &TokMacroElseIf{location} |
             &TokMacroEndIf{location} |
             &TokMacroPrint{location} |
-            &TokMacroDisplay{location} |
+            &TokMacroDisplay{location, ..} |
             &TokMacroSilently{location} |
             &TokMacroEndSilently{location} |
             &TokParenOpen{location} |
@@ -272,7 +270,6 @@ impl PartialEq for Token {
             (&TokMacroStart{..}, &TokMacroStart{..}) => true,
             (&TokMacroEnd{..}, &TokMacroEnd{..}) => true,
             (&TokMacroContentVar{..}, &TokMacroContentVar{..}) => true,
-            (&TokMacroContentPassageName{..}, &TokMacroContentPassageName{..}) => true,
             (&TokMacroSet{..}, &TokMacroSet{..}) => true,
             (&TokMacroIf{..}, &TokMacroIf{..}) => true,
             (&TokMacroElse{..}, &TokMacroElse{..}) => true,
@@ -385,13 +382,13 @@ rustlex! TweeLexer {
     let FUNCTION = FUNCTION_NAME '(';
 
     let MACRO_NAME = [^" >"'\n']* ( WHITESPACE+ "if")?;
+    let MACRO_DISPLAY_PASSAGE_NAME = [^'"''>'' ''\t''\n'] ([^">"]*(">"[^">"])?)* [^'"''>'' ''\t''\n'] | [^"'>"' ''\t''\n'] ([^">"]*(">"[^">"])?)* [^"'>"' ''\t''\n'];
 
     let ASSIGN = "=" | "to" | "+=" | "-=" | "*=" | "/=";
     let SEMI_COLON = ';';
     let NUM_OP = ["+-*/%"];
     let COMP_OP = "is" | "==" | "eq" | "neq" | ">" | "gt" | ">=" | "gte" | "<" | "lt" | "<=" | "lte";
     let LOG_OP = "and" | "or" | "not";
-
 
     let LINK_OPEN = '[';
     let LINK_CLOSE = ']';
@@ -401,6 +398,8 @@ rustlex! TweeLexer {
     let LINK_LABELED = "[[" LINK_TEXT "|" (PASSAGE_NAME | VAR_NAME) "]";
 
     let COMMENT = "/%" ([^"%"]*(("%")*[^"%/"])?)* ("%")* "%/";
+
+    let MACRO_CONTENT_FAIL = ([^"> 0123456789+-*/%="'\n''\t']*(">"[^"> "'\n''\t'])?)+;
 
     INITIAL {
         PASSAGE_START => |lexer:&mut TweeLexer<R>| -> Option<Token> {
@@ -610,11 +609,13 @@ rustlex! TweeLexer {
     }
 
     MONO_TEXT {
+
         TEXT_MONO =>  |lexer:&mut TweeLexer<R>| Some(TokText {location: lexer.yylloc(), text: lexer.yystr()} )
         FORMAT_MONO_END => |lexer:&mut TweeLexer<R>| {
             lexer.NON_NEWLINE();
             Some(TokFormatMonoEnd {location: lexer.yylloc()} )
         }
+
         NEWLINE =>  |lexer:&mut TweeLexer<R>| -> Option<Token> {
             Some(TokText {location: lexer.yylloc(), text: " ".to_string()} )
         }
@@ -655,8 +656,8 @@ rustlex! TweeLexer {
                     Some(TokMacroPrint {location: lexer.yylloc()} )
                 },
                 "display" => {
-                    lexer.DISPLAY_CONTENT();
-                    Some(TokMacroDisplay {location: lexer.yylloc()} )
+                    lexer.MACRO_CONTENT_DISPLAY();
+                    None
                 },
                 "silently" => {
                     lexer.MACRO_CONTENT();
@@ -667,27 +668,23 @@ rustlex! TweeLexer {
                     Some(TokMacroEndSilently {location: lexer.yylloc()} )
                 },
                 _ => {
-                    lexer.MACRO_CONTENT();
-                    Some(TokMacroContentPassageName {location: lexer.yylloc(), passage_name: replaced_string.to_string()} )
+                    lexer.MACRO_CONTENT_SHORT_DISPLAY();
+                    Some(TokMacroDisplay {location: lexer.yylloc(), passage_name: replaced_string.to_string()} )
                 }
             }
         }
 
         VAR_NAME =>  |lexer:&mut TweeLexer<R>| {
-            lexer.MACRO_CONTENT();
+            lexer.MACRO_CONTENT_SHORT_PRINT();
             Some(TokMacroContentVar {location: lexer.yylloc(), var_name: lexer.yystr()} )
         }
     }
 
-
-
     MACRO_CONTENT {
-        MACRO_END => |lexer:&mut TweeLexer<R>| {
-            if lexer.new_line { lexer.NEWLINE() } else { lexer.NON_NEWLINE() };
-            Some(TokMacroEnd {location: lexer.yylloc()} )
-        }
 
+        MACRO_CONTENT_FAIL => |lexer:&mut TweeLexer<R>| -> Option<Token> { bad_expression_panic(lexer.yystr(), lexer.yylloc()); None }
 
+        // Expression Stuff
         FUNCTION =>  |lexer:&mut TweeLexer<R>| {
             let s =  lexer.yystr();
             let trimmed = &s[0 .. s.len()-1];
@@ -696,30 +693,7 @@ rustlex! TweeLexer {
             lexer.FUNCTION_ARGS();
             Some(TokFunction {location: lexer.yylloc(), name: name.clone()} )
         }
-
-        // Expression Stuff
-        STRING => |lexer:&mut TweeLexer<R>| {
-            let s = lexer.yystr();
-            // strip the quotes from strings
-            let trimmed = &s[1 .. s.len() - 1];
-
-            // unescape quotes
-            let quote_type = s.chars().next().unwrap();
-            let mut unescaped = String::new();
-
-            for (c, peek) in trimmed.chars().peeking() {
-                if let Some(nextc) = peek {
-                    if c == '\\' && nextc == quote_type {
-                        continue;
-                    }
-                }
-
-                unescaped.push(c);
-            }
-
-            Some(TokString {location: lexer.yylloc(), value: unescaped} )
-        }
-
+        STRING =>     |lexer:&mut TweeLexer<R>| Some(TokString    {location: lexer.yylloc(), value: unescape(lexer.yystr())} )
         VAR_NAME =>   |lexer:&mut TweeLexer<R>| Some(TokVariable  {location: lexer.yylloc(), name: lexer.yystr()} )
         FLOAT =>      |lexer:&mut TweeLexer<R>| Some(TokFloat     {location: lexer.yylloc(), value: lexer.yystr()[..].parse().unwrap()} )
         INT =>        |lexer:&mut TweeLexer<R>| Some(TokInt       {location: lexer.yylloc(), value: lexer.yystr()[..].parse().unwrap()} )
@@ -734,8 +708,95 @@ rustlex! TweeLexer {
         COLON =>      |lexer:&mut TweeLexer<R>| Some(TokColon     {location: lexer.yylloc()} )
         // Expression Stuff End
 
-        WHITESPACE =>  |_:&mut TweeLexer<R>| -> Option<Token> {
-            None
+        NEWLINE =>  |_:&mut TweeLexer<R>| -> Option<Token> { None }
+
+        WHITESPACE =>  |_:&mut TweeLexer<R>| -> Option<Token> { None }
+
+        MACRO_END => |lexer:&mut TweeLexer<R>| {
+            lexer.NON_NEWLINE();
+            Some(TokMacroEnd {location: lexer.yylloc()} )
+        }
+    }
+
+    MACRO_CONTENT_DISPLAY {
+
+        MACRO_DISPLAY_PASSAGE_NAME  => |lexer:&mut TweeLexer<R>| {
+            Some(TokMacroDisplay {location: lexer.yylloc(), passage_name: lexer.yystr().trim().to_string()} )
+        }
+
+        STRING => |lexer:&mut TweeLexer<R>| {
+            Some(TokMacroDisplay {passage_name: unescape(lexer.yystr()), location: lexer.yylloc()})
+        }
+
+        NEWLINE =>  |_:&mut TweeLexer<R>| -> Option<Token> { None }
+
+        WHITESPACE =>  |_:&mut TweeLexer<R>| -> Option<Token> { None }
+
+        MACRO_END => |lexer:&mut TweeLexer<R>| {
+            lexer.NON_NEWLINE();
+            Some(TokMacroEnd {location: lexer.yylloc()} )
+        }
+    }
+
+    MACRO_CONTENT_SHORT_PRINT {
+
+        MACRO_CONTENT_FAIL => |lexer:&mut TweeLexer<R>| -> Option<Token> { bad_expression_panic(lexer.yystr(), lexer.yylloc()); None }
+
+        // Expression Stuff
+        FUNCTION =>   |lexer:&mut TweeLexer<R>| -> Option<Token> { bad_expression_panic(lexer.yystr(), lexer.yylloc()); None }
+        STRING =>     |lexer:&mut TweeLexer<R>| -> Option<Token> { bad_expression_panic(lexer.yystr(), lexer.yylloc()); None }
+        VAR_NAME =>   |lexer:&mut TweeLexer<R>| -> Option<Token> { bad_expression_panic(lexer.yystr(), lexer.yylloc()); None }
+        FLOAT =>      |lexer:&mut TweeLexer<R>| -> Option<Token> { bad_expression_panic(lexer.yystr(), lexer.yylloc()); None }
+        INT =>        |lexer:&mut TweeLexer<R>| -> Option<Token> { bad_expression_panic(lexer.yystr(), lexer.yylloc()); None }
+        BOOL =>       |lexer:&mut TweeLexer<R>| -> Option<Token> { bad_expression_panic(lexer.yystr(), lexer.yylloc()); None }
+        NUM_OP =>     |lexer:&mut TweeLexer<R>| -> Option<Token> { bad_expression_panic(lexer.yystr(), lexer.yylloc()); None }
+        COMP_OP =>    |lexer:&mut TweeLexer<R>| -> Option<Token> { bad_expression_panic(lexer.yystr(), lexer.yylloc()); None }
+        LOG_OP =>     |lexer:&mut TweeLexer<R>| -> Option<Token> { bad_expression_panic(lexer.yystr(), lexer.yylloc()); None }
+        PAREN_OPEN => |lexer:&mut TweeLexer<R>| -> Option<Token> { bad_expression_panic(lexer.yystr(), lexer.yylloc()); None }
+        PAREN_CLOSE =>|lexer:&mut TweeLexer<R>| -> Option<Token> { bad_expression_panic(lexer.yystr(), lexer.yylloc()); None }
+        SEMI_COLON => |lexer:&mut TweeLexer<R>| -> Option<Token> { bad_expression_panic(lexer.yystr(), lexer.yylloc()); None }
+        ASSIGN =>     |lexer:&mut TweeLexer<R>| -> Option<Token> { bad_expression_panic(lexer.yystr(), lexer.yylloc()); None }
+        COLON =>      |lexer:&mut TweeLexer<R>| -> Option<Token> { bad_expression_panic(lexer.yystr(), lexer.yylloc()); None }
+        // Expression Stuff End
+
+        NEWLINE =>  |_:&mut TweeLexer<R>| -> Option<Token> { None }
+
+        WHITESPACE =>  |_:&mut TweeLexer<R>| -> Option<Token> { None }
+
+        MACRO_END => |lexer:&mut TweeLexer<R>| {
+            lexer.NON_NEWLINE();
+            Some(TokMacroEnd {location: lexer.yylloc()} )
+        }
+    }
+
+    MACRO_CONTENT_SHORT_DISPLAY {
+
+        MACRO_CONTENT_FAIL => |lexer:&mut TweeLexer<R>| -> Option<Token> { bad_argument_panic(lexer.yystr(), lexer.yylloc()); None }
+
+        // Expression Stuff
+        FUNCTION =>   |_:&mut TweeLexer<R>| -> Option<Token> { None }
+        STRING =>     |_:&mut TweeLexer<R>| -> Option<Token> { None }
+        VAR_NAME =>   |_:&mut TweeLexer<R>| -> Option<Token> { None }
+        FLOAT =>      |_:&mut TweeLexer<R>| -> Option<Token> { None }
+        INT =>        |_:&mut TweeLexer<R>| -> Option<Token> { None }
+        BOOL =>       |_:&mut TweeLexer<R>| -> Option<Token> { None }
+        NUM_OP =>     |_:&mut TweeLexer<R>| -> Option<Token> { None }
+        COMP_OP =>    |_:&mut TweeLexer<R>| -> Option<Token> { None }
+        LOG_OP =>     |_:&mut TweeLexer<R>| -> Option<Token> { None }
+        PAREN_OPEN => |_:&mut TweeLexer<R>| -> Option<Token> { None }
+        PAREN_CLOSE =>|_:&mut TweeLexer<R>| -> Option<Token> { None }
+        SEMI_COLON => |_:&mut TweeLexer<R>| -> Option<Token> { None }
+        ASSIGN =>     |_:&mut TweeLexer<R>| -> Option<Token> { None }
+        COLON =>      |_:&mut TweeLexer<R>| -> Option<Token> { None }
+        // Expression Stuff End
+
+        NEWLINE =>  |_:&mut TweeLexer<R>| -> Option<Token> { None }
+
+        WHITESPACE =>  |_:&mut TweeLexer<R>| -> Option<Token> { None }
+
+        MACRO_END => |lexer:&mut TweeLexer<R>| {
+            lexer.NON_NEWLINE();
+            Some(TokMacroEnd {location: lexer.yylloc()} )
         }
     }
 
@@ -745,7 +806,7 @@ rustlex! TweeLexer {
         VAR_NAME => |lexer:&mut TweeLexer<R>| Some(TokVariable{location: lexer.yylloc(), name: lexer.yystr()} )
         FLOAT =>    |lexer:&mut TweeLexer<R>| Some(TokFloat   {location: lexer.yylloc(), value: lexer.yystr()[..].parse().unwrap()} )
         INT =>      |lexer:&mut TweeLexer<R>| Some(TokInt     {location: lexer.yylloc(), value: lexer.yystr()[..].parse().unwrap()} )
-        STRING =>   |lexer:&mut TweeLexer<R>| Some(TokString  {location: lexer.yylloc(), value: lexer.yystr()} )
+        STRING =>   |lexer:&mut TweeLexer<R>| Some(TokString  {location: lexer.yylloc(), value: unescape(lexer.yystr())} )
         BOOL =>     |lexer:&mut TweeLexer<R>| Some(TokBoolean {location: lexer.yylloc(), value: lexer.yystr()} )
         NUM_OP =>   |lexer:&mut TweeLexer<R>| Some(TokNumOp   {location: lexer.yylloc(), op_name: lexer.yystr()} )
         COMP_OP =>  |lexer:&mut TweeLexer<R>| Some(TokCompOp  {location: lexer.yylloc(), op_name: lexer.yystr()} )
@@ -765,16 +826,6 @@ rustlex! TweeLexer {
         }
     }
 
-    DISPLAY_CONTENT {
-        MACRO_END => |lexer:&mut TweeLexer<R>| {
-            if lexer.new_line { lexer.NEWLINE() } else { lexer.NON_NEWLINE() };
-            Some(TokMacroEnd {location: lexer.yylloc()} )
-        }
-
-        VAR_NAME =>  |lexer:&mut TweeLexer<R>| Some(TokVariable {location: lexer.yylloc(), name: lexer.yystr()} )
-        PASSAGE_NAME => |lexer:&mut TweeLexer<R>| Some(TokPassage {name: lexer.yystr().trim().to_string(), location: lexer.yylloc()} )
-    }
-
     LINK_VAR_CHECK {
         LINK_CLOSE => |lexer:&mut TweeLexer<R>| -> Option<Token> {
             lexer.NON_NEWLINE();
@@ -792,7 +843,7 @@ rustlex! TweeLexer {
         VAR_NAME =>   |lexer:&mut TweeLexer<R>| Some(TokVariable  {location: lexer.yylloc(), name: lexer.yystr()} )
         FLOAT =>      |lexer:&mut TweeLexer<R>| Some(TokFloat     {location: lexer.yylloc(), value: lexer.yystr()[..].parse().unwrap()} )
         INT =>        |lexer:&mut TweeLexer<R>| Some(TokInt       {location: lexer.yylloc(), value: lexer.yystr()[..].parse().unwrap()} )
-        STRING =>     |lexer:&mut TweeLexer<R>| Some(TokString    {location: lexer.yylloc(), value: lexer.yystr()} )
+        STRING =>     |lexer:&mut TweeLexer<R>| Some(TokString    {location: lexer.yylloc(), value: unescape(lexer.yystr())} )
         BOOL =>       |lexer:&mut TweeLexer<R>| Some(TokBoolean   {location: lexer.yylloc(), value: lexer.yystr()} )
         NUM_OP =>     |lexer:&mut TweeLexer<R>| Some(TokNumOp     {location: lexer.yylloc(), op_name: lexer.yystr()} )
         COMP_OP =>    |lexer:&mut TweeLexer<R>| Some(TokCompOp    {location: lexer.yylloc(), op_name: lexer.yystr()} )
@@ -816,6 +867,40 @@ rustlex! TweeLexer {
         }
     }
 
+}
+
+fn unescape(s: String) -> String {
+
+    // strip the quotes from strings
+    let trimmed = &s[1 .. s.len() - 1];
+
+    // unescape quotes
+    let quote_type = s.chars().next().unwrap();
+    let mut unescaped = String::new();
+
+    for (c, peek) in trimmed.chars().peeking() {
+        if let Some(nextc) = peek {
+            if c == '\\' && nextc == quote_type {
+                continue;
+            }
+        }
+
+        unescaped.push(c);
+    }
+
+    unescaped
+}
+
+fn bad_expression_panic(s: String, loc: (u64,u64)) {
+    let (line, symbol) = loc;
+    //todo: error message should be "<<print>> bad expression: $test + bla"
+    panic!("<<print>> bad expression at {},{}: \"{}\"", line, symbol, s);
+}
+
+fn bad_argument_panic(s: String, loc: (u64,u64)) {
+    let (line, symbol) = loc;
+    //todo: error message should be "<<Pop one>> bad argument: one"
+    panic!("<<display>> bad argument at {},{}: \"{}\"", line, symbol, s);
 }
 
 
@@ -1008,14 +1093,71 @@ mod tests {
 
     #[test]
     fn macro_display_test() {
-        let tokens = test_lex("::Passage\n<<display DisplayedPassage>>\n::DisplayedPassage");
+        let tokens = test_lex("::Passage\n<<display Passage>>\n<<display  Passage  >>\n<<display  Passage\n>>\n<<display \'Passage\'>>\n<<display  \'Passage\'  >>\n<<display  \'Passage\'\n>>\n<<display \"Passage\">>\n<<display  \"Passage\"  >>\n<<display  \"Passage\"\n>>\n<<display Passage Passage>>\n<<display  Passage Passage  >>\n<<display  Passage Passage\n>>\n<<display \'Passage Passage\'>>\n<<display  \'Passage Passage\'  >>\n<<display  \'Passage Passage\'\n>>\n<<display \"Passage Passage\">>\n<<display  \"Passage Passage\"  >>\n<<display  \"Passage Passage\"\n>>\n<<display \"Passage\" 0+1>>\n<<display \"Passage\" 5+6\"P\" assage>>\n<<display Passage >Passage>>");
         let expected = vec!(
-            TokPassage {name: "Passage".to_string(), location: (1, 3)},
-            TokMacroDisplay {location: (2, 3)},
-            TokPassage {name: "DisplayedPassage".to_string(), location: (2, 10)},
-            TokMacroEnd {location: (2, 27)},
-            TokNewLine {location: (2, 29)},
-            TokPassage {name: "DisplayedPassage".to_string(), location: (3, 3)}
+            TokPassage { location: (1, 3), name: "Passage".to_string() },
+            TokMacroDisplay { location: (2, 11), passage_name: "Passage".to_string() },
+            TokMacroEnd { location: (2, 18) },
+            TokNewLine { location: (2, 20) },
+            TokMacroDisplay { location: (3, 12), passage_name: "Passage".to_string() },
+            TokMacroEnd { location: (3, 21) },
+            TokNewLine { location: (3, 23) },
+            TokMacroDisplay { location: (4, 12), passage_name: "Passage".to_string() },
+            TokMacroEnd { location: (5, 1) },
+            TokNewLine { location: (5, 3) },
+            TokMacroDisplay { location: (6, 11), passage_name: "Passage".to_string() },
+            TokMacroEnd { location: (6, 20) },
+            TokNewLine { location: (6, 22) },
+            TokMacroDisplay { location: (7, 12), passage_name: "Passage".to_string() },
+            TokMacroEnd { location: (7, 23) },
+            TokNewLine { location: (7, 25) },
+            TokMacroDisplay { location: (8, 12), passage_name: "Passage".to_string() },
+            TokMacroEnd { location: (9, 1) },
+            TokNewLine { location: (9, 3) },
+            TokMacroDisplay { location: (10, 11), passage_name: "Passage".to_string() },
+            TokMacroEnd { location: (10, 20) },
+            TokNewLine { location: (10, 22) },
+            TokMacroDisplay { location: (11, 12), passage_name: "Passage".to_string() },
+            TokMacroEnd { location: (11, 23) },
+            TokNewLine { location: (11, 25) },
+            TokMacroDisplay { location: (12, 12), passage_name: "Passage".to_string() },
+            TokMacroEnd { location: (13, 1) },
+            TokNewLine { location: (13, 3) },
+            TokMacroDisplay { location: (14, 11), passage_name: "Passage Passage".to_string() },
+            TokMacroEnd { location: (14, 26) },
+            TokNewLine { location: (14, 28) },
+            TokMacroDisplay { location: (15, 12), passage_name: "Passage Passage".to_string() },
+            TokMacroEnd { location: (15, 29) },
+            TokNewLine { location: (15, 31) },
+            TokMacroDisplay { location: (16, 12), passage_name: "Passage Passage".to_string() },
+            TokMacroEnd { location: (17, 1) },
+            TokNewLine { location: (17, 3) },
+            TokMacroDisplay { location: (18, 11), passage_name: "Passage Passage".to_string() },
+            TokMacroEnd { location: (18, 28) },
+            TokNewLine { location: (18, 30) },
+            TokMacroDisplay { location: (19, 12), passage_name: "Passage Passage".to_string() },
+            TokMacroEnd { location: (19, 31) },
+            TokNewLine { location: (19, 33) },
+            TokMacroDisplay { location: (20, 12), passage_name: "Passage Passage".to_string() },
+            TokMacroEnd { location: (21, 1) },
+            TokNewLine { location: (21, 3) },
+            TokMacroDisplay { location: (22, 11), passage_name: "Passage Passage".to_string() },
+            TokMacroEnd { location: (22, 28) },
+            TokNewLine { location: (22, 30) },
+            TokMacroDisplay { location: (23, 12), passage_name: "Passage Passage".to_string() },
+            TokMacroEnd { location: (23, 31) },
+            TokNewLine { location: (23, 33) },
+            TokMacroDisplay { location: (24, 12), passage_name: "Passage Passage".to_string() },
+            TokMacroEnd { location: (25, 1) },
+            TokNewLine { location: (25, 3) },
+            TokMacroDisplay { location: (26, 11), passage_name: "\"Passage\" 0+1".to_string() },
+            TokMacroEnd { location: (26, 25) },
+            TokNewLine { location: (26, 27) },
+            TokMacroDisplay { location: (27, 11), passage_name: "\"Passage\" 5+6\"P\" assage".to_string() },
+            TokMacroEnd { location: (27, 34) },
+            TokNewLine { location: (27, 36) },
+            TokMacroDisplay { location: (28, 11), passage_name: "Passage >Passage".to_string() },
+            TokMacroEnd { location: (28, 27) }
         );
 
         assert_tok_eq(expected, tokens);
@@ -1023,15 +1165,35 @@ mod tests {
 
     #[test]
     fn macro_display_short_test() {
-        // Should fail because it contains an invalid macro
-        let tokens = test_lex("::Passage\n<<Passage>>");
+        let tokens = test_lex("::Passage\n<<Passage>>\n<<Passage   >>\n<<Passage\n>>\n<<Passage 5>>\n<<Passage \"test\">>\n<<Passage \"test\"+5>>\n<<\"Passage\'>>");
         let expected = vec![
             TokPassage {name: "Passage".to_string(), location: (1, 3)},
-            TokMacroContentPassageName {location: (2, 3), passage_name: "Passage".to_string()},
-            TokMacroEnd {location: (2, 10)}
+            TokMacroDisplay {location: (2, 3), passage_name: "Passage2".to_string()},
+            TokMacroEnd {location: (2, 11)},
+            TokNewLine { location: (2, 13) },
+            TokMacroDisplay { location: (3, 3), passage_name: "Passage".to_string() },
+            TokMacroEnd { location: (3, 14) },
+            TokNewLine { location: (3, 16) },
+            TokMacroDisplay { location: (4, 3), passage_name: "Passage".to_string() },
+            TokMacroEnd { location: (5, 1) },
+            TokNewLine { location: (5, 3) },
+            TokMacroDisplay { location: (6, 3), passage_name: "Passage".to_string() },
+            TokMacroEnd { location: (6, 13) },
+            TokNewLine { location: (6, 15) },
+            TokMacroDisplay { location: (7, 3), passage_name: "Passage".to_string() },
+            TokMacroEnd { location: (7, 18) },
+            TokNewLine { location: (7, 20) },
+            TokMacroDisplay { location: (8, 3), passage_name: "Passage".to_string() },
+            TokMacroEnd { location: (8, 20) },
+            TokNewLine { location: (8, 22) },
+            TokMacroDisplay { location: (9, 3), passage_name: "\"Passage\'".to_string() },
+            TokMacroEnd { location: (9, 13) }
         ];
 
         assert_tok_eq(expected, tokens);
+
+        let fail_tokens = test_lex(":fail");
+        assert_eq!(0, fail_tokens.len());
     }
 
     #[test]
