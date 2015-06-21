@@ -19,6 +19,7 @@ enum Type{
 pub struct AST {
     passages: Vec<ASTNode>,
     path: Vec<usize>,
+    is_in_if_expression: bool
 }
 
  /// add zcode based on tokens
@@ -378,6 +379,7 @@ pub enum ASTOperation {
     Up,
     UpChild(Token),
     UpChildDown(Token),
+    UpSpecial,
     TwoUp,
 }
 
@@ -386,11 +388,12 @@ impl AST {
         let mut ast = AST {
             passages: Vec::new(),
             path: Vec::new(),
+            is_in_if_expression: false,
         };
         for op in ops {
             ast.operation(op);
         }
-        //ast.parse_expressions();
+        ast.parse_expressions();
 
         ast
     }
@@ -405,6 +408,7 @@ impl AST {
             Up => self.up(),
             UpChild(child) => self.up_child(child),
             UpChildDown(child) => self.up_child_down(child),
+            UpSpecial => self.up_special(),
             TwoUp => self.two_up(),
         }
     }
@@ -440,9 +444,19 @@ impl AST {
 
     /// adds a child an goees one child down
     pub fn child_down(&mut self, token: Token) {
+        // 
+        if token.clone() == (TokMacroIf { location: (0, 0) }) ||
+           token.clone() == (TokMacroElseIf { location: (0, 0) }) {
+            self.is_in_if_expression = true;
+        }
+
         let ast_count_childs = self.count_childs(self.path.to_vec());
         self.add_child(token);
         self.path.push(ast_count_childs);
+
+        //
+        
+        //TokMacroIf
     }
 
     /// adds one child and goes down. adds snd child and goes down.
@@ -454,6 +468,16 @@ impl AST {
     /// goes one lvl up
     pub fn up(&mut self) {
         self.path.pop();
+    }
+
+    /// TODO
+    pub fn up_special(&mut self) {
+        if !self.is_in_if_expression {
+            self.path.pop();
+        } else {
+            self.is_in_if_expression = false;
+        }
+        
     }
 
     /// goes one lvl up and adds and child
@@ -556,35 +580,56 @@ impl NodeDefault {
 
         self.childs.reverse();
         while let Some(top) = self.childs.pop() {
-            match top.category() {
-                tok @ TokInt { .. } => {
-                    println!("! TokInt {:?}", tok);
-                    expr_stack.push( ASTNode::Default(NodeDefault { category: tok.clone(), childs: Vec::new() }) );
+            if top.category() == TokExpression {
+                println!("! TokExpression");
+                /*match top {
+                    &mut ASTNode::Default(ref mut node) => {
+                        match &node.category {
+                            &TokExpression => {
+                                &node.parse_expressions();
+                            }, //found_expression = true,
+                            _ => ()
+                        }
 
-                    if self.childs.len() == 0 {
-                        //for i in 0..length {
-                        self.create_bla_bla(&mut expr_stack, &mut oper_stack);
-                    }
-                },
-                tok @ TokNumOp { .. } => {
-                    println!("! TokNumOp {:?}", tok);
-                    
-                    //for other_token in oper_stack.iter().rev() {
-                    let length = oper_stack.len();
-                    for i in 0..length {
-                        let i_rev = length - i - 1;
-                        let token: Token = oper_stack.get(i_rev).unwrap().clone();
-                        println!("loop: {:?} - {:?}", i_rev, token);
-                        if self.is_operator_precedence(tok.clone(), token) {
-                            println!("!!!!");
+                        /*for mut child in node.childs.iter_mut() {
+                            child.parse_expressions();
+                        }*/
+                    },
+                    _ => ()
+                }*/
+                
+            } else {
+
+                match top.category() {
+                    tok @ TokInt { .. } | tok @ TokFunction { .. } => {
+                        println!("! TokInt {:?}", tok);
+                        expr_stack.push( ASTNode::Default(NodeDefault { category: tok.clone(), childs: Vec::new() }) );
+
+                        if self.childs.len() == 0 {
+                            //for i in 0..length {
                             self.create_bla_bla(&mut expr_stack, &mut oper_stack);
                         }
-                        //println!("! op {:?}", tok);
-                    }
+                    },
+                    tok @ TokNumOp { .. } => {
+                        println!("! TokNumOp {:?}", tok);
+                        
+                        //for other_token in oper_stack.iter().rev() {
+                        let length = oper_stack.len();
+                        for i in 0..length {
+                            let i_rev = length - i - 1;
+                            let token: Token = oper_stack.get(i_rev).unwrap().clone();
+                            println!("loop: {:?} - {:?}", i_rev, token);
+                            if self.is_operator_precedence(tok.clone(), token) {
+                                println!("!!!!");
+                                self.create_bla_bla(&mut expr_stack, &mut oper_stack);
+                            }
+                            //println!("! op {:?}", tok);
+                        }
 
-                    oper_stack.push(tok.clone());
-                },
-                _ => ()
+                        oper_stack.push(tok.clone());
+                    },
+                    _ => ()
+                }
             }
         }
 

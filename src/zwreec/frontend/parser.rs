@@ -381,7 +381,7 @@ impl<'a> Parser<'a> {
                 (ExpressionListf, TokMacroEnd { .. } ) => {
                     debug!("pop TokMacroEnd");
 
-                    Some(Up)
+                    Some(UpSpecial)
                     //None
                 },
                 (ExpressionListf, _) => {
@@ -565,7 +565,8 @@ impl<'a> Parser<'a> {
                     stack.push(Terminal(tok));
 
                     // Get out of empty function
-                    Some(Up)
+                    //Some(Up)
+                    None
                 },
                 (Functionf, TokVariable { .. } ) |
                 (Functionf, TokInt      { .. } ) |
@@ -598,13 +599,16 @@ impl<'a> Parser<'a> {
 
                     // We still need to get out of the expression
                     // And out of the function
-                    Some(TwoUp)
+                    //Some(TwoUp)
+                    Some(Up)
+                    //None
                 },
                 (Argumentsf, tok @ TokColon { .. } ) => {
                     stack.push(NonTerminal(Arguments));
                     stack.push(Terminal(tok));
 
-                    Some(Up)
+                    //Some(Up)
+                    None
                 },
                 (Argumentsf, _) => {
                     // Argumentsf -> ε
