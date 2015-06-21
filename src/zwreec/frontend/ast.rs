@@ -250,6 +250,17 @@ fn gen_zcode<'a>(node: &'a ASTNode, mut out: &mut zfile::Zfile, mut manager: &mu
                     vec![ZOP::Label{name: after_else_label}]
                 },
 
+                &Token::TokMacroDisplay {ref passage_name, .. } => {
+                    vec![
+                    // activates the display-modus
+                    ZOP::StoreU8{variable: 17, value: 1},
+                    ZOP::Call1N{jump_to_label: passage_name.to_string()},
+
+                    // deactivates the display-modus
+                    ZOP::StoreU8{variable: 17, value: 0},
+                    ]
+                },
+
                 &TokMacroPrint { .. } => {
                     if t.childs.len() != 1 {
                         panic!("Doesn't support print with 0 or more than one argument");
@@ -332,16 +343,6 @@ fn gen_zcode<'a>(node: &'a ASTNode, mut out: &mut zfile::Zfile, mut manager: &mu
                             vec![ZOP::PrintNumVar{variable: var_id}]
                         }
                     }
-                },
-                &Token::TokMacroContentPassageName {ref passage_name, .. } => {
-                    vec![
-                    // activates the display-modus
-                    ZOP::StoreU8{variable: 17, value: 1},
-                    ZOP::Call1N{jump_to_label: passage_name.to_string()},
-
-                    // deactivates the display-modus
-                    ZOP::StoreU8{variable: 17, value: 0},
-                    ]
                 },
                 _ => {
                     debug!("no match if");
