@@ -1040,13 +1040,71 @@ mod tests {
 
     #[test]
     fn macro_display_test() {
-        let tokens = test_lex("::Passage\n<<display DisplayedPassage>>\n::DisplayedPassage");
+        let tokens = test_lex("::Passage\n<<display Passage>>\n<<display  Passage  >>\n<<display  Passage\n>>\n<<display \'Passage\'>>\n<<display  \'Passage\'  >>\n<<display  \'Passage\'\n>>\n<<display \"Passage\">>\n<<display  \"Passage\"  >>\n<<display  \"Passage\"\n>>\n<<display Passage Passage>>\n<<display  Passage Passage  >>\n<<display  Passage Passage\n>>\n<<display \'Passage Passage\'>>\n<<display  \'Passage Passage\'  >>\n<<display  \'Passage Passage\'\n>>\n<<display \"Passage Passage\">>\n<<display  \"Passage Passage\"  >>\n<<display  \"Passage Passage\"\n>>\n<<display \"Passage\" 0+1>>\n<<display \"Passage\" 5+6\"P\" assage>>\n<<display Passage >Passage>>");
         let expected = vec!(
-            TokPassage {name: "Passage".to_string(), location: (1, 3)},
-            TokMacroDisplay {passage_name: "DisplayedPassage".to_string(), location: (2, 11)},
-            TokMacroEnd {location: (2, 27)},
-            TokNewLine {location: (2, 29)},
-            TokPassage {name: "DisplayedPassage".to_string(), location: (3, 3)},
+            TokPassage { location: (1, 3), name: "Passage".to_string() },
+            TokMacroDisplay { location: (2, 11), passage_name: "Passage".to_string() },
+            TokMacroEnd { location: (2, 18) },
+            TokNewLine { location: (2, 20) },
+            TokMacroDisplay { location: (3, 12), passage_name: "Passage".to_string() },
+            TokMacroEnd { location: (3, 21) },
+            TokNewLine { location: (3, 23) },
+            TokMacroDisplay { location: (4, 12), passage_name: "Passage".to_string() },
+            TokMacroEnd { location: (5, 1) },
+            TokNewLine { location: (5, 3) },
+            TokMacroDisplay { location: (6, 11), passage_name: "Passage".to_string() },
+            TokMacroEnd { location: (6, 20) },
+            TokNewLine { location: (6, 22) },
+            TokMacroDisplay { location: (7, 12), passage_name: "Passage".to_string() },
+            TokMacroEnd { location: (7, 23) },
+            TokNewLine { location: (7, 25) },
+            TokMacroDisplay { location: (8, 12), passage_name: "Passage".to_string() },
+            TokMacroEnd { location: (9, 1) },
+            TokNewLine { location: (9, 3) },
+            TokMacroDisplay { location: (10, 11), passage_name: "Passage".to_string() },
+            TokMacroEnd { location: (10, 20) },
+            TokNewLine { location: (10, 22) },
+            TokMacroDisplay { location: (11, 12), passage_name: "Passage".to_string() },
+            TokMacroEnd { location: (11, 23) },
+            TokNewLine { location: (11, 25) },
+            TokMacroDisplay { location: (12, 12), passage_name: "Passage".to_string() },
+            TokMacroEnd { location: (13, 1) },
+            TokNewLine { location: (13, 3) },
+            TokMacroDisplay { location: (14, 11), passage_name: "Passage Passage".to_string() },
+            TokMacroEnd { location: (14, 26) },
+            TokNewLine { location: (14, 28) },
+            TokMacroDisplay { location: (15, 12), passage_name: "Passage Passage".to_string() },
+            TokMacroEnd { location: (15, 29) },
+            TokNewLine { location: (15, 31) },
+            TokMacroDisplay { location: (16, 12), passage_name: "Passage Passage".to_string() },
+            TokMacroEnd { location: (17, 1) },
+            TokNewLine { location: (17, 3) },
+            TokMacroDisplay { location: (18, 11), passage_name: "Passage Passage".to_string() },
+            TokMacroEnd { location: (18, 28) },
+            TokNewLine { location: (18, 30) },
+            TokMacroDisplay { location: (19, 12), passage_name: "Passage Passage".to_string() },
+            TokMacroEnd { location: (19, 31) },
+            TokNewLine { location: (19, 33) },
+            TokMacroDisplay { location: (20, 12), passage_name: "Passage Passage".to_string() },
+            TokMacroEnd { location: (21, 1) },
+            TokNewLine { location: (21, 3) },
+            TokMacroDisplay { location: (22, 11), passage_name: "Passage Passage".to_string() },
+            TokMacroEnd { location: (22, 28) },
+            TokNewLine { location: (22, 30) },
+            TokMacroDisplay { location: (23, 12), passage_name: "Passage Passage".to_string() },
+            TokMacroEnd { location: (23, 31) },
+            TokNewLine { location: (23, 33) },
+            TokMacroDisplay { location: (24, 12), passage_name: "Passage Passage".to_string() },
+            TokMacroEnd { location: (25, 1) },
+            TokNewLine { location: (25, 3) },
+            TokMacroDisplay { location: (26, 11), passage_name: "\"Passage\" 0+1".to_string() },
+            TokMacroEnd { location: (26, 25) },
+            TokNewLine { location: (26, 27) },
+            TokMacroDisplay { location: (27, 11), passage_name: "\"Passage\" 5+6\"P\" assage".to_string() },
+            TokMacroEnd { location: (27, 34) },
+            TokNewLine { location: (27, 36) },
+            TokMacroDisplay { location: (28, 11), passage_name: "Passage >Passage".to_string() },
+            TokMacroEnd { location: (28, 27) }
         );
 
         assert_tok_eq(expected, tokens);
@@ -1054,14 +1112,35 @@ mod tests {
 
     #[test]
     fn macro_display_short_test() {
-        let tokens = test_lex("::Passage\n<<Passage>>");
+        let tokens = test_lex("::Passage\n<<Passage>>\n<<Passage   >>\n<<Passage\n>>\n<<Passage 5>>\n<<Passage \"test\">>\n<<Passage \"test\"+5>>\n<<\"Passage\'>>");
         let expected = vec![
             TokPassage {name: "Passage".to_string(), location: (1, 3)},
-            TokMacroDisplay {location: (2, 3), passage_name: "Passage".to_string()},
-            TokMacroEnd {location: (2, 10)}
+            TokMacroDisplay {location: (2, 3), passage_name: "Passage2".to_string()},
+            TokMacroEnd {location: (2, 11)},
+            TokNewLine { location: (2, 13) },
+            TokMacroDisplay { location: (3, 3), passage_name: "Passage".to_string() },
+            TokMacroEnd { location: (3, 14) },
+            TokNewLine { location: (3, 16) },
+            TokMacroDisplay { location: (4, 3), passage_name: "Passage".to_string() },
+            TokMacroEnd { location: (5, 1) },
+            TokNewLine { location: (5, 3) },
+            TokMacroDisplay { location: (6, 3), passage_name: "Passage".to_string() },
+            TokMacroEnd { location: (6, 13) },
+            TokNewLine { location: (6, 15) },
+            TokMacroDisplay { location: (7, 3), passage_name: "Passage".to_string() },
+            TokMacroEnd { location: (7, 18) },
+            TokNewLine { location: (7, 20) },
+            TokMacroDisplay { location: (8, 3), passage_name: "Passage".to_string() },
+            TokMacroEnd { location: (8, 20) },
+            TokNewLine { location: (8, 22) },
+            TokMacroDisplay { location: (9, 3), passage_name: "\"Passage\'".to_string() },
+            TokMacroEnd { location: (9, 13) }
         ];
 
         assert_tok_eq(expected, tokens);
+
+        let fail_tokens = test_lex(":fail");
+        assert_eq!(0, fail_tokens.len());
     }
 
     #[test]
