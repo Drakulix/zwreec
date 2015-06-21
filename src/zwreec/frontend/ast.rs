@@ -201,11 +201,11 @@ fn gen_zcode<'a>(node: &'a ASTNode, mut out: &mut zfile::Zfile, mut manager: &mu
 
                     let mut code: Vec<ZOP> = vec![];
 
-                    let child = &t.childs[0];
+                    let child = &t.childs[0].as_default();
 
-                    match child.as_default().category {
+                    match child.category {
                     	TokExpression => {
-                    		let eval = evaluate_expression(child, &mut code, manager);
+                    		let eval = evaluate_expression(&child.childs[0], &mut code, manager);
                     		match eval {
                     			Operand::Var(var) => code.push(ZOP::PrintNumVar{variable: var}),
                     			Operand::Const(c) => code.push(ZOP::Print{text: format!("{}", c.value)}),
@@ -336,7 +336,7 @@ fn evaluate_expression_internal<'a>(node: &'a ASTNode, code: &mut Vec<ZOP>,
 				_ => { panic!("Unsupported function: {}", name)}
 			}
 		},
-		_ => panic!("unhandled token")
+		_ => panic!("unhandled token {:?}", n.category)
 	}
 }
 
