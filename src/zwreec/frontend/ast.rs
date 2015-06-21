@@ -194,6 +194,17 @@ fn gen_zcode<'a>(node: &'a ASTNode, mut out: &mut zfile::Zfile, mut manager: &mu
                     vec![ZOP::Label{name: after_else_label}]
                 },
 
+                &Token::TokMacroDisplay {ref passage_name, .. } => {
+                	let var = Variable { id: 17 };
+                    vec![
+                    // activates the display-modus
+                    ZOP::StoreVariable{variable: var.clone(), value: Operand::new_const(1)},
+                    ZOP::Call1N{jump_to_label: passage_name.to_string()},
+
+                    // deactivates the display-modus
+                    ZOP::StoreVariable{variable: var.clone(), value: Operand::new_const(0)},
+                    ]
+                },
                 &TokMacroPrint { .. } => {
                     if t.childs.len() != 1 {
                         panic!("Doesn't support print with 0 or more than one argument");
@@ -217,8 +228,7 @@ fn gen_zcode<'a>(node: &'a ASTNode, mut out: &mut zfile::Zfile, mut manager: &mu
                         }
                     };
                     code
-                }
-
+                },
                 &TokMacroContentVar {ref var_name, .. } => {
                     let var_id = manager.symbol_table.get_symbol_id(&*var_name);
                     match manager.symbol_table.get_symbol_type(&*var_name) {
@@ -232,17 +242,6 @@ fn gen_zcode<'a>(node: &'a ASTNode, mut out: &mut zfile::Zfile, mut manager: &mu
                             vec![ZOP::PrintNumVar{variable: var_id}]
                         }
                     }
-                },
-                &Token::TokMacroContentPassageName {ref passage_name, .. } => {
-                	let var = Variable { id: 17 };
-                    vec![
-                    // activates the display-modus
-                    ZOP::StoreVariable{variable: var.clone(), value: Operand::new_const(1)},
-                    ZOP::Call1N{jump_to_label: passage_name.to_string()},
-
-                    // deactivates the display-modus
-                    ZOP::StoreVariable{variable: var.clone(), value: Operand::new_const(0)},
-                    ]
                 },
                 _ => {
                     debug!("no match if");
