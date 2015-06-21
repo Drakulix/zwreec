@@ -551,17 +551,20 @@ impl AST {
 
 // ================================
 // node types
+#[derive(Clone)]
 enum ASTNode {
     Default (NodeDefault),
     Passage (NodePassage)
 }
 
+#[derive(Clone)]
 struct NodePassage {
     category: Token,
     pub childs: Vec<ASTNode>,
     /*tags: Vec<ASTNode>*/
 }
 
+#[derive(Clone)]
 struct NodeDefault {
     category: Token,
     childs: Vec<ASTNode>
@@ -572,6 +575,16 @@ impl NodeDefault {
     /// parse the expression node and creates mutliple ast nodes
     /// http://programmers.stackexchange.com/questions/254074/how-exactly-is-an-abstract-syntax-tree-created
     fn parse_expressions(&mut self) {
+
+        /*!!!!
+        -wir sollten es erstmal so hinbiegen, dass die unteren expressions nicht 
+            verloren gehen, das sollte eigentlich kein problem sein
+
+            problem ist aktuell wohl eher, dass
+                a) tokfunction fehlt und
+                b) die kinder der aktuellen knoten nicht vergessen werden sollen, was aber wohl nur bei
+*/
+
         println!("! !!!!: {:?}", self.category);
         
         // here starts the expression parsing..
@@ -579,7 +592,7 @@ impl NodeDefault {
         let mut oper_stack: Vec<Token> = Vec::new();
 
         self.childs.reverse();
-        while let Some(top) = self.childs.pop() {
+        while let Some(mut top) = self.childs.pop() {
             if top.category() == TokExpression {
                 println!("! TokExpression");
                 /*match top {
@@ -603,7 +616,19 @@ impl NodeDefault {
                 match top.category() {
                     tok @ TokInt { .. } | tok @ TokFunction { .. } => {
                         println!("! TokInt {:?}", tok);
-                        expr_stack.push( ASTNode::Default(NodeDefault { category: tok.clone(), childs: Vec::new() }) );
+                        //expr_stack.push( ASTNode::Default(NodeDefault { category: tok.clone(), childs: Vec::new() }) );
+                        //let &mut node2: &mut NodeDefault;
+                        let v;
+                        match top {
+                            ASTNode::Default(ref mut node) => {
+                                //node2 = *node
+                                // argh. clone vec
+                                v = node.childs.to_vec();
+                            },
+                            _ => panic!{"bla"}
+                        }
+                        expr_stack.push( ASTNode::Default(NodeDefault { category: tok.clone(), childs: v }) );
+                        //expr_stack.push( ASTNode::Default(NodeDefault { category: tok.clone(), childs: top.childs }) );
 
                         if self.childs.len() == 0 {
                             //for i in 0..length {
