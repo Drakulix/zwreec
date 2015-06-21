@@ -1,6 +1,7 @@
 //! The `ast` module contains a lot of useful functionality
 //! to create and walk through the ast (abstract syntaxtree)
 
+use frontend::expressionparser;
 use frontend::lexer::Token;
 use frontend::lexer::Token::*;
 use backend::zcode::zfile;
@@ -552,163 +553,22 @@ impl AST {
 // ================================
 // node types
 #[derive(Clone)]
-enum ASTNode {
+pub enum ASTNode {
     Default (NodeDefault),
     Passage (NodePassage)
 }
 
 #[derive(Clone)]
-struct NodePassage {
+pub struct NodePassage {
     category: Token,
     pub childs: Vec<ASTNode>,
     /*tags: Vec<ASTNode>*/
 }
 
 #[derive(Clone)]
-struct NodeDefault {
-    category: Token,
-    childs: Vec<ASTNode>
-}
-
-impl NodeDefault {
-    // TODO should be part of extra module
-    /// parse the expression node and creates mutliple ast nodes
-    /// http://programmers.stackexchange.com/questions/254074/how-exactly-is-an-abstract-syntax-tree-created
-    fn parse_expressions(&mut self) {
-
-        /*!!!!
-        -wir sollten es erstmal so hinbiegen, dass die unteren expressions nicht 
-            verloren gehen, das sollte eigentlich kein problem sein
-
-            problem ist aktuell wohl eher, dass
-                a) tokfunction fehlt und
-                b) die kinder der aktuellen knoten nicht vergessen werden sollen, was aber wohl nur bei
-*/
-
-        println!("! !!!!: {:?}", self.category);
-        
-        // here starts the expression parsing..
-        let mut expr_stack: Vec<ASTNode> = Vec::new();
-        let mut oper_stack: Vec<Token> = Vec::new();
-
-        self.childs.reverse();
-        while let Some(mut top) = self.childs.pop() {
-            if top.category() == TokExpression {
-                println!("! TokExpression");
-                /*match top {
-                    &mut ASTNode::Default(ref mut node) => {
-                        match &node.category {
-                            &TokExpression => {
-                                &node.parse_expressions();
-                            }, //found_expression = true,
-                            _ => ()
-                        }
-
-                        /*for mut child in node.childs.iter_mut() {
-                            child.parse_expressions();
-                        }*/
-                    },
-                    _ => ()
-                }*/
-                
-            } else {
-
-                match top.category() {
-                    tok @ TokInt { .. } | tok @ TokFunction { .. } => {
-                        println!("! TokInt {:?}", tok);
-                        //expr_stack.push( ASTNode::Default(NodeDefault { category: tok.clone(), childs: Vec::new() }) );
-                        //let &mut node2: &mut NodeDefault;
-                        let v;
-                        match top {
-                            ASTNode::Default(ref mut node) => {
-                                //node2 = *node
-                                // argh. clone vec
-                                v = node.childs.to_vec();
-                            },
-                            _ => panic!{"bla"}
-                        }
-                        expr_stack.push( ASTNode::Default(NodeDefault { category: tok.clone(), childs: v }) );
-                        //expr_stack.push( ASTNode::Default(NodeDefault { category: tok.clone(), childs: top.childs }) );
-
-                        if self.childs.len() == 0 {
-                            //for i in 0..length {
-                            self.create_bla_bla(&mut expr_stack, &mut oper_stack);
-                        }
-                    },
-                    tok @ TokNumOp { .. } => {
-                        println!("! TokNumOp {:?}", tok);
-                        
-                        //for other_token in oper_stack.iter().rev() {
-                        let length = oper_stack.len();
-                        for i in 0..length {
-                            let i_rev = length - i - 1;
-                            let token: Token = oper_stack.get(i_rev).unwrap().clone();
-                            println!("loop: {:?} - {:?}", i_rev, token);
-                            if self.is_operator_precedence(tok.clone(), token) {
-                                println!("!!!!");
-                                self.create_bla_bla(&mut expr_stack, &mut oper_stack);
-                            }
-                            //println!("! op {:?}", tok);
-                        }
-
-                        oper_stack.push(tok.clone());
-                    },
-                    _ => ()
-                }
-            }
-        }
-
-        if let Some(node) = expr_stack.pop() {
-            println!("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!: {:?}", expr_stack.len());
-            //node.print(0, false);
-            self.childs.push(node);
-        }
-    }
-
-    /// TODO, name ändern
-    fn create_bla_bla(&mut self, expr_stack: &mut Vec<ASTNode>, oper_stack: &mut Vec<Token>) {
-        if let Some(top_op) = oper_stack.pop() {
-            println!("!!!!: {:?}", top_op);
-            let e2: ASTNode = expr_stack.pop().unwrap();
-            let e1: ASTNode = expr_stack.pop().unwrap();
-
-            let new_node = ASTNode::Default(NodeDefault { category: top_op.clone(), childs: vec![e1, e2] });
-            //new_node.print(0, true);
-            expr_stack.push( new_node );
-        }
-    }
-
-    /// TODO, op. ordnen!!!
-    fn is_operator_precedence(&mut self, token1: Token, token2: Token) -> bool {
-        let mut op1: String = "".to_string();
-        let mut op2: String = "".to_string();
-        match token1 {
-            TokNumOp { op_name, .. } => {
-                op1 = op_name.clone();
-            },
-            _ => ()
-        }
-        match token2 {
-            TokNumOp { op_name, .. } => {
-                op2 = op_name.clone();
-            },
-            _ => ()
-        }
-
-        println!("ops: {:?} - {:?}", op1, op2);
-        /*if (op1 == "*" || op1 == "/") && op2 != "%" {
-            return true
-        } else if op1 == "+" && op2 == "+" {
-            return true
-        }*/
-        if op1 == "+" || op1 == "-" {
-            return true
-        } else if op1 != "+" && op1 == "-" {
-            return true
-        }
-
-        false
-    }
+pub struct NodeDefault {
+    pub category: Token,
+    pub childs: Vec<ASTNode>
 }
 
 struct CodeGenManager<'a> {
@@ -907,7 +767,6 @@ impl ASTNode {
 
     /// goes through the whole tree and parse the expressions
     fn parse_expressions(&mut self) {
-        //let mut found_expression: bool = false;
         match self {
             &mut ASTNode::Passage(ref mut node) => {
                 for mut child in node.childs.iter_mut() {
@@ -917,8 +776,8 @@ impl ASTNode {
             &mut ASTNode::Default(ref mut node) => {
                 match &node.category {
                     &TokExpression => {
-                        &node.parse_expressions();
-                    }, //found_expression = true,
+                        expressionparser::ExpressionParser::parse(node);
+                    },
                     _ => ()
                 }
 
@@ -927,14 +786,7 @@ impl ASTNode {
                 }
             }
         }
-
-        /*if found_expression {
-            self.parse_expressions_in_node();
-        }*/
-    }
-
-
-    
+    }    
 }
 
 // ================================
