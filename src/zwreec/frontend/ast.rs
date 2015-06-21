@@ -361,8 +361,6 @@ fn gen_zcode<'a>(node: &'a ASTNode, mut out: &mut zfile::Zfile, mut manager: &mu
             code
         }
     }
-
-
 }
 
 fn boolstr_to_u8(string: &str) -> u8 {
@@ -380,7 +378,6 @@ pub enum ASTOperation {
     Up,
     UpChild(Token),
     UpChildDown(Token),
-    UpTwoChildsDown(Token, Token),
     TwoUp,
 }
 
@@ -393,7 +390,7 @@ impl AST {
         for op in ops {
             ast.operation(op);
         }
-        ast.parse_expressions();
+        //ast.parse_expressions();
 
         ast
     }
@@ -408,7 +405,6 @@ impl AST {
             Up => self.up(),
             UpChild(child) => self.up_child(child),
             UpChildDown(child) => self.up_child_down(child),
-            UpTwoChildsDown(child1, child2) => self.up_two_childs_down(child1, child2),
             TwoUp => self.two_up(),
         }
     }
@@ -470,13 +466,6 @@ impl AST {
     pub fn up_child_down(&mut self, token: Token) {
         self.up();
         self.child_down(token);
-    }
-
-    /// goes one lvl up, adds one child and goes down. adds child and goes down.
-    pub fn up_two_childs_down(&mut self, child1: Token, child2: Token) {
-        self.up();
-        self.child_down(child1);
-        self.child_down(child2);
     }
 
     /// goes two lvl up
@@ -552,6 +541,104 @@ struct NodePassage {
 struct NodeDefault {
     category: Token,
     childs: Vec<ASTNode>
+}
+
+impl NodeDefault {
+    // TODO should be part of extra module
+    /// parse the expression node and creates mutliple ast nodes
+    /// http://programmers.stackexchange.com/questions/254074/how-exactly-is-an-abstract-syntax-tree-created
+    fn parse_expressions(&mut self) {
+        println!("! !!!!: {:?}", self.category);
+        
+        // here starts the expression parsing..
+        let mut expr_stack: Vec<ASTNode> = Vec::new();
+        let mut oper_stack: Vec<Token> = Vec::new();
+
+        self.childs.reverse();
+        while let Some(top) = self.childs.pop() {
+            match top.category() {
+                tok @ TokInt { .. } => {
+                    println!("! TokInt {:?}", tok);
+                    expr_stack.push( ASTNode::Default(NodeDefault { category: tok.clone(), childs: Vec::new() }) );
+
+                    if self.childs.len() == 0 {
+                        //for i in 0..length {
+                        self.create_bla_bla(&mut expr_stack, &mut oper_stack);
+                    }
+                },
+                tok @ TokNumOp { .. } => {
+                    println!("! TokNumOp {:?}", tok);
+                    
+                    //for other_token in oper_stack.iter().rev() {
+                    let length = oper_stack.len();
+                    for i in 0..length {
+                        let i_rev = length - i - 1;
+                        let token: Token = oper_stack.get(i_rev).unwrap().clone();
+                        println!("loop: {:?} - {:?}", i_rev, token);
+                        if self.is_operator_precedence(tok.clone(), token) {
+                            println!("!!!!");
+                            self.create_bla_bla(&mut expr_stack, &mut oper_stack);
+                        }
+                        //println!("! op {:?}", tok);
+                    }
+
+                    oper_stack.push(tok.clone());
+                },
+                _ => ()
+            }
+        }
+
+        if let Some(node) = expr_stack.pop() {
+            println!("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!: {:?}", expr_stack.len());
+            //node.print(0, false);
+            self.childs.push(node);
+        }
+    }
+
+    /// TODO, name ändern
+    fn create_bla_bla(&mut self, expr_stack: &mut Vec<ASTNode>, oper_stack: &mut Vec<Token>) {
+        if let Some(top_op) = oper_stack.pop() {
+            println!("!!!!: {:?}", top_op);
+            let e2: ASTNode = expr_stack.pop().unwrap();
+            let e1: ASTNode = expr_stack.pop().unwrap();
+
+            let new_node = ASTNode::Default(NodeDefault { category: top_op.clone(), childs: vec![e1, e2] });
+            //new_node.print(0, true);
+            expr_stack.push( new_node );
+        }
+    }
+
+    /// TODO, op. ordnen!!!
+    fn is_operator_precedence(&mut self, token1: Token, token2: Token) -> bool {
+        let mut op1: String = "".to_string();
+        let mut op2: String = "".to_string();
+        match token1 {
+            TokNumOp { op_name, .. } => {
+                op1 = op_name.clone();
+            },
+            _ => ()
+        }
+        match token2 {
+            TokNumOp { op_name, .. } => {
+                op2 = op_name.clone();
+            },
+            _ => ()
+        }
+
+        println!("ops: {:?} - {:?}", op1, op2);
+        /*if (op1 == "*" || op1 == "/") && op2 != "%" {
+            return true
+        } else if op1 == "+" && op2 == "+" {
+            return true
+        }*/
+        if op1 == "+" || op1 == "-" {
+            return true
+        } else if op1 != "+" && op1 == "-" {
+            return true
+        }
+
+        false
+    }
 }
 
 struct CodeGenManager<'a> {
@@ -699,6 +786,17 @@ impl ASTNode {
         }
     }
 
+    pub fn category(&self) -> Token {
+        match self {
+            &ASTNode::Passage(ref t) => {
+                t.category.clone()
+            },
+            &ASTNode::Default(ref t) => {
+                t.category.clone()
+            }
+        }
+    }
+
     /// prints an node of an ast
     pub fn print(&self, indent: usize, force_print: bool) {
         let mut spaces = "".to_string();
@@ -739,18 +837,34 @@ impl ASTNode {
 
     /// goes through the whole tree and parse the expressions
     fn parse_expressions(&mut self) {
+        //let mut found_expression: bool = false;
         match self {
-            &mut ASTNode::Default(ref node) => {
+            &mut ASTNode::Passage(ref mut node) => {
+                for mut child in node.childs.iter_mut() {
+                    child.parse_expressions();
+                }
+            },
+            &mut ASTNode::Default(ref mut node) => {
                 match &node.category {
                     &TokExpression => {
-                        println!("!!!!!!!!!!!!!!!!!!!!");
-                    },
+                        &node.parse_expressions();
+                    }, //found_expression = true,
                     _ => ()
                 }
+
+                for mut child in node.childs.iter_mut() {
+                    child.parse_expressions();
+                }
             }
-            _ => panic!("Node cannot be unwrapped as NodeDefault!")
         }
+
+        /*if found_expression {
+            self.parse_expressions_in_node();
+        }*/
     }
+
+
+    
 }
 
 // ================================

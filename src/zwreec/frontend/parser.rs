@@ -203,6 +203,7 @@ impl<'a> Parser<'a> {
                     debug!("pop TokMacroEndIf Passage;");
                     // jump one ast-level higher
                     Some(UpChild(tok))
+                    //Some(AddChild(tok))
                 },
                 (PassageContent, TokFormatBoldEnd { .. } ) => {
                     // jump one ast-level higher
@@ -304,7 +305,9 @@ impl<'a> Parser<'a> {
                     stack.push(NonTerminal(ExpressionList));
                     stack.push(Terminal(tok.clone()));
 
-                    Some(TwoChildsDown(tok, TokExpression))
+                    //Some(TwoChildsDown(tok, TokExpression))
+                    Some(ChildDown(tok))
+                    //None
                 },
                 (Macro, tok @ TokMacroPrint { .. } ) => {
                     stack.push(Terminal(TokMacroEnd {location: (0, 0)} ));
@@ -337,7 +340,7 @@ impl<'a> Parser<'a> {
                     stack.push(NonTerminal(ExpressionList));
                     stack.push(Terminal(tok.clone()));
 
-                    Some(UpTwoChildsDown(tok, TokExpression))
+                    Some(UpChildDown(tok))
                 },
                 (ElseIf, _) => {
                     // ElseIf -> ε
@@ -379,10 +382,13 @@ impl<'a> Parser<'a> {
                     debug!("pop TokMacroEnd");
 
                     Some(Up)
+                    //None
                 },
                 (ExpressionListf, _) => {
+                    debug!("pop ExpressionListf -> ε");
                     // ExpressionListf -> ε
-                    None
+                    //None
+                    Some(Up)
                 },
 
                 // Expression
@@ -393,12 +399,14 @@ impl<'a> Parser<'a> {
                 (Expression, TokFunction { .. } ) => {
                     stack.push(NonTerminal(E));
 
-                    Some(ChildDown(TokExpression))
+                    //Some(ChildDown(TokExpression))
+                    None
                 },
                 (Expression, TokAssign { .. } ) => {
                     stack.push(NonTerminal(AssignVariable));
 
-                    Some(ChildDown(TokExpression))
+                    //Some(ChildDown(TokExpression))
+                    None
                 },
 
                 // E
@@ -410,13 +418,16 @@ impl<'a> Parser<'a> {
                     stack.push(NonTerminal(E2));
                     stack.push(NonTerminal(T));
 
-                    None
+                    //None
+                    Some(ChildDown(TokExpression))
                 },
 
                 // E2
                 (E2, _) => {
                     // E2 -> ε
-                    None
+                    //None
+                    debug!("pop E2 -> ε");
+                    Some(Up)
                 },
 
                 // T
@@ -488,8 +499,8 @@ impl<'a> Parser<'a> {
                 },
                 (F2, _) => {
                     // F2 -> ε
-                    //None
-                    Some(Up)
+                    None
+                    //Some(Up)
                 },
 
                 // G
@@ -518,8 +529,8 @@ impl<'a> Parser<'a> {
                 },
                 (G2, _) => {
                     // G2 -> ε
-                    //None
-                    Some(Up)
+                    None
+                    //Some(Up)
                 },
 
                 // H
