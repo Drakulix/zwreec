@@ -33,7 +33,7 @@ fn gen_zcode<'a>(node: &'a ASTNode, mut out: &mut zfile::Zfile, mut manager: &mu
             let mut code: Vec<ZOP> = vec![];
             match &node.category {
                 &TokPassage {ref name, .. } => {
-                    code.push(ZOP::Routine{name: name.to_string(), count_variables: 0});
+                    code.push(ZOP::Routine{name: name.to_string(), count_variables: 15});
                 },
                 _ => {
                     debug!("no match 1");
