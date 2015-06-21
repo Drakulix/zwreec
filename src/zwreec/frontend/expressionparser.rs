@@ -27,6 +27,7 @@ impl ExpressionParser {
         node.childs.reverse();
         while let Some(top) = node.childs.pop() {
             match top.category() {
+                tok @ TokBoolean  { .. } |
                 tok @ TokInt      { .. } | 
                 tok @ TokFunction { .. } |
                 tok @ TokVariable { .. } => {
