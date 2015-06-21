@@ -260,7 +260,11 @@ impl Zfile {
             for &(ref other, addr) in prev_strings.iter() {
                 if other.orig == string.orig && other.unicode == string.unicode {
                     string_found = true;
-                    self.data.write_u16(addr/8 as u16, string.from_addr as usize);
+                    if string.unicode {
+                        self.data.write_u16(addr as u16, string.from_addr as usize);  // normal addr
+                    } else {
+                        self.data.write_u16(addr/8 as u16, string.from_addr as usize);  // packed addr
+                    }
                     break;
                 }
             }
@@ -272,13 +276,13 @@ impl Zfile {
                     let hexstrs: Vec<String> = string.chars.iter().map(|b| format!("{:02X}", b)).collect();
                     trace!("{:#x}: {}", str_addr, hexstrs.connect(" "));
                     self.data.append_bytes(&string.chars);
-                    self.data.write_u16(str_addr/8 as u16, string.from_addr as usize);
+                    self.data.write_u16(str_addr as u16, string.from_addr as usize);  // normal addr
                 } else {
                     debug!("{:#x}: zstring \"{}\"", str_addr, string.orig);
                     let hexstrs: Vec<String> = string.chars.iter().map(|b| format!("{:02X}", b)).collect();
                     trace!("{:#x}: {}", str_addr, hexstrs.connect(" "));
                     self.data.append_bytes(&string.chars);
-                    self.data.write_u16(str_addr/8 as u16, string.from_addr as usize);
+                    self.data.write_u16(str_addr/8 as u16, string.from_addr as usize);  // packed addr
                 }
                 prev_strings.push((string.clone(), str_addr));
             }
@@ -417,29 +421,16 @@ impl Zfile {
                     self.unicode_table.push(character as u16);
                     current_text.push(character);
                 } else {
-                    // no space, so op_print_unicode_char is the answer
+                    // no space in table, so plain utf16 is the answer
                     trace!("Unicode char '{:?}' is not in unicode_table", character.to_string());
-                    if current_text.len() > 0 {
-                        if current_text.len() > 3 {  // write string to high mem
-                            self.gen_high_mem_zprint(&current_text[..]);
-                            current_text.clear();
-                        } else { // print in place
-                            self.emit(vec![ZOP::Print{text: current_text.to_string()}]);
-                            current_text.clear();
-                        }
-                    }
+                    self.gen_write_out_zstring(current_text.to_string());  // write out previous buffer
+                    current_text.clear();
                     current_utf16.push(character);
                 }
             }
         }
         self.gen_write_out_unicode(current_utf16);  // write out utf16 string
-        if current_text.len() > 0 {
-            if current_text.len() > 3 {  // write string to high mem
-                self.gen_high_mem_zprint(&current_text[..]);
-            } else {  // print in place
-                self.emit(vec![ZOP::Print{text: current_text.to_string()}]);
-            }
-        }
+        self.gen_write_out_zstring(current_text);  // order does not matter
     }
 
     fn gen_write_out_unicode(&mut self, current_utf16: String) {
@@ -458,6 +449,16 @@ impl Zfile {
                 self.strings.push(Zstring{chars: utf16bytes, orig: current_utf16.to_string(), from_addr: (self.data.len()-2) as u16, unicode: true});
             } else {
                 self.emit(vec![ZOP::PrintUnicode{c: current_utf16.chars().nth(0).unwrap() as u16}]);
+            }
+        }
+    }
+
+    fn gen_write_out_zstring(&mut self, current_text: String) {
+        if current_text.len() > 0 {
+            if current_text.len() > 3 {  // write string to high mem
+                self.gen_high_mem_zprint(&current_text[..]);
+            } else {  // print in place
+                self.emit(vec![ZOP::Print{text: current_text}]);
             }
         }
     }
@@ -685,15 +686,20 @@ impl Zfile {
     pub fn routine_print_unicode(&mut self) {
         self.emit(vec![
             ZOP::Routine{name: "print_unicode".to_string(), count_variables: 4},
+            // DEBUG    ZOP::Print{text: "pos:".to_string()}, ZOP::PrintNumVar{variable: 0x01},
             // addr as arg1 in 0x01, copy length to 0x02
             ZOP::LoadWvar{array_address_var: 0x01, index: 4, variable: 0x02},  // index at var:4 is 0
+            // DEBUG    ZOP::Print{text: "len:".to_string()}, ZOP::PrintNumVar{variable: 0x02},
             ZOP::AddVar{variable1: 0x02, variable2: 0x02, result: 0x02}, // double length
             ZOP::AddVar{variable1: 0x01, variable2: 0x02, result: 0x02}, // add 'offset' addr to length,
-            // so it marks the position after the last char
+            // so it marks the position after the last char after we increase it by 2 again
+            ZOP::Add{variable1: 0x02, add_const: 2i16, variable2: 0x02}, // point after last char
             ZOP::Add{variable1: 0x01, add_const: 2i16, variable2: 0x01}, // point to first char
             ZOP::Label{name: "inter_char".to_string()},
+            // DEBUG    ZOP::Print{text: "pos:".to_string()}, ZOP::PrintNumVar{variable: 0x01},
             // load u16 char to 0x3
             ZOP::LoadWvar{array_address_var: 0x01, index: 4, variable: 0x03},  // index at var:4 is 0
+            // DEBUG    ZOP::Print{text: "code:".to_string()}, ZOP::PrintNumVar{variable: 0x03},
             ZOP::PrintUnicodeVar{var: 0x03},
             ZOP::Add{variable1: 0x01, add_const: 2i16, variable2: 0x01}, // point to next char
             ZOP::JL{local_var_id: 0x01, local_var_id2: 0x02, jump_to_label: "inter_char".to_string()},

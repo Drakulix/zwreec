@@ -21,6 +21,7 @@ pub fn temp_create_zcode_example<W: Write>(output: &mut W) {
 
     zfile.start();
     let store_addr = zfile.object_addr + 2;
+    // code for debugging purposes and can be changed as wanted
     zfile.emit(vec![
         ZOP::Routine{name: "Start".to_string(), count_variables: 1},
         ZOP::PrintOps{text: "Content at memory pointed by variable (expected 8729): \n".to_string()},
@@ -33,7 +34,6 @@ pub fn temp_create_zcode_example<W: Write>(output: &mut W) {
         ZOP::Newline,
         ZOP::PrintUnicodeVar{var: 190}, // should output ∙
         ZOP::Newline,
-        ZOP::PrintOps{text: "expected ∙ in the previous line and in the next\n".to_string()},
         ZOP::PrintUnicode{c: '∙' as u16},
         ZOP::Newline,
         ZOP::Quit,
