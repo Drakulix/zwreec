@@ -60,6 +60,22 @@ pub fn op_loadw(array_address: u16, index: u8, variable: u8, object_addr: u16) -
     bytes
 }
 
+/// loads a word from an array in a variable
+/// loadw is an 2op, BUT with 3 ops -.-
+pub fn op_loadw_var(array_address_var: u8, index: u8, variable: u8) -> Vec<u8> {
+    let mut bytes = op_2(0x0f, vec![ArgType::Variable, ArgType::Variable]);
+
+    // variable with array address
+    bytes.push(array_address_var);
+
+    // array index
+    bytes.push(index);
+
+    // variable
+    bytes.push(variable);
+    bytes
+}
+
 
 /// reads keys from the keyboard and saves the asci-value in local_var_id
 /// read_char is VAROP
@@ -158,21 +174,21 @@ pub fn op_set_color(foreground: u8, background: u8) -> Vec<u8> {
 }
 
 
-/// prints string at given packet address TODO: needs testing
+/// prints string at given packet address  which is then multiplied by 8
 pub fn op_print_paddr(address: u8) -> Vec<u8> {
    let mut bytes = op_1(0x0D, ArgType::Variable);
    bytes.push(address);
    bytes
 }
 
-/// prints string at given address which is then divided by 8 to be a packed address TODO: needs testing
+/// prints string at given packed address which is then multiplied by 8
 pub fn op_print_paddr_static(address: u16) -> Vec<u8> {
    let mut bytes = op_1(0x0D, ArgType::LargeConst);
-   write_u16(address/8, &mut bytes);
+   write_u16(address, &mut bytes);
    bytes
 }
 
-/// prints string at given adress TODO: needs testing
+/// prints string at given address
 pub fn op_print_addr(address: u8) -> Vec<u8> {
    let mut bytes = op_1(0x07, ArgType::Variable);
    bytes.push(address);
@@ -228,6 +244,18 @@ pub fn op_add(variable1: u8, add_const: i16, variable2: u8) -> Vec<u8> {
     bytes.push(variable1);
 	write_i16(add_const, &mut bytes);
     bytes.push(variable2);
+    bytes
+}
+
+
+/// addition
+/// result = variable1 + variable2
+pub fn op_add_var(variable1: u8, variable2: u8, result: u8) -> Vec<u8> {
+    let args: Vec<ArgType> = vec![ArgType::Variable, ArgType::Variable];
+    let mut bytes = op_2(0x14, args);
+    bytes.push(variable1);
+    bytes.push(variable2);
+    bytes.push(result);
     bytes
 }
 
@@ -291,9 +319,9 @@ pub fn op_1( value: u8, arg_type: ArgType) -> Vec<u8> {
 /// $20 -- $3f  long      2OP     small constant, variable
 /// $40 -- $5f  long      2OP     variable, small constant
 /// $60 -- $7f  long      2OP     variable, variable
-/// not handled here:
+///
 /// $c0 -- $df  variable  2OP     (operand types in next byte)
-/// except $be  extended opcode given in next byte
+/// not handled here: $be  extended opcode given in next byte
 pub fn op_2( value: u8, arg_types: Vec<ArgType>) -> Vec<u8> {
     let mut byte: u8 = 0x00;
     let mut is_variable: bool = false;
