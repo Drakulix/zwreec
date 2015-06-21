@@ -4,7 +4,7 @@
 use frontend::lexer::Token;
 use frontend::lexer::Token::*;
 use backend::zcode::zfile;
-use backend::zcode::zfile::{FormattingState, ZOP};
+use backend::zcode::zfile::{FormattingState, ZOP, Operand, Variable, Constant, LargeConstant};
 use std::collections::HashMap;
 
 //==============================
@@ -79,31 +79,30 @@ fn gen_zcode<'a>(node: &'a ASTNode, mut out: &mut zfile::Zfile, mut manager: &mu
                     ZOP::Call2NWithAddress{jump_to_label: "system_add_link".to_string(), address: passage_name.to_string()},
                     ZOP::SetColor{foreground: 8, background: 2},
                     ZOP::Print{text: format!("{}[", display_name)},
-                    ZOP::PrintNumVar{variable: 16},
+                    ZOP::PrintNumVar{variable: Variable::new(16)},
                     ZOP::Print{text: "]".to_string()},
                     ZOP::SetColor{foreground: 9, background: 2},
                     ]
                 },
                 &TokAssign {ref var_name, ref op_name, .. } => {
                     if op_name == "=" || op_name == "to" {
+                    	let mut code: Vec<ZOP> = vec![];
                         if t.childs.len() == 1 {
-                            match t.childs[0].as_default().category {
-                                TokInt {value, .. } => {
-                                    if !manager.symbol_table.is_known_symbol(var_name) {
-                                        manager.symbol_table.insert_new_symbol(&var_name, Type::Integer);
-                                    }
-                                    let symbol_id = manager.symbol_table.get_symbol_id(var_name);
-                                    vec![ZOP::StoreU16{variable: symbol_id, value: value as u16}]
-                                },
-                                TokBoolean {ref value, .. } => {
-                                    if !manager.symbol_table.is_known_symbol(var_name) {
-                                        manager.symbol_table.insert_new_symbol(&var_name, Type::Bool);
-                                    }
-                                    let symbol_id = manager.symbol_table.get_symbol_id(var_name);
-                                    vec![ZOP::StoreU8{variable: symbol_id, value: boolstr_to_u8(&*value)}]
-                                },
-                                _ => { vec![] }
+                       		let expression_node = &t.childs[0].as_default();
+                       		let result = match expression_node.category {
+                       			TokExpression => {
+                       				if expression_node.childs.len() != 1 {
+                       					panic!("Unsupported expression!")
+                       				}
+                       				evaluate_expression(&expression_node.childs[0], &mut code, manager)
+                       			}, _ => panic!("Unsupported expression!")
+                       		};
+                        	if !manager.symbol_table.is_known_symbol(var_name) {
+                            	manager.symbol_table.insert_new_symbol(&var_name, Type::Integer);
                             }
+                            let symbol_id = manager.symbol_table.get_symbol_id(var_name);
+                            code.push(ZOP::StoreVariable{variable: symbol_id, value: result});
+                            code
                         } else {
                             debug!("Assign Expression currently not supported.");
                             vec![]
@@ -115,53 +114,24 @@ fn gen_zcode<'a>(node: &'a ASTNode, mut out: &mut zfile::Zfile, mut manager: &mu
                         panic!("Unsupported if-expression!");
                     }
 
-                    let mut compare: u8 = 1;
-
                     // check if the first node is an expression node
                     let expression_node = match t.childs[0].as_default().category {
                         TokExpression => t.childs[0].as_default(),
                         _ =>  panic!("Unsupported if-expression!")
                     };
 
-                    // Check if first token is variable
-                    let var_name = match expression_node.childs[0].as_default().category {
-                        TokVariable {ref name, .. } => name,
-                        _ =>  panic!("Unsupported if-expression!")
-                    };
+                    let mut code: Vec<ZOP> = vec![];
 
-                    if expression_node.childs.len() > 1 {
-                        // Check if second token is compare operator
-                        match expression_node.childs[1].as_default().category {
-                            TokCompOp {ref op_name, .. } => {
-                                match &*(*op_name) {
-                                    "==" | "is" => {} ,
-                                    _ => panic!("Unsupported Compare Operator!")
-                                }
-                            }, _ =>  panic!("Unsupported if-expression!")
-                        }
+                    // Evaluate the contained expression
+                    let result = evaluate_expression(&expression_node.childs[0], &mut code, manager);
 
-                        // Check if third token is number
-                        compare = match expression_node.childs[2].as_default().category {
-                            TokInt {ref value, .. } => {
-                                *value as u8
-                            },
-                            TokBoolean {ref value, .. } => {
-                                boolstr_to_u8(&*value)
-                            }, _ => panic!("Unsupported assign value!")
-                        };
-                    }
-
-                    let symbol_id = manager.symbol_table.get_symbol_id(&*var_name);
                     let if_id = manager.ids_if.start_next();
-
                     let if_label = format!("if_{}", if_id);
                     let after_if_label = format!("after_if_{}", if_id);
                     let after_else_label = format!("after_else_{}", if_id);
-                    let mut code: Vec<ZOP> = vec![
-                        ZOP::JE{local_var_id: symbol_id, equal_to_const: compare, jump_to_label: if_label.to_string()},
-                        ZOP::Jump{jump_to_label: after_if_label.to_string()},
-                        ZOP::Label{name: if_label.to_string()}
-                    ];
+                    code.push(ZOP::JG{operand1: result, operand2: Operand::new_const(0), jump_to_label: if_label.to_string()});
+                    code.push(ZOP::Jump{jump_to_label: after_if_label.to_string()});
+                    code.push(ZOP::Label{name: if_label.to_string()});
 
                     for i in 1..t.childs.len() {
                         for instr in gen_zcode(&t.childs[i], out, manager) {
@@ -178,53 +148,25 @@ fn gen_zcode<'a>(node: &'a ASTNode, mut out: &mut zfile::Zfile, mut manager: &mu
                         panic!("Unsupported elseif-expression!");
                     }
 
-                    let mut compare: u8 = 1;
+                    let mut code: Vec<ZOP> = vec![];
 
-                    // check if the first node is a pseudonode
-                    let pseudo_node = match t.childs[0].as_default().category {
+                    // check if the first node is an expression node
+                    let expression_node = match t.childs[0].as_default().category {
                         TokExpression => t.childs[0].as_default(),
                         _ =>  panic!("Unsupported elseif-expression!")
                     };
 
-                    // Check if first token is variable
-                    let var_name = match pseudo_node.childs[0].as_default().category {
-                        TokVariable {ref name, .. } => name,
-                        _ =>  panic!("Unsupported elseif-expression!")
-                    };
-
-                    if pseudo_node.childs.len() > 1 {
-                        // Check if second token is compare operator
-                        match pseudo_node.childs[1].as_default().category {
-                            TokCompOp {ref op_name, .. } => {
-                                match &*(*op_name) {
-                                    "==" | "is" => {} ,
-                                    _ => panic!("Unsupported Compare Operator!")
-                                }
-                            }, _ =>  panic!("Unsupported elseif-expression!")
-                        }
-
-                        // Check if third token is number
-                        compare = match pseudo_node.childs[2].as_default().category {
-                            TokInt {ref value, .. } => {
-                                *value as u8
-                            },
-                            TokBoolean {ref value, .. } => {
-                                boolstr_to_u8(&*value)
-                            }, _ => panic!("Unsupported assign value!")
-                        };
-                    }
-
-                    let symbol_id = manager.symbol_table.get_symbol_id(&*var_name);
+                    // Evaluate the contained expression
+                    let result = evaluate_expression(&expression_node.childs[0], &mut code, manager);
+ 
                     let if_id = manager.ids_if.start_next();
 
                     let if_label = format!("if_{}", if_id);
                     let after_if_label = format!("after_if_{}", manager.ids_if.pop_id());
                     let after_else_label = format!("after_else_{}", manager.ids_if.peek());
-                    let mut code: Vec<ZOP> = vec![
-                        ZOP::JE{local_var_id: symbol_id, equal_to_const: compare, jump_to_label: if_label.to_string()},
-                        ZOP::Jump{jump_to_label: after_if_label.to_string()},
-                        ZOP::Label{name: if_label.to_string()}
-                    ];
+                    code.push(ZOP::JG{operand1: result, operand2: Operand::new_const(0), jump_to_label: if_label.to_string()});
+                    code.push(ZOP::Jump{jump_to_label: after_if_label.to_string()});
+                    code.push(ZOP::Label{name: if_label.to_string()});
 
                     for i in 1..t.childs.len() {
                         for instr in gen_zcode(&t.childs[i], out, manager) {
@@ -260,58 +202,14 @@ fn gen_zcode<'a>(node: &'a ASTNode, mut out: &mut zfile::Zfile, mut manager: &mu
                     let child = &t.childs[0];
 
                     match child.as_default().category {
-                        TokInt {ref value, ..} => {
-                            code.push(ZOP::Print{text: format!("{}", value)},);
-                        },
-                        TokBoolean {ref value, ..} => {
-                            code.push(ZOP::Print{text: format!("{}", value)},);
-                        },
-                        TokFunction {ref name, ..} => {
-                            if *name == "random" {
-                                let args = &child.as_default().childs;
-                                if args.len() != 2 {
-                                    panic!("Function random only supports 2 args");
-                                }
-
-                                if args[0].as_default().childs.len() != 1 ||
-                                   args[0].as_default().childs.len() != 1 {
-                                    panic!("Unsupported Expression");
-                                }
-
-                                let from = args[0].as_default().childs[0].as_default();
-                                let to = args[1].as_default().childs[0].as_default();
-
-                                let mut from_value;
-                                let mut to_value;
-
-                                if let TokInt {value, ..} = from.category {
-                                    from_value = value as u16;
-                                } else {
-                                    panic!("Unsupported Expression");
-                                };
-
-                                if let TokInt {value, ..} = to.category {
-                                    to_value = value as u16;
-                                } else {
-                                    panic!("Unsupported Expression");
-                                };
-
-                                let range = (to_value - from_value + 1) as u8;
-
-                                let var = manager.symbol_table.get_symbol_id("int0");
-
-                                code.push(ZOP::Random {range: range, variable: var} );
-
-                                if from_value <= 0 {
-                                    code.push(ZOP::Sub {variable1: var, sub_const: 1, variable2: var} );
-                                } else {
-                                    code.push(ZOP::Add {variable1: var, add_const: (from_value - 1) as i16, variable2: var} );
-                                }
-                                code.push(ZOP::PrintNumVar {variable: var} );
-                            } else {
-                                panic!("Unsupported function '{}'", name);
-                            }
-                        },
+                    	TokExpression => {
+                    		let eval = evaluate_expression(child, &mut code, manager);
+                    		match eval {
+                    			Operand::Var(var) => code.push(ZOP::PrintNumVar{variable: var}),
+                    			Operand::Const(c) => code.push(ZOP::Print{text: format!("{}", c.value)}),
+                    			Operand::LargeConst(c) => code.push(ZOP::Print{text: format!("{}", c.value)})
+                    		};
+                    	},
                         _ => {
                             panic!("Unsupported Expression");
                         }
@@ -334,13 +232,14 @@ fn gen_zcode<'a>(node: &'a ASTNode, mut out: &mut zfile::Zfile, mut manager: &mu
                     }
                 },
                 &Token::TokMacroContentPassageName {ref passage_name, .. } => {
+                	let var = Variable { id: 17 };
                     vec![
                     // activates the display-modus
-                    ZOP::StoreU8{variable: 17, value: 1},
+                    ZOP::StoreVariable{variable: var.clone(), value: Operand::new_const(1)},
                     ZOP::Call1N{jump_to_label: passage_name.to_string()},
 
                     // deactivates the display-modus
-                    ZOP::StoreU8{variable: 17, value: 0},
+                    ZOP::StoreVariable{variable: var.clone(), value: Operand::new_const(0)},
                     ]
                 },
                 _ => {
@@ -361,14 +260,352 @@ fn gen_zcode<'a>(node: &'a ASTNode, mut out: &mut zfile::Zfile, mut manager: &mu
             code
         }
     }
-
-
 }
 
-fn boolstr_to_u8(string: &str) -> u8 {
+fn evaluate_expression<'a>(node: &'a ASTNode, code: &mut Vec<ZOP>, mut manager: &mut CodeGenManager<'a>) -> Operand {
+	let mut temp_ids = CodeGenManager::new_temp_var_vec();
+	evaluate_expression_internal(node, code, &mut temp_ids, manager)
+}
+
+// Evaluates an expression node to zCode.
+fn evaluate_expression_internal<'a>(node: &'a ASTNode, code: &mut Vec<ZOP>,
+		temp_ids: &mut Vec<u8>, mut manager: &mut CodeGenManager<'a>) -> Operand {
+	let n = node.as_default();
+
+	match n.category {
+		TokNumOp { ref op_name, .. } => {
+			if n.childs.len() != 2 {
+				panic!("Numeric operators need two arguments!")
+			}
+			let eval0 = evaluate_expression_internal(&n.childs[0], code, temp_ids, manager);
+			let eval1 = evaluate_expression_internal(&n.childs[1], code, temp_ids, manager);
+			eval_num_op(&eval0, &eval1, &**op_name, code, temp_ids)
+		},
+		TokCompOp { ref op_name, .. } => {
+			if n.childs.len() != 2 {
+				panic!("Numeric operators need two arguments!")
+			}
+			let eval0 = evaluate_expression_internal(&n.childs[0], code, temp_ids, manager);
+			let eval1 = evaluate_expression_internal(&n.childs[1], code, temp_ids, manager);
+			eval_comp_op(&eval0, &eval1, &**op_name, code, temp_ids, manager)
+		},
+		TokLogOp { ref op_name, .. } => {
+			let eval0 = evaluate_expression_internal(&n.childs[0], code, temp_ids, manager);
+			
+			match &**op_name {
+				"and" | "or" => {
+					let eval1 = evaluate_expression_internal(&n.childs[1], code, temp_ids, manager);
+					eval_and_or(&eval0, &eval1, &**op_name, code, temp_ids)
+				},
+				"not" => {
+					eval_not(&eval0, code, temp_ids, manager)
+				}, 
+				_ => panic!("unhandled op")
+			}
+		}
+		TokInt { ref value, .. } => {
+			Operand::new_large_const(*value as i16)
+		},
+		TokBoolean { ref value, .. } => {
+			boolstr_to_const(&**value)
+		},
+		TokVariable { ref name, .. } => {
+			Operand::Var(manager.symbol_table.get_symbol_id(name))
+		},
+		TokFunction { ref name, .. } => {
+			match &**name {
+				"random" => {
+					let args = &node.as_default().childs;
+				    if args.len() != 2 {
+				        panic!("Function random only supports 2 args");
+				    }
+
+				    if args[0].as_default().childs.len() != 1 || args[1].as_default().childs.len() != 1 {
+				        panic!("Unsupported Expression");
+				    }
+
+				    let from = &args[0].as_default().childs[0];
+				    let to = &args[1].as_default().childs[0];
+
+				    let from_value = evaluate_expression_internal(from, code, temp_ids, manager);
+				    let to_value = evaluate_expression_internal(to, code, temp_ids, manager);
+					function_random(&from_value, &to_value, code, temp_ids)
+				},
+				_ => { panic!("Unsupported function: {}", name)}
+			}
+		},
+		_ => panic!("unhandled token")
+	}
+}
+
+fn eval_num_op<'a>(eval0: &Operand, eval1: &Operand, op_name: &str, code: &mut Vec<ZOP>, temp_ids: &mut Vec<u8>) -> Operand {
+	if count_constants(eval0, eval1) == 2 {
+		return direct_eval_num_op(eval0, eval1, op_name);
+	}
+	let save_var = determine_save_var(eval0, eval1, temp_ids);
+	match op_name {
+		"+" => {
+			code.push(ZOP::Add{operand1: eval0.clone(), operand2: eval1.clone(), save_variable: save_var.clone()});
+		},
+		"-" => {
+			code.push(ZOP::Sub{operand1: eval0.clone(), operand2: eval1.clone(), save_variable: save_var.clone()});
+		},
+		"*" => {
+
+		},
+		"/" => {
+
+		},
+		"%" => {
+
+		},
+		_ => panic!("unhandled op")
+	};
+
+	free_var_if_both_temp(eval0, eval1, temp_ids);
+
+	Operand::Var(save_var)
+}
+
+
+
+fn direct_eval_num_op(eval0: &Operand, eval1: &Operand, op_name: &str) -> Operand {
+	let mut out_large = false;
+	let val0 = eval0.const_value();
+	let val1 = eval1.const_value();
+	match eval0 { &Operand::LargeConst(_) => {out_large = true; }, _ => {} };
+	match eval1 { &Operand::LargeConst(_) => {out_large = true; }, _ => {} };
+	let result = match op_name {
+		"+" => {
+			val0 + val1
+		},
+		"-" => {
+			val0 - val1
+		},
+		"*" => {
+			val0 * val1
+		},
+		"/" => {
+			val0 / val1
+		},
+		"%" => {
+			val0 % val1
+		},
+		_ => panic!("unhandled op")
+	};
+	if out_large {
+		Operand::LargeConst(LargeConstant { value: result })
+	} else {
+		Operand::Const(Constant { value: result as u8 })
+	}
+}
+
+fn eval_comp_op<'a>(eval0: &Operand, eval1: &Operand, op_name: &str, code: &mut Vec<ZOP>, 
+		temp_ids: &mut Vec<u8>, mut manager: &mut CodeGenManager<'a>) -> Operand {
+	if count_constants(eval0, eval1) == 2 {
+		return direct_eval_comp_op(eval0, eval1, op_name);
+	}
+	let save_var = Variable { id: temp_ids.pop().unwrap() };
+	let label = format!("expr_{}", manager.ids_expr.start_next());
+	let const_true = Operand::new_const(1);
+	let const_false = Operand::new_const(0);
+	match op_name {
+		"is" | "==" | "eq" => {
+			code.push(ZOP::StoreVariable{ variable: save_var.clone(), value: const_true});
+			code.push(ZOP::JE{operand1: eval0.clone(), operand2: eval1.clone(), jump_to_label: label.to_string()});
+			code.push(ZOP::StoreVariable{ variable: save_var.clone(), value: const_false});
+		},
+		"neq" => {
+			code.push(ZOP::StoreVariable{ variable: save_var.clone(), value: const_false});
+			code.push(ZOP::JE{operand1: eval0.clone(), operand2: eval1.clone(), jump_to_label: label.to_string()});
+			code.push(ZOP::StoreVariable{ variable: save_var.clone(), value: const_true});
+		},
+		"<" | "lt" =>  {
+			code.push(ZOP::StoreVariable{ variable: save_var.clone(), value: const_true });
+			code.push(ZOP::JL{operand1: eval0.clone(), operand2: eval1.clone(), jump_to_label: label.to_string()});
+			code.push(ZOP::StoreVariable{ variable: save_var.clone(), value: const_false});
+		},
+		"<=" | "lte" => {
+			code.push(ZOP::StoreVariable{ variable: save_var.clone(), value: const_false});
+			code.push(ZOP::JG{operand1: eval0.clone(), operand2: eval1.clone(), jump_to_label: label.to_string()});
+			code.push(ZOP::StoreVariable{ variable: save_var.clone(), value: const_true});
+		},
+		">=" | "gte" => {
+			code.push(ZOP::StoreVariable{ variable: save_var.clone(), value: const_false});
+			code.push(ZOP::JL{operand1: eval0.clone(), operand2: eval1.clone(), jump_to_label: label.to_string()});
+			code.push(ZOP::StoreVariable{ variable: save_var.clone(), value: const_true});
+		},
+		">" | "gt" => {
+			code.push(ZOP::StoreVariable{ variable: save_var.clone(), value: const_true});
+			code.push(ZOP::JG{operand1: eval0.clone(), operand2: eval1.clone(), jump_to_label: label.to_string()});
+			code.push(ZOP::StoreVariable{ variable: save_var.clone(), value: const_false});
+		},
+		_ => panic!("unhandled op")
+	};
+	code.push(ZOP::Label {name: label.to_string()});
+	free_var_if_temp(eval0, temp_ids);
+	free_var_if_temp(eval1, temp_ids);
+	Operand::Var(save_var)
+}
+
+/// Directly evaluates the given compare operation.
+/// Both operands must be constants.
+fn direct_eval_comp_op(eval0: &Operand, eval1: &Operand, op_name: &str) -> Operand {
+	let val0 = eval0.const_value();
+	let val1 = eval1.const_value();
+	let result = match op_name {
+		"is" | "==" | "eq" => { val0 == val1 },
+		"neq" => { val0 != val1	},
+		"<" | "lt" =>  { val0 < val1 },
+		"<=" | "lte" => { val0 <= val1 },
+		">=" | "gte" => { val0 >= val1 },
+		">" | "gt" => { val0 > val1 },
+		_ => panic!("unhandled op")
+	};
+	if result {
+		Operand::Const(Constant {value: 1})
+	} else {
+		Operand::Const(Constant {value: 0})
+	}
+}
+
+fn eval_and_or(eval0: &Operand, eval1: &Operand, op_name: &str, code: &mut Vec<ZOP>, 
+		temp_ids: &mut Vec<u8>) -> Operand {
+	if count_constants(&eval0, &eval1) == 2 {
+		let mut out_large = false;
+		let val0 = eval0.const_value();
+		let val1 = eval1.const_value();
+		match eval0 { &Operand::LargeConst(_) => {out_large = true; }, _ => {} };
+		match eval1 { &Operand::LargeConst(_) => {out_large = true; }, _ => {} };
+		let result = if op_name == "or" {
+				val0 | val1
+			} else {
+				val0 & val1
+			};
+		if out_large {
+			return Operand::LargeConst(LargeConstant { value: result })
+		} else {
+			return Operand::Const(Constant { value: result as u8 })
+		}
+	}
+	
+	let save_var = determine_save_var(eval0, eval1, temp_ids);
+	if op_name == "or" {
+		code.push(ZOP::Or{operand1: eval0.clone(), operand2: eval1.clone(), save_variable: save_var.clone()});
+	} else {
+		code.push(ZOP::And{operand1: eval0.clone(), operand2: eval1.clone(), save_variable: save_var.clone()});
+	}
+	free_var_if_both_temp(eval0, eval1, temp_ids);
+	Operand::Var(save_var)
+}
+
+fn eval_not<'a>(eval: &Operand, code: &mut Vec<ZOP>,
+		temp_ids: &mut Vec<u8>, mut manager: &mut CodeGenManager<'a>) -> Operand {
+	if eval.is_const() {
+		let val = eval.const_value();
+		let result: u8 = if val > 0 { 0 } else { 1 };
+		return Operand::Const(Constant { value: result });
+	}
+	let save_var = Variable { id: temp_ids.pop().unwrap() };
+	let label = format!("expr_{}", manager.ids_expr.start_next());
+	code.push(ZOP::StoreVariable{ variable: save_var.clone(), value: Operand::new_const(0)});
+	code.push(ZOP::JG{operand1: eval.clone(), operand2: Operand::new_const(0), jump_to_label: label.to_string()});
+	code.push(ZOP::StoreVariable{ variable: save_var.clone(), value: Operand::new_const(1)});
+	code.push(ZOP::Label {name: label.to_string()});
+	free_var_if_temp(eval, temp_ids);
+	Operand::Var(save_var)
+}
+
+fn function_random(arg_from: &Operand, arg_to: &Operand,
+		code: &mut Vec<ZOP>, temp_ids: &mut Vec<u8>) -> Operand {
+
+	let range_var = Variable::new(temp_ids.pop().unwrap());
+	// Calculate range = to - from + 1
+	code.push(ZOP::Sub{
+		operand1: arg_to.clone(), 
+		operand2: arg_from.clone(), 
+		save_variable: range_var.clone()
+	});
+	code.push(ZOP::Sub{
+		operand1: Operand::new_var(range_var.id), 
+		operand2: Operand::new_const(1), 
+		save_variable: range_var.clone()
+	});
+
+    let var = Variable::new(temp_ids.pop().unwrap());
+
+    // get a random number between 0 and range
+    code.push(ZOP::Random {range: Operand::new_var(range_var.id), variable: var.clone()} );
+
+    // add arg_from to range
+    code.push(ZOP::Add{
+    	operand1: Operand::new_var(var.id), 
+    	operand2: arg_from.clone(), 
+    	save_variable: var.clone()
+    });
+    temp_ids.push(range_var.id);
+    Operand::new_var(var.id)
+}
+
+fn free_var_if_both_temp (eval0: &Operand, eval1: &Operand, temp_ids: &mut Vec<u8>) {
+	match eval0 { 
+		&Operand::Var(ref var1) => {
+			if CodeGenManager::is_temp_var(var1) {
+				match eval1 {
+					&Operand::Var(ref var2)=> {
+						if CodeGenManager::is_temp_var(var2) {
+							temp_ids.push(var2.id);
+						}
+					}, _ => {}
+				}
+			}
+		}, _ => {}
+	};
+}
+
+fn free_var_if_temp (operand: &Operand, temp_ids: &mut Vec<u8>) {
+	match operand {
+		&Operand::Var(ref var) => {
+			if CodeGenManager::is_temp_var(var){
+				temp_ids.push(var.id);
+			}
+		}, _ => {}
+	}
+}
+
+fn determine_save_var(operand1: &Operand, operand2: &Operand, temp_ids: &mut Vec<u8>) -> Variable {
+	match operand1 {
+		&Operand::Var(ref var) => {
+			if CodeGenManager::is_temp_var(var) {
+				return var.clone();
+			}
+		}, _ => {}
+	};
+	match operand2 {
+		&Operand::Var(ref var) => {
+			if CodeGenManager::is_temp_var(var) {
+				return var.clone();
+			}
+		}, _ => {}
+	};
+	return Variable { id: temp_ids.pop().unwrap() };
+}
+
+fn count_constants(operand1: &Operand, operand2: &Operand) -> u8 {
+	let mut const_count: u8 = 0;
+	if operand1.is_const() {
+		const_count += 1;
+	}
+	if operand2.is_const() {
+		const_count += 1;
+	}
+	const_count
+}
+
+fn boolstr_to_const(string: &str) -> Operand {
     match string {
-        "true" => 1 as u8,
-        _ => 0 as u8
+        "true" => Operand::Const(Constant { value: 1 }),
+        _ => Operand::Const(Constant { value: 0 })
     }
 }
 
@@ -550,6 +787,7 @@ struct NodeDefault {
 
 struct CodeGenManager<'a> {
     ids_if: IdentifierProvider,
+    ids_expr: IdentifierProvider,
     symbol_table: SymbolTable<'a>,
     format_state: FormattingState
 }
@@ -561,16 +799,25 @@ struct IdentifierProvider {
 
 struct SymbolTable<'a> {
     current_id: u8,
-    symbol_map: HashMap<&'a str, (u8, Type)>
+    symbol_map: HashMap<&'a str, (Variable, Type)>
 }
 
 impl <'a> CodeGenManager<'a> {
     pub fn new() -> CodeGenManager<'a> {
         CodeGenManager {
             ids_if: IdentifierProvider::new(),
+            ids_expr: IdentifierProvider::new(),
             symbol_table: SymbolTable::new(),
-            format_state: FormattingState {bold: false, italic: false, mono: false, inverted: false}
+            format_state: FormattingState {bold: false, italic: false, mono: false, inverted: false},
         }
+    }
+
+    pub fn new_temp_var_vec() -> Vec<u8> {
+    	(2..15).collect()
+    }
+
+    pub fn is_temp_var(var: &Variable) -> bool{
+    	var.id > 1 && var.id < 16
     }
 }
 
@@ -605,14 +852,14 @@ impl <'a> SymbolTable<'a> {
     pub fn new() -> SymbolTable<'a> {
         SymbolTable {
             current_id: 25,
-            symbol_map: HashMap::<&str, (u8,Type)>::new()
+            symbol_map: HashMap::<&str, (Variable, Type)>::new()
         }
     }
 
     // Inserts a symbol into the table, assigning a new id
     pub fn insert_new_symbol(&mut self, symbol: &'a str, t: Type) {
         debug!("Assigned id {} to variable {}", self.current_id, symbol);
-        self.symbol_map.insert(symbol, (self.current_id,t));
+        self.symbol_map.insert(symbol, (Variable::new(self.current_id),t));
         self.current_id += 1;
     }
 
@@ -623,7 +870,7 @@ impl <'a> SymbolTable<'a> {
 
     // Returns the id for a given symbol
     // (check if is_known_symbol, otherwise panics)
-    pub fn get_symbol_id(&self, symbol: &str) -> u8 {
+    pub fn get_symbol_id(&self, symbol: &str) -> Variable {
         let (b,_) = self.symbol_map.get(symbol).unwrap().clone();
         b
     }

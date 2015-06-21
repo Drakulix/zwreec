@@ -2,8 +2,7 @@ pub use super::zfile::ArgType;
 pub use super::zfile::JumpType;
 pub use super::zfile::Zjump;
 pub use super::zfile::Zfile;
-
-
+pub use super::zfile::{ Operand, Variable, Constant, LargeConstant };
 
 /// clears spcified window
 pub fn op_erase_window(value: i8) -> Vec<u8> {
@@ -101,10 +100,10 @@ pub fn op_set_text_style(bold: bool, reverse: bool, monospace: bool, italic: boo
 
 
 /// Prints the value of a variable (only ints a possibe)
-pub fn op_print_num_var(variable: u8) -> Vec<u8> {
+pub fn op_print_num_var(variable: &Variable) -> Vec<u8> {
     let args: Vec<ArgType> = vec![ArgType::Variable, ArgType::Nothing, ArgType::Nothing, ArgType::Nothing];
     let mut bytes = op_var(0x06, args);
-    bytes.push(variable);
+    bytes.push(variable.id);
     bytes
 }
 
@@ -120,11 +119,11 @@ pub fn op_pull(variable: u8) -> Vec<u8> {
 
 
 /// calculates a random numer from 1 to range
-pub fn op_random(range: u8, variable: u8) -> Vec<u8> {
-    let args: Vec<ArgType> = vec![ArgType::SmallConst, ArgType::Nothing, ArgType::Nothing, ArgType::Nothing];
+pub fn op_random(range: &Operand, variable: &Variable) -> Vec<u8> {
+    let args: Vec<ArgType> = vec![arg_type(range), ArgType::Nothing, ArgType::Nothing, ArgType::Nothing];
     let mut bytes = op_var(0x07, args);
-    bytes.push(range);
-    bytes.push(variable);
+    write_argument(range, &mut bytes);
+    bytes.push(variable.id);
     bytes
 }
 
@@ -188,46 +187,56 @@ pub fn op_ret(value: u16) -> Vec<u8> {
 }
 
 
-// saves an u16 to the variable
-pub fn op_store_u16(variable: u8, value: u16) -> Vec<u8> {
-    let args: Vec<ArgType> = vec![ArgType::Reference, ArgType::LargeConst];
-    let mut bytes = op_2(0x0d, args);
-    bytes.push(variable);
-    write_u16(value, &mut bytes);
-    bytes
-}
-
-
 // saves an u8 to the variable
-pub fn op_store_u8(variable: u8, value: u8) -> Vec<u8> {
-    let args: Vec<ArgType> = vec![ArgType::Reference, ArgType::SmallConst];
+pub fn op_store_var(variable: &Variable, value: &Operand) -> Vec<u8> {
+    let args: Vec<ArgType> = vec![ArgType::Reference, arg_type(&value)];
     let mut bytes = op_2(0x0d, args);
-    bytes.push(variable);
-    bytes.push(value);
+    bytes.push(variable.id);
+    write_argument(value, &mut bytes);
     bytes
 }
 
+/// bitwise or
+/// save_variable = operand1 | operand2
+pub fn op_or(operand1: &Operand, operand2: &Operand, save_variable: &Variable) -> Vec<u8> {
+    let args: Vec<ArgType> = vec![arg_type(operand1), arg_type(operand2)];
+    let mut bytes = op_2(0x08, args);
+    write_argument(operand1, &mut bytes);
+    write_argument(operand2, &mut bytes);
+    bytes.push(save_variable.id);
+    bytes
+}
+
+/// bitwise and
+/// save_variable = operand1 & operand2
+pub fn op_and(operand1: &Operand, operand2: &Operand, save_variable: &Variable) -> Vec<u8> {
+    let args: Vec<ArgType> = vec![arg_type(operand1), arg_type(operand2)];
+    let mut bytes = op_2(0x09, args);
+    write_argument(operand1, &mut bytes);
+    write_argument(operand2, &mut bytes);
+    bytes.push(save_variable.id);
+    bytes
+}
 
 /// subtraktion
-/// variable2 = variable1 - sub_const
-pub fn op_sub(variable1: u8, sub_const: i16, variable2: u8) -> Vec<u8> {
-    let args: Vec<ArgType> = vec![ArgType::Variable, ArgType::LargeConst];
+/// save_variable = operand1 - operand2
+pub fn op_sub(operand1: &Operand, operand2: &Operand, save_variable: &Variable) -> Vec<u8> {
+    let args: Vec<ArgType> = vec![arg_type(operand1), arg_type(operand2)];
     let mut bytes = op_2(0x15, args);
-    bytes.push(variable1);
-	write_i16(sub_const, &mut bytes);
-    bytes.push(variable2);
+    write_argument(operand1, &mut bytes);
+    write_argument(operand2, &mut bytes);
+    bytes.push(save_variable.id);
     bytes
 }
 
-
 /// addition
-/// variable2 = variable1 + sub_const
-pub fn op_add(variable1: u8, add_const: i16, variable2: u8) -> Vec<u8> {
-    let args: Vec<ArgType> = vec![ArgType::Variable, ArgType::LargeConst];
+/// save_variable = operand1 + operand2
+pub fn op_add(operand1: &Operand, operand2: &Operand, save_variable: &Variable) -> Vec<u8> {
+    let args: Vec<ArgType> = vec![arg_type(operand1), arg_type(operand2)];
     let mut bytes = op_2(0x14, args);
-    bytes.push(variable1);
-	write_i16(add_const, &mut bytes);
-    bytes.push(variable2);
+    write_argument(operand1, &mut bytes);
+    write_argument(operand2, &mut bytes);
+    bytes.push(save_variable.id);
     bytes
 }
 
@@ -340,6 +349,23 @@ pub fn encode_variable_arguments( arg_types: Vec<ArgType>) -> u8 {
 
     byte
  }
+
+
+pub fn arg_type(operand: &Operand) -> ArgType {
+    match operand {
+        &Operand::Var(_) => ArgType::Variable,
+        &Operand::Const(_) => ArgType::SmallConst,
+        &Operand::LargeConst(_) => ArgType::LargeConst
+    }
+}
+
+pub fn write_argument(operand: &Operand, v: &mut Vec<u8>){
+    match operand {
+        &Operand::Var(ref var)=> v.push(var.id),
+        &Operand::Const(ref constant) => v.push(constant.value),
+        &Operand::LargeConst(ref constant) => write_i16(constant.value, v)
+    };
+}
 
 ///writes u16 to a vec<u8>
 pub fn write_u16(value: u16, v: &mut Vec<u8>) {
