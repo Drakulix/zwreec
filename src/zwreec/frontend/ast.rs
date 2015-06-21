@@ -1,6 +1,7 @@
 //! The `ast` module contains a lot of useful functionality
 //! to create and walk through the ast (abstract syntaxtree)
 
+use frontend::expressionparser;
 use frontend::lexer::Token;
 use frontend::lexer::Token::*;
 use backend::zcode::zfile;
@@ -19,6 +20,7 @@ enum Type{
 pub struct AST {
     passages: Vec<ASTNode>,
     path: Vec<usize>,
+    is_in_if_expression: bool
 }
 
  /// add zcode based on tokens
@@ -613,23 +615,24 @@ pub enum ASTOperation {
     AddPassage(Token),
     AddChild(Token),
     ChildDown(Token),
-    TwoChildsDown(Token, Token),
     Up,
     UpChild(Token),
     UpChildDown(Token),
-    UpTwoChildsDown(Token, Token),
-    TwoUp,
+    UpSpecial,
 }
 
 impl AST {
     pub fn build<I: Iterator<Item=ASTOperation>>(ops: I) -> AST {
         let mut ast = AST {
             passages: Vec::new(),
-            path: Vec::new()
+            path: Vec::new(),
+            is_in_if_expression: false,
         };
         for op in ops {
             ast.operation(op);
         }
+        ast.parse_expressions();
+
         ast
     }
 
@@ -639,12 +642,17 @@ impl AST {
             AddPassage(passage) => self.add_passage(passage),
             AddChild(child) => self.add_child(child),
             ChildDown(child) => self.child_down(child),
-            TwoChildsDown(child1, child2) => self.two_childs_down(child1, child2),
             Up => self.up(),
             UpChild(child) => self.up_child(child),
             UpChildDown(child) => self.up_child_down(child),
-            UpTwoChildsDown(child1, child2) => self.up_two_childs_down(child1, child2),
-            TwoUp => self.two_up(),
+            UpSpecial => self.up_special(),
+        }
+    }
+
+    /// goes through the whole tree and parse the expressions
+    fn parse_expressions(&mut self) {
+        for child in &mut self.passages {
+            child.parse_expressions();
         }
     }
 
@@ -661,12 +669,10 @@ impl AST {
 
     /// adds a child to the path in the ast
     pub fn add_child(&mut self, token: Token) {
-
         if let Some(index) = self.path.first() {
             let mut new_path: Vec<usize> = self.path.to_vec();
             new_path.remove(0);
-
-            self.passages[*index].add_child(new_path, token)
+            self.passages[*index].add_child(new_path, token);
         } else {
             self.passages.push(ASTNode::Default(NodeDefault { category: token, childs: Vec::new() }));
         }
@@ -674,6 +680,12 @@ impl AST {
 
     /// adds a child an goees one child down
     pub fn child_down(&mut self, token: Token) {
+        // 
+        if token.clone() == (TokMacroIf { location: (0, 0) }) ||
+           token.clone() == (TokMacroElseIf { location: (0, 0) }) {
+            self.is_in_if_expression = true;
+        }
+
         let ast_count_childs = self.count_childs(self.path.to_vec());
         self.add_child(token);
         self.path.push(ast_count_childs);
@@ -690,6 +702,15 @@ impl AST {
         self.path.pop();
     }
 
+    /// special up of the if-expression
+    pub fn up_special(&mut self) {
+        if !self.is_in_if_expression {
+            self.path.pop();
+        } else {
+            self.is_in_if_expression = false;
+        }
+    }
+
     /// goes one lvl up and adds and child
     pub fn up_child(&mut self, token: Token) {
         self.up();
@@ -702,15 +723,7 @@ impl AST {
         self.child_down(token);
     }
 
-    /// goes one lvl up, adds one child and goes down. adds child and goes down.
-    pub fn up_two_childs_down(&mut self, child1: Token, child2: Token) {
-        self.up();
-        self.child_down(child1);
-        self.child_down(child2);
-    }
-
-
-    //goes two lvl up
+    /// goes two lvl up
     pub fn two_up(&mut self) {
         self.up();
         self.up();
@@ -718,7 +731,7 @@ impl AST {
 
 
     /// convert ast to zcode
-    pub fn to_zcode(& self, out: &mut zfile::Zfile) {
+    pub fn to_zcode(&self, out: &mut zfile::Zfile) {
         let mut manager = CodeGenManager::new();
 
         // Insert temp variables for internal calculations
@@ -769,20 +782,23 @@ impl AST {
 
 // ================================
 // node types
-enum ASTNode {
+#[derive(Clone)]
+pub enum ASTNode {
     Default (NodeDefault),
     Passage (NodePassage)
 }
 
-struct NodePassage {
+#[derive(Clone)]
+pub struct NodePassage {
     category: Token,
     pub childs: Vec<ASTNode>,
     /*tags: Vec<ASTNode>*/
 }
 
-struct NodeDefault {
-    category: Token,
-    childs: Vec<ASTNode>
+#[derive(Clone)]
+pub struct NodeDefault {
+    pub category: Token,
+    pub childs: Vec<ASTNode>
 }
 
 struct CodeGenManager<'a> {
@@ -940,6 +956,17 @@ impl ASTNode {
         }
     }
 
+    pub fn category(&self) -> Token {
+        match self {
+            &ASTNode::Passage(ref t) => {
+                t.category.clone()
+            },
+            &ASTNode::Default(ref t) => {
+                t.category.clone()
+            }
+        }
+    }
+
     /// prints an node of an ast
     pub fn print(&self, indent: usize, force_print: bool) {
         let mut spaces = "".to_string();
@@ -977,6 +1004,29 @@ impl ASTNode {
             _ => panic!("Node cannot be unwrapped as NodeDefault!")
         }
     }
+
+    /// goes through the whole tree and parse the expressions
+    fn parse_expressions(&mut self) {
+        match self {
+            &mut ASTNode::Passage(ref mut node) => {
+                for mut child in node.childs.iter_mut() {
+                    child.parse_expressions();
+                }
+            },
+            &mut ASTNode::Default(ref mut node) => {
+                match &node.category {
+                    &TokExpression => {
+                        expressionparser::ExpressionParser::parse(node);
+                    },
+                    _ => ()
+                }
+
+                for mut child in node.childs.iter_mut() {
+                    child.parse_expressions();
+                }
+            }
+        }
+    }    
 }
 
 // ================================
@@ -1025,6 +1075,28 @@ mod tests {
             (vec![0,1], TokNewLine {location: (0, 0)}),
             (vec![1]  , TokPassage {name: "".to_string(), location: (0, 0)}),
 
+        );
+
+        test_expected(expected, ast);
+    }
+
+    #[test]
+    fn test_expression() {
+        let ast = test_ast("::Passage\n<<print 1-2*3-4*5>>");
+
+        let expected = vec!(
+            (vec![0]            , TokPassage { location: (0, 0), name: "Passage".to_string() }),
+            (vec![0,0]          , TokMacroPrint { location: (0, 0) }),
+            (vec![0,0,0]        , TokExpression),
+            (vec![0,0,0,0]      , TokNumOp { location: (0, 0), op_name: "-".to_string() }),
+            (vec![0,0,0,0,0]    , TokNumOp { location: (0, 0), op_name: "-".to_string() }),
+            (vec![0,0,0,0,0,0]  , TokInt { location: (0, 0), value: 1 }),
+            (vec![0,0,0,0,0,1]  , TokNumOp { location: (0, 0), op_name: "*".to_string() }),
+            (vec![0,0,0,0,0,1,0], TokInt { location: (0, 0), value: 2 }),
+            (vec![0,0,0,0,0,1,1], TokInt { location: (0, 0), value: 3}),
+            (vec![0,0,0,0,1]    , TokNumOp { location: (0, 0), op_name: "*".to_string() }),
+            (vec![0,0,0,0,1,0]  , TokInt { location: (0, 0), value: 4 }),
+            (vec![0,0,0,0,1,1]  , TokInt { location: (0, 0), value: 5 }),
         );
 
         test_expected(expected, ast);
