@@ -297,6 +297,7 @@ impl PartialEq for Token {
             (&TokLogOp{..}, &TokLogOp{..}) => true,
             (&TokSemiColon{..}, &TokSemiColon{..}) => true,
             (&TokNewLine{..}, &TokNewLine{..}) => true,
+            (&TokExpression, &TokExpression) => true,
             _ => false,
         }
     }
@@ -369,7 +370,7 @@ rustlex! TweeLexer {
     let VAR_CHAR = LETTER | DIGIT | UNDERSCORE;
     let VAR_NAME = '$' (LETTER | UNDERSCORE) VAR_CHAR*;
 
-    let INT = "-"? DIGIT+;
+    let INT = /*"-"?*/ DIGIT+;
     let FLOAT = "-"? (DIGIT+ "." DIGIT*) | "-"? (DIGIT* "." DIGIT+) | "-"? "Infinity";
 
     let STRING = '"' ([^'\\''"']|'\\'.)* '"' | "'" ([^'\\'"'"]|'\\'.)* "'";
