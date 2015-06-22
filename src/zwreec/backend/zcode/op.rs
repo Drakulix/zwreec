@@ -26,36 +26,35 @@ pub fn op_call_1n_var(variable: u8) -> Vec<u8> {
 
 /// stores a value to an array
 /// stores the value of variable to the address in: array_address + 2*index
-pub fn op_storew(array_address: u16, index: u8, variable: u8, object_addr: u16) -> Vec<u8> {
-    assert!(array_address > 0, "not allowed array-address, becouse in _some_ interpreters (for example zoom) it crahs. -.-");
-    let args: Vec<ArgType> = vec![ArgType::LargeConst, ArgType::Variable, ArgType::Variable, ArgType::Nothing];
+pub fn op_storew(array_address: &Operand, index: &Variable, variable: &Variable) -> Vec<u8> {
+    // assert!(array_address > 0, "not allowed array-address, becouse in _some_ interpreters (for example zoom) it crahs. -.-");
+    let args: Vec<ArgType> = vec![arg_type(&array_address), ArgType::Variable, ArgType::Variable, ArgType::Nothing];
     let mut bytes = op_var(0x01, args);
 
     // array address
-    write_u16(object_addr + array_address, &mut bytes);
+    write_argument(array_address, &mut bytes);
 
     // array index
-    bytes.push(index);
+    bytes.push(index.id);
 
     // value
-    bytes.push(variable);
+    bytes.push(variable.id);
     bytes
 }
 
 
 /// loads a word from an array in a variable
 /// loadw is an 2op, BUT with 3 ops -.-
-pub fn op_loadw(array_address: u16, index: u8, variable: u8, object_addr: u16) -> Vec<u8> {
-    let mut bytes = op_2(0x0f, vec![ArgType::LargeConst, ArgType::Variable]);
+pub fn op_loadw(array_address: &Operand, index: &Variable, variable: &Variable) -> Vec<u8> {
+    let mut bytes = op_2(0x0f, vec![arg_type(&array_address), ArgType::Variable]);
 
     // array address
-    write_u16(object_addr + array_address, &mut bytes);
-
+    write_argument(array_address, &mut bytes);
     // array index
-    bytes.push(index);
+    bytes.push(index.id);
 
     // variable
-    bytes.push(variable);
+    bytes.push(variable.id);
     bytes
 }
 
@@ -157,24 +156,18 @@ pub fn op_set_color(foreground: u8, background: u8) -> Vec<u8> {
 }
 
 
-/// prints string at given packet address TODO: needs testing
-pub fn op_print_paddr(address: u8) -> Vec<u8> {
-   let mut bytes = op_1(0x0D, ArgType::Variable);
-   bytes.push(address);
+/// prints string at given packed address (which is then multiplied by 8 the zmachine to be the real address)
+pub fn op_print_paddr(address: &Operand) -> Vec<u8> {
+   let mut bytes = op_1(0x0D, arg_type(&address));
+   write_argument(address, &mut bytes);
    bytes
 }
 
-/// prints string at given address which is then divided by 8 to be a packed address TODO: needs testing
-pub fn op_print_paddr_static(address: u16) -> Vec<u8> {
-   let mut bytes = op_1(0x0D, ArgType::LargeConst);
-   write_u16(address/8, &mut bytes);
-   bytes
-}
 
-/// prints string at given adress TODO: needs testing
-pub fn op_print_addr(address: u8) -> Vec<u8> {
-   let mut bytes = op_1(0x07, ArgType::Variable);
-   bytes.push(address);
+/// prints string at given adress
+pub fn op_print_addr(address: &Operand) -> Vec<u8> {
+   let mut bytes = op_1(0x07, arg_type(&address));
+   write_argument(address, &mut bytes);
    bytes
 }
 
@@ -300,9 +293,9 @@ pub fn op_1( value: u8, arg_type: ArgType) -> Vec<u8> {
 /// $20 -- $3f  long      2OP     small constant, variable
 /// $40 -- $5f  long      2OP     variable, small constant
 /// $60 -- $7f  long      2OP     variable, variable
-/// not handled here:
+///
 /// $c0 -- $df  variable  2OP     (operand types in next byte)
-/// except $be  extended opcode given in next byte
+/// not handled here: $be  extended opcode given in next byte
 pub fn op_2( value: u8, arg_types: Vec<ArgType>) -> Vec<u8> {
     let mut byte: u8 = 0x00;
     let mut is_variable: bool = false;
