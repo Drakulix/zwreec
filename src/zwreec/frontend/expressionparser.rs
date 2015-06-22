@@ -2,6 +2,7 @@
 //! to an ast (abstract syntaxtree)
 //! the idea is explained here: http://programmers.stackexchange.com/questions/254074/
 
+//use frontend::ast::*;
 use frontend::ast::{ASTNode, NodeDefault};
 use frontend::lexer::Token;
 use frontend::lexer::Token::*;
