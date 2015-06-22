@@ -1,21 +1,21 @@
 //! Constructs a parsing iterator for a twee token iterator.
 //!
-//! This is a predictive parser for a twee token stream. It takes an `Token` 
+//! This is a predictive parser for a twee token stream. It takes an `Token`
 //! iterator (see [lexer](/zwreec/frontend/lexer/index.html)) and wraps it inside
 //! a parsing iterator that returns operations to construct an abstract syntax
-//! tree. 
+//! tree.
 //!
 //! # Parser
 //!
-//! The underlying parser is a predictive top-down parser for a LL(1) grammar. 
-//! For more information about the parser you should refer to *Compilers: 
-//! Principles, Techniques, and Tools* by A. V. Aho, M. S. Lam, R. Sethi, and J. D. Ullman, 
+//! The underlying parser is a predictive top-down parser for a LL(1) grammar.
+//! For more information about the parser you should refer to *Compilers:
+//! Principles, Techniques, and Tools* by A. V. Aho, M. S. Lam, R. Sethi, and J. D. Ullman,
 //! Chapter 4.4.4: "Nonrecursive Predictive Parsing".
 //!
 //! # Grammar
 //!
 //! As mentioned, the parser operates on a LL(1) grammar. It is documented in [Zwreec's
-//! Github Wiki](https://github.com/Drakulix/zwreec/wiki/Underlying-Twee-Grammar#grammar), 
+//! Github Wiki](https://github.com/Drakulix/zwreec/wiki/Underlying-Twee-Grammar#grammar),
 //! together with the resulting [parse
 //! table](https://github.com/Drakulix/zwreec/wiki/Underlying-Parsetable)
 use config::Config;
@@ -23,7 +23,6 @@ use frontend::lexer::Token;
 use frontend::lexer::Token::*;
 use frontend::ast::ASTOperation;
 use frontend::ast::ASTOperation::*;
-use utils::error::Error;
 use utils::extensions::{ParserExt, ParseResult};
 use self::NonTerminalType::*;
 use self::Elem::*;
@@ -31,6 +30,7 @@ use self::Elem::*;
 //=============================
 // error handling
 
+#[derive(Debug)]
 pub enum ParserError {
     TokenDoNotMatch { token: Option<Token>, stack: Token },
     StackIsEmpty { token: Token },
@@ -87,7 +87,7 @@ pub enum NonTerminalType {
 /// This enum represents the lexical elements of a grammar. Nonterminals are defined by
 /// `NonTerminalType`, terminals use the lexical token as specification.
 ///
-/// For the full grammar, take a look at Zwreec's 
+/// For the full grammar, take a look at Zwreec's
 /// [Wiki](https://github.com/Drakulix/zwreec/wiki/Underlying-Twee-Grammar#grammar).
 pub enum Elem {
     NonTerminal(NonTerminalType),
@@ -142,14 +142,14 @@ impl<'a> Parser<'a> {
                                 if stack_token == token {
                                     (ParseResult::Continue, None)
                                 } else {
-                                    ParserError::TokenDoNotMatch{token: Some(token), stack: stack_token}.raise()
+                                    panic!(ParserError::TokenDoNotMatch{token: Some(token), stack: stack_token});
                                 }
                             },
-                            None => ParserError::StackIsEmpty{token: token}.raise(),
+                            None => panic!(ParserError::StackIsEmpty{token: token}),
                         },
                         None => match state.stack.pop() {
                             Some(Elem::NonTerminal(non_terminal)) => (ParseResult::Continue, (state.grammar_func)(non_terminal, None, &mut state.stack)),
-                            Some(Elem::Terminal(stack_token)) => ParserError::TokenDoNotMatch{token: token, stack: stack_token}.raise(),
+                            Some(Elem::Terminal(stack_token)) => panic!(ParserError::TokenDoNotMatch{token: token, stack: stack_token}),
                             None => (ParseResult::End, None),
                         }
                     }
@@ -227,7 +227,7 @@ impl<'a> Parser<'a> {
                 },
                 (PassageContent, tok @ TokMacroEndIf { .. }) => {
                     debug!("pop TokMacroEndIf Passage;");
-                    
+
                     // jump one ast-level higher
                     Some(UpChild(tok))
                 },
@@ -508,7 +508,7 @@ impl<'a> Parser<'a> {
                         stack.push(NonTerminal(F2));
                         stack.push(NonTerminal(G));
                         stack.push(Terminal(TokNumOp{location: location.clone(), op_name: op.clone()}));
-                        
+
                         Some(AddChild(TokNumOp{location: location, op_name: op}))
                     }
                     _ => None
@@ -536,7 +536,7 @@ impl<'a> Parser<'a> {
                         stack.push(NonTerminal(G2));
                         stack.push(NonTerminal(H));
                         stack.push(Terminal(TokNumOp{location: location.clone(), op_name: op.clone()}));
-                        
+
                         Some(AddChild(TokNumOp{location: location, op_name: op}))
                     }
                     _ => None
@@ -644,7 +644,7 @@ impl<'a> Parser<'a> {
                     Some(AddChild(tok))
                 },
                 (x, tok) => {
-                    ParserError::NoProjection{token: tok, stack: x}.raise()
+                    panic!(ParserError::NoProjection{token: tok, stack: x})
                 }
             }
 
@@ -659,7 +659,7 @@ impl<'a> Parser<'a> {
                     None
                 },
                 _ => {
-                    ParserError::NonTerminalEnd{stack: top}.raise()
+                    panic!(ParserError::NonTerminalEnd{stack: top})
                 }
             }
         }
