@@ -37,7 +37,6 @@ fn short_options() -> getopts::Options {
     opts.optflag("q", "quiet", "be quiet");
     opts.optflagopt("l", "logfile", "specify log file (default zwreec.log)", "LOGFILE");
     opts.optopt("o", "", "name of the output file", "FILE");
-    opts.optflag("f", "force", "force opening of output file");
     opts.optflag("h", "help", "display this help and exit");
     opts.optflag("V", "version", "display version");
 
@@ -213,7 +212,7 @@ fn parse_output(matches: &getopts::Matches) -> Option<Box<Write>> {
         // Check if FILE exists and issue warning.
         if File::open(path).is_ok() {
             if !matches.opt_present("f") {
-                error!("Output file {} already exists. Use '-f' to overwrite!", 
+                error!("Output file {} already exists. Use '-o NAME' to use a different name or '-f' to overwrite!", 
                        path.display());
                 return None;
             } else {
