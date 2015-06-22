@@ -37,7 +37,8 @@ pub struct LexerError;
 ///
 /// The `zwreec::utils::extensions` module defines a new iterator `FilteringScan`.
 /// This struct stores the state for this iterator.
-pub struct ScanState {
+pub struct ScanState<'a> {
+    cfg: &'a Config,
     current_text: String,
     current_text_location: (u64, u64),
     skip_next: bool,
@@ -62,10 +63,11 @@ pub struct ScanState {
 /// let tokens = zwreec::frontend::lexer::lex(&cfg, &mut input);
 /// ```
 #[allow(unused_variables)]
-pub fn lex<'a, R: Read>(cfg: &Config, input: &'a mut R) -> FilteringScan<Peeking<TweeLexer<BufReader<&'a mut R>>, Token>, ScanState, fn(&mut ScanState, (Token, Option<Token>)) -> Option<Token>>  {
+pub fn lex<'a, R: Read>(cfg: &'a Config, input: &'a mut R) -> FilteringScan<Peeking<TweeLexer<BufReader<&'a mut R>>, Token>, ScanState<'a>, fn(&mut ScanState, (Token, Option<Token>)) -> Option<Token>>  {
 
     TweeLexer::new(BufReader::new(input)).peeking().scan_filter(
         ScanState {
+            cfg: cfg,
             current_text: String::new(),
             current_text_location: (0, 0),
             skip_next: false,
@@ -78,6 +80,13 @@ pub fn lex<'a, R: Read>(cfg: &Config, input: &'a mut R) -> FilteringScan<Peeking
                 }
 
                 match elem {
+                    (TokError {location, message}, _) => {
+                        error!("{}", message);
+                        if !state.cfg.force {
+                            panic!();
+                        }
+                        None
+                    }
                     (TokText {location, text}, Some(TokText{ .. })) => {
                         if state.current_text.len() == 0 {
                             state.current_text_location = location;
@@ -166,6 +175,7 @@ pub enum Token {
     TokSemiColon              {location: (u64, u64)},
     TokNewLine                {location: (u64, u64)},
     TokExpression,
+    TokError                  {location: (u64, u64), message: String},
 }
 
 impl Token {
@@ -228,7 +238,8 @@ impl Token {
             &TokCompOp{location, ..} |
             &TokLogOp{location, ..} |
             &TokSemiColon{location} |
-            &TokNewLine{location}
+            &TokNewLine{location} |
+            &TokError{location, ..}
                 => location,
             &TokExpression => (0, 0)
         }
@@ -297,6 +308,7 @@ impl PartialEq for Token {
             (&TokLogOp{..}, &TokLogOp{..}) => true,
             (&TokSemiColon{..}, &TokSemiColon{..}) => true,
             (&TokNewLine{..}, &TokNewLine{..}) => true,
+            (&TokError{..}, &TokError{..}) => true,
             (&TokExpression, &TokExpression) => true,
             _ => false,
         }
@@ -683,7 +695,7 @@ rustlex! TweeLexer {
 
     MACRO_CONTENT {
 
-        MACRO_CONTENT_FAIL => |lexer:&mut TweeLexer<R>| -> Option<Token> { bad_expression_panic(lexer.yystr(), lexer.yylloc()); None }
+        MACRO_CONTENT_FAIL => |lexer:&mut TweeLexer<R>| -> Option<Token> { Some(bad_expression(lexer.yystr(), lexer.yylloc())) }
 
         // Expression Stuff
         FUNCTION =>  |lexer:&mut TweeLexer<R>| {
@@ -741,23 +753,23 @@ rustlex! TweeLexer {
 
     MACRO_CONTENT_SHORT_PRINT {
 
-        MACRO_CONTENT_FAIL => |lexer:&mut TweeLexer<R>| -> Option<Token> { bad_expression_panic(lexer.yystr(), lexer.yylloc()); None }
+        MACRO_CONTENT_FAIL => |lexer:&mut TweeLexer<R>| -> Option<Token> { Some(bad_expression(lexer.yystr(), lexer.yylloc())) }
 
         // Expression Stuff
-        FUNCTION =>   |lexer:&mut TweeLexer<R>| -> Option<Token> { bad_expression_panic(lexer.yystr(), lexer.yylloc()); None }
-        STRING =>     |lexer:&mut TweeLexer<R>| -> Option<Token> { bad_expression_panic(lexer.yystr(), lexer.yylloc()); None }
-        VAR_NAME =>   |lexer:&mut TweeLexer<R>| -> Option<Token> { bad_expression_panic(lexer.yystr(), lexer.yylloc()); None }
-        FLOAT =>      |lexer:&mut TweeLexer<R>| -> Option<Token> { bad_expression_panic(lexer.yystr(), lexer.yylloc()); None }
-        INT =>        |lexer:&mut TweeLexer<R>| -> Option<Token> { bad_expression_panic(lexer.yystr(), lexer.yylloc()); None }
-        BOOL =>       |lexer:&mut TweeLexer<R>| -> Option<Token> { bad_expression_panic(lexer.yystr(), lexer.yylloc()); None }
-        NUM_OP =>     |lexer:&mut TweeLexer<R>| -> Option<Token> { bad_expression_panic(lexer.yystr(), lexer.yylloc()); None }
-        COMP_OP =>    |lexer:&mut TweeLexer<R>| -> Option<Token> { bad_expression_panic(lexer.yystr(), lexer.yylloc()); None }
-        LOG_OP =>     |lexer:&mut TweeLexer<R>| -> Option<Token> { bad_expression_panic(lexer.yystr(), lexer.yylloc()); None }
-        PAREN_OPEN => |lexer:&mut TweeLexer<R>| -> Option<Token> { bad_expression_panic(lexer.yystr(), lexer.yylloc()); None }
-        PAREN_CLOSE =>|lexer:&mut TweeLexer<R>| -> Option<Token> { bad_expression_panic(lexer.yystr(), lexer.yylloc()); None }
-        SEMI_COLON => |lexer:&mut TweeLexer<R>| -> Option<Token> { bad_expression_panic(lexer.yystr(), lexer.yylloc()); None }
-        ASSIGN =>     |lexer:&mut TweeLexer<R>| -> Option<Token> { bad_expression_panic(lexer.yystr(), lexer.yylloc()); None }
-        COLON =>      |lexer:&mut TweeLexer<R>| -> Option<Token> { bad_expression_panic(lexer.yystr(), lexer.yylloc()); None }
+        FUNCTION =>   |lexer:&mut TweeLexer<R>| -> Option<Token> { Some(bad_expression(lexer.yystr(), lexer.yylloc())) }
+        STRING =>     |lexer:&mut TweeLexer<R>| -> Option<Token> { Some(bad_expression(lexer.yystr(), lexer.yylloc())) }
+        VAR_NAME =>   |lexer:&mut TweeLexer<R>| -> Option<Token> { Some(bad_expression(lexer.yystr(), lexer.yylloc())) }
+        FLOAT =>      |lexer:&mut TweeLexer<R>| -> Option<Token> { Some(bad_expression(lexer.yystr(), lexer.yylloc())) }
+        INT =>        |lexer:&mut TweeLexer<R>| -> Option<Token> { Some(bad_expression(lexer.yystr(), lexer.yylloc())) }
+        BOOL =>       |lexer:&mut TweeLexer<R>| -> Option<Token> { Some(bad_expression(lexer.yystr(), lexer.yylloc())) }
+        NUM_OP =>     |lexer:&mut TweeLexer<R>| -> Option<Token> { Some(bad_expression(lexer.yystr(), lexer.yylloc())) }
+        COMP_OP =>    |lexer:&mut TweeLexer<R>| -> Option<Token> { Some(bad_expression(lexer.yystr(), lexer.yylloc())) }
+        LOG_OP =>     |lexer:&mut TweeLexer<R>| -> Option<Token> { Some(bad_expression(lexer.yystr(), lexer.yylloc())) }
+        PAREN_OPEN => |lexer:&mut TweeLexer<R>| -> Option<Token> { Some(bad_expression(lexer.yystr(), lexer.yylloc())) }
+        PAREN_CLOSE =>|lexer:&mut TweeLexer<R>| -> Option<Token> { Some(bad_expression(lexer.yystr(), lexer.yylloc())) }
+        SEMI_COLON => |lexer:&mut TweeLexer<R>| -> Option<Token> { Some(bad_expression(lexer.yystr(), lexer.yylloc())) }
+        ASSIGN =>     |lexer:&mut TweeLexer<R>| -> Option<Token> { Some(bad_expression(lexer.yystr(), lexer.yylloc())) }
+        COLON =>      |lexer:&mut TweeLexer<R>| -> Option<Token> { Some(bad_expression(lexer.yystr(), lexer.yylloc())) }
         // Expression Stuff End
 
         NEWLINE =>  |_:&mut TweeLexer<R>| -> Option<Token> { None }
@@ -772,7 +784,7 @@ rustlex! TweeLexer {
 
     MACRO_CONTENT_SHORT_DISPLAY {
 
-        MACRO_CONTENT_FAIL => |lexer:&mut TweeLexer<R>| -> Option<Token> { bad_argument_panic(lexer.yystr(), lexer.yylloc()); None }
+        MACRO_CONTENT_FAIL => |lexer:&mut TweeLexer<R>| -> Option<Token> { Some(bad_argument(lexer.yystr(), lexer.yylloc())) }
 
         // Expression Stuff
         FUNCTION =>   |_:&mut TweeLexer<R>| -> Option<Token> { None }
@@ -892,16 +904,18 @@ fn unescape(s: String) -> String {
     unescaped
 }
 
-fn bad_expression_panic(s: String, loc: (u64,u64)) {
+fn bad_expression(s: String, loc: (u64,u64)) -> Token {
     let (line, symbol) = loc;
     //todo: error message should be "<<print>> bad expression: $test + bla"
-    panic!("<<print>> bad expression at {},{}: \"{}\"", line, symbol, s);
+    let m = format!("<<print>> bad expression at {},{}: \"{}\"", line, symbol, s);
+    TokError{location: loc, message: m}
 }
 
-fn bad_argument_panic(s: String, loc: (u64,u64)) {
+fn bad_argument(s: String, loc: (u64,u64)) -> Token {
     let (line, symbol) = loc;
     //todo: error message should be "<<Pop one>> bad argument: one"
-    panic!("<<display>> bad argument at {},{}: \"{}\"", line, symbol, s);
+    let m = format!("<<display>> bad argument at {},{}: \"{}\"", line, symbol, s);
+    TokError{location: loc, message: m}
 }
 
 
