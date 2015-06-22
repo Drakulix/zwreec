@@ -246,7 +246,7 @@ pub fn op_mul(operand1: &Operand, operand2: &Operand, save_variable: &Variable) 
 
 /// division
 /// save_variable = operand1 / operand2
-pub fn op_mul(operand1: &Operand, operand2: &Operand, save_variable: &Variable) -> Vec<u8> {
+pub fn op_div(operand1: &Operand, operand2: &Operand, save_variable: &Variable) -> Vec<u8> {
     let args: Vec<ArgType> = vec![arg_type(operand1), arg_type(operand2)];
     let mut bytes = op_2(0x17, args);
     write_argument(operand1, &mut bytes);
