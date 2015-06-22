@@ -161,6 +161,8 @@ use std::vec::Vec;
 /// }
 /// ```
 pub struct Config {
+    /// Force compilation despite errors
+    pub force: bool,
     /// Add easter egg to compiler
     pub easter_egg: bool,
     /// Instruct compiler to run these test-cases
@@ -178,6 +180,7 @@ impl Config {
     /// ```
     pub fn default_config() -> Config {
         Config{
+            force: false,
             easter_egg: true,
             test_cases: Vec::new(),
         }
@@ -209,6 +212,10 @@ impl Config {
 
         if matches.opt_present("generate-sample-zcode") {
             cfg.test_cases.push(TestCase::ZcodeBackend);
+        }
+
+        if matches.opt_present("f") {
+            cfg.force = true;
         }
 
         // TODO: Find a way to make these two loops somewhat less.. repetitive
@@ -308,6 +315,7 @@ pub enum TestCase {
 /// As you can see, `options()` returns your own command line options, which are then conditionally
 /// expanded by using `zwreec_options()`.
 pub fn zwreec_options(mut opts: getopts::Options) -> getopts::Options {
+    opts.optflag("f", "force", "force opening of output file");
     opts.optmulti("F", "feature", "", "FEAT");
     opts.optmulti("N", "no-feature", "enable or disable a feature (can occur multiple times).
                         List of supported features (default):
