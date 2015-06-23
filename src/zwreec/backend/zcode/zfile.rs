@@ -1101,3 +1101,22 @@ fn test_op_quit() {
 fn test_op_add() {
     assert_eq!(op::op_add(&Operand::new_var(1),&Operand::new_var(2),&Variable::new(3)),vec![0x74,0x01,0x02,0x03]);
 }
+#[test]
+fn test_op_sub() {
+    assert_eq!(op::op_sub(&Operand::new_var(1),&Operand::new_var(2),&Variable::new(3)),vec![0x75,0x01,0x02,0x03]);
+}
+
+#[test]
+fn test_op_mul() {
+    assert_eq!(op::op_mul(&Operand::new_var(1),&Operand::new_var(2),&Variable::new(3)),vec![0x76,0x01,0x02,0x03]);
+}
+
+#[test]
+fn test_op_div() {
+    assert_eq!(op::op_div(&Operand::new_var(1),&Operand::new_var(2),&Variable::new(3)),vec![0x77,0x01,0x02,0x03]);
+}
+
+#[test]
+fn test_op_mod() {
+    assert_eq!(op::op_mod(&Operand::new_var(1),&Operand::new_var(2),&Variable::new(3)),vec![0x78,0x01,0x02,0x03]);
+}
