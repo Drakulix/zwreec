@@ -310,7 +310,7 @@ pub fn function_random(arg_from: &Operand, arg_to: &Operand,
         operand2: arg_from.clone(), 
         save_variable: range_var.clone()
     });
-    code.push(ZOP::Sub{
+    code.push(ZOP::Add{
         operand1: Operand::new_var(range_var.id), 
         operand2: Operand::new_const(1), 
         save_variable: range_var.clone()
@@ -318,13 +318,18 @@ pub fn function_random(arg_from: &Operand, arg_to: &Operand,
 
     let var = Variable::new(temp_ids.pop().unwrap());
 
-    // get a random number between 0 and range
+    // get a random number between 1 and range
     code.push(ZOP::Random {range: Operand::new_var(range_var.id), variable: var.clone()} );
 
-    // add arg_from to range
+    // add (arg_from - 1) to range (because min. random is 1 not 0)
     code.push(ZOP::Add{
         operand1: Operand::new_var(var.id), 
         operand2: arg_from.clone(), 
+        save_variable: var.clone()
+    });
+     code.push(ZOP::Sub{
+        operand1: Operand::new_var(var.id), 
+        operand2: Operand::new_const(1), 
         save_variable: var.clone()
     });
     temp_ids.push(range_var.id);
