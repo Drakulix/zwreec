@@ -15,7 +15,7 @@ ASCII-Zeichen
 Unicode
 <<set $last to 2>>
 
-We currently support a wide range of Unicode characters. The Z-Machine has support for all unicode characters from 0x0 to 0xffffffff. These are excerpts from multiple Unicode Code pages.
+We currently support a wide range of Unicode characters. The Z-Machine has support for all unicode characters from 0x0 to 0xffff. These are excerpts from multiple Unicode Code pages.
 
 U+00000000 Basic Latin:
  !"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]_'abcdefghijklmnopqrstuvwxyz{|}~
