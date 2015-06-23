@@ -1076,3 +1076,8 @@ fn test_zfile_label_and_jump_loop() {
     assert_eq!((labels[0].to_addr as i32 - jumps[0].from_addr as i32) as i16, rel_addr);  // specified as in write_jumps()
     assert_eq!(-1 as i16, rel_addr);  // this is the expected result, jump one address back
 }
+
+#[test]
+fn test_op_inc() {
+    assert_eq!(op::op_inc(1),vec![0x95,0x01]);
+}

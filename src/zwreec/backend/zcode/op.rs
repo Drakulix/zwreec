@@ -407,3 +407,4 @@ pub fn write_i16(value: i16, v: &mut Vec<u8>) {
         v.push((value >> 8) as u8);
         v.push((value & 0xff) as u8);
 }
+
