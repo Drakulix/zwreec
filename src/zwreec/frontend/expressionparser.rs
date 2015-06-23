@@ -29,6 +29,7 @@ impl ExpressionParser {
             match top.category() {
                 tok @ TokBoolean  { .. } |
                 tok @ TokInt      { .. } |
+                tok @ TokString   { .. } |
                 tok @ TokFunction { .. } |
                 tok @ TokVariable { .. } => {
                     let childs_copy = top.as_default().childs.to_vec();
