@@ -19,21 +19,14 @@ pub fn temp_create_zcode_example<W: Write>(output: &mut W) {
     let mut zfile: Zfile = zfile::Zfile::new();
 
     zfile.start();
-    let store_addr = zfile.object_addr + 2;
-    // code for debugging purposes and can be changed as wanted
     zfile.emit(vec![
-        ZOP::Routine{name: "Start".to_string(), count_variables: 1},
-        ZOP::PrintOps{text: "Content at memory pointed by variable (expected 8729): \n".to_string()},
-        ZOP::StoreVariable{variable: Variable::new(200), value: Operand::new_large_const(0x2219)},
-        ZOP::StoreW{array_address: Operand::new_large_const(store_addr as i16), index: Variable::new(1), variable: Variable::new(200)},  // index at var:1 is 0
-        ZOP::StoreVariable{variable: Variable::new(200), value: Operand::new_large_const(store_addr as i16)},
-        ZOP::LoadW{array_address: Operand::new_var(200), index: Variable::new(1), variable: Variable::new(190)},
+        ZOP::Routine{name: "Start".to_string(), count_variables: 3},
+        ZOP::StoreVariable{variable: Variable::new(200), value: Operand::new_large_const(0x0002)},
+        ZOP::StoreVariable{variable: Variable::new(201), value: Operand::new_large_const(0x0004)},
+        ZOP::StoreVariable{variable: Variable::new(202), value: Operand::new_large_const(0x1000)},
+        ZOP::Mul{operand1: Operand::new_var(200), operand2:Operand::new_var(201) , save_variable: Variable::new(202)},
         ZOP::Newline,
-        ZOP::PrintNumVar{variable: Variable::new(190)},
-        ZOP::Newline,
-        ZOP::PrintUnicodeVar{var: Variable::new(190)}, // should output ∙
-        ZOP::Newline,
-        ZOP::PrintUnicode{c: '∙' as u16},
+        ZOP::PrintNumVar{variable: Variable::new(202)},
         ZOP::Newline,
         ZOP::Quit,
         ]);

@@ -6,7 +6,7 @@
 //!
 //! # Example
 //!
-//! This small example shows how the differend submodules interact and can 
+//! This small example shows how the different submodules interact and can 
 //! be used to parse a Twee-File.
 //!
 //! ```

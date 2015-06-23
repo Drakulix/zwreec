@@ -1,6 +1,6 @@
-//! The `expressionparser` module parse every expression
-//! to an ast (abstract syntaxtree)
-//! the idea is explained here: http://programmers.stackexchange.com/questions/254074/
+//! The `expressionparser` module parses every expression
+//! to an AST (abstract syntax tree).
+//! The idea is explained here: http://programmers.stackexchange.com/questions/254074/
 
 use frontend::ast::{ASTNode, NodeDefault};
 use frontend::lexer::Token;
@@ -28,7 +28,7 @@ impl ExpressionParser {
         while let Some(top) = node.childs.pop() {
             match top.category() {
                 tok @ TokBoolean  { .. } |
-                tok @ TokInt      { .. } | 
+                tok @ TokInt      { .. } |
                 tok @ TokString   { .. } |
                 tok @ TokFunction { .. } |
                 tok @ TokVariable { .. } => {
@@ -36,7 +36,8 @@ impl ExpressionParser {
                     self.expr_stack.push( ASTNode::Default(NodeDefault { category: tok.clone(), childs: childs_copy }) );
                 },
                 tok @ TokNumOp  { .. } |
-                tok @ TokCompOp { .. } => {
+                tok @ TokCompOp { .. } |
+                tok @ TokLogOp  { .. } => {
                     let length = self.oper_stack.len();
 
                     // cycle through the oper_stack stack backwards
@@ -91,14 +92,16 @@ fn is_ranking_not_higher(token1: Token, token2: Token) -> bool {
     let mut op2: String = "".to_string();
     match token1 {
         TokNumOp  { op_name, .. } |
-        TokCompOp { op_name, .. } => {
+        TokCompOp { op_name, .. } |
+        TokLogOp  { op_name, .. } => {
             op1 = op_name.clone();
         },
         _ => ()
     }
     match token2 {
         TokNumOp  { op_name, .. } |
-        TokCompOp { op_name, .. } => {
+        TokCompOp { op_name, .. } |
+        TokLogOp  { op_name, .. } => {
             op2 = op_name.clone();
         },
         _ => ()
@@ -114,11 +117,13 @@ fn is_ranking_not_higher(token1: Token, token2: Token) -> bool {
 /// ranking of the operators
 fn operator_rank(op: String) -> u8 {
     match op.as_ref() {
+        "or"                => 1,
+        "and"               => 2,
         "is" | "==" | "eq" | "neq" | ">" | "gt" | ">=" | "gte" | "<" | "lt" | "<=" | "lte"
-                    => 2,
-        "+" | "-"   => 3,
-        "*" | "/"   => 4,
-        "%"         => 5,
-        _           => panic!{"This operator is not implemented"}
+                            => 3,
+        "+" | "-"           => 4,
+        "*" | "/" | "%"     => 5,
+        "not"               => 6,
+        _                   => panic!{"This operator is not implemented"}
     }
 }
