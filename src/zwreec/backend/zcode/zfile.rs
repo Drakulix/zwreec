@@ -15,7 +15,8 @@ pub struct LargeConstant { pub value: i16 }
 pub enum Operand {
     Var(Variable),
     Const(Constant) ,
-    LargeConst(LargeConstant)
+    LargeConst(LargeConstant),
+    StringRef(LargeConstant),
 }
 
 impl Operand {
@@ -25,6 +26,10 @@ impl Operand {
 
     pub fn new_large_const(value: i16) -> Operand {
         Operand::LargeConst(LargeConstant { value: value })
+    }
+
+    pub fn new_string_ref(value: i16) -> Operand {
+        Operand::StringRef(LargeConstant { value: value })
     }
 
     pub fn new_var(id: u8) -> Operand {
@@ -138,6 +143,7 @@ pub struct Zstring {
     pub chars: Vec<u8>,  // contains either ztext or [length:u16, utf16char:u16, …]
     pub orig: String,
     pub unicode: bool,
+    pub written_addr: u32,
 }
 
 #[derive(Debug, PartialEq, Clone)]
@@ -302,6 +308,33 @@ impl Zfile {
         }
     }
 
+    pub fn write_string(&mut self, newstring: &str) -> u16 {
+        self.write_strings();
+        for string in self.strings.iter_mut() {
+            if string.orig == newstring && string.unicode {
+                return string.written_addr as u16;
+            }
+        }
+        let mut utf16bytes: Vec<u8> = vec![];
+        for c in newstring.chars() {
+            let value: u16 = c as u16;
+            utf16bytes.push((value >> 8) as u8);
+            utf16bytes.push((value & 0xff) as u8);
+         }
+        let length: u16 = utf16bytes.len() as u16 / 2u16;
+        utf16bytes.insert(0, (length >> 8) as u8);
+        utf16bytes.insert(1, (length & 0xff) as u8);
+        let str_addr: u16 = self.last_static_written;
+        assert!(str_addr >= self.object_addr && str_addr + (utf16bytes.len() as u16) < self.program_addr, "invalid addr to store a string");
+        debug!("{:#x}: utf16 \"{}\"", str_addr, newstring);
+        let hexstrs: Vec<String> = utf16bytes.iter().map(|b| format!("{:02X}", b)).collect();
+        trace!("{:#x}: {}", str_addr, hexstrs.connect(" "));
+        self.data.write_bytes(&utf16bytes, str_addr as usize);
+        self.last_static_written = self.last_static_written + utf16bytes.len() as u16;
+        self.strings.push(Zstring{orig: newstring.to_string(), chars: utf16bytes, unicode: true, written_addr: str_addr as u32, from_addr: 0});
+        str_addr
+    }
+
     /// saves the zstrings to high mem and writes the resulting address to the
     /// print_paddr arguments which referencing the string
     fn write_strings(&mut self) {
@@ -321,7 +354,7 @@ impl Zfile {
                 }
             }
             if string_found == false {  // add new string to high mem
-                let n_str_addr: u32 = if string.unicode {
+                let n_str_addr: u32 = if string.unicode && string.written_addr == 0 {
                     let str_addr: u16 = self.last_static_written;
                     assert!(str_addr >= self.object_addr && str_addr + (string.chars.len() as u16) < self.program_addr, "invalid addr to store a string");
                     debug!("{:#x}: utf16 \"{}\"", str_addr, string.orig);
@@ -331,7 +364,7 @@ impl Zfile {
                     self.data.write_u16(str_addr as u16, string.from_addr as usize);  // normal addr
                     self.last_static_written = self.last_static_written + string.chars.len() as u16;
                     str_addr as u32
-                } else {
+                } else if string.unicode == false && string.written_addr == 0 {
                     let str_addr: u32 = align_address(self.data.len() as u32, 8);
                     self.data.write_zero_until(str_addr as usize);
                     debug!("{:#x}: zstring \"{}\"", str_addr, string.orig);
@@ -340,7 +373,10 @@ impl Zfile {
                     self.data.append_bytes(&string.chars);
                     self.data.write_u16((str_addr/8) as u16, string.from_addr as usize);  // packed addr
                     str_addr
+                } else {
+                    string.written_addr
                 };
+                string.written_addr = n_str_addr;
                 prev_strings.push((string.clone(), n_str_addr));
              }
          }
@@ -506,7 +542,7 @@ impl Zfile {
                 utf16bytes.insert(0, (length >> 8) as u8);
                 utf16bytes.insert(1, (length & 0xff) as u8);
                 self.emit(vec![ZOP::Call2NWithArg{jump_to_label: "print_unicode".to_string(), arg: Operand::new_large_const(0)}]);
-                self.strings.push(Zstring{chars: utf16bytes, orig: current_utf16.to_string(), from_addr: (self.data.len()-2) as u32, unicode: true});
+                self.strings.push(Zstring{chars: utf16bytes, orig: current_utf16.to_string(), from_addr: (self.data.len()-2) as u32, unicode: true, written_addr: 0});
             } else {
                 self.emit(vec![ZOP::PrintUnicode{c: current_utf16.chars().nth(0).unwrap() as u16}]);
             }
@@ -528,7 +564,7 @@ impl Zfile {
         let mut text_bytes: Bytes = Bytes{bytes: Vec::new()};
         ztext::encode(&mut text_bytes, text, &self.unicode_table);
         self.strings.push(
-            Zstring{chars: text_bytes.bytes, orig: text.to_string(), from_addr: (self.data.len()-2) as u32, unicode: false});
+            Zstring{chars: text_bytes.bytes, orig: text.to_string(), from_addr: (self.data.len()-2) as u32, unicode: false, written_addr: 0});
     }
 
     // ================================

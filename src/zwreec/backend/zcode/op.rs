@@ -348,7 +348,8 @@ pub fn arg_type(operand: &Operand) -> ArgType {
     match operand {
         &Operand::Var(_) => ArgType::Variable,
         &Operand::Const(_) => ArgType::SmallConst,
-        &Operand::LargeConst(_) => ArgType::LargeConst
+        &Operand::LargeConst(_) => ArgType::LargeConst,
+        &Operand::StringRef(_) => ArgType::LargeConst,
     }
 }
 
@@ -356,7 +357,8 @@ pub fn write_argument(operand: &Operand, v: &mut Vec<u8>){
     match operand {
         &Operand::Var(ref var)=> v.push(var.id),
         &Operand::Const(ref constant) => v.push(constant.value),
-        &Operand::LargeConst(ref constant) => write_i16(constant.value, v)
+        &Operand::LargeConst(ref constant) => write_i16(constant.value, v),
+        &Operand::StringRef(ref constant) => write_i16(constant.value, v),
     };
 }
 

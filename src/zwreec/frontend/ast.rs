@@ -96,11 +96,15 @@ fn gen_zcode<'a>(node: &'a ASTNode, mut out: &mut zfile::Zfile, mut manager: &mu
                        				if expression_node.childs.len() != 1 {
                        					panic!("Unsupported expression!")
                        				}
-                       				evaluate_expression(&expression_node.childs[0], &mut code, manager)
+                       				evaluate_expression(&expression_node.childs[0], &mut code, manager, &mut out)
                        			}, _ => panic!("Unsupported expression!")
                        		};
                         	if !manager.symbol_table.is_known_symbol(var_name) {
-                            	manager.symbol_table.insert_new_symbol(&var_name, Type::Integer);
+                                let vartype = match result {
+                                    Operand::StringRef(_) => Type::String,
+                                    _ => Type::Integer
+                                };
+                            	manager.symbol_table.insert_new_symbol(&var_name, vartype);
                             }
                             let symbol_id = manager.symbol_table.get_symbol_id(var_name);
                             code.push(ZOP::StoreVariable{variable: symbol_id, value: result});
@@ -125,7 +129,7 @@ fn gen_zcode<'a>(node: &'a ASTNode, mut out: &mut zfile::Zfile, mut manager: &mu
                     let mut code: Vec<ZOP> = vec![];
 
                     // Evaluate the contained expression
-                    let result = evaluate_expression(&expression_node.childs[0], &mut code, manager);
+                    let result = evaluate_expression(&expression_node.childs[0], &mut code, manager, &mut out);
 
                     let if_id = manager.ids_if.start_next();
                     let if_label = format!("if_{}", if_id);
@@ -159,7 +163,7 @@ fn gen_zcode<'a>(node: &'a ASTNode, mut out: &mut zfile::Zfile, mut manager: &mu
                     };
 
                     // Evaluate the contained expression
-                    let result = evaluate_expression(&expression_node.childs[0], &mut code, manager);
+                    let result = evaluate_expression(&expression_node.childs[0], &mut code, manager, &mut out);
  
                     let if_id = manager.ids_if.start_next();
 
@@ -216,9 +220,10 @@ fn gen_zcode<'a>(node: &'a ASTNode, mut out: &mut zfile::Zfile, mut manager: &mu
 
                     match child.category {
                     	TokExpression => {
-                    		let eval = evaluate_expression(&child.childs[0], &mut code, manager);
+                    		let eval = evaluate_expression(&child.childs[0], &mut code, manager, &mut out);
                     		match eval {
                     			Operand::Var(var) => code.push(ZOP::PrintNumVar{variable: var}),
+                                Operand::StringRef(addr) => code.push(ZOP::PrintUnicodeStr{address: Operand::new_large_const(addr.value)}),
                     			Operand::Const(c) => code.push(ZOP::Print{text: format!("{}", c.value)}),
                     			Operand::LargeConst(c) => code.push(ZOP::Print{text: format!("{}", c.value)})
                     		};
@@ -263,14 +268,14 @@ fn gen_zcode<'a>(node: &'a ASTNode, mut out: &mut zfile::Zfile, mut manager: &mu
     }
 }
 
-fn evaluate_expression<'a>(node: &'a ASTNode, code: &mut Vec<ZOP>, mut manager: &mut CodeGenManager<'a>) -> Operand {
+fn evaluate_expression<'a>(node: &'a ASTNode, code: &mut Vec<ZOP>, mut manager: &mut CodeGenManager<'a>, mut out: &mut zfile::Zfile) -> Operand {
 	let mut temp_ids = CodeGenManager::new_temp_var_vec();
-	evaluate_expression_internal(node, code, &mut temp_ids, manager)
+	evaluate_expression_internal(node, code, &mut temp_ids, manager, &mut out)
 }
 
 // Evaluates an expression node to zCode.
 fn evaluate_expression_internal<'a>(node: &'a ASTNode, code: &mut Vec<ZOP>,
-		temp_ids: &mut Vec<u8>, mut manager: &mut CodeGenManager<'a>) -> Operand {
+		temp_ids: &mut Vec<u8>, mut manager: &mut CodeGenManager<'a>, mut out: &mut zfile::Zfile) -> Operand {
 	let n = node.as_default();
 
 	match n.category {
@@ -278,24 +283,24 @@ fn evaluate_expression_internal<'a>(node: &'a ASTNode, code: &mut Vec<ZOP>,
 			if n.childs.len() != 2 {
 				panic!("Numeric operators need two arguments!")
 			}
-			let eval0 = evaluate_expression_internal(&n.childs[0], code, temp_ids, manager);
-			let eval1 = evaluate_expression_internal(&n.childs[1], code, temp_ids, manager);
+			let eval0 = evaluate_expression_internal(&n.childs[0], code, temp_ids, manager, &mut out);
+			let eval1 = evaluate_expression_internal(&n.childs[1], code, temp_ids, manager, &mut out);
 			eval_num_op(&eval0, &eval1, &**op_name, code, temp_ids)
 		},
 		TokCompOp { ref op_name, .. } => {
 			if n.childs.len() != 2 {
 				panic!("Numeric operators need two arguments!")
 			}
-			let eval0 = evaluate_expression_internal(&n.childs[0], code, temp_ids, manager);
-			let eval1 = evaluate_expression_internal(&n.childs[1], code, temp_ids, manager);
+			let eval0 = evaluate_expression_internal(&n.childs[0], code, temp_ids, manager, &mut out);
+			let eval1 = evaluate_expression_internal(&n.childs[1], code, temp_ids, manager, &mut out);
 			eval_comp_op(&eval0, &eval1, &**op_name, code, temp_ids, manager)
 		},
 		TokLogOp { ref op_name, .. } => {
-			let eval0 = evaluate_expression_internal(&n.childs[0], code, temp_ids, manager);
+			let eval0 = evaluate_expression_internal(&n.childs[0], code, temp_ids, manager, &mut out);
 			
 			match &**op_name {
 				"and" | "or" => {
-					let eval1 = evaluate_expression_internal(&n.childs[1], code, temp_ids, manager);
+					let eval1 = evaluate_expression_internal(&n.childs[1], code, temp_ids, manager, &mut out);
 					eval_and_or(&eval0, &eval1, &**op_name, code, temp_ids)
 				},
 				"not" => {
@@ -310,6 +315,9 @@ fn evaluate_expression_internal<'a>(node: &'a ASTNode, code: &mut Vec<ZOP>,
 		TokBoolean { ref value, .. } => {
 			boolstr_to_const(&**value)
 		},
+        TokString {ref value, .. } => {
+            Operand::new_string_ref(out.write_string(value) as i16)
+        }
 		TokVariable { ref name, .. } => {
 			Operand::Var(manager.symbol_table.get_symbol_id(name))
 		},
@@ -328,8 +336,8 @@ fn evaluate_expression_internal<'a>(node: &'a ASTNode, code: &mut Vec<ZOP>,
 				    let from = &args[0].as_default().childs[0];
 				    let to = &args[1].as_default().childs[0];
 
-				    let from_value = evaluate_expression_internal(from, code, temp_ids, manager);
-				    let to_value = evaluate_expression_internal(to, code, temp_ids, manager);
+				    let from_value = evaluate_expression_internal(from, code, temp_ids, manager, &mut out);
+				    let to_value = evaluate_expression_internal(to, code, temp_ids, manager, &mut out);
 					function_random(&from_value, &to_value, code, temp_ids)
 				},
 				_ => { panic!("Unsupported function: {}", name)}
@@ -804,7 +812,7 @@ struct CodeGenManager<'a> {
     ids_if: IdentifierProvider,
     ids_expr: IdentifierProvider,
     symbol_table: SymbolTable<'a>,
-    format_state: FormattingState
+    format_state: FormattingState,
 }
 
 struct IdentifierProvider {
@@ -894,6 +902,7 @@ impl <'a> SymbolTable<'a> {
         let (_,b) = self.symbol_map.get(symbol).unwrap().clone();
         b
     }
+
 }
 
 impl ASTNode {
