@@ -1,0 +1,22 @@
+:: Start
+<<set $max to 0>>
+<<set $random_max to 100>>
+[[Start randomizing...|MaxRandom]]
+
+:: MaxRandom
+<<set $random to random(0,$random_max)>>
+Random is: <<$random>>
+<<if $random > $max>>
+<<set $max to $random>>
+<<endif>>
+Maximum is: <<$max>>
+<<if $max == $random_max>>
+Maximum ist reached.
+[[Start over...|Start]]
+<<else if $max > $random_max - 25>>
+Maximum is almost reached.
+[[Start over...|Start]]
+<<endif>>
+<<if $max < $random_max>>
+[[Next Random...|MaxRandom]]
+<<endif>>
