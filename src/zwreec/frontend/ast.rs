@@ -352,13 +352,13 @@ fn eval_num_op<'a>(eval0: &Operand, eval1: &Operand, op_name: &str, code: &mut V
 			code.push(ZOP::Sub{operand1: eval0.clone(), operand2: eval1.clone(), save_variable: save_var.clone()});
 		},
 		"*" => {
-
+            code.push(ZOP::Mul{operand1: eval0.clone(), operand2: eval1.clone(), save_variable: save_var.clone()});
 		},
 		"/" => {
-
+            code.push(ZOP::Div{operand1: eval0.clone(), operand2: eval1.clone(), save_variable: save_var.clone()});
 		},
 		"%" => {
-
+            code.push(ZOP::Mod{operand1: eval0.clone(), operand2: eval1.clone(), save_variable: save_var.clone()});
 		},
 		_ => panic!("unhandled op")
 	};
