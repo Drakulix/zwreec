@@ -1,6 +1,6 @@
-//! The `expressionparser` module parse every expression
-//! to an ast (abstract syntaxtree)
-//! the idea is explained here: http://programmers.stackexchange.com/questions/254074/
+//! The `expressionparser` module parses every expression
+//! to an AST (abstract syntax tree).
+//! The idea is explained here: http://programmers.stackexchange.com/questions/254074/
 
 use frontend::ast::{ASTNode, NodeDefault};
 use frontend::lexer::Token;
