@@ -157,7 +157,6 @@ pub fn op_set_color(foreground: u8, background: u8) -> Vec<u8> {
 
 
 /// prints string at given packed address (which is then multiplied by 8 the zmachine to be the real address)
-/// TODO: needs testing
 pub fn op_print_paddr(address: &Operand) -> Vec<u8> {
    let mut bytes = op_1(0x0D, arg_type(&address));
    write_argument(address, &mut bytes);
@@ -165,7 +164,7 @@ pub fn op_print_paddr(address: &Operand) -> Vec<u8> {
 }
 
 
-/// prints string at given adress TODO: needs testing
+/// prints string at given adress
 pub fn op_print_addr(address: &Operand) -> Vec<u8> {
    let mut bytes = op_1(0x07, arg_type(&address));
    write_argument(address, &mut bytes);
@@ -173,7 +172,7 @@ pub fn op_print_addr(address: &Operand) -> Vec<u8> {
 }
 
 
-/// returns a LargeConst TODO: needs testing
+/// returns a LargeConst
 pub fn op_ret(value: u16) -> Vec<u8> {
     let mut bytes = op_1(0x0b, ArgType::LargeConst);
     write_u16(value, &mut bytes);
@@ -181,7 +180,7 @@ pub fn op_ret(value: u16) -> Vec<u8> {
 }
 
 
-// saves an u8 to the variable TODO: needs testing
+// saves an u8 to the variable
 pub fn op_store_var(variable: &Variable, value: &Operand) -> Vec<u8> {
     let args: Vec<ArgType> = vec![ArgType::Reference, arg_type(&value)];
     let mut bytes = op_2(0x0d, args);

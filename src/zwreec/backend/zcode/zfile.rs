@@ -1195,3 +1195,23 @@ fn test_op_erase_window() {
 fn test_op_call_1n_var() {
     assert_eq!(op::op_call_1n_var(0x01),vec![0xAF,0x01]);
 }
+
+#[test]
+fn test_op_print_paddr() {
+    assert_eq!(op::op_print_paddr(&Operand::new_var(10)),vec![0xAD,0x0a]);
+}
+
+#[test]
+fn test_op_print_addr() {
+    assert_eq!(op::op_print_addr(&Operand::new_var(10)),vec![0xA7,0x0a]);
+}
+
+#[test]
+fn test_op_ret() {
+    assert_eq!(op::op_ret(0x0101),vec![0xED,0x0101]);
+}
+
+#[test]
+fn test_op_print_paddr() {
+    assert_eq!(op::op_print_paddr(&Operand::new_var(10)),vec![0xAD,0x0a]);
+}
