@@ -1120,3 +1120,13 @@ fn test_op_div() {
 fn test_op_mod() {
     assert_eq!(op::op_mod(&Operand::new_var(1),&Operand::new_var(2),&Variable::new(3)),vec![0x78,0x01,0x02,0x03]);
 }
+
+#[test]
+fn test_op_and() {
+    assert_eq!(op::op_and(&Operand::new_var(1),&Operand::new_var(2),&Variable::new(3)),vec![0x69,0x01,0x02,0x03]);
+}
+
+#[test]
+fn test_op_or() {
+    assert_eq!(op::op_or(&Operand::new_var(1),&Operand::new_var(2),&Variable::new(3)),vec![0x68,0x01,0x02,0x03]);
+}
