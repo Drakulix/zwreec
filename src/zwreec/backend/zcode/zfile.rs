@@ -1185,3 +1185,13 @@ fn test_op_loadw() {
 fn test_op_storew() {
     assert_eq!(op::op_storew(&Operand::new_var(1),&Variable::new(2),&Variable::new(3)),vec![0xE1,0xAB,0x01,0x02,0x03]);
 }
+
+#[test]
+fn test_op_erase_window() {
+    assert_eq!(op::op_erase_window(0x01),vec![0xED,0x3F,0x00,0x01]);
+}
+
+#[test]
+fn test_op_call_1n_var() {
+    assert_eq!(op::op_call_1n_var(0x01),vec![0xAF,0x01]);
+}
