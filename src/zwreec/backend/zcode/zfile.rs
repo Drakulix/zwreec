@@ -1130,3 +1130,14 @@ fn test_op_and() {
 fn test_op_or() {
     assert_eq!(op::op_or(&Operand::new_var(1),&Operand::new_var(2),&Variable::new(3)),vec![0x68,0x01,0x02,0x03]);
 }
+
+#[test]
+fn test_op_set_color() {
+    assert_eq!(op::op_set_color(0x15,0x20),vec![0x1B,0x15,0x20]);
+}
+
+#[test]
+fn test_op_set_color_var() {
+    assert_eq!(op::op_set_color_var(0x01,0x02),vec![0x7B,0x01,0x02]);
+}
+
