@@ -127,14 +127,14 @@ pub struct Zfile {
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct Zjump {
-    pub from_addr: u16,
+    pub from_addr: u32,
     pub name: String,
     pub jump_type: JumpType
 }
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct Zstring {
-    pub from_addr: u16,
+    pub from_addr: u32,
     pub chars: Vec<u8>,  // contains either ztext or [length:u16, utf16char:u16, …]
     pub orig: String,
     pub unicode: bool,
@@ -142,7 +142,7 @@ pub struct Zstring {
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct Zlabel {
-    pub to_addr: u16,
+    pub to_addr: u32,
     pub name: String
 }
 
@@ -279,7 +279,7 @@ impl Zfile {
                     label_found = true;
                     match jump.jump_type {
                         JumpType::Routine => {
-                            let new_addr: u16 = label.to_addr / 8;
+                            let new_addr: u16 = (label.to_addr / 8) as u16;
                             self.data.write_u16(new_addr, jump.from_addr as usize);
                         },
                         JumpType::Branch => {
@@ -305,7 +305,7 @@ impl Zfile {
     /// saves the zstrings to high mem and writes the resulting address to the
     /// print_paddr arguments which referencing the string
     fn write_strings(&mut self) {
-        let mut prev_strings: Vec<(Zstring, u16)> = vec![];
+        let mut prev_strings: Vec<(Zstring, u32)> = vec![];
         for string in self.strings.iter_mut() {
             // optimize to reuse strings if they are the same
             let mut string_found = false;
@@ -315,13 +315,13 @@ impl Zfile {
                     if string.unicode {
                         self.data.write_u16(addr as u16, string.from_addr as usize);  // normal addr
                     } else {
-                        self.data.write_u16(addr/8 as u16, string.from_addr as usize);  // packed addr
+                        self.data.write_u16((addr/8) as u16, string.from_addr as usize);  // packed addr
                     }
                     break;
                 }
             }
             if string_found == false {  // add new string to high mem
-                let n_str_addr: u16 = if string.unicode {
+                let n_str_addr: u32 = if string.unicode {
                     let str_addr: u16 = self.last_static_written;
                     assert!(str_addr >= self.object_addr && str_addr + (string.chars.len() as u16) < self.program_addr, "invalid addr to store a string");
                     debug!("{:#x}: utf16 \"{}\"", str_addr, string.orig);
@@ -330,15 +330,15 @@ impl Zfile {
                     self.data.write_bytes(&string.chars, str_addr as usize);
                     self.data.write_u16(str_addr as u16, string.from_addr as usize);  // normal addr
                     self.last_static_written = self.last_static_written + string.chars.len() as u16;
-                    str_addr
+                    str_addr as u32
                 } else {
-                    let str_addr: u16 = align_address(self.data.len() as u16, 8);
+                    let str_addr: u32 = align_address(self.data.len() as u32, 8);
                     self.data.write_zero_until(str_addr as usize);
                     debug!("{:#x}: zstring \"{}\"", str_addr, string.orig);
                     let hexstrs: Vec<String> = string.chars.iter().map(|b| format!("{:02X}", b)).collect();
                     trace!("{:#x}: {}", str_addr, hexstrs.connect(" "));
                     self.data.append_bytes(&string.chars);
-                    self.data.write_u16(str_addr/8 as u16, string.from_addr as usize);  // packed addr
+                    self.data.write_u16((str_addr/8) as u16, string.from_addr as usize);  // packed addr
                     str_addr
                 };
                 prev_strings.push((string.clone(), n_str_addr));
@@ -348,7 +348,7 @@ impl Zfile {
 
     /// adds jump to write the jump-addresses after reading all commands
     pub fn add_jump(&mut self, name: String, jump_type: JumpType) {
-        let from_addr: u16 = self.data.bytes.len() as u16;
+        let from_addr: u32 = self.data.bytes.len() as u32;
         let jump: Zjump = Zjump{ from_addr: from_addr, name: name, jump_type: jump_type};
         self.jumps.push(jump);
 
@@ -357,7 +357,7 @@ impl Zfile {
     }
 
     /// adds label to the labels-vector. we need them later
-    fn add_label(&mut self, name: String, to_addr: u16) {
+    fn add_label(&mut self, name: String, to_addr: u32) {
         let label: Zlabel = Zlabel{ name: name, to_addr: to_addr };
         for other_label in self.labels.iter() {
             if other_label.name == label.name {
@@ -506,7 +506,7 @@ impl Zfile {
                 utf16bytes.insert(0, (length >> 8) as u8);
                 utf16bytes.insert(1, (length & 0xff) as u8);
                 self.emit(vec![ZOP::Call2NWithArg{jump_to_label: "print_unicode".to_string(), arg: Operand::new_large_const(0)}]);
-                self.strings.push(Zstring{chars: utf16bytes, orig: current_utf16.to_string(), from_addr: (self.data.len()-2) as u16, unicode: true});
+                self.strings.push(Zstring{chars: utf16bytes, orig: current_utf16.to_string(), from_addr: (self.data.len()-2) as u32, unicode: true});
             } else {
                 self.emit(vec![ZOP::PrintUnicode{c: current_utf16.chars().nth(0).unwrap() as u16}]);
             }
@@ -528,7 +528,7 @@ impl Zfile {
         let mut text_bytes: Bytes = Bytes{bytes: Vec::new()};
         ztext::encode(&mut text_bytes, text, &self.unicode_table);
         self.strings.push(
-            Zstring{chars: text_bytes.bytes, orig: text.to_string(), from_addr: (self.data.len()-2) as u16, unicode: false});
+            Zstring{chars: text_bytes.bytes, orig: text.to_string(), from_addr: (self.data.len()-2) as u32, unicode: false});
     }
 
     // ================================
@@ -563,7 +563,7 @@ impl Zfile {
 
     /// command to create a routine
     pub fn routine(&mut self, name: &str, count_variables: u8) {    
-        let index: u16 = routine_address(self.data.bytes.len() as u16);
+        let index: u32 = routine_address(self.data.bytes.len() as u32);
         
         assert!(count_variables <= 15, "only 15 local variables are allowed");
         assert!(index % 8 == 0, "adress of a routine must start at address % 8 == 0");
@@ -575,7 +575,7 @@ impl Zfile {
     /// command to create a label
     pub fn label(&mut self, name: &str) {
         let index: usize = self.data.bytes.len();
-        self.add_label(name.to_string(), index as u16);
+        self.add_label(name.to_string(), index as u32);
     }
 
     // ================================
@@ -951,12 +951,12 @@ impl Zfile {
     }
 }
 
-fn align_address(address: u16, align: u16) -> u16 {
+fn align_address(address: u32, align: u32) -> u32 {
     address + (align - (address % align)) % align
 }
 
 /// returns the routine address, should be adress % 8 == 0 (becouse its an packed address)
-fn routine_address(address: u16) -> u16 {
+fn routine_address(address: u32) -> u32 {
     return align_address(address, 8);
 }
 
