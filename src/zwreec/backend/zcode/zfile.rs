@@ -1141,3 +1141,13 @@ fn test_op_set_color_var() {
     assert_eq!(op::op_set_color_var(0x01,0x02),vec![0x7B,0x01,0x02]);
 }
 
+
+#[test]
+fn test_op_push_u16() {
+    assert_eq!(op::op_push_u16(0x0101),vec![0xE8,0x3F,0x01,0x01]);
+}
+
+#[test]
+fn test_op_random() {
+    assert_eq!(op::op_random(&Operand::new_var(10),&Variable::new(3)),vec![0xE7,0xBF,0x0a,0x03]);
+}
