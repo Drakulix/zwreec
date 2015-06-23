@@ -1175,3 +1175,13 @@ fn test_op_set_text_style() {
 fn test_op_read_char() {
     assert_eq!(op::op_read_char(0x01),vec![0xF6,0x7F,0x00,0x01]);
 }
+
+#[test]
+fn test_op_loadw() {
+    assert_eq!(op::op_loadw(&Operand::new_var(1),&Variable::new(2),&Variable::new(3)),vec![0x6F,0x01,0x02,0x03]);
+}
+
+#[test]
+fn test_op_storew() {
+    assert_eq!(op::op_storew(&Operand::new_var(1),&Variable::new(2),&Variable::new(3)),vec![0xE1,0xAB,0x01,0x02,0x03]);
+}
