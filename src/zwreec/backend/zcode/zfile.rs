@@ -1208,10 +1208,10 @@ fn test_op_print_addr() {
 
 #[test]
 fn test_op_ret() {
-    assert_eq!(op::op_ret(0x0101),vec![0xED,0x0101]);
+    assert_eq!(op::op_ret(0x0101),vec![0x8B,0x01,0x01]);
 }
 
 #[test]
-fn test_op_print_paddr() {
-    assert_eq!(op::op_print_paddr(&Operand::new_var(10)),vec![0xAD,0x0a]);
+fn test_op_store_var() {
+    assert_eq!(op::op_store_var(&Variable::new(2),&Operand::new_var(10)),vec![0x2d,0x02,0x0a]);
 }
