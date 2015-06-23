@@ -1141,13 +1141,37 @@ fn test_op_set_color_var() {
     assert_eq!(op::op_set_color_var(0x01,0x02),vec![0x7B,0x01,0x02]);
 }
 
-
 #[test]
 fn test_op_push_u16() {
     assert_eq!(op::op_push_u16(0x0101),vec![0xE8,0x3F,0x01,0x01]);
 }
 
 #[test]
+fn test_op_pull() {
+    assert_eq!(op::op_pull(0x01),vec![0xE9,0x7F,0x01]);
+}
+
+#[test]
 fn test_op_random() {
     assert_eq!(op::op_random(&Operand::new_var(10),&Variable::new(3)),vec![0xE7,0xBF,0x0a,0x03]);
+}
+
+#[test]
+fn test_op_print_num_var() {
+    assert_eq!(op::op_print_num_var(&Variable::new(3)),vec![0xE6,0xBF,0x03]);
+}
+
+#[test]
+fn test_op_set_text_style() {
+    assert_eq!(op::op_set_text_style(true,true,true,true),vec![0xF1,0x7F,0x0F]);
+    assert_eq!(op::op_set_text_style(true,false,false,false),vec![0xF1,0x7F,0x02]);
+    assert_eq!(op::op_set_text_style(false,true,false,false),vec![0xF1,0x7F,0x01]);
+    assert_eq!(op::op_set_text_style(false,false,true,false),vec![0xF1,0x7F,0x08]);
+    assert_eq!(op::op_set_text_style(false,false,false,true),vec![0xF1,0x7F,0x04]);
+    assert_eq!(op::op_set_text_style(false,false,false,false),vec![0xF1,0x7F,0x00]);
+}
+
+#[test]
+fn test_op_read_char() {
+    assert_eq!(op::op_read_char(0x01),vec![0xF6,0x7F,0x00,0x01]);
 }
