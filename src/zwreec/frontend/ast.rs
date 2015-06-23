@@ -38,6 +38,7 @@ impl AST {
         for op in ops {
             ast.operation(op);
         }
+        // parse the expressions in the ast
         ast.parse_expressions();
 
         ast

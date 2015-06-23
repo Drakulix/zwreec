@@ -392,7 +392,8 @@ impl<'a> Parser<'a> {
                 (ExpressionList, TokString   { .. } ) |
                 (ExpressionList, TokBoolean  { .. } ) |
                 (ExpressionList, TokAssign   { .. } ) |
-                (ExpressionList, TokFunction { .. } ) => {
+                (ExpressionList, TokFunction { .. } ) |
+                (ExpressionList, TokParenOpen{ .. } ) => {
                     stack.push(NonTerminal(ExpressionListf));
                     stack.push(NonTerminal(Expression));
 
@@ -416,7 +417,8 @@ impl<'a> Parser<'a> {
                 (Expression, TokInt      { .. } ) |
                 (Expression, TokString   { .. } ) |
                 (Expression, TokBoolean  { .. } ) |
-                (Expression, TokFunction { .. } ) => {
+                (Expression, TokFunction { .. } ) |
+                (Expression, TokParenOpen{ .. } ) => {
                     stack.push(NonTerminal(E));
 
                     None
@@ -432,7 +434,8 @@ impl<'a> Parser<'a> {
                 (E, TokInt      { .. } ) |
                 (E, TokString   { .. } ) |
                 (E, TokBoolean  { .. } ) |
-                (E, TokFunction { .. } ) => {
+                (E, TokFunction { .. } ) |
+                (E, TokParenOpen{ .. } ) => {
                     stack.push(NonTerminal(E2));
                     stack.push(NonTerminal(T));
 
@@ -462,7 +465,8 @@ impl<'a> Parser<'a> {
                 (T, TokInt      { .. } ) |
                 (T, TokString   { .. } ) |
                 (T, TokBoolean  { .. } ) |
-                (T, TokFunction { .. } )=> {
+                (T, TokFunction { .. } ) |
+                (T, TokParenOpen{ .. } )=> {
                     stack.push(NonTerminal(T2));
                     stack.push(NonTerminal(B));
 
@@ -490,7 +494,8 @@ impl<'a> Parser<'a> {
                 (B, TokInt      { .. } ) |
                 (B, TokString   { .. } ) |
                 (B, TokBoolean  { .. } ) |
-                (B, TokFunction { .. } ) => {
+                (B, TokFunction { .. } ) |
+                (B, TokParenOpen{ .. } ) => {
                     stack.push(NonTerminal(B2));
                     stack.push(NonTerminal(F));
 
@@ -518,7 +523,8 @@ impl<'a> Parser<'a> {
                 (F, TokInt      { .. } ) |
                 (F, TokString   { .. } ) |
                 (F, TokBoolean  { .. } ) |
-                (F, TokFunction { .. } ) => {
+                (F, TokFunction { .. } ) |
+                (F, TokParenOpen{ .. } ) => {
                     stack.push(NonTerminal(F2));
                     stack.push(NonTerminal(G));
 
@@ -546,7 +552,8 @@ impl<'a> Parser<'a> {
                 (G, TokInt      { .. } ) |
                 (G, TokString   { .. } ) |
                 (G, TokBoolean  { .. } ) |
-                (G, TokFunction { .. } ) => {
+                (G, TokFunction { .. } ) |
+                (G, TokParenOpen{ .. } ) => {
                     stack.push(NonTerminal(G2));
                     stack.push(NonTerminal(H));
 
@@ -569,8 +576,7 @@ impl<'a> Parser<'a> {
                 (G2, TokSemiColon  { .. } ) |
                 (G2, TokCompOp     { .. } ) |
                 (G2, TokArgsEnd    { .. } ) |
-                (G2, TokColon      { .. } ) |
-                (G2, TokParenClose { .. } ) => {
+                (G2, TokColon      { .. } ) => {
                     // G2 -> ε
                     None
                 },
@@ -584,7 +590,6 @@ impl<'a> Parser<'a> {
                 (G2, tok) => {
                     ParserError::NoProjection{token: tok, stack: G2}.raise()
                 }
-
 
                 // H
                 (H, TokInt     { .. } ) |
@@ -601,6 +606,13 @@ impl<'a> Parser<'a> {
                 },
                 (H, TokFunction { .. } ) => {
                     stack.push(NonTerminal(Function));
+
+                    None
+                },
+                (H, tok @ TokParenOpen { .. } ) => {
+                    stack.push(Terminal(TokParenClose{location: (0, 0)}));
+                    stack.push(NonTerminal(Expression));
+                    stack.push(Terminal(tok.clone()));
 
                     None
                 },
