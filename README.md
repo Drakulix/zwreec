@@ -3,7 +3,7 @@
 <img width=144px src="https://dl.dropboxusercontent.com/u/70410095/zwreec/logo.png">
 *Logo by [@madmalik](https://github.com/madmalik)*
 
-Zwreec is a compiler for [interactive fiction](http://en.wikipedia.org/wiki/Interactive_fiction) in the Twee format (created by the [Twine software](http://en.wikipedia.org/wiki/Twine_(software))) to [Z-Machine](http://en.wikipedia.org/wiki/Z-machine) instructions (Zcode) which can be run with interpreters like [frotz](http://frotz.sourceforge.net).
+Zwreec is a compiler for [interactive fiction](http://en.wikipedia.org/wiki/Interactive_fiction) in the Twee format (created by the [Twine software](http://en.wikipedia.org/wiki/Twine_(software))) to [Z-Machine](http://en.wikipedia.org/wiki/Z-machine) instructions (Zcode) which can be run with interpreters like [frotz](http://frotz.sourceforge.net) or [gargoyle](http://ccxvii.net/gargoyle/)
 
 ## Requirements and Usage
 
