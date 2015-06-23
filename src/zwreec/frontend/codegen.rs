@@ -4,8 +4,7 @@ use std::collections::HashMap;
 use std::error::Error;
 use std::io::Write;
 
-use backend::zcode::zfile;
-use backend::zcode::zfile::{FormattingState, Operand, Variable, ZOP};
+use backend::zcode::zfile::{FormattingState, Operand, Variable, ZOP, Zfile};
 use config::Config;
 use frontend::ast;
 use frontend::ast::ASTNode;
@@ -30,7 +29,7 @@ pub fn generate_zcode<W: Write>(cfg: &Config, ast: ast::AST, output: &mut W) {
 struct Codegen<'a> {
     cfg: &'a Config,
     ast: ast::AST,
-    zfile: zfile::Zfile
+    zfile: Zfile
 }
 
 impl<'a> Codegen<'a> {
@@ -38,7 +37,7 @@ impl<'a> Codegen<'a> {
         Codegen {
             cfg: cfg,
             ast: ast,
-            zfile: zfile::Zfile::new()
+            zfile: Zfile::new()
         }
     }
 
@@ -61,7 +60,7 @@ impl<'a> Codegen<'a> {
 
 
 /// add zcode based on tokens
-pub fn gen_zcode<'a>(node: &'a ASTNode, mut out: &mut zfile::Zfile, mut manager: &mut CodeGenManager<'a>) -> Vec<ZOP> {
+pub fn gen_zcode<'a>(node: &'a ASTNode, mut out: &mut Zfile, mut manager: &mut CodeGenManager<'a>) -> Vec<ZOP> {
     let mut state_copy = manager.format_state.clone();
     let mut set_formatting = false;
     
@@ -132,11 +131,15 @@ pub fn gen_zcode<'a>(node: &'a ASTNode, mut out: &mut zfile::Zfile, mut manager:
                                     if expression_node.childs.len() != 1 {
                                         panic!("Unsupported expression!")
                                     }
-                                    evaluate_expression(&expression_node.childs[0], &mut code, manager)
+                                    evaluate_expression(&expression_node.childs[0], &mut code, manager, &mut out)
                                 }, _ => panic!("Unsupported expression!")
                             };
                             if !manager.symbol_table.is_known_symbol(var_name) {
-                                manager.symbol_table.insert_new_symbol(&var_name, Type::Integer);
+                                let vartype = match result {
+                                    Operand::StringRef(_) => Type::String,
+                                    _ => Type::Integer
+                                };
+                                manager.symbol_table.insert_new_symbol(&var_name, vartype);
                             }
                             let symbol_id = manager.symbol_table.get_symbol_id(var_name);
                             code.push(ZOP::StoreVariable{variable: symbol_id, value: result});
@@ -161,7 +164,7 @@ pub fn gen_zcode<'a>(node: &'a ASTNode, mut out: &mut zfile::Zfile, mut manager:
                     let mut code: Vec<ZOP> = vec![];
 
                     // Evaluate the contained expression
-                    let result = evaluate_expression(&expression_node.childs[0], &mut code, manager);
+                    let result = evaluate_expression(&expression_node.childs[0], &mut code, manager, &mut out);
 
                     let if_id = manager.ids_if.start_next();
                     let if_label = format!("if_{}", if_id);
@@ -195,7 +198,7 @@ pub fn gen_zcode<'a>(node: &'a ASTNode, mut out: &mut zfile::Zfile, mut manager:
                     };
 
                     // Evaluate the contained expression
-                    let result = evaluate_expression(&expression_node.childs[0], &mut code, manager);
+                    let result = evaluate_expression(&expression_node.childs[0], &mut code, manager, &mut out);
  
                     let if_id = manager.ids_if.start_next();
 
@@ -252,9 +255,10 @@ pub fn gen_zcode<'a>(node: &'a ASTNode, mut out: &mut zfile::Zfile, mut manager:
 
                     match child.category {
                         TokExpression => {
-                            let eval = evaluate_expression(&child.childs[0], &mut code, manager);
+                            let eval = evaluate_expression(&child.childs[0], &mut code, manager, &mut out);
                             match eval {
                                 Operand::Var(var) => code.push(ZOP::PrintNumVar{variable: var}),
+                                Operand::StringRef(addr) => code.push(ZOP::PrintUnicodeStr{address: Operand::new_large_const(addr.value)}),
                                 Operand::Const(c) => code.push(ZOP::Print{text: format!("{}", c.value)}),
                                 Operand::LargeConst(c) => code.push(ZOP::Print{text: format!("{}", c.value)})
                             };
@@ -272,7 +276,7 @@ pub fn gen_zcode<'a>(node: &'a ASTNode, mut out: &mut zfile::Zfile, mut manager:
                             vec![ZOP::PrintNumVar{variable: var_id}]
                         },
                         Type::String => {
-                            vec![]
+                            vec![ZOP::PrintUnicodeStr{address: Operand::new_var(var_id.id)}]
                         },
                         Type::Bool => {
                             vec![ZOP::PrintNumVar{variable: var_id}]

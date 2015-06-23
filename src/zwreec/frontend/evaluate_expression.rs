@@ -1,22 +1,22 @@
 //! The `evaluate_expressions` module...
 
 
-use backend::zcode::zfile::{ZOP, Operand, Variable, Constant, LargeConstant};
+use backend::zcode::zfile::{ZOP, Operand, Variable, Constant, LargeConstant, Zfile};
 use frontend::ast::{ASTNode};
 use frontend::codegen;
 use frontend::codegen::{CodeGenManager};
-use frontend::lexer::Token::{TokNumOp, TokCompOp, TokLogOp, TokInt, TokBoolean, TokVariable, TokFunction};
+use frontend::lexer::Token::{TokNumOp, TokCompOp, TokLogOp, TokInt, TokBoolean, TokVariable, TokFunction, TokString};
 
 
 
-pub fn evaluate_expression<'a>(node: &'a ASTNode, code: &mut Vec<ZOP>, mut manager: &mut CodeGenManager<'a>) -> Operand {
+pub fn evaluate_expression<'a>(node: &'a ASTNode, code: &mut Vec<ZOP>, mut manager: &mut CodeGenManager<'a>, mut out: &mut Zfile) -> Operand {
     let mut temp_ids = CodeGenManager::new_temp_var_vec();
-    evaluate_expression_internal(node, code, &mut temp_ids, manager)
+    evaluate_expression_internal(node, code, &mut temp_ids, manager, &mut out)
 }
 
 /// Evaluates an expression node to zCode.
 fn evaluate_expression_internal<'a>(node: &'a ASTNode, code: &mut Vec<ZOP>,
-        temp_ids: &mut Vec<u8>, mut manager: &mut CodeGenManager<'a>) -> Operand {
+        temp_ids: &mut Vec<u8>, mut manager: &mut CodeGenManager<'a>, mut out: &mut Zfile) -> Operand {
     let n = node.as_default();
 
     match n.category {
@@ -24,24 +24,24 @@ fn evaluate_expression_internal<'a>(node: &'a ASTNode, code: &mut Vec<ZOP>,
             if n.childs.len() != 2 {
                 panic!("Numeric operators need two arguments!")
             }
-            let eval0 = evaluate_expression_internal(&n.childs[0], code, temp_ids, manager);
-            let eval1 = evaluate_expression_internal(&n.childs[1], code, temp_ids, manager);
+            let eval0 = evaluate_expression_internal(&n.childs[0], code, temp_ids, manager, &mut out);
+            let eval1 = evaluate_expression_internal(&n.childs[1], code, temp_ids, manager, &mut out);
             eval_num_op(&eval0, &eval1, &**op_name, code, temp_ids)
         },
         TokCompOp { ref op_name, .. } => {
             if n.childs.len() != 2 {
                 panic!("Numeric operators need two arguments!")
             }
-            let eval0 = evaluate_expression_internal(&n.childs[0], code, temp_ids, manager);
-            let eval1 = evaluate_expression_internal(&n.childs[1], code, temp_ids, manager);
+            let eval0 = evaluate_expression_internal(&n.childs[0], code, temp_ids, manager, &mut out);
+            let eval1 = evaluate_expression_internal(&n.childs[1], code, temp_ids, manager, &mut out);
             eval_comp_op(&eval0, &eval1, &**op_name, code, temp_ids, manager)
         },
         TokLogOp { ref op_name, .. } => {
-            let eval0 = evaluate_expression_internal(&n.childs[0], code, temp_ids, manager);
+            let eval0 = evaluate_expression_internal(&n.childs[0], code, temp_ids, manager, &mut out);
             
             match &**op_name {
                 "and" | "or" => {
-                    let eval1 = evaluate_expression_internal(&n.childs[1], code, temp_ids, manager);
+                    let eval1 = evaluate_expression_internal(&n.childs[1], code, temp_ids, manager, &mut out);
                     eval_and_or(&eval0, &eval1, &**op_name, code, temp_ids)
                 },
                 "not" => {
@@ -55,6 +55,9 @@ fn evaluate_expression_internal<'a>(node: &'a ASTNode, code: &mut Vec<ZOP>,
         },
         TokBoolean { ref value, .. } => {
             boolstr_to_const(&**value)
+        },
+        TokString {ref value, .. } => {
+            Operand::new_string_ref(out.write_string(value) as i16)
         },
         TokVariable { ref name, .. } => {
             Operand::Var(manager.symbol_table.get_symbol_id(name))
@@ -74,8 +77,8 @@ fn evaluate_expression_internal<'a>(node: &'a ASTNode, code: &mut Vec<ZOP>,
                     let from = &args[0].as_default().childs[0];
                     let to = &args[1].as_default().childs[0];
 
-                    let from_value = evaluate_expression_internal(from, code, temp_ids, manager);
-                    let to_value = evaluate_expression_internal(to, code, temp_ids, manager);
+                    let from_value = evaluate_expression_internal(from, code, temp_ids, manager, &mut out);
+                    let to_value = evaluate_expression_internal(to, code, temp_ids, manager, &mut out);
                     codegen::function_random(&from_value, &to_value, code, temp_ids)
                 },
                 _ => { panic!("Unsupported function: {}", name)}
