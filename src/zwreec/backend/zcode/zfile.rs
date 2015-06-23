@@ -1081,3 +1081,23 @@ fn test_zfile_label_and_jump_loop() {
 fn test_op_inc() {
     assert_eq!(op::op_inc(1),vec![0x95,0x01]);
 }
+
+#[test]
+fn test_op_dec() {
+    assert_eq!(op::op_dec(1),vec![0x96,0x01]);
+}
+
+#[test]
+fn test_op_newline() {
+    assert_eq!(op::op_newline(),vec![0xbb]);
+}
+
+#[test]
+fn test_op_quit() {
+    assert_eq!(op::quit(),vec![0xba]);
+}
+
+#[test]
+fn test_op_add() {
+    assert_eq!(op::op_add(&Operand::new_var(1),&Operand::new_var(2),&Variable::new(3)),vec![0x74,0x01,0x02,0x03]);
+}
