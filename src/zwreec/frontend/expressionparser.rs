@@ -53,9 +53,35 @@ impl ExpressionParser {
 
                     self.oper_stack.push(tok.clone());
                 },
+                tok @ TokParenOpen { .. } => {
+                    self.oper_stack.push(tok.clone());
+                }
+                TokParenClose { .. } => {
+                    let length = self.oper_stack.len();
+
+                    for i in 0..length {
+                        let i_rev = length - i - 1;
+                        let token: Token = self.oper_stack.get(i_rev).unwrap().clone();
+                        //if is_ranking_not_higher(token, tok.clone()) {
+                        //    self.new_operator_node();
+                        //}
+                        match token {
+                            TokParenOpen { .. } => {
+                                break;
+                            }
+                            _ => {
+                                self.new_operator_node();
+                            }
+                        }
+                    }
+
+                    self.oper_stack.pop();
+
+                }
                 _ => ()
             }
         }
+        println!("LENGTH {:?}", self.expr_stack.len());
 
         // parse the last elements of the stack
         // to avoid endless loop we try max expr_stack.len()
