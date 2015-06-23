@@ -236,7 +236,7 @@ fn gen_zcode<'a>(node: &'a ASTNode, mut out: &mut zfile::Zfile, mut manager: &mu
                             vec![ZOP::PrintNumVar{variable: var_id}]
                         },
                         Type::String => {
-                            vec![]
+                            vec![ZOP::PrintUnicodeStr{address: Operand::new_var(var_id.id)}]
                         },
                         Type::Bool => {
                             vec![ZOP::PrintNumVar{variable: var_id}]

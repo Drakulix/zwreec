@@ -57,6 +57,7 @@ impl Variable {
 pub enum ZOP {
   PrintUnicode{c: u16},
   PrintUnicodeVar{var: Variable},
+  PrintUnicodeStr{address: Operand},
   Print{text: String},
   PrintNumVar{variable: Variable},
   PrintPaddr{address: Operand},  // packed address
@@ -78,7 +79,9 @@ pub enum ZOP {
   Ret{value: u16},
   JE{operand1: Operand, operand2: Operand, jump_to_label: String},
   JL{operand1: Operand, operand2: Operand, jump_to_label: String},
+  JLE{operand1: Operand, operand2: Operand, jump_to_label: String},
   JG{operand1: Operand, operand2: Operand, jump_to_label: String},
+  JGE{operand1: Operand, operand2: Operand, jump_to_label: String},
   Random{range: Operand, variable: Variable},
   ReadChar{local_var_id: u8},
   ReadCharTimer{local_var_id: u8, timer: u8, routine: String},
@@ -119,6 +122,7 @@ pub struct Zfile {
     unicode_table_addr: u16,
     global_addr: u16,
     pub object_addr: u16,
+    last_static_written: u16,
 }
 
 #[derive(Debug, PartialEq, Clone)]
@@ -161,10 +165,11 @@ impl Zfile {
             jumps: Vec::new(),
             labels: Vec::new(),
             strings: Vec::new(),
-            program_addr: 0x800,
+            program_addr: 0xfff8,
             unicode_table_addr: 0,
             global_addr: 0,
             object_addr: 0,
+            last_static_written: 0x800,
         }
     }
 
@@ -180,11 +185,11 @@ impl Zfile {
         // 1 byte for the unicode count, 97 possible chars with 2 bytes
         self.global_addr = self.unicode_table_addr + 195;
 
-        // 480 becouse there are 240 global 2-bytes variables
+        // 480 because there are 240 global 2-bytes variables
         self.object_addr = self.global_addr + 480;
-        let high_memory_addr: u16 = 0x800;
-        let static_addr: u16 = 0x800;
-        let dictionary_addr: u16 = 0x800;
+        let high_memory_addr: u16 = self.program_addr;
+        let static_addr: u16 = self.last_static_written;
+        let dictionary_addr: u16 = self.last_static_written;
 
         // version
         self.data.write_byte(8, 0x00);
@@ -316,22 +321,27 @@ impl Zfile {
                 }
             }
             if string_found == false {  // add new string to high mem
-                let str_addr = align_address(self.data.len() as u16, 8);
-                self.data.write_zero_until(str_addr as usize);
-                if string.unicode {
+                let n_str_addr: u16 = if string.unicode {
+                    let str_addr: u16 = self.last_static_written;
+                    assert!(str_addr >= self.object_addr && str_addr + (string.chars.len() as u16) < self.program_addr, "invalid addr to store a string");
                     debug!("{:#x}: utf16 \"{}\"", str_addr, string.orig);
                     let hexstrs: Vec<String> = string.chars.iter().map(|b| format!("{:02X}", b)).collect();
                     trace!("{:#x}: {}", str_addr, hexstrs.connect(" "));
-                    self.data.append_bytes(&string.chars);
+                    self.data.write_bytes(&string.chars, str_addr as usize);
                     self.data.write_u16(str_addr as u16, string.from_addr as usize);  // normal addr
+                    self.last_static_written = self.last_static_written + string.chars.len() as u16;
+                    str_addr
                 } else {
+                    let str_addr: u16 = align_address(self.data.len() as u16, 8);
+                    self.data.write_zero_until(str_addr as usize);
                     debug!("{:#x}: zstring \"{}\"", str_addr, string.orig);
                     let hexstrs: Vec<String> = string.chars.iter().map(|b| format!("{:02X}", b)).collect();
                     trace!("{:#x}: {}", str_addr, hexstrs.connect(" "));
                     self.data.append_bytes(&string.chars);
                     self.data.write_u16(str_addr/8 as u16, string.from_addr as usize);  // packed addr
-                }
-                prev_strings.push((string.clone(), str_addr));
+                    str_addr
+                };
+                prev_strings.push((string.clone(), n_str_addr));
              }
          }
     }
@@ -407,6 +417,7 @@ impl Zfile {
         match instr {
             &ZOP::PrintUnicode{c} => self.op_print_unicode_char(c),
             &ZOP::PrintUnicodeVar{ref var} => self.op_print_unicode_var(var),
+            &ZOP::PrintUnicodeStr{ref address} => self.op_print_unicode_str(address),
             &ZOP::Print{ref text} => self.op_print(text),
             &ZOP::PrintOps{ref text} => self.gen_print_ops(text),
             &ZOP::Routine{ref name, count_variables} => self.routine(name, count_variables),
@@ -414,7 +425,9 @@ impl Zfile {
             &ZOP::Jump{ref jump_to_label} => self.op_jump(jump_to_label),
             &ZOP::ReadCharTimer{local_var_id, timer, ref routine} => self.op_read_char_timer(local_var_id, timer, routine),
             &ZOP::JL{ref operand1, ref operand2, ref jump_to_label} => self.op_jl(operand1, operand2, jump_to_label),
+            &ZOP::JLE{ref operand1, ref operand2, ref jump_to_label} => self.op_jle(operand1, operand2, jump_to_label),
             &ZOP::JG{ref operand1, ref operand2, ref jump_to_label} => self.op_jg(operand1, operand2, jump_to_label),
+            &ZOP::JGE{ref operand1, ref operand2, ref jump_to_label} => self.op_jge(operand1, operand2, jump_to_label),
             &ZOP::JE{ref operand1, ref operand2, ref jump_to_label} => self.op_je(operand1, operand2, jump_to_label),
             &ZOP::Call2NWithAddress{ref jump_to_label, ref address} => self.op_call_2n_with_address(jump_to_label, address),
             &ZOP::Call2NWithArg{ref jump_to_label, ref arg} => self.op_call_2n_with_arg(jump_to_label, arg),
@@ -840,6 +853,22 @@ impl Zfile {
         self.add_jump(jump_to_label.to_string(), JumpType::Branch);
     }
 
+    /// jumps to a label if the value of operand1 is lower than or equal operand2 (compared as i16)
+    pub fn op_jle(&mut self, operand1: &Operand, operand2: &Operand, jump_to_label: &str) {
+        self.emit(vec![
+            ZOP::JL{operand1: operand1.clone(), operand2: operand2.clone(), jump_to_label: jump_to_label.to_string()},
+            ZOP::JE{operand1: operand1.clone(), operand2: operand2.clone(), jump_to_label: jump_to_label.to_string()}
+            ]);
+    }
+
+    /// jumps to a label if the value of operand1 is greater than or equal operand2 (compared as i16)
+    pub fn op_jge(&mut self, operand1: &Operand, operand2: &Operand, jump_to_label: &str) {
+        self.emit(vec![
+            ZOP::JG{operand1: operand1.clone(), operand2: operand2.clone(), jump_to_label: jump_to_label.to_string()},
+            ZOP::JE{operand1: operand1.clone(), operand2: operand2.clone(), jump_to_label: jump_to_label.to_string()}
+            ]);
+    }
+
     /// jumps to a label if the value of operand1 is greater than operand2
     pub fn op_jg(&mut self, operand1: &Operand, operand2: &Operand, jump_to_label: &str) {
 
@@ -893,6 +922,10 @@ impl Zfile {
         let byte = 0x02 << 6 | 0x03 << 4 | 0x03 << 2 | 0x03 << 0;
         self.data.append_byte(byte);
         self.data.append_byte(variable.id);
+    }
+
+    pub fn op_print_unicode_str(&mut self, address: &Operand) {
+        self.emit(vec![ZOP::Call2NWithArg{jump_to_label: "print_unicode".to_string(), arg: address.clone()}]);
     }
 
     // ================================
