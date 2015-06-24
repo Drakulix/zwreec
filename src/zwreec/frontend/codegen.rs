@@ -137,6 +137,7 @@ pub fn gen_zcode<'a>(node: &'a ASTNode, mut out: &mut Zfile, mut manager: &mut C
                             if !manager.symbol_table.is_known_symbol(var_name) {
                                 let vartype = match result {
                                     Operand::StringRef(_) => Type::String,
+                                    Operand::Var(ref var) => if manager.symbol_table.has_var_id(var.id) { manager.symbol_table.get_symbol_type_by_id(var.id) } else { Type::Integer },
                                     _ => Type::Integer
                                 };
                                 manager.symbol_table.insert_new_symbol(&var_name, vartype);
@@ -257,7 +258,7 @@ pub fn gen_zcode<'a>(node: &'a ASTNode, mut out: &mut Zfile, mut manager: &mut C
                         TokExpression => {
                             let eval = evaluate_expression(&child.childs[0], &mut code, manager, &mut out);
                             match eval {
-                                Operand::Var(var) => code.push(ZOP::PrintNumVar{variable: var}),
+                                Operand::Var(var) => if manager.symbol_table.has_var_id(var.id) && manager.symbol_table.get_symbol_type_by_id(var.id) == Type::String { code.push(ZOP::PrintUnicodeStr{address: Operand::new_var(var.id)}); } else { code.push(ZOP::PrintNumVar{variable: var}); },
                                 Operand::StringRef(addr) => code.push(ZOP::PrintUnicodeStr{address: Operand::new_large_const(addr.value)}),
                                 Operand::Const(c) => code.push(ZOP::Print{text: format!("{}", c.value)}),
                                 Operand::LargeConst(c) => code.push(ZOP::Print{text: format!("{}", c.value)})
@@ -405,7 +406,7 @@ impl IdentifierProvider {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, PartialEq)]
 pub enum Type {
     Bool,
     Integer,
@@ -442,5 +443,25 @@ impl <'a> SymbolTable<'a> {
     pub fn get_symbol_type(&self, symbol: &str) -> Type {
         let (_,b) = self.symbol_map.get(symbol).unwrap().clone();
         b
+    }
+
+    pub fn has_var_id(&self, id: u8) -> bool {
+        for name in self.symbol_map.keys() {
+            let (var, _) = self.symbol_map.get(name).unwrap().clone();;
+            if var.id == id {
+                return true;
+            }
+        }
+        false
+    }
+
+    pub fn get_symbol_type_by_id(&self, id: u8) -> Type {
+        for name in self.symbol_map.keys() {
+            let (var, vartype) = self.symbol_map.get(name).unwrap().clone();;
+            if var.id == id {
+                return vartype;
+            }
+        }
+        panic!("should never happen: could not find the requested ID in symbol table")
     }
 }
