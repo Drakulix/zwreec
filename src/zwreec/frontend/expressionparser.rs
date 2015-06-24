@@ -43,6 +43,9 @@ impl ExpressionParser {
                     // cycle through the oper_stack stack backwards
                     // if the rank of the current operator is <= the top of the
                     // stack, we create a new node
+                    // if anybody is good in rust, please refactor this. it
+                    // should be:
+                    // while(is_ranking_not_higher(oper_stack.top(), tok.clone())) { ...
                     for i in 0..length {
                         let i_rev = length - i - 1;
                         let token: Token = self.oper_stack.get(i_rev).unwrap().clone();
@@ -52,6 +55,25 @@ impl ExpressionParser {
                     }
 
                     self.oper_stack.push(tok.clone());
+                },
+                tok @ TokExpression => {
+                    // more ugly code.
+                    // an expression-node is a child of an expression, if there
+                    // where parentheses in the expression. but we don't want 
+                    // them, so we parse the subexpression in the parentheses
+
+                    // make a copy of the top-node. (becouse node is borrowed)
+                    // and then parse it again
+                    let childs_copy = top.as_default().childs.to_vec();
+                    let mut ast_node = NodeDefault { category: tok.clone(), childs: childs_copy };
+                    ExpressionParser::parse(&mut ast_node);
+                    
+                    if ast_node.childs.len() == 1 {
+                        let temp = ast_node.childs.get(0).unwrap().clone();
+                        self.expr_stack.push(temp);
+                    } else {
+                        panic!{"no parsable sub-expression"}
+                    }
                 },
                 _ => ()
             }

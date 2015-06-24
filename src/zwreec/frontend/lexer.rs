@@ -412,7 +412,7 @@ rustlex! TweeLexer {
 
     let COMMENT = "/%" ([^"%"]*(("%")*[^"%/"])?)* ("%")* "%/";
 
-    let MACRO_CONTENT_FAIL = ([^"> 0123456789+-*/%="'\n''\t']*(">"[^"> "'\n''\t'])?)+;
+    let MACRO_CONTENT_FAIL = ([^"> 0123456789+-*/%=()"'\n''\t']*(">"[^"> "'\n''\t'])?)+;
 
     INITIAL {
         PASSAGE_START => |lexer:&mut TweeLexer<R>| -> Option<Token> {
