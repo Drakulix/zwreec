@@ -1215,3 +1215,56 @@ fn test_op_ret() {
 fn test_op_store_var() {
     assert_eq!(op::op_store_var(&Variable::new(2),&Operand::new_var(10)),vec![0x2d,0x02,0x0a]);
 }
+
+#[test]
+fn test_encode_variable_arguments() {
+    assert_eq!(op::encode_variable_arguments(vec![ArgType::Variable]),0x80);
+    assert_eq!(op::encode_variable_arguments(vec![ArgType::SmallConst]),0x40);
+    assert_eq!(op::encode_variable_arguments(vec![ArgType::LargeConst]),0x00);
+    assert_eq!(op::encode_variable_arguments(vec![ArgType::Nothing]),0xc0);
+    assert_eq!(op::encode_variable_arguments(vec![ArgType::Reference]),0x40);
+}
+
+#[test]
+fn test_op_2() {
+    assert_eq!(op::op_2(0x02,vec![ArgType::Variable]),vec![0x42]);
+    assert_eq!(op::op_2(0x02,vec![ArgType::LargeConst]),vec![0xc2,0x0f]);
+    assert_eq!(op::op_2(0x02,vec![ArgType::SmallConst]),vec![0x02]);
+    assert_eq!(op::op_2(0x02,vec![ArgType::Reference]),vec![0x02]);
+}
+
+#[test]
+fn test_op_1() {
+    assert_eq!(op::op_1(0x02,ArgType::Variable),vec![0xa2]);
+    assert_eq!(op::op_1(0x02,ArgType::LargeConst),vec![0x82]);
+    assert_eq!(op::op_1(0x02,ArgType::SmallConst),vec![0x92]);
+    assert_eq!(op::op_1(0x02,ArgType::Reference),vec![0x92]);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
