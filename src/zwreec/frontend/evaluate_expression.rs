@@ -155,7 +155,7 @@ fn eval_comp_op<'a>(eval0: &Operand, eval1: &Operand, op_name: &str, code: &mut 
     if count_constants(eval0, eval1) == 2 {
         return direct_eval_comp_op(eval0, eval1, op_name);
     }
-    let save_var = Variable { id: temp_ids.pop().unwrap() };
+    let save_var = Variable::new(temp_ids.pop().unwrap());
     let label = format!("expr_{}", manager.ids_expr.start_next());
     let const_true = Operand::new_const(1);
     let const_false = Operand::new_const(0);
@@ -256,7 +256,7 @@ fn eval_not<'a>(eval: &Operand, code: &mut Vec<ZOP>,
         let result: u8 = if val > 0 { 0 } else { 1 };
         return Operand::Const(Constant { value: result });
     }
-    let save_var = Variable { id: temp_ids.pop().unwrap() };
+    let save_var = Variable::new(temp_ids.pop().unwrap());
     let label = format!("expr_{}", manager.ids_expr.start_next());
     code.push(ZOP::StoreVariable{ variable: save_var.clone(), value: Operand::new_const(0)});
     code.push(ZOP::JG{operand1: eval.clone(), operand2: Operand::new_const(0), jump_to_label: label.to_string()});
@@ -307,7 +307,7 @@ fn determine_save_var(operand1: &Operand, operand2: &Operand, temp_ids: &mut Vec
             }
         }, _ => {}
     };
-    return Variable { id: temp_ids.pop().unwrap() };
+    return Variable::new(temp_ids.pop().unwrap());
 }
 
 fn count_constants(operand1: &Operand, operand2: &Operand) -> u8 {
