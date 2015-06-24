@@ -1241,6 +1241,22 @@ fn test_op_1() {
     assert_eq!(op::op_1(0x02,ArgType::Reference),vec![0x92]);
 }
 
+#[test]
+fn test_op_var() {
+    assert_eq!(op::op_var(0x02,vec![ArgType::Variable]),vec![0xe2,0x80]);
+    assert_eq!(op::op_var(0x02,vec![ArgType::LargeConst]),vec![0xe2,0x00]);
+    assert_eq!(op::op_var(0x02,vec![ArgType::SmallConst]),vec![0xe2,0x40]);
+    assert_eq!(op::op_var(0x02,vec![ArgType::Reference]),vec![0xe2,0x40]);
+}
+
+#[test]
+fn test_op_0() {
+    assert_eq!(op::op_0(0x02),vec![0xb2]);
+    assert_eq!(op::op_0(0x04),vec![0xb4]);
+    assert_eq!(op::op_0(0x08),vec![0xb8]);
+    assert_eq!(op::op_0(0x03),vec![0xb3]);
+}
+
 
 
 
