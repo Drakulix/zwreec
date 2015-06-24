@@ -1076,3 +1076,142 @@ fn test_zfile_label_and_jump_loop() {
     assert_eq!((labels[0].to_addr as i32 - jumps[0].from_addr as i32) as i16, rel_addr);  // specified as in write_jumps()
     assert_eq!(-1 as i16, rel_addr);  // this is the expected result, jump one address back
 }
+
+#[test]
+fn test_op_inc() {
+    assert_eq!(op::op_inc(1),vec![0x95,0x01]);
+}
+
+#[test]
+fn test_op_dec() {
+    assert_eq!(op::op_dec(1),vec![0x96,0x01]);
+}
+
+#[test]
+fn test_op_newline() {
+    assert_eq!(op::op_newline(),vec![0xbb]);
+}
+
+#[test]
+fn test_op_quit() {
+    assert_eq!(op::quit(),vec![0xba]);
+}
+
+#[test]
+fn test_op_add() {
+    assert_eq!(op::op_add(&Operand::new_var(1),&Operand::new_var(2),&Variable::new(3)),vec![0x74,0x01,0x02,0x03]);
+}
+#[test]
+fn test_op_sub() {
+    assert_eq!(op::op_sub(&Operand::new_var(1),&Operand::new_var(2),&Variable::new(3)),vec![0x75,0x01,0x02,0x03]);
+}
+
+#[test]
+fn test_op_mul() {
+    assert_eq!(op::op_mul(&Operand::new_var(1),&Operand::new_var(2),&Variable::new(3)),vec![0x76,0x01,0x02,0x03]);
+}
+
+#[test]
+fn test_op_div() {
+    assert_eq!(op::op_div(&Operand::new_var(1),&Operand::new_var(2),&Variable::new(3)),vec![0x77,0x01,0x02,0x03]);
+}
+
+#[test]
+fn test_op_mod() {
+    assert_eq!(op::op_mod(&Operand::new_var(1),&Operand::new_var(2),&Variable::new(3)),vec![0x78,0x01,0x02,0x03]);
+}
+
+#[test]
+fn test_op_and() {
+    assert_eq!(op::op_and(&Operand::new_var(1),&Operand::new_var(2),&Variable::new(3)),vec![0x69,0x01,0x02,0x03]);
+}
+
+#[test]
+fn test_op_or() {
+    assert_eq!(op::op_or(&Operand::new_var(1),&Operand::new_var(2),&Variable::new(3)),vec![0x68,0x01,0x02,0x03]);
+}
+
+#[test]
+fn test_op_set_color() {
+    assert_eq!(op::op_set_color(0x15,0x20),vec![0x1B,0x15,0x20]);
+}
+
+#[test]
+fn test_op_set_color_var() {
+    assert_eq!(op::op_set_color_var(0x01,0x02),vec![0x7B,0x01,0x02]);
+}
+
+#[test]
+fn test_op_push_u16() {
+    assert_eq!(op::op_push_u16(0x0101),vec![0xE8,0x3F,0x01,0x01]);
+}
+
+#[test]
+fn test_op_pull() {
+    assert_eq!(op::op_pull(0x01),vec![0xE9,0x7F,0x01]);
+}
+
+#[test]
+fn test_op_random() {
+    assert_eq!(op::op_random(&Operand::new_var(10),&Variable::new(3)),vec![0xE7,0xBF,0x0a,0x03]);
+}
+
+#[test]
+fn test_op_print_num_var() {
+    assert_eq!(op::op_print_num_var(&Variable::new(3)),vec![0xE6,0xBF,0x03]);
+}
+
+#[test]
+fn test_op_set_text_style() {
+    assert_eq!(op::op_set_text_style(true,true,true,true),vec![0xF1,0x7F,0x0F]);
+    assert_eq!(op::op_set_text_style(true,false,false,false),vec![0xF1,0x7F,0x02]);
+    assert_eq!(op::op_set_text_style(false,true,false,false),vec![0xF1,0x7F,0x01]);
+    assert_eq!(op::op_set_text_style(false,false,true,false),vec![0xF1,0x7F,0x08]);
+    assert_eq!(op::op_set_text_style(false,false,false,true),vec![0xF1,0x7F,0x04]);
+    assert_eq!(op::op_set_text_style(false,false,false,false),vec![0xF1,0x7F,0x00]);
+}
+
+#[test]
+fn test_op_read_char() {
+    assert_eq!(op::op_read_char(0x01),vec![0xF6,0x7F,0x00,0x01]);
+}
+
+#[test]
+fn test_op_loadw() {
+    assert_eq!(op::op_loadw(&Operand::new_var(1),&Variable::new(2),&Variable::new(3)),vec![0x6F,0x01,0x02,0x03]);
+}
+
+#[test]
+fn test_op_storew() {
+    assert_eq!(op::op_storew(&Operand::new_var(1),&Variable::new(2),&Variable::new(3)),vec![0xE1,0xAB,0x01,0x02,0x03]);
+}
+
+#[test]
+fn test_op_erase_window() {
+    assert_eq!(op::op_erase_window(0x01),vec![0xED,0x3F,0x00,0x01]);
+}
+
+#[test]
+fn test_op_call_1n_var() {
+    assert_eq!(op::op_call_1n_var(0x01),vec![0xAF,0x01]);
+}
+
+#[test]
+fn test_op_print_paddr() {
+    assert_eq!(op::op_print_paddr(&Operand::new_var(10)),vec![0xAD,0x0a]);
+}
+
+#[test]
+fn test_op_print_addr() {
+    assert_eq!(op::op_print_addr(&Operand::new_var(10)),vec![0xA7,0x0a]);
+}
+
+#[test]
+fn test_op_ret() {
+    assert_eq!(op::op_ret(0x0101),vec![0x8B,0x01,0x01]);
+}
+
+#[test]
+fn test_op_store_var() {
+    assert_eq!(op::op_store_var(&Variable::new(2),&Operand::new_var(10)),vec![0x2d,0x02,0x0a]);
+}
