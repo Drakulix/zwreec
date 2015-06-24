@@ -38,7 +38,7 @@ impl AST {
         for op in ops {
             ast.operation(op);
         }
-        //ast.parse_expressions();
+        ast.parse_expressions();
 
         ast
     }

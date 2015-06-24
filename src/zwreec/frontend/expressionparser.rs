@@ -35,9 +35,10 @@ impl ExpressionParser {
                     let childs_copy = top.as_default().childs.to_vec();
                     self.expr_stack.push( ASTNode::Default(NodeDefault { category: tok.clone(), childs: childs_copy }) );
                 },
-                tok @ TokNumOp  { .. } |
-                tok @ TokCompOp { .. } |
-                tok @ TokLogOp  { .. } => {
+                tok @ TokNumOp      { .. } |
+                tok @ TokCompOp     { .. } |
+                tok @ TokLogOp      { .. } |
+                tok @ TokUnaryMinus { .. } => {
                     let length = self.oper_stack.len();
 
                     // cycle through the oper_stack stack backwards
@@ -68,9 +69,8 @@ impl ExpressionParser {
                     let mut ast_node = NodeDefault { category: tok.clone(), childs: childs_copy };
                     ExpressionParser::parse(&mut ast_node);
                     
-                    if ast_node.childs.len() == 1 {
-                        let temp = ast_node.childs.get(0).unwrap().clone();
-                        self.expr_stack.push(temp);
+                    if let Some(temp) = ast_node.childs.get(0) {
+                        self.expr_stack.push(temp.clone());
                     } else {
                         panic!{"no parsable sub-expression"}
                     }
@@ -78,11 +78,16 @@ impl ExpressionParser {
                 _ => ()
             }
         }
-
-        // parse the last elements of the stack
-        // to avoid endless loop we try max expr_stack.len()
+        // parse the last elements of the stacks
+        // to avoid endless loop we try max stack.len()
         for _ in 0..self.expr_stack.len() {
             if self.expr_stack.len() > 0 {
+                self.new_operator_node();
+            }
+        }
+        // multiple operators could be on the stack becouse if the unary ops
+        for _ in 0..self.oper_stack.len() {
+            if self.oper_stack.len() > 0 {
                 self.new_operator_node();
             }
         }
@@ -97,11 +102,39 @@ impl ExpressionParser {
     /// creates a node with an operator on top
     fn new_operator_node(&mut self) {
         if let Some(top_op) = self.oper_stack.pop() {
-            let e2: ASTNode = self.expr_stack.pop().unwrap();
-            let e1: ASTNode = self.expr_stack.pop().unwrap();
 
-            let new_node = ASTNode::Default(NodeDefault { category: top_op.clone(), childs: vec![e1, e2] });
-            self.expr_stack.push( new_node );
+            let is_unary: bool = match top_op.clone() {
+                TokLogOp { op_name: op, .. } => match &*op {
+                    "not" => true,
+                    _   => false
+                },
+                TokUnaryMinus { .. } => true,
+                _  => false
+            };
+
+            if self.expr_stack.len() > 0 {
+                let e2: ASTNode = match self.expr_stack.pop() {
+                    Some(tok) => tok,
+                    None      => panic!{"Not enough elements on the stack to create a node"}
+                };
+
+                let mut new_node: ASTNode;
+               
+                if is_unary {
+                    new_node = ASTNode::Default(NodeDefault { category: top_op.clone(), childs: vec![e2] });
+                } else {
+                    let e1: ASTNode = match self.expr_stack.pop() {
+                        Some(tok) => tok,
+                        None      => panic!{"Missing Node to create binary node"}
+                    };
+                    new_node = ASTNode::Default(NodeDefault { category: top_op.clone(), childs: vec![e1, e2] });
+                }
+
+                self.expr_stack.push( new_node );
+            } else {
+                // multiple unary operators in a row like "not not true"
+                self.oper_stack.push(top_op.clone());
+            }
         }
     }
 }
@@ -110,25 +143,35 @@ impl ExpressionParser {
 /// is more important then operator of token2
 /// the ranking is set in "operator_precedence"
 fn is_ranking_not_higher(token1: Token, token2: Token) -> bool {
-    let mut op1: String = "".to_string();
-    let mut op2: String = "".to_string();
-    match token1 {
-        TokNumOp  { op_name, .. } |
-        TokCompOp { op_name, .. } |
-        TokLogOp  { op_name, .. } => {
-            op1 = op_name.clone();
+    let op1: String = match token1 {
+        TokUnaryMinus{ .. } => "_".to_string(),
+        TokNumOp     { op_name, .. } |
+        TokCompOp    { op_name, .. } |
+        TokLogOp     { op_name, .. } => {
+            op_name.clone()
         },
-        _ => ()
-    }
-    match token2 {
-        TokNumOp  { op_name, .. } |
-        TokCompOp { op_name, .. } |
-        TokLogOp  { op_name, .. } => {
-            op2 = op_name.clone();
+        _ => panic!{"not allowed operator"}
+    };
+    let op2: String = match token2 {
+        TokUnaryMinus{ .. } => "_".to_string(),
+        TokNumOp     { op_name, .. } |
+        TokCompOp    { op_name, .. } |
+        TokLogOp     { op_name, .. } => {
+            op_name.clone()
         },
-        _ => ()
+        _ => panic!{"not allowed operator"}
+    };
+    
+
+    // special handling for the unary operators (two unary operators in a row)
+    //let op1_copy: &str = op1.as_slice();
+    if (op1 == "_" || op1 == "not") &&
+        operator_rank(op1.clone()) == operator_rank(op2.clone()) {
+        
+        return false
     }
 
+    // 
     if operator_rank(op1) >= operator_rank(op2) {
         return true
     }
@@ -145,7 +188,8 @@ fn operator_rank(op: String) -> u8 {
                             => 3,
         "+" | "-"           => 4,
         "*" | "/" | "%"     => 5,
-        "not"               => 6,
+        "_"                 => 6, //unary minus
+        "not"               => 7,
         _                   => panic!{"This operator is not implemented"}
     }
 }

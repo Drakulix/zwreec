@@ -407,6 +407,15 @@ impl<'a> Parser<'a> {
                     }
                     _ => None
                 },
+                (ExpressionList, TokLogOp { op_name: op, .. }) =>  match &*op {
+                    "not" => {
+                        stack.push(NonTerminal(ExpressionListf));
+                        stack.push(NonTerminal(Expression));
+
+                        None
+                    }
+                    _ => None
+                },
 
                 // ExpressionListf
                 (ExpressionListf, TokMacroEnd { .. } ) => {
@@ -445,6 +454,14 @@ impl<'a> Parser<'a> {
                     }
                     _ => None
                 },
+                (Expression, TokLogOp { op_name: op, .. }) =>  match &*op {
+                    "not" => {
+                        stack.push(NonTerminal(E));
+
+                        None
+                    }
+                    _ => None
+                },
 
                 // E
                 (E, TokVariable { .. } ) |
@@ -464,7 +481,16 @@ impl<'a> Parser<'a> {
                         stack.push(NonTerminal(E2));
                         stack.push(NonTerminal(T));
 
-                        None
+                        Some(ChildDown(TokExpression))
+                    }
+                    _ => None
+                },
+                (E, TokLogOp { op_name: op, .. }) =>  match &*op {
+                    "not" => {
+                        stack.push(NonTerminal(E2));
+                        stack.push(NonTerminal(T));
+
+                        Some(ChildDown(TokExpression))
                     }
                     _ => None
                 },
@@ -500,6 +526,15 @@ impl<'a> Parser<'a> {
                 },
                 (T, TokNumOp { op_name: op, .. }) =>  match &*op {
                     "-" => {
+                        stack.push(NonTerminal(T2));
+                        stack.push(NonTerminal(B));
+
+                        None
+                    }
+                    _ => None
+                },
+                (T, TokLogOp { op_name: op, .. }) =>  match &*op {
+                    "not" => {
                         stack.push(NonTerminal(T2));
                         stack.push(NonTerminal(B));
 
@@ -545,6 +580,15 @@ impl<'a> Parser<'a> {
                     }
                     _ => None
                 },
+                (B, TokLogOp { op_name: op, .. }) =>  match &*op {
+                    "not" => {
+                        stack.push(NonTerminal(B2));
+                        stack.push(NonTerminal(F));
+
+                        None
+                    }
+                    _ => None
+                },
 
                 // B2
                 (B2, TokCompOp { location, op_name: op }) => match &*op {
@@ -576,6 +620,15 @@ impl<'a> Parser<'a> {
                 },
                 (F, TokNumOp { op_name: op, .. }) =>  match &*op {
                     "-" => {
+                        stack.push(NonTerminal(F2));
+                        stack.push(NonTerminal(G));
+
+                        None
+                    }
+                    _ => None
+                },
+                (F, TokLogOp { op_name: op, .. }) =>  match &*op {
+                    "not" => {
                         stack.push(NonTerminal(F2));
                         stack.push(NonTerminal(G));
 
@@ -621,6 +674,15 @@ impl<'a> Parser<'a> {
                     }
                     _ => None
                 },
+                (G, TokLogOp { op_name: op, .. }) =>  match &*op {
+                    "not" => {
+                        stack.push(NonTerminal(G2));
+                        stack.push(NonTerminal(H));
+
+                        None
+                    }
+                    _ => None
+                },
 
                 // G2
                 (G2, TokNumOp { location, op_name: op }) => match &*op {
@@ -638,7 +700,8 @@ impl<'a> Parser<'a> {
                 (G2, TokSemiColon  { .. } ) |
                 (G2, TokCompOp     { .. } ) |
                 (G2, TokArgsEnd    { .. } ) |
-                (G2, TokColon      { .. } ) => {
+                (G2, TokColon      { .. } ) |
+                (G2, TokParenClose { .. } ) => {
                     // G2 -> ε
                     None
                 },
@@ -659,7 +722,16 @@ impl<'a> Parser<'a> {
                         stack.push(NonTerminal(H));
                         stack.push(Terminal(TokNumOp{location: location.clone(), op_name: op.clone()}));
 
-                        Some(AddChild(TokNumOp{location: location, op_name: "_".to_string()}))
+                        Some(AddChild(TokUnaryMinus{location: location}))
+                    }
+                    _ => None
+                },
+                (H, TokLogOp { location, op_name: op }) =>  match &*op {
+                    "not" => {
+                        stack.push(NonTerminal(H));
+                        stack.push(Terminal(TokLogOp{location: location.clone(), op_name: op.clone()}));
+
+                        Some(AddChild(TokLogOp{ location: location, op_name: op }))
                     }
                     _ => None
                 },
