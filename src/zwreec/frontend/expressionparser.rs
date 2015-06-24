@@ -24,7 +24,6 @@ impl ExpressionParser {
 
     /// parse the expression node and creates mutliple ast nodes
     fn parse_expressions(&mut self, node: &mut NodeDefault) {
-
         node.childs.reverse();
         while let Some(top) = node.childs.pop() {
             match top.category() {

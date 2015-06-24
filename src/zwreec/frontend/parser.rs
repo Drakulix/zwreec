@@ -654,7 +654,7 @@ impl<'a> Parser<'a> {
                         stack.push(NonTerminal(H));
                         stack.push(Terminal(TokNumOp{location: location.clone(), op_name: op.clone()}));
 
-                        Some(AddChild(TokNumOp{location: location, op_name: op}))
+                        Some(AddChild(TokNumOp{location: location, op_name: "_".to_string()}))
                     }
                     _ => None
                 },
