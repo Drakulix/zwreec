@@ -233,6 +233,39 @@ pub fn op_add(operand1: &Operand, operand2: &Operand, save_variable: &Variable) 
     bytes
 }
 
+/// multiplikation
+/// save_variable = operand1 * operand2
+pub fn op_mul(operand1: &Operand, operand2: &Operand, save_variable: &Variable) -> Vec<u8> {
+    let args: Vec<ArgType> = vec![arg_type(operand1), arg_type(operand2)];
+    let mut bytes = op_2(0x16, args);
+    write_argument(operand1, &mut bytes);
+    write_argument(operand2, &mut bytes);
+    bytes.push(save_variable.id);
+    bytes
+}
+
+/// division
+/// save_variable = operand1 / operand2
+pub fn op_div(operand1: &Operand, operand2: &Operand, save_variable: &Variable) -> Vec<u8> {
+    let args: Vec<ArgType> = vec![arg_type(operand1), arg_type(operand2)];
+    let mut bytes = op_2(0x17, args);
+    write_argument(operand1, &mut bytes);
+    write_argument(operand2, &mut bytes);
+    bytes.push(save_variable.id);
+    bytes
+}
+
+/// modulo
+/// save_variable = operand1 / operand2
+pub fn op_mod(operand1: &Operand, operand2: &Operand, save_variable: &Variable) -> Vec<u8> {
+    let args: Vec<ArgType> = vec![arg_type(operand1), arg_type(operand2)];
+    let mut bytes = op_2(0x18, args);
+    write_argument(operand1, &mut bytes);
+    write_argument(operand2, &mut bytes);
+    bytes.push(save_variable.id);
+    bytes
+}
+
 /// decrements the value of the variable
 pub fn op_dec(variable: u8) -> Vec<u8> {
     let mut bytes = op_1(0x06, ArgType::Reference);
@@ -348,7 +381,8 @@ pub fn arg_type(operand: &Operand) -> ArgType {
     match operand {
         &Operand::Var(_) => ArgType::Variable,
         &Operand::Const(_) => ArgType::SmallConst,
-        &Operand::LargeConst(_) => ArgType::LargeConst
+        &Operand::LargeConst(_) => ArgType::LargeConst,
+        &Operand::StringRef(_) => ArgType::LargeConst,
     }
 }
 
@@ -356,7 +390,8 @@ pub fn write_argument(operand: &Operand, v: &mut Vec<u8>){
     match operand {
         &Operand::Var(ref var)=> v.push(var.id),
         &Operand::Const(ref constant) => v.push(constant.value),
-        &Operand::LargeConst(ref constant) => write_i16(constant.value, v)
+        &Operand::LargeConst(ref constant) => write_i16(constant.value, v),
+        &Operand::StringRef(ref constant) => write_i16(constant.value, v),
     };
 }
 

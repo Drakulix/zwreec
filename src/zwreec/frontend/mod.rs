@@ -6,7 +6,7 @@
 //!
 //! # Example
 //!
-//! This small example shows how the differend submodules interact and can 
+//! This small example shows how the different submodules interact and can 
 //! be used to parse a Twee-File.
 //!
 //! ```
@@ -25,8 +25,10 @@
 //!     p.parse(tokens)
 //! );
 //! ```
-pub mod lexer;
-pub mod parser;
+
 pub mod ast;
 pub mod codegen;
+pub mod evaluate_expression;
 pub mod expressionparser;
+pub mod lexer;
+pub mod parser;

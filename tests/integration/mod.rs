@@ -66,6 +66,11 @@ fn random_test() {
 }
 
 #[test]
+fn random_expanded_test() {
+    test_compile(TESTFOLDER_PASS.to_string() + "RandomExpanded.twee");
+}
+
+#[test]
 fn if_else_test() {
     test_compile(TESTFOLDER_PASS.to_string() + "If-Else.twee");
 }

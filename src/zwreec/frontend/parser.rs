@@ -441,6 +441,16 @@ impl<'a> Parser<'a> {
                 },
 
                 // E2
+                (E2, TokLogOp { location, op_name: op }) => match &*op {
+                    "or" => {
+                        stack.push(NonTerminal(E2));
+                        stack.push(NonTerminal(T));
+                        stack.push(Terminal(TokLogOp{location: location.clone(), op_name: op.clone()}));
+
+                        Some(AddChild(TokLogOp{location: location, op_name: op}))
+                    }
+                    _ => None
+                },
                 (E2, _) => {
                     // E2 -> ε
                     debug!("pop E2 -> ε");
@@ -460,6 +470,16 @@ impl<'a> Parser<'a> {
                 },
 
                 // T2
+                (T2, TokLogOp { location, op_name: op }) => match &*op {
+                    "and" => {
+                        stack.push(NonTerminal(T2));
+                        stack.push(NonTerminal(B));
+                        stack.push(Terminal(TokLogOp{location: location.clone(), op_name: op.clone()}));
+
+                        Some(AddChild(TokLogOp{location: location, op_name: op}))
+                    }
+                    _ => None
+                },
                 (T2, _) => {
                     // T2 -> ε
                     None
@@ -478,12 +498,15 @@ impl<'a> Parser<'a> {
                 },
 
                 // B2
-                (B2, tok @ TokCompOp { .. } ) => {
-                    stack.push(NonTerminal(B2));
-                    stack.push(NonTerminal(F));
-                    stack.push(Terminal(tok.clone()));
+                (B2, TokCompOp { location, op_name: op }) => match &*op {
+                    "is" | "==" | "eq" | "neq" | ">" | "gt" | ">=" | "gte" | "<" | "lt" | "<=" | "lte" => {
+                        stack.push(NonTerminal(B2));
+                        stack.push(NonTerminal(F));
+                        stack.push(Terminal(TokCompOp{location: location.clone(), op_name: op.clone()}));
 
-                    Some(AddChild(tok))
+                        Some(AddChild(TokCompOp{location: location, op_name: op}))
+                    }
+                    _ => None
                 },
                 (B2, _) => {
                     // B2 -> ε
@@ -541,10 +564,27 @@ impl<'a> Parser<'a> {
                     }
                     _ => None
                 },
-                (G2, _) => {
+                (G2, TokVarSetEnd  { .. } ) |
+                (G2, TokMacroEnd   { .. } ) |
+                (G2, TokSemiColon  { .. } ) |
+                (G2, TokCompOp     { .. } ) |
+                (G2, TokArgsEnd    { .. } ) |
+                (G2, TokColon      { .. } ) |
+                (G2, TokParenClose { .. } ) => {
                     // G2 -> ε
                     None
                 },
+                (G2, TokLogOp { location, op_name: op }) => match &*op {
+                    "and" | "or" => {
+                        // G2 -> ε =>
+                        None
+                    }
+                    _ => ParserError::NoProjection{token: TokLogOp{location: location.clone(), op_name: op.clone()}, stack: G2}.raise()
+                },
+                (G2, tok) => {
+                    ParserError::NoProjection{token: tok, stack: G2}.raise()
+                }
+
 
                 // H
                 (H, TokInt     { .. } ) |
