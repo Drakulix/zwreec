@@ -103,6 +103,7 @@ pub enum ZOP {
   Inc{variable: u8},
   Ret{value: u16},
   JE{operand1: Operand, operand2: Operand, jump_to_label: String},
+  JNE{operand1: Operand, operand2: Operand, jump_to_label: String},
   JL{operand1: Operand, operand2: Operand, jump_to_label: String},
   JLE{operand1: Operand, operand2: Operand, jump_to_label: String},
   JG{operand1: Operand, operand2: Operand, jump_to_label: String},
@@ -491,6 +492,7 @@ impl Zfile {
             &ZOP::JG{ref operand1, ref operand2, ref jump_to_label} => self.op_jg(operand1, operand2, jump_to_label),
             &ZOP::JGE{ref operand1, ref operand2, ref jump_to_label} => self.op_jge(operand1, operand2, jump_to_label),
             &ZOP::JE{ref operand1, ref operand2, ref jump_to_label} => self.op_je(operand1, operand2, jump_to_label),
+            &ZOP::JNE{ref operand1, ref operand2, ref jump_to_label} => self.op_jne(operand1, operand2, jump_to_label),
             &ZOP::Call2NWithAddress{ref jump_to_label, ref address} => self.op_call_2n_with_address(jump_to_label, address),
             &ZOP::Call2NWithArg{ref jump_to_label, ref arg} => self.op_call_2n_with_arg(jump_to_label, arg),
             &ZOP::Call1N{ref jump_to_label} => self.op_call_1n(jump_to_label),
@@ -994,6 +996,14 @@ impl Zfile {
 
         // jump
         self.add_jump(jump_to_label.to_string(), JumpType::Branch);
+    }
+
+    /// jumps to a label if the value of operand1 is not equal to operand2
+    pub fn op_jne(&mut self, operand1: &Operand, operand2: &Operand, jump_to_label: &str) {
+        self.emit(vec![
+            ZOP::JL{operand1: operand1.clone(), operand2: operand2.clone(), jump_to_label: jump_to_label.to_string()},
+            ZOP::JG{operand1: operand1.clone(), operand2: operand2.clone(), jump_to_label: jump_to_label.to_string()}
+            ]);
     }
 
     /// jumps to a label if the value of operand1 is lower than operand2 (compared as i16)
