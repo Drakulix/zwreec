@@ -1391,7 +1391,7 @@ fn test_op_print_addr() {
 
 #[test]
 fn test_op_ret() {
-    assert_eq!(op::op_ret(&Operand::new_large_const(0)),vec![0x8B,0x01,0x01]);
+    assert_eq!(op::op_ret(&Operand::new_large_const(0x0101 as i16)),vec![0x8B,0x01,0x01]);
 }
 
 #[test]
