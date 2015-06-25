@@ -4,7 +4,7 @@ use std::collections::HashMap;
 use std::error::Error;
 use std::io::Write;
 
-use backend::zcode::zfile::{FormattingState, Operand, Variable, ZOP, Zfile};
+use backend::zcode::zfile::{FormattingState, Operand, Variable, ZOP, Zfile, Type};
 use config::Config;
 use frontend::ast;
 use frontend::ast::ASTNode;
@@ -137,7 +137,7 @@ pub fn gen_zcode<'a>(node: &'a ASTNode, mut out: &mut Zfile, mut manager: &mut C
                             if !manager.symbol_table.is_known_symbol(var_name) {
                                 let vartype = match result {
                                     Operand::StringRef(_) => Type::String,
-                                    Operand::Var(ref var) => if manager.symbol_table.has_var_id(var.id) { manager.symbol_table.get_symbol_type_by_id(var.id) } else { Type::Integer },
+                                    Operand::Var(ref var) => var.vartype.clone(),
                                     _ => Type::Integer
                                 };
                                 manager.symbol_table.insert_new_symbol(&var_name, vartype);
@@ -235,7 +235,7 @@ pub fn gen_zcode<'a>(node: &'a ASTNode, mut out: &mut Zfile, mut manager: &mut C
                 },
 
                 &TokMacroDisplay {ref passage_name, .. } => {
-                    let var = Variable { id: 17 };
+                    let var = Variable::new(17);
                     vec![
                     // activates the display-modus
                     ZOP::StoreVariable{variable: var.clone(), value: Operand::new_const(1)},
@@ -258,7 +258,7 @@ pub fn gen_zcode<'a>(node: &'a ASTNode, mut out: &mut Zfile, mut manager: &mut C
                         TokExpression => {
                             let eval = evaluate_expression(&child.childs[0], &mut code, manager, &mut out);
                             match eval {
-                                Operand::Var(var) => if manager.symbol_table.has_var_id(var.id) && manager.symbol_table.get_symbol_type_by_id(var.id) == Type::String { code.push(ZOP::PrintUnicodeStr{address: Operand::new_var(var.id)}); } else { code.push(ZOP::PrintNumVar{variable: var}); },
+                                Operand::Var(var) => if var.vartype == Type::String { code.push(ZOP::PrintUnicodeStr{address: Operand::new_var_string(var.id)}); } else { code.push(ZOP::PrintNumVar{variable: var}); },
                                 Operand::StringRef(addr) => code.push(ZOP::PrintUnicodeStr{address: Operand::new_large_const(addr.value)}),
                                 Operand::Const(c) => code.push(ZOP::Print{text: format!("{}", c.value)}),
                                 Operand::LargeConst(c) => code.push(ZOP::Print{text: format!("{}", c.value)})
@@ -406,13 +406,6 @@ impl IdentifierProvider {
     }
 }
 
-#[derive(Clone, PartialEq)]
-pub enum Type {
-    Bool,
-    Integer,
-    String,
-}
-
 impl <'a> SymbolTable<'a> {
     pub fn new() -> SymbolTable<'a> {
         SymbolTable {
@@ -424,7 +417,7 @@ impl <'a> SymbolTable<'a> {
     // Inserts a symbol into the table, assigning a new id
     pub fn insert_new_symbol(&mut self, symbol: &'a str, t: Type) {
         debug!("Assigned id {} to variable {}", self.current_id, symbol);
-        self.symbol_map.insert(symbol, (Variable::new(self.current_id),t));
+        self.symbol_map.insert(symbol, (Variable{id: self.current_id, vartype: t.clone()}, t));
         self.current_id += 1;
     }
 

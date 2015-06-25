@@ -4,8 +4,15 @@ pub use super::zbytes::Bytes;
 pub use super::ztext;
 pub use super::op;
 
+#[derive(Clone, PartialEq, Debug)]
+pub enum Type {
+    Bool,
+    Integer,
+    String,
+}
+
 #[derive(Debug,Clone)]
-pub struct Variable { pub id: u8 }
+pub struct Variable { pub id: u8, pub vartype: Type}
 #[derive(Debug,Clone)]
 pub struct Constant { pub value: u8 }
 #[derive(Debug,Clone)]
@@ -36,6 +43,10 @@ impl Operand {
         Operand::Var(Variable::new(id))
     }
 
+    pub fn new_var_string(id: u8) -> Operand {
+        Operand::Var(Variable::new_string(id))
+    }
+
     pub fn const_value(&self) -> i16 {
         match self {
             &Operand::Const(ref constant) => constant.value as i16,
@@ -54,7 +65,13 @@ impl Operand {
 
 impl Variable {
     pub fn new(id: u8) -> Variable {
-        Variable { id: id }
+        Variable { id: id, vartype: Type::Integer }
+    }
+    pub fn new_string(id: u8) -> Variable {
+        Variable { id: id, vartype: Type::String }
+    }
+    pub fn new_bool(id: u8) -> Variable {
+        Variable { id: id, vartype: Type::Bool }
     }
 }
 

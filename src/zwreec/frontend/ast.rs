@@ -2,9 +2,8 @@
 //! to create and walk through the ast (abstract syntaxtree)
 
 use backend::zcode::zfile;
-use backend::zcode::zfile::{ZOP};
+use backend::zcode::zfile::{ZOP, Type};
 use frontend::codegen;
-use frontend::codegen::Type;
 use frontend::expressionparser;
 use frontend::lexer::Token;
 use frontend::lexer::Token::{TokMacroIf, TokMacroElseIf, TokExpression, TokPassage};
