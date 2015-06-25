@@ -605,6 +605,9 @@ impl Zfile {
             ZOP::SetColor{foreground: 9, background: 2},
             ZOP::EraseWindow{value: -1},
             ZOP::Call1N{jump_to_label: "Start".to_string()},
+            ZOP::Label{name: "mainloop".to_string()},
+            ZOP::Call1N{jump_to_label: "system_check_links".to_string()},
+            ZOP::Jump{jump_to_label: "mainloop".to_string()},
         ]);
     }
 
