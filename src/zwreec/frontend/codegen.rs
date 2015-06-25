@@ -83,7 +83,6 @@ pub fn gen_zcode<'a>(node: &'a ASTNode, mut out: &mut Zfile, mut manager: &mut C
             }
 
             code.push(ZOP::Newline);
-            code.push(ZOP::Call1N{jump_to_label: "system_check_links".to_string()});
             code.push(ZOP::Ret{value: 0});
             code
         },
