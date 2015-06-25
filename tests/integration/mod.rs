@@ -82,8 +82,44 @@ fn current_status_test() {
 
 #[test]
 #[should_panic]
+fn expression_double_operators_test() {
+    test_compile(TESTFOLDER_FAIL.to_string() + "ExpressionDoubleOperators.twee");
+}
+
+#[test]
+#[should_panic]
+fn expression_wrong_parentheses1_test() {
+    test_compile(TESTFOLDER_FAIL.to_string() + "ExpressionsWrongParentheses1.twee");
+}
+
+#[test]
+#[should_panic]
+fn expression_wrong_parentheses2_test() {
+    test_compile(TESTFOLDER_FAIL.to_string() + "ExpressionsWrongParentheses2.twee");
+}
+
+#[test]
+#[should_panic]
+fn duplicate_passages() {
+    test_compile(TESTFOLDER_FAIL.to_string() + "DuplicatePassage.twee");
+}
+
+#[test]
+#[should_panic]
 fn invalid_macro_test() {
    test_compile(TESTFOLDER_FAIL.to_string() + "InvalidMacro.twee");
+}
+
+#[test]
+#[should_panic]
+fn multiple_else_test() {
+    test_compile(TESTFOLDER_FAIL.to_string() + "MultipleElse.twee");
+}
+
+#[test]
+#[should_panic]
+fn multiple_endif_test() {
+    test_compile(TESTFOLDER_FAIL.to_string() + "MultipleEndIf.twee");
 }
 
 #[test]
@@ -94,6 +130,18 @@ fn no_start_passage_test() {
 
 #[test]
 #[should_panic]
-fn duplicate_passage_test() {
-    test_compile(TESTFOLDER_FAIL.to_string() + "DuplicatePassage.twee");
+fn passage_not_allowed_chars1_test() {
+    test_compile(TESTFOLDER_FAIL.to_string() + "PassageNotAllowedChars1.twee");
+}
+
+#[test]
+#[should_panic]
+fn passage_not_allowed_chars2_test() {
+    test_compile(TESTFOLDER_FAIL.to_string() + "PassageNotAllowedChars2.twee");
+}
+
+#[test]
+#[should_panic]
+fn wrong_formatting_test() {
+    test_compile(TESTFOLDER_FAIL.to_string() + "WrongFormatting.twee");
 }

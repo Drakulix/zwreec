@@ -80,11 +80,8 @@ pub fn lex<'a, R: Read>(cfg: &'a Config, input: &'a mut R) -> FilteringScan<Peek
                 }
 
                 match elem {
-                    (TokError {location, message}, _) => {
-                        error!("{}", message);
-                        if !state.cfg.force {
-                            panic!();
-                        }
+                    (x @ TokError {..}, _) => {
+                        error_panic!(state.cfg => x);
                         None
                     }
                     (TokText {location, text}, Some(TokText{ .. })) => {
@@ -339,9 +336,9 @@ rustlex! TweeLexer {
     let TEXT_INITIAL = INITIAL_START_CHAR INITIAL_CHAR*;
 
     // If for example // is at a beginning of a line, then // is matched and not just /
-    let TEXT_START_CHAR = "ä"|"Ä"|"ü"|"Ü"|"ö"|"Ö"|"ß"|"ẞ" | [^"*!>#"'\n']; // add chars longer than one byte
+    let TEXT_START_CHAR = [^"*!>#"'\n']; // add chars longer than one byte
     let TEXT_CHAR = [^"/'_=~^{@<[" '\n'];
-    let TEXT = TEXT_CHAR+ | ["/'_=^{@<["];
+    let TEXT = TEXT_CHAR+ | ["/'_=~^{@<["];
 
     let TEXT_MONO_CHAR = [^"}"'\n'];
     let TEXT_MONO = TEXT_MONO_CHAR+ | "}" | "}}";

@@ -1,3 +1,3 @@
 pub mod file;
 pub mod extensions;
-pub mod error;
+#[macro_use] pub mod error;
