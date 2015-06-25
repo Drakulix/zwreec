@@ -89,6 +89,9 @@ pub enum ZOP {
   Call2NWithAddress{jump_to_label: String, address: String},
   Call2NWithArg{jump_to_label: String, arg: Operand},
   Call1NVar{variable: u8},
+  Call2S{jump_to_label: String, arg: Operand, result: Variable},
+  CallVNA2{jump_to_label: String, arg1: Operand, arg2: Operand},
+  CallVNA3{jump_to_label: String, arg1: Operand, arg2: Operand, arg3: Operand},
   Routine{name: String, count_variables: u8},
   Label{name: String},
   Newline,
@@ -491,6 +494,9 @@ impl Zfile {
             &ZOP::Call2NWithAddress{ref jump_to_label, ref address} => self.op_call_2n_with_address(jump_to_label, address),
             &ZOP::Call2NWithArg{ref jump_to_label, ref arg} => self.op_call_2n_with_arg(jump_to_label, arg),
             &ZOP::Call1N{ref jump_to_label} => self.op_call_1n(jump_to_label),
+            &ZOP::Call2S{ref jump_to_label, ref arg, ref result} => self.op_call_2s(jump_to_label, arg, result),
+            &ZOP::CallVNA2{ref jump_to_label, ref arg1, ref arg2} => self.op_call_vn_a2(jump_to_label, arg1, arg2),
+            &ZOP::CallVNA3{ref jump_to_label, ref arg1, ref arg2, ref arg3} => self.op_call_vn_a3(jump_to_label, arg1, arg2, arg3),
             _ => ()
         }
         let mut new_jumps: Vec<Zjump> = vec![];
@@ -604,6 +610,7 @@ impl Zfile {
         self.emit(vec![
             ZOP::SetColor{foreground: 9, background: 2},
             ZOP::EraseWindow{value: -1},
+            ZOP::Call1N{jump_to_label: "malloc_init".to_string()},
             ZOP::Call1N{jump_to_label: "Start".to_string()},
         ]);
     }
@@ -616,6 +623,10 @@ impl Zfile {
         self.routine_add_link();
         self.routine_check_more();
         self.routine_print_unicode();
+        self.routine_mem_free();
+        self.routine_malloc_init();
+        self.routine_strcpy();
+        self.routine_malloc();
         self.write_jumps();
         self.write_strings();
     }
@@ -828,6 +839,47 @@ impl Zfile {
         ]);
     }
 
+    /// malloc
+    pub fn routine_malloc(&mut self) {
+        self.emit(vec![
+            ZOP::Routine{name: "malloc".to_string(), count_variables: 15},
+            // @TODO:
+            ZOP::Ret{value: 0}
+        ]);
+    }
+
+    /// strcpy
+    pub fn routine_strcpy(&mut self) {
+        self.emit(vec![
+            ZOP::Routine{name: "strcpy".to_string(), count_variables: 15},
+            // @TODO:
+            // arg1: from_addr (has length at first u16)
+            // arg2: to_addr (no length at first u16)
+            // also liest length selbst
+            ZOP::Ret{value: 0}
+        ]);
+    }
+
+    /// malloc_init
+    pub fn routine_malloc_init(&mut self) {
+        self.emit(vec![
+            ZOP::Routine{name: "malloc_init".to_string(), count_variables: 15},
+            // @TODO:
+            // alles auf -1
+            ZOP::Ret{value: 0}
+        ]);
+    }
+
+    /// mem_free
+    pub fn routine_mem_free(&mut self) {
+        self.emit(vec![
+            ZOP::Routine{name: "mem_free".to_string(), count_variables: 15},
+            // @TODO:
+            // durch den speicher sucht und schaut, ob es eine variable dazu gibt. sonst free.
+            // inhalt, also länge < 0 heißt kein eintrag.
+            ZOP::Ret{value: 0}
+        ]);
+    }
 
     // ================================
     // specific ops
@@ -884,6 +936,46 @@ impl Zfile {
         self.add_jump(jump_to_label.to_string(), JumpType::Routine);
 
         op::write_argument(arg, &mut self.data.bytes);  // just one argument
+    }
+
+    /// calls a routine with one argument and stores return value in result
+    /// call_2s is 2OP
+    pub fn op_call_2s(&mut self, jump_to_label: &str, arg: &Operand, result: &Variable) {
+        let args: Vec<ArgType> = vec![ArgType::LargeConst, op::arg_type(&arg), ArgType::Variable];
+        self.op_2(0x19, args);
+
+        // the address of the jump_to_label
+        self.add_jump(jump_to_label.to_string(), JumpType::Routine);
+
+        op::write_argument(arg, &mut self.data.bytes);  // just one argument
+        self.data.append_byte(result.id);
+    }
+
+    /// calls a routine with two arguments and throws result away
+    /// call_vn is VAROP
+    pub fn op_call_vn_a2(&mut self, jump_to_label: &str, arg1: &Operand, arg2: &Operand) {
+        let args: Vec<ArgType> = vec![ArgType::LargeConst, op::arg_type(&arg1), op::arg_type(&arg2)];
+        self.op_var(0x19, args);
+
+        // the address of the jump_to_label
+        self.add_jump(jump_to_label.to_string(), JumpType::Routine);
+
+        op::write_argument(arg1, &mut self.data.bytes);
+        op::write_argument(arg2, &mut self.data.bytes);
+    }
+
+    /// calls a routine with three arguments and throws result away
+    /// call_vn is VAROP
+    pub fn op_call_vn_a3(&mut self, jump_to_label: &str, arg1: &Operand, arg2: &Operand, arg3: &Operand) {
+        let args: Vec<ArgType> = vec![ArgType::LargeConst, op::arg_type(&arg1), op::arg_type(&arg2), op::arg_type(&arg3)];
+        self.op_var(0x19, args);
+
+        // the address of the jump_to_label
+        self.add_jump(jump_to_label.to_string(), JumpType::Routine);
+
+        op::write_argument(arg1, &mut self.data.bytes);
+        op::write_argument(arg2, &mut self.data.bytes);
+        op::write_argument(arg3, &mut self.data.bytes);
     }
 
     /// jumps to a label if the value of operand1 is equal to operand2

@@ -1,7 +1,7 @@
 //! The `evaluate_expressions` module...
 
 
-use backend::zcode::zfile::{ZOP, Operand, Variable, Constant, LargeConstant, Zfile};
+use backend::zcode::zfile::{ZOP, Operand, Variable, Constant, LargeConstant, Zfile, Type};
 use frontend::ast::{ASTNode};
 use frontend::codegen;
 use frontend::codegen::{CodeGenManager};
@@ -95,7 +95,61 @@ fn eval_num_op<'a>(eval0: &Operand, eval1: &Operand, op_name: &str, code: &mut V
     let save_var = determine_save_var(eval0, eval1, temp_ids);
     match op_name {
         "+" => {
-            code.push(ZOP::Add{operand1: eval0.clone(), operand2: eval1.clone(), save_variable: save_var.clone()});
+            if save_var.vartype == Type::String {
+                let addr1 = match eval0 {
+                    &Operand::StringRef(_) => eval0,
+                    &Operand::Var(Variable{id: _, vartype: Type::String}) => eval0,
+                    _ => panic!("num_to_str not implemented") // would return addr of str in mem
+                };
+                let addr2 = match eval1 {
+                    &Operand::StringRef(_) => eval1,
+                    &Operand::Var(Variable{id: _, vartype: Type::String}) => eval1,
+                    _ => panic!("num_to_str not implemented") // would return addr of str in mem
+                };
+                let len1 = Variable::new(temp_ids.pop().unwrap());
+                let len2 = Variable::new(temp_ids.pop().unwrap());
+                let tmp = Variable::new(temp_ids.pop().unwrap());
+                let codesnippet = vec![
+                    // set to 0 for index access
+                    ZOP::StoreVariable{variable: len1.clone(), value: Operand::new_large_const(0)},
+                    // read length of string which is stored at index 0
+                    ZOP::LoadW{array_address: addr1.clone(), index: len1.clone(), variable: len1.clone()},
+                    // set to 0 for index access
+                    ZOP::StoreVariable{variable: len2.clone(), value: Operand::new_large_const(0)},
+                    // read length of string which is stored at index 0
+                    ZOP::LoadW{array_address: addr2.clone(), index: len2.clone(), variable: len2.clone()},
+                    // store new length = len1+len1+len2+len2 in save_var
+                    ZOP::StoreVariable{variable: save_var.clone(), value: Operand::new_var(len1.id)},
+                    ZOP::Add{operand1: Operand::new_var(len1.id), operand2: Operand::new_var(save_var.id), save_variable: save_var.clone()},
+                    ZOP::Add{operand1: Operand::new_var(len2.id), operand2: Operand::new_var(save_var.id), save_variable: save_var.clone()},
+                    ZOP::Add{operand1: Operand::new_var(len2.id), operand2: Operand::new_var(save_var.id), save_variable: save_var.clone()},
+                    ZOP::Call2S{jump_to_label: "malloc".to_string(), arg: Operand::new_var(save_var.id), result: save_var.clone()},
+                    // write len1+len2 to len2
+                    ZOP::Add{operand1: Operand::new_var(len1.id), operand2: Operand::new_var(len2.id), save_variable: len2.clone()},
+                    // set tmp to 0 for array index 0
+                    ZOP::StoreVariable{variable: tmp.clone(), value: Operand::new_large_const(0)},
+                    // and store len1+len2 in first u16
+                    ZOP::StoreW{array_address: Operand::new_var(save_var.id), index: tmp.clone(), variable: len2.clone()},
+                    // set tmp to save_var_addr+2
+                    ZOP::StoreVariable{variable: tmp.clone(), value: Operand::new_large_const(2)},
+                    ZOP::Add{operand1: Operand::new_var(tmp.id), operand2: Operand::new_var(save_var.id), save_variable: tmp.clone()},
+                    // strcopy (addr1 zu save_var_addr+2)
+                    ZOP::CallVNA2{jump_to_label: "strcpy".to_string(), arg1: addr1.clone(), arg2: Operand::new_var(tmp.id)},
+                    // set tmp to save_var_addr+2+len1*2
+                    ZOP::Add{operand1: Operand::new_var(tmp.id), operand2: Operand::new_var(len1.id), save_variable: tmp.clone()},
+                    ZOP::Add{operand1: Operand::new_var(tmp.id), operand2: Operand::new_var(len1.id), save_variable: tmp.clone()},
+                    // strcopy (addr2 zu save_var_addr+2+len1*2)
+                    ZOP::CallVNA2{jump_to_label: "strcpy".to_string(), arg1: addr2.clone(), arg2: Operand::new_var(tmp.id)},
+                ];
+                for instr in codesnippet {
+                    code.push(instr);
+                }
+                free_var_if_temp(&Operand::new_var(len1.id), temp_ids);
+                free_var_if_temp(&Operand::new_var(len2.id), temp_ids);
+                free_var_if_temp(&Operand::new_var(tmp.id), temp_ids);
+            } else {
+                code.push(ZOP::Add{operand1: eval0.clone(), operand2: eval1.clone(), save_variable: save_var.clone()});
+            }
         },
         "-" => {
             code.push(ZOP::Sub{operand1: eval0.clone(), operand2: eval1.clone(), save_variable: save_var.clone()});
@@ -292,22 +346,41 @@ fn free_var_if_temp (operand: &Operand, temp_ids: &mut Vec<u8>) {
     }
 }
 
+fn determine_result_type(a: Type, b: Type) -> Type {
+    if a == Type::String || b == Type::String {
+        Type::String
+    } else {
+        Type::Integer
+    }
+}
+
 fn determine_save_var(operand1: &Operand, operand2: &Operand, temp_ids: &mut Vec<u8>) -> Variable {
+    let type1 = match operand1 {
+        &Operand::Var(ref var) => var.vartype.clone(),
+        &Operand::StringRef(_) => Type::String,
+        _ => { Type::Integer }
+    };
+    let type2 = match operand2 {
+        &Operand::Var(ref var) => var.vartype.clone(),
+        &Operand::StringRef(_) => Type::String,
+        _ => { Type::Integer }
+    };
+    let vartype = determine_result_type(type1, type2);
     match operand1 {
         &Operand::Var(ref var) => {
             if CodeGenManager::is_temp_var(var) {
-                return var.clone();
+                return Variable{id: var.id, vartype: vartype};
             }
         }, _ => {}
     };
     match operand2 {
         &Operand::Var(ref var) => {
             if CodeGenManager::is_temp_var(var) {
-                return var.clone();
+                return Variable{id: var.id, vartype: vartype};
             }
         }, _ => {}
     };
-    return Variable::new(temp_ids.pop().unwrap());
+    return Variable{id: temp_ids.pop().unwrap(), vartype: vartype };
 }
 
 fn count_constants(operand1: &Operand, operand2: &Operand) -> u8 {
