@@ -98,9 +98,10 @@ pub enum Elem {
 ///
 /// The `zwreec::utils::extensions` module defines a new iterator `Parser`.
 /// This struct stores the state for this iterator.
-pub struct ParseState {
+pub struct ParseState<'a> {
     stack: Vec<Elem>,
-    grammar_func: Box<Fn(NonTerminalType, Option<Token>, &mut Vec<Elem>) -> Option<ASTOperation>>,
+    grammar_func: Box<Fn(&Config, NonTerminalType, Option<Token>, &mut Vec<Elem>) -> Option<ASTOperation>>,
+    cfg: &'a Config
 }
 
 //==============================
@@ -130,6 +131,7 @@ impl<'a> Parser<'a> {
             ParseState {
                 stack: stack,
                 grammar_func: Box::new(Parser::apply_grammar),
+                cfg: self.cfg,
             },
             {
                 /// the predictive stack ll(1) parsing routine
@@ -137,19 +139,27 @@ impl<'a> Parser<'a> {
 
                      match token {
                         Some(token) => match state.stack.pop() {
-                            Some(Elem::NonTerminal(non_terminal)) => (ParseResult::Halt, (state.grammar_func)(non_terminal, Some(token), &mut state.stack)),
+                            Some(Elem::NonTerminal(non_terminal)) => (ParseResult::Halt, (state.grammar_func)(state.cfg, non_terminal, Some(token), &mut state.stack)),
                             Some(Elem::Terminal(stack_token)) => {
                                 if stack_token == token {
                                     (ParseResult::Continue, None)
                                 } else {
-                                    panic!(ParserError::TokenDoNotMatch{token: Some(token), stack: stack_token});
+                                    error_panic!(state.cfg => ParserError::TokenDoNotMatch{token: Some(token), stack: stack_token.clone()});
+                                    state.stack.push(Elem::Terminal(stack_token));
+                                    (ParseResult::Continue, None)
                                 }
                             },
-                            None => panic!(ParserError::StackIsEmpty{token: token}),
+                            None => {
+                                error_panic!(state.cfg => ParserError::StackIsEmpty{token: token});
+                                (ParseResult::End, None)
+                            },
                         },
                         None => match state.stack.pop() {
-                            Some(Elem::NonTerminal(non_terminal)) => (ParseResult::Continue, (state.grammar_func)(non_terminal, None, &mut state.stack)),
-                            Some(Elem::Terminal(stack_token)) => panic!(ParserError::TokenDoNotMatch{token: token, stack: stack_token}),
+                            Some(Elem::NonTerminal(non_terminal)) => (ParseResult::Continue, (state.grammar_func)(state.cfg, non_terminal, None, &mut state.stack)),
+                            Some(Elem::Terminal(stack_token)) => {
+                                error_panic!(state.cfg => ParserError::TokenDoNotMatch{token: token, stack: stack_token});
+                                (ParseResult::Continue, None)
+                            },
                             None => (ParseResult::End, None),
                         }
                     }
@@ -162,7 +172,7 @@ impl<'a> Parser<'a> {
     /// apply the ll(1) grammar
     /// the match-statement simulates the parsing-table behavior
     ///
-    fn apply_grammar(top: NonTerminalType, maybe_token: Option<Token>, stack: &mut Vec<Elem>) -> Option<ASTOperation> {
+    fn apply_grammar(cfg: &Config, top: NonTerminalType, maybe_token: Option<Token>, stack: &mut Vec<Elem>) -> Option<ASTOperation> {
         if let Some(token) = maybe_token {
 
             let state = (top, token);
@@ -578,13 +588,13 @@ impl<'a> Parser<'a> {
                     "and" | "or" => {
                         // G2 -> ε =>
                         None
-                    }
-                    _ => ParserError::NoProjection{token: TokLogOp{location: location.clone(), op_name: op.clone()}, stack: G2}.raise()
+                    },
+                    _ => {
+                        error_panic!(cfg => ParserError::NoProjection{token: TokLogOp{location: location.clone(), op_name: op.clone()}, stack: G2});
+                        None
+                    },
                 },
-                (G2, tok) => {
-                    ParserError::NoProjection{token: tok, stack: G2}.raise()
-                }
-
+                (G2, tok) => { error_panic!(cfg => ParserError::NoProjection{token: tok, stack: G2}); None },
 
                 // H
                 (H, TokInt     { .. } ) |
@@ -684,7 +694,8 @@ impl<'a> Parser<'a> {
                     Some(AddChild(tok))
                 },
                 (x, tok) => {
-                    panic!(ParserError::NoProjection{token: tok, stack: x})
+                    error_panic!(cfg => ParserError::NoProjection{token: tok, stack: x});
+                    None
                 }
             }
 
@@ -699,7 +710,8 @@ impl<'a> Parser<'a> {
                     None
                 },
                 _ => {
-                    panic!(ParserError::NonTerminalEnd{stack: top})
+                    error_panic!(cfg => ParserError::NonTerminalEnd{stack: top});
+                    None
                 }
             }
         }
