@@ -80,11 +80,8 @@ pub fn lex<'a, R: Read>(cfg: &'a Config, input: &'a mut R) -> FilteringScan<Peek
                 }
 
                 match elem {
-                    (TokError {location, message}, _) => {
-                        error!("{}", message);
-                        if !state.cfg.force {
-                            panic!();
-                        }
+                    (x @ TokError {..}, _) => {
+                        error_panic!(state.cfg => x);
                         None
                     }
                     (TokText {location, text}, Some(TokText{ .. })) => {
