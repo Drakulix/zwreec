@@ -171,6 +171,7 @@ pub enum Token {
     TokLogOp                  {location: (u64, u64), op_name: String},
     TokSemiColon              {location: (u64, u64)},
     TokNewLine                {location: (u64, u64)},
+    TokUnaryMinus             {location: (u64, u64)},
     TokExpression,
     TokError                  {location: (u64, u64), message: String},
 }
@@ -236,6 +237,7 @@ impl Token {
             &TokLogOp{location, ..} |
             &TokSemiColon{location} |
             &TokNewLine{location} |
+            &TokUnaryMinus{location} |
             &TokError{location, ..}
                 => location,
             &TokExpression => (0, 0)
@@ -305,6 +307,7 @@ impl PartialEq for Token {
             (&TokLogOp{..}, &TokLogOp{..}) => true,
             (&TokSemiColon{..}, &TokSemiColon{..}) => true,
             (&TokNewLine{..}, &TokNewLine{..}) => true,
+            (&TokUnaryMinus{..}, &TokUnaryMinus{..}) => true,
             (&TokError{..}, &TokError{..}) => true,
             (&TokExpression, &TokExpression) => true,
             _ => false,
@@ -409,7 +412,7 @@ rustlex! TweeLexer {
 
     let COMMENT = "/%" ([^"%"]*(("%")*[^"%/"])?)* ("%")* "%/";
 
-    let MACRO_CONTENT_FAIL = ([^"> 0123456789+-*/%="'\n''\t']*(">"[^"> "'\n''\t'])?)+;
+    let MACRO_CONTENT_FAIL = ([^"> 0123456789+-*/%=()"'\n''\t']*(">"[^"> "'\n''\t'])?)+;
 
     INITIAL {
         PASSAGE_START => |lexer:&mut TweeLexer<R>| -> Option<Token> {
