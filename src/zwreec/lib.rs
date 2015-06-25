@@ -3,19 +3,19 @@
 //! Twee-to-Zcode compile library.
 //!
 //! Zwreec is a compiler for [interactive fiction](http://en.wikipedia.org/wiki/Interactive_fiction)
-//! in the Twee format (created by the [Twine software](http://en.wikipedia.org/wiki/Twine_(software))) 
-//! to [Z-Machine](http://en.wikipedia.org/wiki/Z-machine) instructions (Zcode) 
+//! in the Twee format (created by the [Twine software](http://en.wikipedia.org/wiki/Twine_(software)))
+//! to [Z-Machine](http://en.wikipedia.org/wiki/Z-machine) instructions (Zcode)
 //! which can be run with interpreters like [frotz](http://frotz.sourceforge.net).
 //!
-//! This library was developed as part of the course "Softwareprojekt 
+//! This library was developed as part of the course "Softwareprojekt
 //! Übersetzerbau" in 2015.
 //!
 //! # Requirements and Usage
 //!
 //! The library uses a [fork of rustlex](https://github.com/Farthen/rustlex) to
-//! to do lexical analysis. Since rustlex requires the Rust Nightly Builds, so 
-//! does zwreec. More precisely, this library was *only* developed and tested 
-//! against Rust 1.2.0-nightly, build 2015-06-01. You can install this specific 
+//! to do lexical analysis. Since rustlex requires the Rust Nightly Builds, so
+//! does zwreec. More precisely, this library was *only* developed and tested
+//! against Rust 1.2.0-nightly, build 2015-06-01. You can install this specific
 //! version using:
 //!
 //! ```sh
@@ -34,10 +34,10 @@
 //! ```rust
 //! extern crate zwreec;
 //! ```
-//!  
-//! # Features 
 //!
-//! Only rudimentary Twee features are supported right now. This is about to change in the upcoming weeks. 
+//! # Features
+//!
+//! Only rudimentary Twee features are supported right now. This is about to change in the upcoming weeks.
 //! Check the github issues for more information on the currently supported features.
 //!
 //! # Example
@@ -74,8 +74,8 @@
 //!
 //! # Reference Binary Implementation
 //!
-//! Zwreecs [Github-Repository](https://github.com/Drakulix/zwreec) contains a 
-//! reference binary implementation that uses this library and provides a simple 
+//! Zwreecs [Github-Repository](https://github.com/Drakulix/zwreec) contains a
+//! reference binary implementation that uses this library and provides a simple
 //! command line interface to compile Twee files.
 //!
 //! To build the binary, you need the rust version as outlined in [Requirements and
@@ -84,8 +84,8 @@
 //! ```sh
 //! $ cargo build
 //! ```
-//! 
-//! The resulting binary can be found at `target/debug/zwreec`. 
+//!
+//! The resulting binary can be found at `target/debug/zwreec`.
 //!
 //! # Logging
 //!
@@ -93,10 +93,7 @@
 //! [log](../log/index.html). The reference binary implementation of zwreec also includes an
 //! implementation of the `Log` trait.
 
-#![feature(plugin)]
-#![plugin(rustlex)]
-#[allow(plugin_as_library)]
-extern crate rustlex;
+extern crate rustlex_codegen as rustlex;
 #[macro_use] extern crate log;
 extern crate time;
 extern crate term;
@@ -125,9 +122,9 @@ use std::io::{Read,Write};
 /// # use std::fs::File;
 /// # use std::path::Path;
 /// # let mut args: Vec<String> = env::args().collect();
-/// # 
+/// #
 /// # if args.len() != 2 { panic!("Need exactly one input file!"); }
-/// # 
+/// #
 /// let cfg = zwreec::config::Config::default_config();
 /// let mut input = File::open(Path::new(&args[1])).unwrap();
 /// let mut output = File::create(Path::new("a.z8")).unwrap();
@@ -154,7 +151,7 @@ pub fn compile<R: Read, W: Write>(cfg: Config, input: &mut R, output: &mut W) {
 
 /// Run internal library tests.
 ///
-/// This function is used to circumvent certain parts of the compiler toolchain. 
+/// This function is used to circumvent certain parts of the compiler toolchain.
 /// It currently only processes `TestCase::ZcodeBackend` which creates a Zcode
 /// file using all available OP-Codes.
 ///
