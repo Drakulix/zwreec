@@ -5,7 +5,7 @@ dependencies = [
  "getopts 0.2.11 (registry+https://github.com/rust-lang/crates.io-index)",
  "libc 0.1.8 (registry+https://github.com/rust-lang/crates.io-index)",
  "log 0.3.1 (registry+https://github.com/rust-lang/crates.io-index)",
- "rustlex 0.2.7 (git+https://github.com/farthen/rustlex.git?rev=19149fae0337c2ca7c32c918d19c7b7558240234)",
+ "rustlex 0.2.7 (git+https://github.com/farthen/rustlex.git?rev=5fb0824727e39fed05559b1807eace5349ccca23)",
  "term 0.2.9 (registry+https://github.com/rust-lang/crates.io-index)",
  "time 0.1.26 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
@@ -48,7 +48,7 @@ dependencies = [
 [[package]]
 name = "rustlex"
 version = "0.2.7"
-source = "git+https://github.com/farthen/rustlex.git?rev=19149fae0337c2ca7c32c918d19c7b7558240234#19149fae0337c2ca7c32c918d19c7b7558240234"
+source = "git+https://github.com/farthen/rustlex.git?rev=5fb0824727e39fed05559b1807eace5349ccca23#5fb0824727e39fed05559b1807eace5349ccca23"
 
 [[package]]
 name = "term"
