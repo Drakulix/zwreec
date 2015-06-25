@@ -3,6 +3,17 @@ use std::fmt::{Display, Formatter, Result, Write};
 use frontend::lexer::Token;
 use frontend::parser::ParserError;
 
+macro_rules! error_panic(
+    ($cfg:expr => $($arg:tt)+) => (
+        {
+            error!("{}", $($arg)*);
+            if !$cfg.force {
+                panic!()
+            }
+        }
+    )
+);
+
 impl Display for Token {
     fn fmt(&self, f: &mut Formatter) -> Result {
         match self {
