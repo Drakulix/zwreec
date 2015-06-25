@@ -29,12 +29,13 @@ macro_rules! print_stderr(
     )
 );
 
-/// Returns the primary options for zwreec. It is e.g. used to generate the 
+/// Returns the primary options for zwreec. It is e.g. used to generate the
 /// usage information.
 fn short_options() -> getopts::Options {
     let mut opts = getopts::Options::new();
     opts.optflagmulti("v", "verbose", "be more verbose. Can be used multiple times.");
     opts.optflag("q", "quiet", "be quiet");
+    opts.optflag("w", "overwrite", "overwrite output file if necessary.");
     opts.optflagopt("l", "logfile", "specify log file (default zwreec.log)", "LOGFILE");
     opts.optopt("o", "", "name of the output file", "FILE");
     opts.optflag("h", "help", "display this help and exit");
@@ -53,11 +54,11 @@ fn usage(verbose: bool) {
         short_options()
     };
 
-    let brief = format!("Usage: zwreec [-hV] [-vq] [-l [LOGFILE]] [-o OUTPUT] INPUT");
+    let brief = format!("Usage: zwreec [-hV] [-vqwf] [-l [LOGFILE]] [-o OUTPUT] INPUT");
 
     println!("{}\n
 Additional help:
-    --help -v           Print the full set of options zwreec accepts", 
+    --help -v           Print the full set of options zwreec accepts",
         options.usage(&brief));
 }
 
@@ -66,8 +67,8 @@ Additional help:
 /// Parses command line arguments to set up the logger and extract input and
 /// output parameters. Will display the usage and exit depending on arguments.
 ///
-/// Returns `getopts::Matches` and a `std::fs::File` for the input and output 
-/// file. The `getopts::Matches` can be used to 
+/// Returns `getopts::Matches` and a `std::fs::File` for the input and output
+/// file. The `getopts::Matches` can be used to
 ///
 /// # Examples
 ///
@@ -83,7 +84,7 @@ Additional help:
 ///
 /// # Failures
 ///
-/// Depending on encountered arguments or parsing errors this function will 
+/// Depending on encountered arguments or parsing errors this function will
 /// print the usage and/or call `exit(1)`.
 ///
 /// NOTE: This is similar to librustc_driver's handle_options function.
@@ -211,8 +212,8 @@ fn parse_output(matches: &getopts::Matches) -> Option<Box<Write>> {
 
         // Check if FILE exists and issue warning.
         if File::open(path).is_ok() {
-            if !matches.opt_present("f") {
-                error!("Output file {} already exists. Use '-o NAME' to use a different name or '-f' to overwrite!", 
+            if !matches.opt_present("w") {
+                error!("Output file {} already exists. Use '-o NAME' to use a different name or '-w' to overwrite!",
                        path.display());
                 return None;
             } else {
