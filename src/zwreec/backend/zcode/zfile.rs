@@ -824,6 +824,7 @@ impl Zfile {
             // DEBUG    ZOP::Print{text: "pos:".to_string()}, ZOP::PrintNumVar{variable: 0x01},
             // addr as arg1 in 0x01, copy length to 0x02
             ZOP::LoadW{array_address: Operand::new_var(1), index: Variable::new(4), variable: Variable::new(2)},  // index at var:4 is 0
+            ZOP::JE{operand1: Operand::new_var(2), operand2: Operand::new_large_const(0), jump_to_label: "inter_char_end".to_string()},
             // DEBUG    ZOP::Print{text: "len:".to_string()}, ZOP::PrintNumVar{variable: 0x02},
             ZOP::Add{operand1: Operand::new_var(2), operand2: Operand::new_var(2), save_variable: Variable::new(2)}, // double length
             ZOP::Add{operand1: Operand::new_var(1), operand2: Operand::new_var(2), save_variable: Variable::new(2)}, // add 'offset' addr to length,
@@ -838,6 +839,7 @@ impl Zfile {
             ZOP::PrintUnicodeVar{var: Variable::new(3)},
             ZOP::Add{operand1: Operand::new_var(1), operand2: Operand::new_large_const(2i16), save_variable: Variable::new(1)}, // point to next char
             ZOP::JL{operand1: Operand::new_var(1), operand2: Operand::new_var(2), jump_to_label: "inter_char".to_string()},
+            ZOP::Label{name: "inter_char_end".to_string()},
             ZOP::Ret{value: 0}
         ]);
     }
