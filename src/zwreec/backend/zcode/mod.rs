@@ -21,13 +21,8 @@ pub fn temp_create_zcode_example<W: Write>(output: &mut W) {
     zfile.start();
     zfile.emit(vec![
         ZOP::Routine{name: "Start".to_string(), count_variables: 3},
-        ZOP::StoreVariable{variable: Variable::new(200), value: Operand::new_large_const(0x0002)},
-        ZOP::StoreVariable{variable: Variable::new(201), value: Operand::new_large_const(0x0004)},
-        ZOP::StoreVariable{variable: Variable::new(202), value: Operand::new_large_const(0x1000)},
-        ZOP::Mul{operand1: Operand::new_var(200), operand2:Operand::new_var(201) , save_variable: Variable::new(202)},
-        ZOP::Newline,
-        ZOP::PrintNumVar{variable: Variable::new(202)},
-        ZOP::Newline,
+        ZOP::Add{operand1: Operand::new_var(1), operand2: Operand::new_var(1), save_variable: Variable::new(1)},
+        ZOP::PrintOps{text: "it works".to_string()},
         ZOP::Quit,
         ]);
     zfile.end();

@@ -84,7 +84,7 @@ pub fn gen_zcode<'a>(node: &'a ASTNode, mut out: &mut Zfile, mut manager: &mut C
 
             code.push(ZOP::Newline);
             code.push(ZOP::Call1N{jump_to_label: "mem_free".to_string()});
-            code.push(ZOP::Ret{value: 0});
+            code.push(ZOP::Ret{value: Operand::new_const(0)});
             code
         },
         &ASTNode::Default(ref t) => {
