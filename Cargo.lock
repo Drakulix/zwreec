@@ -47,7 +47,7 @@ dependencies = [
 [[package]]
 name = "rustlex"
 version = "0.2.7"
-source = "git+https://github.com/farthen/rustlex.git#3e2c2898b0c7abdaf0469187277c1d388cd744d2"
+source = "git+https://github.com/farthen/rustlex.git#5fb0824727e39fed05559b1807eace5349ccca23"
 
 [[package]]
 name = "term"
