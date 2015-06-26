@@ -643,6 +643,7 @@ impl Zfile {
         self.routine_strcpy();
         self.routine_malloc();
         self.routine_strcat();
+        self.routine_itoa();
         self.write_jumps();
         self.write_strings();
     }
@@ -994,6 +995,53 @@ impl Zfile {
             // durch den speicher suchen und schauen, ob es eine variable dazu gibt. sonst free=-1i16.
             // inhalt, also länge < 0 heißt kein eintrag.
             ZOP::Ret{value: Operand::new_const(0)}
+        ]);
+    }
+
+    /// itoa
+    /// convert from number at arg1 to string at base of 10, returns the str addr
+    pub fn routine_itoa(&mut self) {
+        let number = Variable::new(1);  // var1 is the given number
+        let stra = Variable::new(2);  // the result string
+        let i = Variable::new(3);  // the current index
+        let zero = Variable::new(6);  // var14 stays 0
+        let tmp = Variable::new(4);
+        let z = Variable::new(5);
+        self.emit(vec![
+            ZOP::Routine{name: "itoa".to_string(), count_variables: 7},
+            // set first digit we handle to 10000
+            ZOP::StoreVariable{variable: z.clone(), value: Operand::new_large_const(10000i16)},
+            // maximum length is 7 characters like -12345 and length=6 at first u16
+            ZOP::Call2S{jump_to_label: "malloc".to_string(), arg: Operand::new_large_const(7), result: stra.clone()},
+            ZOP::Inc{variable: i.id},  // point at first character to be written
+            // write '-' if < 0
+            ZOP::JGE{operand1: Operand::new_var(number.id), operand2: Operand::new_large_const(0), jump_to_label: "itoa_write".to_string()},
+            ZOP::StoreVariable{variable: tmp.clone(), value: Operand::new_large_const('-' as i16)},
+            ZOP::StoreW{array_address: Operand::new_var(stra.id), index: i.clone(), variable: tmp.clone()},
+            ZOP::Inc{variable: i.id}, // go to next position
+            // and make number positive from now on (max 32767)
+            ZOP::Mul{operand1: Operand::new_large_const(-1i16), operand2: Operand::new_var(number.id), save_variable: number.clone()},
+            ZOP::Label{name: "itoa_write".to_string()},
+            // tmp=number/z
+            ZOP::Div{operand1: Operand::new_var(number.id), operand2: Operand::new_var(z.id), save_variable: tmp.clone()},
+            // do not write if digit is 0
+            ZOP::JE{operand1: Operand::new_var(tmp.id), operand2: Operand::new_large_const(0i16), jump_to_label: "itoa_continue".to_string()},
+            // write digit tmp as utf16
+            ZOP::Add{operand1: Operand::new_large_const('0' as i16), operand2: Operand::new_var(tmp.id), save_variable: tmp.clone()},
+            ZOP::StoreW{array_address: Operand::new_var(stra.id), index: i.clone(), variable: tmp.clone()},
+            ZOP::Inc{variable: i.id}, // go to next position
+            ZOP::Label{name: "itoa_continue".to_string()},
+            // number=number % z
+            ZOP::Mod{operand1: Operand::new_var(number.id), operand2: Operand::new_var(z.id), save_variable: number.clone()},
+            // continue with z/10
+            ZOP::Div{operand1: Operand::new_var(z.id), operand2: Operand::new_large_const(10i16), save_variable: z.clone()},
+            ZOP::JG{operand1: Operand::new_var(z.id), operand2: Operand::new_large_const(1i16), jump_to_label: "itoa_write".to_string()},
+            // write number as utf16 as it is in range 0-9
+            ZOP::Add{operand1: Operand::new_large_const('0' as i16), operand2: Operand::new_var(number.id), save_variable: tmp.clone()},
+            ZOP::StoreW{array_address: Operand::new_var(stra.id), index: i.clone(), variable: tmp.clone()},
+            // write length i at first position
+            ZOP::StoreW{array_address: Operand::new_var(stra.id), index: zero.clone(), variable: i.clone()},
+            ZOP::Ret{value: Operand::new_var(stra.id)}
         ]);
     }
 

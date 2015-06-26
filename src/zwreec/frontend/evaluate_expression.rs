@@ -100,17 +100,23 @@ fn eval_num_op<'a>(eval0: &Operand, eval1: &Operand, op_name: &str, code: &mut V
     match op_name {
         "+" => {
             if save_var.vartype == Type::String {
+                let a1 = Variable::new(temp_ids.pop().unwrap());
+                let o1 = Operand::new_var(a1.id);
+                let a2 = Variable::new(temp_ids.pop().unwrap());
+                let o2 = Operand::new_var(a2.id);
                 let addr1 = match eval0 {
                     &Operand::StringRef(_) => eval0,
                     &Operand::Var(Variable{id: _, vartype: Type::String}) => eval0,
-                    _ => panic!("num_to_str not implemented") // @TODO: would return addr of number converted to str in mem
+                    _ => { code.push(ZOP::Call2S{jump_to_label: "itoa".to_string(), arg: eval0.clone(), result: a1.clone()}); &o1 }
                 };
                 let addr2 = match eval1 {
                     &Operand::StringRef(_) => eval1,
                     &Operand::Var(Variable{id: _, vartype: Type::String}) => eval1,
-                    _ => panic!("num_to_str not implemented") // @TODO: would return addr of number converted to str in mem
+                    _ => { code.push(ZOP::Call2S{jump_to_label: "itoa".to_string(), arg: eval1.clone(), result: a2.clone()}); &o2 }
                 };
                 code.push(ZOP::CallVSA2{jump_to_label: "strcat".to_string(), arg1: addr1.clone(), arg2: addr2.clone(), result: save_var.clone()});
+                free_var_if_temp(&Operand::new_var(a1.id), temp_ids);
+                free_var_if_temp(&Operand::new_var(a2.id), temp_ids);
             } else {
                 code.push(ZOP::Add{operand1: eval0.clone(), operand2: eval1.clone(), save_variable: save_var.clone()});
             }
