@@ -31,6 +31,11 @@ fn test_compile(input_filename: String) {
 }
 
 #[test]
+fn expressions_test() {
+    test_compile(TESTFOLDER_PASS.to_string() + "Expressions.twee");
+}
+
+#[test]
 fn helloworld_test() {
     test_compile(TESTFOLDER_PASS.to_string() + "HelloWorld.twee");
 }

@@ -21,9 +21,9 @@
 102 should print 1: <<print true>>
 103 should print 1: <<print not false>>
 104 should print 0: <<print not true>>
-105 should print 0: <<print !-5>>
-106 should print 0: <<print !5>>
-107 should print 1: <<print !0>>
+105 should print 0: <<print not-5>>
+106 should print 0: <<print not5>>
+107 should print 1: <<print not0>>
 108 should print 1: <<print true and true>>
 109 should print 0: <<print true and false>>
 110 should print 0: <<print false and true>>
@@ -35,7 +35,7 @@
 116 should print 1: <<print true or false and true and false or true>>
 
 /% strings %/
-201 should print hallo: <<print "1234">>
+201 should print 1234: <<print "1234">>
 202 should print hallo: <<print "hallo">>
 203 should print hallo: <<print 'hallo'>>
 204 should print hallo: <<print "hal"+'lo'>>
@@ -81,6 +81,4 @@
 
 328 should print 1: <<print "hallo"=="hallo">>
 329 should print 0: <<print "hallo"=="hallo2">>
-330 should print 0: <<print "hallo"neq"hallo">>
-331 should print 1: <<print "hallo"neq"hallo2">>
 
