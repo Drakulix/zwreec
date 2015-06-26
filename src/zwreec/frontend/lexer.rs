@@ -412,8 +412,6 @@ rustlex! TweeLexer {
 
     let COMMENT = "/%" ([^"%"]*(("%")*[^"%/"])?)* ("%")* "%/";
 
-    let MACRO_CONTENT_FAIL = ([^"> 0123456789+-*/%=()!&|"'\n''\t']*(">"[^"> "'\n''\t'])?)+;
-
     INITIAL {
         PASSAGE_START => |lexer:&mut TweeLexer<R>| -> Option<Token> {
             lexer.PASSAGE();
@@ -695,8 +693,6 @@ rustlex! TweeLexer {
 
     MACRO_CONTENT {
 
-        MACRO_CONTENT_FAIL => |lexer:&mut TweeLexer<R>| -> Option<Token> { Some(bad_expression(lexer.yystr(), lexer.yylloc())) }
-
         // Expression Stuff
         FUNCTION =>  |lexer:&mut TweeLexer<R>| {
             let s =  lexer.yystr();
@@ -753,25 +749,6 @@ rustlex! TweeLexer {
 
     MACRO_CONTENT_SHORT_PRINT {
 
-        MACRO_CONTENT_FAIL => |lexer:&mut TweeLexer<R>| -> Option<Token> { Some(bad_expression(lexer.yystr(), lexer.yylloc())) }
-
-        // Expression Stuff
-        FUNCTION =>   |lexer:&mut TweeLexer<R>| -> Option<Token> { Some(bad_expression(lexer.yystr(), lexer.yylloc())) }
-        STRING =>     |lexer:&mut TweeLexer<R>| -> Option<Token> { Some(bad_expression(lexer.yystr(), lexer.yylloc())) }
-        VAR_NAME =>   |lexer:&mut TweeLexer<R>| -> Option<Token> { Some(bad_expression(lexer.yystr(), lexer.yylloc())) }
-        FLOAT =>      |lexer:&mut TweeLexer<R>| -> Option<Token> { Some(bad_expression(lexer.yystr(), lexer.yylloc())) }
-        INT =>        |lexer:&mut TweeLexer<R>| -> Option<Token> { Some(bad_expression(lexer.yystr(), lexer.yylloc())) }
-        BOOL =>       |lexer:&mut TweeLexer<R>| -> Option<Token> { Some(bad_expression(lexer.yystr(), lexer.yylloc())) }
-        NUM_OP =>     |lexer:&mut TweeLexer<R>| -> Option<Token> { Some(bad_expression(lexer.yystr(), lexer.yylloc())) }
-        COMP_OP =>    |lexer:&mut TweeLexer<R>| -> Option<Token> { Some(bad_expression(lexer.yystr(), lexer.yylloc())) }
-        LOG_OP =>     |lexer:&mut TweeLexer<R>| -> Option<Token> { Some(bad_expression(lexer.yystr(), lexer.yylloc())) }
-        PAREN_OPEN => |lexer:&mut TweeLexer<R>| -> Option<Token> { Some(bad_expression(lexer.yystr(), lexer.yylloc())) }
-        PAREN_CLOSE =>|lexer:&mut TweeLexer<R>| -> Option<Token> { Some(bad_expression(lexer.yystr(), lexer.yylloc())) }
-        SEMI_COLON => |lexer:&mut TweeLexer<R>| -> Option<Token> { Some(bad_expression(lexer.yystr(), lexer.yylloc())) }
-        ASSIGN =>     |lexer:&mut TweeLexer<R>| -> Option<Token> { Some(bad_expression(lexer.yystr(), lexer.yylloc())) }
-        COLON =>      |lexer:&mut TweeLexer<R>| -> Option<Token> { Some(bad_expression(lexer.yystr(), lexer.yylloc())) }
-        // Expression Stuff End
-
         NEWLINE =>  |_:&mut TweeLexer<R>| -> Option<Token> { None }
 
         WHITESPACE =>  |_:&mut TweeLexer<R>| -> Option<Token> { None }
@@ -783,8 +760,6 @@ rustlex! TweeLexer {
     }
 
     MACRO_CONTENT_SHORT_DISPLAY {
-
-        MACRO_CONTENT_FAIL => |lexer:&mut TweeLexer<R>| -> Option<Token> { Some(bad_argument(lexer.yystr(), lexer.yylloc())) }
 
         // Expression Stuff
         FUNCTION =>   |_:&mut TweeLexer<R>| -> Option<Token> { None }
@@ -902,20 +877,6 @@ fn unescape(s: String) -> String {
     }
 
     unescaped
-}
-
-fn bad_expression(s: String, loc: (u64,u64)) -> Token {
-    let (line, symbol) = loc;
-    //todo: error message should be "<<print>> bad expression: $test + bla"
-    let m = format!("<<print>> bad expression at {},{}: \"{}\"", line, symbol, s);
-    TokError{location: loc, message: m}
-}
-
-fn bad_argument(s: String, loc: (u64,u64)) -> Token {
-    let (line, symbol) = loc;
-    //todo: error message should be "<<Pop one>> bad argument: one"
-    let m = format!("<<display>> bad argument at {},{}: \"{}\"", line, symbol, s);
-    TokError{location: loc, message: m}
 }
 
 
