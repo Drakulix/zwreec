@@ -401,7 +401,7 @@ rustlex! TweeLexer {
     let SEMI_COLON = ';';
     let NUM_OP = ["+-*/%"];
     let COMP_OP = "is" | "==" | "eq" | "neq" | ">" | "gt" | ">=" | "gte" | "<" | "lt" | "<=" | "lte";
-    let LOG_OP = "and" | "or" | "not";
+    let LOG_OP = "and" | "&&" | "or" | "||" | "not" | "!";
 
     let LINK_OPEN = '[';
     let LINK_CLOSE = ']';
@@ -412,7 +412,7 @@ rustlex! TweeLexer {
 
     let COMMENT = "/%" ([^"%"]*(("%")*[^"%/"])?)* ("%")* "%/";
 
-    let MACRO_CONTENT_FAIL = ([^"> 0123456789+-*/%=()"'\n''\t']*(">"[^"> "'\n''\t'])?)+;
+    let MACRO_CONTENT_FAIL = ([^"> 0123456789+-*/%=()!&|"'\n''\t']*(">"[^"> "'\n''\t'])?)+;
 
     INITIAL {
         PASSAGE_START => |lexer:&mut TweeLexer<R>| -> Option<Token> {
