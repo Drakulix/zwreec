@@ -418,7 +418,7 @@ impl<'a> Parser<'a> {
                     _ => None
                 },
                 (ExpressionList, TokLogOp { op_name: op, .. }) =>  match &*op {
-                    "not" => {
+                    "not" | "!" => {
                         stack.push(NonTerminal(ExpressionListf));
                         stack.push(NonTerminal(Expression));
 
@@ -465,7 +465,7 @@ impl<'a> Parser<'a> {
                     _ => None
                 },
                 (Expression, TokLogOp { op_name: op, .. }) =>  match &*op {
-                    "not" => {
+                    "not" | "!" => {
                         stack.push(NonTerminal(E));
 
                         None
@@ -496,7 +496,7 @@ impl<'a> Parser<'a> {
                     _ => None
                 },
                 (E, TokLogOp { op_name: op, .. }) =>  match &*op {
-                    "not" => {
+                    "not" | "!" => {
                         stack.push(NonTerminal(E2));
                         stack.push(NonTerminal(T));
 
@@ -507,7 +507,7 @@ impl<'a> Parser<'a> {
 
                 // E2
                 (E2, TokLogOp { location, op_name: op }) => match &*op {
-                    "or" => {
+                    "or" | "||" => {
                         stack.push(NonTerminal(E2));
                         stack.push(NonTerminal(T));
                         stack.push(Terminal(TokLogOp{location: location.clone(), op_name: op.clone()}));
@@ -544,7 +544,7 @@ impl<'a> Parser<'a> {
                     _ => None
                 },
                 (T, TokLogOp { op_name: op, .. }) =>  match &*op {
-                    "not" => {
+                    "not" | "!" => {
                         stack.push(NonTerminal(T2));
                         stack.push(NonTerminal(B));
 
@@ -555,7 +555,7 @@ impl<'a> Parser<'a> {
 
                 // T2
                 (T2, TokLogOp { location, op_name: op }) => match &*op {
-                    "and" => {
+                    "and" | "&&" => {
                         stack.push(NonTerminal(T2));
                         stack.push(NonTerminal(B));
                         stack.push(Terminal(TokLogOp{location: location.clone(), op_name: op.clone()}));
@@ -591,7 +591,7 @@ impl<'a> Parser<'a> {
                     _ => None
                 },
                 (B, TokLogOp { op_name: op, .. }) =>  match &*op {
-                    "not" => {
+                    "not" | "!" => {
                         stack.push(NonTerminal(B2));
                         stack.push(NonTerminal(F));
 
@@ -638,7 +638,7 @@ impl<'a> Parser<'a> {
                     _ => None
                 },
                 (F, TokLogOp { op_name: op, .. }) =>  match &*op {
-                    "not" => {
+                    "not" | "!" => {
                         stack.push(NonTerminal(F2));
                         stack.push(NonTerminal(G));
 
@@ -685,7 +685,7 @@ impl<'a> Parser<'a> {
                     _ => None
                 },
                 (G, TokLogOp { op_name: op, .. }) =>  match &*op {
-                    "not" => {
+                    "not" | "!" => {
                         stack.push(NonTerminal(G2));
                         stack.push(NonTerminal(H));
 
@@ -716,7 +716,7 @@ impl<'a> Parser<'a> {
                     None
                 },
                 (G2, TokLogOp { location, op_name: op }) => match &*op {
-                    "and" | "or" => {
+                    "and" | "&&" | "or" | "||" => {
                         // G2 -> ε =>
                         None
                     },
@@ -738,7 +738,7 @@ impl<'a> Parser<'a> {
                     _ => None
                 },
                 (H, TokLogOp { location, op_name: op }) =>  match &*op {
-                    "not" => {
+                    "not" | "!" => {
                         stack.push(NonTerminal(H));
                         stack.push(Terminal(TokLogOp{location: location.clone(), op_name: op.clone()}));
 

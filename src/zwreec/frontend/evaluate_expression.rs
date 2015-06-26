@@ -38,15 +38,15 @@ fn evaluate_expression_internal<'a>(node: &'a ASTNode, code: &mut Vec<ZOP>,
         },
         TokLogOp { ref op_name, .. } => {
             let eval0 = evaluate_expression_internal(&n.childs[0], code, temp_ids, manager, &mut out);
-            
+
             match &**op_name {
-                "and" | "or" => {
+                "and" | "&&" | "or" | "||" => {
                     let eval1 = evaluate_expression_internal(&n.childs[1], code, temp_ids, manager, &mut out);
                     eval_and_or(&eval0, &eval1, &**op_name, code, temp_ids)
                 },
-                "not" => {
+                "not" | "!" => {
                     eval_not(&eval0, code, temp_ids, manager)
-                }, 
+                },
                 _ => panic!("unhandled op")
             }
         },
@@ -168,7 +168,7 @@ fn direct_eval_num_op(eval0: &Operand, eval1: &Operand, op_name: &str) -> Operan
     }
 }
 
-fn eval_comp_op<'a>(eval0: &Operand, eval1: &Operand, op_name: &str, code: &mut Vec<ZOP>, 
+fn eval_comp_op<'a>(eval0: &Operand, eval1: &Operand, op_name: &str, code: &mut Vec<ZOP>,
         temp_ids: &mut Vec<u8>, mut manager: &mut CodeGenManager<'a>) -> Operand {
     if count_constants(eval0, eval1) == 2 {
         return direct_eval_comp_op(eval0, eval1, op_name);
@@ -237,7 +237,7 @@ fn direct_eval_comp_op(eval0: &Operand, eval1: &Operand, op_name: &str) -> Opera
     }
 }
 
-fn eval_and_or(eval0: &Operand, eval1: &Operand, op_name: &str, code: &mut Vec<ZOP>, 
+fn eval_and_or(eval0: &Operand, eval1: &Operand, op_name: &str, code: &mut Vec<ZOP>,
         temp_ids: &mut Vec<u8>) -> Operand {
     if count_constants(&eval0, &eval1) == 2 {
         let mut out_large = false;
@@ -245,7 +245,7 @@ fn eval_and_or(eval0: &Operand, eval1: &Operand, op_name: &str, code: &mut Vec<Z
         let val1 = eval1.const_value();
         match eval0 { &Operand::LargeConst(_) => {out_large = true; }, _ => {} };
         match eval1 { &Operand::LargeConst(_) => {out_large = true; }, _ => {} };
-        let result = if op_name == "or" {
+        let result = if op_name == "or" || op_name == "||" {
                 val0 | val1
             } else {
                 val0 & val1
@@ -256,9 +256,9 @@ fn eval_and_or(eval0: &Operand, eval1: &Operand, op_name: &str, code: &mut Vec<Z
             return Operand::Const(Constant { value: result as u8 })
         }
     }
-    
+
     let save_var = determine_save_var(eval0, eval1, temp_ids);
-    if op_name == "or" {
+    if op_name == "or" || op_name == "||" {
         code.push(ZOP::Or{operand1: eval0.clone(), operand2: eval1.clone(), save_variable: save_var.clone()});
     } else {
         code.push(ZOP::And{operand1: eval0.clone(), operand2: eval1.clone(), save_variable: save_var.clone()});
@@ -294,7 +294,7 @@ fn eval_unary_minus(eval: &Operand, code: &mut Vec<ZOP>, temp_ids: &mut Vec<u8>)
         }
     }
 
-    let save_var = match eval { 
+    let save_var = match eval {
         &Operand::Var(ref var) => {
             if CodeGenManager::is_temp_var(var) {
                 Variable::new(var.id)
@@ -310,7 +310,7 @@ fn eval_unary_minus(eval: &Operand, code: &mut Vec<ZOP>, temp_ids: &mut Vec<u8>)
 }
 
 fn free_var_if_both_temp (eval0: &Operand, eval1: &Operand, temp_ids: &mut Vec<u8>) {
-    match eval0 { 
+    match eval0 {
         &Operand::Var(ref var1) => {
             if CodeGenManager::is_temp_var(var1) {
                 match eval1 {
