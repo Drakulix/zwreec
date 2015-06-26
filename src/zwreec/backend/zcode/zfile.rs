@@ -92,6 +92,8 @@ pub enum ZOP {
   Call2S{jump_to_label: String, arg: Operand, result: Variable},
   CallVNA2{jump_to_label: String, arg1: Operand, arg2: Operand},
   CallVNA3{jump_to_label: String, arg1: Operand, arg2: Operand, arg3: Operand},
+  CallVSA2{jump_to_label: String, arg1: Operand, arg2: Operand, result: Variable},
+  CallVSA3{jump_to_label: String, arg1: Operand, arg2: Operand, arg3: Operand, result: Variable},
   Routine{name: String, count_variables: u8},
   Label{name: String},
   Newline,
@@ -505,6 +507,8 @@ impl Zfile {
             &ZOP::Call2S{ref jump_to_label, ref arg, ref result} => self.op_call_2s(jump_to_label, arg, result),
             &ZOP::CallVNA2{ref jump_to_label, ref arg1, ref arg2} => self.op_call_vn_a2(jump_to_label, arg1, arg2),
             &ZOP::CallVNA3{ref jump_to_label, ref arg1, ref arg2, ref arg3} => self.op_call_vn_a3(jump_to_label, arg1, arg2, arg3),
+            &ZOP::CallVSA2{ref jump_to_label, ref arg1, ref arg2, ref result} => self.op_call_vs_a2(jump_to_label, arg1, arg2, result),
+            &ZOP::CallVSA3{ref jump_to_label, ref arg1, ref arg2, ref arg3, ref result} => self.op_call_vs_a3(jump_to_label, arg1, arg2, arg3, result),
             _ => ()
         }
         let mut new_jumps: Vec<Zjump> = vec![];
@@ -638,6 +642,7 @@ impl Zfile {
         self.routine_malloc_init();
         self.routine_strcpy();
         self.routine_malloc();
+        self.routine_strcat();
         self.write_jumps();
         self.write_strings();
     }
@@ -917,6 +922,51 @@ impl Zfile {
         ]);
     }
 
+    /// strcat
+    /// returns a reference to a string concatenation of the first and second string parameters
+    pub fn routine_strcat(&mut self) {
+        let addr1 = Variable::new(1);
+        let addr2 = Variable::new(2);
+        let len1 = Variable::new(3);
+        let len2 = Variable::new(4);
+        let tmp = Variable::new(5);
+        let save_var = Variable::new(6);
+        self.emit(vec![
+            ZOP::Routine{name: "strcat".to_string(), count_variables: 15},
+            // var1 has the first str-addr, var2 the second str-addr
+            // set to 0 for index access
+            ZOP::StoreVariable{variable: len1.clone(), value: Operand::new_large_const(0)},
+            // read length of string1 which is stored at index 0
+            ZOP::LoadW{array_address: Operand::new_var(addr1.id), index: len1.clone(), variable: len1.clone()},
+            // set to 0 for index access
+            ZOP::StoreVariable{variable: len2.clone(), value: Operand::new_large_const(0)},
+            // read length of string2 which is stored at index 0
+            ZOP::LoadW{array_address: Operand::new_var(addr2.id), index: len2.clone(), variable: len2.clone()},
+            // store new length = len1+len2 in save_var
+            ZOP::StoreVariable{variable: save_var.clone(), value: Operand::new_var(len1.id)},
+            ZOP::Add{operand1: Operand::new_var(len2.id), operand2: Operand::new_var(save_var.id), save_variable: save_var.clone()},
+            ZOP::Inc{variable: save_var.id},  // increase as we will also save the length at first u16
+            ZOP::Call2S{jump_to_label: "malloc".to_string(), arg: Operand::new_var(save_var.id), result: save_var.clone()},
+            // write len1+len2 to len2
+            ZOP::Add{operand1: Operand::new_var(len1.id), operand2: Operand::new_var(len2.id), save_variable: len2.clone()},
+            // set tmp to 0 for array index 0
+            ZOP::StoreVariable{variable: tmp.clone(), value: Operand::new_large_const(0)},
+            // and store len1+len2 in first u16
+            ZOP::StoreW{array_address: Operand::new_var(save_var.id), index: tmp.clone(), variable: len2.clone()},
+            // set tmp to save_var_addr+2
+            ZOP::StoreVariable{variable: tmp.clone(), value: Operand::new_large_const(2)},
+            ZOP::Add{operand1: Operand::new_var(tmp.id), operand2: Operand::new_var(save_var.id), save_variable: tmp.clone()},
+            // strcopy (addr1 to save_var_addr+2)
+            ZOP::CallVNA2{jump_to_label: "strcpy".to_string(), arg1: Operand::new_var(addr1.id), arg2: Operand::new_var(tmp.id)},
+            // set tmp to save_var_addr+2+len1*2
+            ZOP::Add{operand1: Operand::new_var(tmp.id), operand2: Operand::new_var(len1.id), save_variable: tmp.clone()},
+            ZOP::Add{operand1: Operand::new_var(tmp.id), operand2: Operand::new_var(len1.id), save_variable: tmp.clone()},
+            // strcopy (addr2 to save_var_addr+2+len1*2)
+            ZOP::CallVNA2{jump_to_label: "strcpy".to_string(), arg1: Operand::new_var(addr2.id), arg2: Operand::new_var(tmp.id)},
+            ZOP::Ret{value: Operand::new_var(save_var.id)}
+        ]);
+    }
+
     /// malloc_init
     pub fn routine_malloc_init(&mut self) {
         let heap_start = self.heap_start;
@@ -1042,6 +1092,35 @@ impl Zfile {
         op::write_argument(arg1, &mut self.data.bytes);
         op::write_argument(arg2, &mut self.data.bytes);
         op::write_argument(arg3, &mut self.data.bytes);
+    }
+
+    /// calls a routine with two arguments and stores return value in result
+    /// call_vs is VAROP
+    pub fn op_call_vs_a2(&mut self, jump_to_label: &str, arg1: &Operand, arg2: &Operand, result: &Variable) {
+        let args: Vec<ArgType> = vec![ArgType::LargeConst, op::arg_type(&arg1), op::arg_type(&arg2), ArgType::Nothing];
+        self.op_var(0x0, args);
+
+        // the address of the jump_to_label
+        self.add_jump(jump_to_label.to_string(), JumpType::Routine);
+
+        op::write_argument(arg1, &mut self.data.bytes);
+        op::write_argument(arg2, &mut self.data.bytes);
+        self.data.append_byte(result.id);
+    }
+
+    /// calls a routine with two arguments and stores return value in result
+    /// call_vs is VAROP
+    pub fn op_call_vs_a3(&mut self, jump_to_label: &str, arg1: &Operand, arg2: &Operand, arg3: &Operand, result: &Variable) {
+        let args: Vec<ArgType> = vec![ArgType::LargeConst, op::arg_type(&arg1), op::arg_type(&arg2), op::arg_type(&arg3)];
+        self.op_var(0x0, args);
+
+        // the address of the jump_to_label
+        self.add_jump(jump_to_label.to_string(), JumpType::Routine);
+
+        op::write_argument(arg1, &mut self.data.bytes);
+        op::write_argument(arg2, &mut self.data.bytes);
+        op::write_argument(arg3, &mut self.data.bytes);
+        self.data.append_byte(result.id);
     }
 
     /// jumps to a label if the value of operand1 is equal to operand2
