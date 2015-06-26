@@ -861,17 +861,23 @@ impl Zfile {
     /// malloc
     pub fn routine_malloc(&mut self) {
         let heap_start = self.heap_start;
-        // @TODO: let static_addr = self.static_addr;
+        let static_addr = self.static_addr;
         self.emit(vec![
             ZOP::Routine{name: "malloc".to_string(), count_variables: 15},
             // var1 is the allocation size given in needed amount of u16
             // var4 is the possible memory address
             // var2 contains entry at index var3 of var4
             // var3 is index on array at var4
+            // var5 has the upper boundary for var4 which is at static_addr-length*2
             // init var4 with heap_start
             ZOP::StoreVariable{variable: Variable::new(4), value: Operand::new_large_const(heap_start as i16)},
+            // calc var5
+            ZOP::StoreVariable{variable: Variable::new(5), value: Operand::new_large_const(static_addr as i16)},
+            ZOP::Sub{operand1: Operand::new_var(5), operand2: Operand::new_var(1), save_variable: Variable::new(5)},
+            ZOP::Sub{operand1: Operand::new_var(5), operand2: Operand::new_var(1), save_variable: Variable::new(5)},
             ZOP::Label{name: "malloc_loop".to_string()},
-            // @TODO: if var4 >= static_addr-length*2, we have to give up and quit
+            // check if we have to give up and quit
+            ZOP::JGE{operand1: Operand::new_var(4), operand2: Operand::new_var(5), jump_to_label: "malloc_fail".to_string()},
             // set var3 index to 0
             ZOP::StoreVariable{variable: Variable::new(3), value: Operand::new_large_const(0)},
             // read the entry of var4 at pos var3 to var2
@@ -887,7 +893,8 @@ impl Zfile {
             // if var3 is greater than the allocation size, we have found enough space at var4 and can return it
             ZOP::JG{operand1: Operand::new_var(3), operand2: Operand::new_var(1), jump_to_label: "malloc_return".to_string()},
             ZOP::Inc{variable: 3},  // increase index
-            // @TODO: if var4+var3*2 >= static_addr-length*2, we have to give up and quit
+            // check if we have to give up and quit
+            ZOP::JGE{operand1: Operand::new_var(4), operand2: Operand::new_var(5), jump_to_label: "malloc_fail".to_string()},
             // load entry of var4 at pos var3 to var2
             ZOP::LoadW{array_address: Operand::new_var(4), index: Variable::new(3), variable: Variable::new(2)},
             // continue testing for free memory if this one was free
@@ -897,7 +904,10 @@ impl Zfile {
             ZOP::Add{operand1: Operand::new_var(4), operand2: Operand::new_var(3), save_variable: Variable::new(4)},
             ZOP::Jump{jump_to_label: "malloc_loop".to_string()},
             ZOP::Label{name: "malloc_return".to_string()},
-            ZOP::Ret{value: Operand::new_var(4)}
+            ZOP::Ret{value: Operand::new_var(4)},
+            ZOP::Label{name: "malloc_fail".to_string()},
+            ZOP::Print{text: "MALLOC FAIL".to_string()},
+            ZOP::Quit,
         ]);
     }
 
