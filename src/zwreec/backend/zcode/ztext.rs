@@ -138,9 +138,6 @@ fn shift(zchar: u16, position: u8) -> u16 {
 ///  
 /// # Examples
 ///
-/// ```ignore
-/// assert_eq!(pos_in_alpha('c'), 2);
-/// ```
 fn pos_in_alpha(letter: u8) -> i8 {
     for i in 0..ALPHABET.len() {
         if ALPHABET[i] as u8 == letter {
@@ -175,9 +172,35 @@ pub fn pos_in_unicode(letter: u16, unicode_table: &Vec<u16>) -> i8 {
 ///
 /// # Examples
 ///
-/// ```ignore
-/// assert_eq!(pos_to_index(5), 2);
-/// ```
 fn pos_to_index(position: usize) -> usize {
     2 * (position / 3)
+}
+
+#[test]
+fn test_pos_in_alpha() {
+    assert_eq!(pos_in_alpha('a' as u8), 0);
+    assert_eq!(pos_in_alpha('b' as u8), 1);
+    assert_eq!(pos_in_alpha('c' as u8), 2);
+    assert_eq!(pos_in_alpha('A' as u8), 26);
+    assert_eq!(pos_in_alpha('B' as u8), 27);
+    assert_eq!(pos_in_alpha('C' as u8), 28);
+}
+
+#[test]
+fn test_pos_to_index() {
+    assert_eq!(pos_to_index(5), 2);
+}
+
+#[test]
+fn test_shift() {
+    assert_eq!(shift(6,2), 6);
+    assert_eq!(shift(26,5), 26);
+}
+
+#[test]
+fn test_string_to_zchar() {
+    let mut vec: Vec<u16> = Vec::new();
+    assert_eq!(string_to_zchar("i am a string, please test me, no unicode",&vec), vec![14, 0, 6, 18, 0, 6, 0, 24, 25, 23, 14, 19, 12, 5, 19, 0, 21, 17, 10, 6, 24, 10, 0, 25, 10, 24, 25, 0, 18, 10, 5, 19, 0, 19, 20, 0, 26, 19, 14, 8, 20, 9, 10]);
+    vec.push('€' as u16);
+    assert_eq!(string_to_zchar("nasty char: €",&vec), vec![19, 6, 24, 25, 30, 0, 8, 13, 6, 23, 5, 29, 0, 5, 6, 4, 27]);
 }
