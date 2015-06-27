@@ -33,3 +33,4 @@ getopts = "0.2.10"
 
 [dependencies.rustlex]
 git = "https://github.com/farthen/rustlex.git"
+rev = "5fb0824727e39fed05559b1807eace5349ccca23"

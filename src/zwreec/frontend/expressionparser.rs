@@ -60,7 +60,7 @@ impl ExpressionParser {
                 tok @ TokExpression => {
                     // more ugly code.
                     // an expression-node is a child of an expression, if there
-                    // where parentheses in the expression. but we don't want 
+                    // where parentheses in the expression. but we don't want
                     // them, so we parse the subexpression in the parentheses
 
                     // make a copy of the top-node. (becouse node is borrowed)
@@ -68,7 +68,7 @@ impl ExpressionParser {
                     let childs_copy = top.as_default().childs.to_vec();
                     let mut ast_node = NodeDefault { category: tok.clone(), childs: childs_copy };
                     ExpressionParser::parse(&mut ast_node);
-                    
+
                     if let Some(temp) = ast_node.childs.get(0) {
                         self.expr_stack.push(temp.clone());
                     } else {
@@ -106,7 +106,8 @@ impl ExpressionParser {
             let is_unary: bool = match top_op.clone() {
                 TokLogOp { op_name: op, .. } => match &*op {
                     "not" => true,
-                    _   => false
+                    "!"   => true,
+                    _     => false
                 },
                 TokUnaryMinus { .. } => true,
                 _  => false
@@ -119,7 +120,7 @@ impl ExpressionParser {
                 };
 
                 let mut new_node: ASTNode;
-               
+
                 if is_unary {
                     new_node = ASTNode::Default(NodeDefault { category: top_op.clone(), childs: vec![e2] });
                 } else {
@@ -161,17 +162,17 @@ fn is_ranking_not_higher(token1: Token, token2: Token) -> bool {
         },
         _ => panic!{"not allowed operator"}
     };
-    
+
 
     // special handling for the unary operators (two unary operators in a row)
     //let op1_copy: &str = op1.as_slice();
-    if (op1 == "_" || op1 == "not") &&
+    if (op1 == "_" || op1 == "not" || op1 == "!") &&
         operator_rank(op1.clone()) == operator_rank(op2.clone()) {
-        
+
         return false
     }
 
-    // 
+    //
     if operator_rank(op1) >= operator_rank(op2) {
         return true
     }
@@ -182,14 +183,13 @@ fn is_ranking_not_higher(token1: Token, token2: Token) -> bool {
 /// ranking of the operators
 fn operator_rank(op: String) -> u8 {
     match op.as_ref() {
-        "or"                => 1,
-        "and"               => 2,
+        "or" | "||"         => 1,
+        "and" | "&&"        => 2,
         "is" | "==" | "eq" | "neq" | ">" | "gt" | ">=" | "gte" | "<" | "lt" | "<=" | "lte"
                             => 3,
         "+" | "-"           => 4,
         "*" | "/" | "%"     => 5,
-        "_"                 => 6, //unary minus
-        "not"               => 7,
+        "_" | "not" | "!"   => 6, // _ is unary minus
         _                   => panic!{"This operator is not implemented"}
     }
 }

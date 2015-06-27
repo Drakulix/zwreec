@@ -1,0 +1,2 @@
+::Start
+<<if true>>Text1<<else>>Text2<<else>>Text3<<endif>>

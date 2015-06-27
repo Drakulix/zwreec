@@ -1,0 +1,84 @@
+::Start
+
+/% numeric %/
+001 should print -12345: <<print -12345>>
+002 should print 5:      <<print 5>>
+003 should print 32767:  <<print 32767>>
+004 should print -32767: <<print 32769>>
+005 should print -12345: <<print -12345>>
+006 should print 5040:   <<print 1*2*3*4*5*6*7>>
+007 should print 51:     <<print 1*2+3*4+5*6+7>>
+008 should print -47:    <<print 1*2-3*4-5*6-7>>
+009 should print 1:      <<print 256/8/4/8>>
+010 should print 2:      <<print 6300/5/7/9/10>>
+011 should print 3465:   <<print (1+2)*(3+4)*(5+6)*(7+8)>>
+012 should print 1:      <<print (1-2)*(3-4)*(5-6)*(7-8)>>
+013 should print 1:      <<print (1-2)*(3-4)*(5-6)*(7-8)>>
+015 should print -7:     <<print ((1-2)*(3+4))*(5-6)*(7-8)>>
+
+/% logic %/
+101 should print 0: <<print false>>
+102 should print 1: <<print true>>
+103 should print 1: <<print not false>>
+104 should print 0: <<print not true>>
+105 should print 0: <<print not-5>>
+106 should print 0: <<print not5>>
+107 should print 1: <<print not0>>
+108 should print 1: <<print true and true>>
+109 should print 0: <<print true and false>>
+110 should print 0: <<print false and true>>
+111 should print 0: <<print false and false>>
+112 should print 1: <<print true or true>>
+113 should print 1: <<print true or false>>
+114 should print 1: <<print false or true>>
+115 should print 0: <<print false or false>>
+116 should print 1: <<print true or false and true and false or true>>
+
+/% strings %/
+201 should print 1234: <<print "1234">>
+202 should print hallo: <<print "hallo">>
+203 should print hallo: <<print 'hallo'>>
+204 should print hallo: <<print "hal"+'lo'>>
+205 should print hallo: <<print "hal"+"lo">>
+<<set $var to "haus">>
+206 should print haus: <<print $var>>
+207 should print hallo haus: <<print "hallo "+$var>>
+
+/% compare %/
+301 should print 1: <<print 5==5>>
+302 should print 1: <<print 12345==12345>>
+303 should print 0: <<print 12345==1234>>
+301 should print 1: <<print 5is5>>
+302 should print 1: <<print 12345is12345>>
+303 should print 0: <<print 12345is1234>>
+304 should print 1: <<print 10>=10>>
+305 should print 1: <<print 15>=10>>
+306 should print 0: <<print 8>=10>>
+307 should print 1: <<print 10gte10>>
+308 should print 1: <<print 15gte10>>
+309 should print 0: <<print 8gte10>>
+310 should print 1: <<print 10<=10>>
+311 should print 0: <<print 15<=10>>
+312 should print 1: <<print 8<=10>>
+313 should print 1: <<print 10lte10>>
+314 should print 0: <<print 15lte10>>
+315 should print 1: <<print 8lte10>>
+316 should print 0: <<print 10<10>>
+317 should print 0: <<print 15<10>>
+318 should print 1: <<print 8<10>>
+316 should print 0: <<print 10lt10>>
+317 should print 0: <<print 15lt10>>
+318 should print 1: <<print 8lt10>>
+319 should print 0: <<print 10>10>>
+320 should print 1: <<print 15>10>>
+321 should print 0: <<print 8>10>>
+322 should print 0: <<print 10gt10>>
+323 should print 1: <<print 15gt10>>
+324 should print 0: <<print 8gt10>>
+325 should print 0: <<print 5neq5>>
+326 should print 0: <<print 12345neq12345>>
+327 should print 1: <<print 12345neq1234>>
+
+328 should print 1: <<print "hallo"=="hallo">>
+329 should print 0: <<print "hallo"=="hallo2">>
+

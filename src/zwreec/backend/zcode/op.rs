@@ -43,6 +43,25 @@ pub fn op_storew(array_address: &Operand, index: &Variable, variable: &Variable)
 }
 
 
+/// stores a value to an array
+/// stores the value of variable to the address in: array_address + index
+pub fn op_storeb(array_address: &Operand, index: &Variable, variable: &Variable) -> Vec<u8> {
+    // assert!(array_address > 0, "not allowed array-address, becouse in _some_ interpreters (for example zoom) it crahs. -.-");
+    let args: Vec<ArgType> = vec![arg_type(&array_address), ArgType::Variable, ArgType::Variable, ArgType::Nothing];
+    let mut bytes = op_var(0x02, args);
+
+    // array address
+    write_argument(array_address, &mut bytes);
+
+    // array index
+    bytes.push(index.id);
+
+    // value
+    bytes.push(variable.id);
+    bytes
+}
+
+
 /// loads a word from an array in a variable
 /// loadw is an 2op, BUT with 3 ops -.-
 pub fn op_loadw(array_address: &Operand, index: &Variable, variable: &Variable) -> Vec<u8> {
@@ -173,9 +192,9 @@ pub fn op_print_addr(address: &Operand) -> Vec<u8> {
 
 
 /// returns a LargeConst
-pub fn op_ret(value: u16) -> Vec<u8> {
-    let mut bytes = op_1(0x0b, ArgType::LargeConst);
-    write_u16(value, &mut bytes);
+pub fn op_ret(value: &Operand) -> Vec<u8> {
+    let mut bytes = op_1(0x0b, arg_type(&value));
+    write_argument(value, &mut bytes);
     bytes
 }
 

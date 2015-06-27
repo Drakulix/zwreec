@@ -1,11 +1,11 @@
 //! The `evaluate_expressions` module...
 
 
-use backend::zcode::zfile::{ZOP, Operand, Variable, Constant, LargeConstant, Zfile};
+use backend::zcode::zfile::{ZOP, Operand, Variable, Constant, LargeConstant, Zfile, Type};
 use frontend::ast::{ASTNode};
 use frontend::codegen;
 use frontend::codegen::{CodeGenManager};
-use frontend::lexer::Token::{TokNumOp, TokCompOp, TokLogOp, TokInt, TokBoolean, TokVariable, TokFunction, TokString};
+use frontend::lexer::Token::{TokNumOp, TokCompOp, TokLogOp, TokInt, TokBoolean, TokVariable, TokFunction, TokString, TokUnaryMinus};
 
 
 
@@ -38,18 +38,22 @@ fn evaluate_expression_internal<'a>(node: &'a ASTNode, code: &mut Vec<ZOP>,
         },
         TokLogOp { ref op_name, .. } => {
             let eval0 = evaluate_expression_internal(&n.childs[0], code, temp_ids, manager, &mut out);
-            
+
             match &**op_name {
-                "and" | "or" => {
+                "and" | "&&" | "or" | "||" => {
                     let eval1 = evaluate_expression_internal(&n.childs[1], code, temp_ids, manager, &mut out);
                     eval_and_or(&eval0, &eval1, &**op_name, code, temp_ids)
                 },
-                "not" => {
+                "not" | "!" => {
                     eval_not(&eval0, code, temp_ids, manager)
-                }, 
+                },
                 _ => panic!("unhandled op")
             }
-        }
+        },
+        TokUnaryMinus { .. } => {
+            let eval = evaluate_expression_internal(&n.childs[0], code, temp_ids, manager, &mut out);
+            eval_unary_minus(&eval, code, temp_ids)
+        },
         TokInt { ref value, .. } => {
             Operand::new_large_const(*value as i16)
         },
@@ -95,7 +99,60 @@ fn eval_num_op<'a>(eval0: &Operand, eval1: &Operand, op_name: &str, code: &mut V
     let save_var = determine_save_var(eval0, eval1, temp_ids);
     match op_name {
         "+" => {
-            code.push(ZOP::Add{operand1: eval0.clone(), operand2: eval1.clone(), save_variable: save_var.clone()});
+            if save_var.vartype == Type::String {
+                let addr1 = match eval0 {
+                    &Operand::StringRef(_) => eval0,
+                    &Operand::Var(Variable{id: _, vartype: Type::String}) => eval0,
+                    _ => panic!("num_to_str not implemented") // @TODO: would return addr of number converted to str in mem
+                };
+                let addr2 = match eval1 {
+                    &Operand::StringRef(_) => eval1,
+                    &Operand::Var(Variable{id: _, vartype: Type::String}) => eval1,
+                    _ => panic!("num_to_str not implemented") // @TODO: would return addr of number converted to str in mem
+                };
+                let len1 = Variable::new(temp_ids.pop().unwrap());
+                let len2 = Variable::new(temp_ids.pop().unwrap());
+                let tmp = Variable::new(temp_ids.pop().unwrap());
+                let codesnippet = vec![
+                    // set to 0 for index access
+                    ZOP::StoreVariable{variable: len1.clone(), value: Operand::new_large_const(0)},
+                    // read length of string1 which is stored at index 0
+                    ZOP::LoadW{array_address: addr1.clone(), index: len1.clone(), variable: len1.clone()},
+                    // set to 0 for index access
+                    ZOP::StoreVariable{variable: len2.clone(), value: Operand::new_large_const(0)},
+                    // read length of string2 which is stored at index 0
+                    ZOP::LoadW{array_address: addr2.clone(), index: len2.clone(), variable: len2.clone()},
+                    // store new length = len1+len2 in save_var
+                    ZOP::StoreVariable{variable: save_var.clone(), value: Operand::new_var(len1.id)},
+                    ZOP::Add{operand1: Operand::new_var(len2.id), operand2: Operand::new_var(save_var.id), save_variable: save_var.clone()},
+                    ZOP::Inc{variable: save_var.id},  // increase as we will also save the length at first u16
+                    ZOP::Call2S{jump_to_label: "malloc".to_string(), arg: Operand::new_var(save_var.id), result: save_var.clone()},
+                    // write len1+len2 to len2
+                    ZOP::Add{operand1: Operand::new_var(len1.id), operand2: Operand::new_var(len2.id), save_variable: len2.clone()},
+                    // set tmp to 0 for array index 0
+                    ZOP::StoreVariable{variable: tmp.clone(), value: Operand::new_large_const(0)},
+                    // and store len1+len2 in first u16
+                    ZOP::StoreW{array_address: Operand::new_var(save_var.id), index: tmp.clone(), variable: len2.clone()},
+                    // set tmp to save_var_addr+2
+                    ZOP::StoreVariable{variable: tmp.clone(), value: Operand::new_large_const(2)},
+                    ZOP::Add{operand1: Operand::new_var(tmp.id), operand2: Operand::new_var(save_var.id), save_variable: tmp.clone()},
+                    // strcopy (addr1 to save_var_addr+2)
+                    ZOP::CallVNA2{jump_to_label: "strcpy".to_string(), arg1: addr1.clone(), arg2: Operand::new_var(tmp.id)},
+                    // set tmp to save_var_addr+2+len1*2
+                    ZOP::Add{operand1: Operand::new_var(tmp.id), operand2: Operand::new_var(len1.id), save_variable: tmp.clone()},
+                    ZOP::Add{operand1: Operand::new_var(tmp.id), operand2: Operand::new_var(len1.id), save_variable: tmp.clone()},
+                    // strcopy (addr2 to save_var_addr+2+len1*2)
+                    ZOP::CallVNA2{jump_to_label: "strcpy".to_string(), arg1: addr2.clone(), arg2: Operand::new_var(tmp.id)},
+                ];
+                for instr in codesnippet {
+                    code.push(instr);
+                }
+                free_var_if_temp(&Operand::new_var(len1.id), temp_ids);
+                free_var_if_temp(&Operand::new_var(len2.id), temp_ids);
+                free_var_if_temp(&Operand::new_var(tmp.id), temp_ids);
+            } else {
+                code.push(ZOP::Add{operand1: eval0.clone(), operand2: eval1.clone(), save_variable: save_var.clone()});
+            }
         },
         "-" => {
             code.push(ZOP::Sub{operand1: eval0.clone(), operand2: eval1.clone(), save_variable: save_var.clone()});
@@ -150,12 +207,12 @@ fn direct_eval_num_op(eval0: &Operand, eval1: &Operand, op_name: &str) -> Operan
     }
 }
 
-fn eval_comp_op<'a>(eval0: &Operand, eval1: &Operand, op_name: &str, code: &mut Vec<ZOP>, 
+fn eval_comp_op<'a>(eval0: &Operand, eval1: &Operand, op_name: &str, code: &mut Vec<ZOP>,
         temp_ids: &mut Vec<u8>, mut manager: &mut CodeGenManager<'a>) -> Operand {
     if count_constants(eval0, eval1) == 2 {
         return direct_eval_comp_op(eval0, eval1, op_name);
     }
-    let save_var = Variable { id: temp_ids.pop().unwrap() };
+    let save_var = Variable::new(temp_ids.pop().unwrap());
     let label = format!("expr_{}", manager.ids_expr.start_next());
     let const_true = Operand::new_const(1);
     let const_false = Operand::new_const(0);
@@ -219,7 +276,7 @@ fn direct_eval_comp_op(eval0: &Operand, eval1: &Operand, op_name: &str) -> Opera
     }
 }
 
-fn eval_and_or(eval0: &Operand, eval1: &Operand, op_name: &str, code: &mut Vec<ZOP>, 
+fn eval_and_or(eval0: &Operand, eval1: &Operand, op_name: &str, code: &mut Vec<ZOP>,
         temp_ids: &mut Vec<u8>) -> Operand {
     if count_constants(&eval0, &eval1) == 2 {
         let mut out_large = false;
@@ -227,7 +284,7 @@ fn eval_and_or(eval0: &Operand, eval1: &Operand, op_name: &str, code: &mut Vec<Z
         let val1 = eval1.const_value();
         match eval0 { &Operand::LargeConst(_) => {out_large = true; }, _ => {} };
         match eval1 { &Operand::LargeConst(_) => {out_large = true; }, _ => {} };
-        let result = if op_name == "or" {
+        let result = if op_name == "or" || op_name == "||" {
                 val0 | val1
             } else {
                 val0 & val1
@@ -238,9 +295,9 @@ fn eval_and_or(eval0: &Operand, eval1: &Operand, op_name: &str, code: &mut Vec<Z
             return Operand::Const(Constant { value: result as u8 })
         }
     }
-    
+
     let save_var = determine_save_var(eval0, eval1, temp_ids);
-    if op_name == "or" {
+    if op_name == "or" || op_name == "||" {
         code.push(ZOP::Or{operand1: eval0.clone(), operand2: eval1.clone(), save_variable: save_var.clone()});
     } else {
         code.push(ZOP::And{operand1: eval0.clone(), operand2: eval1.clone(), save_variable: save_var.clone()});
@@ -256,7 +313,7 @@ fn eval_not<'a>(eval: &Operand, code: &mut Vec<ZOP>,
         let result: u8 = if val > 0 { 0 } else { 1 };
         return Operand::Const(Constant { value: result });
     }
-    let save_var = Variable { id: temp_ids.pop().unwrap() };
+    let save_var = Variable::new(temp_ids.pop().unwrap());
     let label = format!("expr_{}", manager.ids_expr.start_next());
     code.push(ZOP::StoreVariable{ variable: save_var.clone(), value: Operand::new_const(0)});
     code.push(ZOP::JG{operand1: eval.clone(), operand2: Operand::new_const(0), jump_to_label: label.to_string()});
@@ -266,8 +323,33 @@ fn eval_not<'a>(eval: &Operand, code: &mut Vec<ZOP>,
     Operand::Var(save_var)
 }
 
+fn eval_unary_minus(eval: &Operand, code: &mut Vec<ZOP>, temp_ids: &mut Vec<u8>) -> Operand {
+    if eval.is_const() {
+        let large = match eval { &Operand::LargeConst(_) => { true }, _ => { false } };
+        if large {
+            return Operand::new_large_const(-eval.const_value());
+        } else {
+            return Operand::new_const(-eval.const_value() as u8);
+        }
+    }
+
+    let save_var = match eval {
+        &Operand::Var(ref var) => {
+            if CodeGenManager::is_temp_var(var) {
+                Variable::new(var.id)
+            } else {
+                Variable::new(temp_ids.pop().unwrap())
+            }
+        }, _ => { Variable::new(temp_ids.pop().unwrap()) }
+    };
+
+    code.push(ZOP::Sub {operand1: Operand::new_const(0), operand2: eval.clone(), save_variable: save_var.clone()});
+
+    Operand::new_var(save_var.id)
+}
+
 fn free_var_if_both_temp (eval0: &Operand, eval1: &Operand, temp_ids: &mut Vec<u8>) {
-    match eval0 { 
+    match eval0 {
         &Operand::Var(ref var1) => {
             if CodeGenManager::is_temp_var(var1) {
                 match eval1 {
@@ -292,22 +374,41 @@ fn free_var_if_temp (operand: &Operand, temp_ids: &mut Vec<u8>) {
     }
 }
 
+fn determine_result_type(a: Type, b: Type) -> Type {
+    if a == Type::String || b == Type::String {
+        Type::String
+    } else {
+        Type::Integer
+    }
+}
+
 fn determine_save_var(operand1: &Operand, operand2: &Operand, temp_ids: &mut Vec<u8>) -> Variable {
+    let type1 = match operand1 {
+        &Operand::Var(ref var) => var.vartype.clone(),
+        &Operand::StringRef(_) => Type::String,
+        _ => { Type::Integer }
+    };
+    let type2 = match operand2 {
+        &Operand::Var(ref var) => var.vartype.clone(),
+        &Operand::StringRef(_) => Type::String,
+        _ => { Type::Integer }
+    };
+    let vartype = determine_result_type(type1, type2);
     match operand1 {
         &Operand::Var(ref var) => {
             if CodeGenManager::is_temp_var(var) {
-                return var.clone();
+                return Variable{id: var.id, vartype: vartype};
             }
         }, _ => {}
     };
     match operand2 {
         &Operand::Var(ref var) => {
             if CodeGenManager::is_temp_var(var) {
-                return var.clone();
+                return Variable{id: var.id, vartype: vartype};
             }
         }, _ => {}
     };
-    return Variable { id: temp_ids.pop().unwrap() };
+    return Variable{id: temp_ids.pop().unwrap(), vartype: vartype };
 }
 
 fn count_constants(operand1: &Operand, operand2: &Operand) -> u8 {
