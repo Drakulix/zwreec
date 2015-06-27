@@ -1001,11 +1001,14 @@ impl Zfile {
     pub fn routine_mem_free(&mut self) {
         let heap_start = self.heap_start;
         let static_addr = self.static_addr;
+        let global_addr = self.global_addr;
         let pos = Variable::new(1);
         let zero = Variable::new(2);
         let c = Variable::new(3);
         let m = Variable::new(4);
         let t = Variable::new(5);
+        let varid = Variable::new(6);
+        let varcontent = Variable::new(7);
         self.emit(vec![
             ZOP::Routine{name: "mem_free".to_string(), count_variables: 15},
             // set m to -1
@@ -1026,14 +1029,18 @@ impl Zfile {
             // ZOP::PrintNumVar{variable: pos.clone()},
             // ZOP::Print{text: "CHECK".to_string()},
             // ZOP::PrintNumVar{variable: c.clone()},
-        ]);
-        for i in 16..256 {
-            self.emit(vec![
-                // check if entry at pos is not referenced by a global variable, then we free it, otherwise jump down
-                ZOP::JE{operand1: Operand::new_var(pos.id), operand2: Operand::new_var(i as u8), jump_to_label: "mem_free_continue".to_string()},
-            ]);
-        }
-        self.emit(vec![
+            // start loop for checking and init varid to iterate on
+            ZOP::StoreVariable{variable: varid.clone(), value: Operand::new_large_const(15i16)},
+            ZOP::Label{name: "mem_free_check".to_string()},
+            ZOP::Inc{variable: varid.id},
+            ZOP::LoadW{array_address: Operand::new_large_const(global_addr as i16 - 32i16), index: varid.clone(), variable: varcontent.clone()},
+            // ZOP::PrintNumVar{variable: varid.clone()}, ZOP::Print{text: ":".to_string()},
+            // ZOP::PrintNumVar{variable: varcontent.clone()},
+            // ZOP::Print{text: " ".to_string()},
+            // check if entry at pos is not referenced by a global variable, then we free it, otherwise jump down
+            ZOP::JE{operand1: Operand::new_var(pos.id), operand2: Operand::new_var(varcontent.id), jump_to_label: "mem_free_continue".to_string()},
+            ZOP::JL{operand1: Operand::new_var(varid.id), operand2: Operand::new_large_const(255i16), jump_to_label: "mem_free_check".to_string()},
+            // finished loop for checking
             // set t to position after the whole entry so now we skip length*2 (content)
             ZOP::Add{operand1: Operand::new_var(pos.id), operand2: Operand::new_var(c.id), save_variable: t.clone()},
             ZOP::Add{operand1: Operand::new_var(t.id), operand2: Operand::new_var(c.id), save_variable: t.clone()},
