@@ -410,7 +410,7 @@ mod tests {
 
     #[test]
     fn test_num_expressions() {
-        let ast = test_ast("::Start\n<<print -12345>>\n<<print 5>>\n<<print 32767>>\n<<print 1*2*3*4*5*6*7>>\n<<print 1*2+3*4+5*6+7>>\n");
+        let ast = test_ast("::Start\n<<print -12345>>\n<<print 5>>\n<<print 32767>>\n<<print 1*2*3*4*5*6*7>>\n<<print 1*2+3*4+5*6+7>>\n<<print 1*2-3*4-5*6-7>>\n<<print 256/8/4/8>>\n");
 
         let expected = vec!(
             (vec![0]                  , TokPassage { location: (0, 0), name: "Start".to_string() }),
@@ -459,6 +459,33 @@ mod tests {
             (vec![0,8,0,0,0,1,1]      , TokInt { location: (0, 0), value: 6 }),
             (vec![0,8,0,0,1]          , TokInt { location: (0, 0), value: 7 }),
             (vec![0,9]                , TokNewLine { location: (0, 0) }),
+            (vec![0,10]               , TokMacroPrint { location: (0, 0) }),
+            (vec![0,10,0]             , TokExpression),
+            (vec![0,10,0,0]           , TokNumOp { location: (0, 0), op_name: "-".to_string() }),
+            (vec![0,10,0,0,0]         , TokNumOp { location: (0, 0), op_name: "-".to_string() }),
+            (vec![0,10,0,0,0,0]       , TokNumOp { location: (0, 0), op_name: "-".to_string() }),
+            (vec![0,10,0,0,0,0,0]     , TokNumOp { location: (0, 0), op_name: "*".to_string() }),
+            (vec![0,10,0,0,0,0,0,0]   , TokInt { location: (0, 0), value: 1 }),
+            (vec![0,10,0,0,0,0,0,1]   , TokInt { location: (0, 0), value: 2 }),
+            (vec![0,10,0,0,0,0,1]     , TokNumOp { location: (0, 0), op_name: "*".to_string() }),
+            (vec![0,10,0,0,0,0,1,0]   , TokInt { location: (0, 0), value: 3 }),
+            (vec![0,10,0,0,0,0,1,1]   , TokInt { location: (0, 0), value: 4 }),
+            (vec![0,10,0,0,0,1]       , TokNumOp { location: (0, 0), op_name: "*".to_string() }),
+            (vec![0,10,0,0,0,1,0]     , TokInt { location: (0, 0), value: 5 }),
+            (vec![0,10,0,0,0,1,1]     , TokInt { location: (0, 0), value: 6 }),
+            (vec![0,10,0,0,1]         , TokInt { location: (0, 0), value: 7 }),
+            (vec![0,11]               , TokNewLine { location: (0, 0) }),
+            (vec![0,12]               , TokMacroPrint { location: (0, 0) }),
+            (vec![0,12,0]             , TokExpression),
+            (vec![0,12,0,0]           , TokNumOp { location: (0, 0), op_name: "/".to_string() }),
+            (vec![0,12,0,0,0]         , TokNumOp { location: (0, 0), op_name: "/".to_string() }),
+            (vec![0,12,0,0,0,0]       , TokNumOp { location: (0, 0), op_name: "/".to_string() }),
+            (vec![0,12,0,0,0,0,0]     , TokInt { location: (0, 0), value: 256 }),
+            (vec![0,12,0,0,0,0,1]     , TokInt { location: (0, 0), value: 8 }),
+            (vec![0,12,0,0,0,1]       , TokInt { location: (0, 0), value: 4 }),
+            (vec![0,12,0,0,1]         , TokInt { location: (0, 0), value: 8 }),
+            (vec![0,13]               , TokNewLine { location: (0, 0) }),
+
         );
 
         test_expected(expected, ast);
