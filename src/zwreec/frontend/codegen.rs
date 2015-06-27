@@ -402,7 +402,7 @@ impl IdentifierProvider {
         id
     }
 
-    // Pops the last id from the stack
+    // Returns the last id from the stack (but retains it)
     pub fn peek(&mut self) -> u32 {
         if let Some(temp) = self.id_stack.last() {
             return temp.clone()
