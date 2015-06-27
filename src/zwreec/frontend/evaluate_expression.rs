@@ -110,9 +110,18 @@ fn eval_num_op<'a>(eval0: &Operand, eval1: &Operand, op_name: &str, code: &mut V
                     &Operand::Var(Variable{id: _, vartype: Type::String}) => eval1,
                     _ => panic!("num_to_str not implemented") // @TODO: would return addr of number converted to str in mem
                 };
-                let len1 = Variable::new(temp_ids.pop().unwrap());
-                let len2 = Variable::new(temp_ids.pop().unwrap());
-                let tmp = Variable::new(temp_ids.pop().unwrap());
+                let len1: Variable = match temp_ids.pop() {
+                    Some(var) => Variable::new(var),
+                    None      => panic!{"Stack temp_ids is empty, pop wasn't possible."}
+                };
+                let len2: Variable = match temp_ids.pop() {
+                    Some(var) => Variable::new(var),
+                    None      => panic!{"Stack temp_ids is empty, pop wasn't possible."}
+                };
+                let tmp: Variable = match temp_ids.pop() {
+                    Some(var) => Variable::new(var),
+                    None      => panic!{"Stack temp_ids is empty, pop wasn't possible."}
+                };
                 let codesnippet = vec![
                     // set to 0 for index access
                     ZOP::StoreVariable{variable: len1.clone(), value: Operand::new_large_const(0)},
@@ -212,7 +221,10 @@ fn eval_comp_op<'a>(eval0: &Operand, eval1: &Operand, op_name: &str, code: &mut 
     if count_constants(eval0, eval1) == 2 {
         return direct_eval_comp_op(eval0, eval1, op_name);
     }
-    let save_var = Variable::new(temp_ids.pop().unwrap());
+    let save_var: Variable = match temp_ids.pop() {
+        Some(var) => Variable::new(var),
+        None      => panic!{"Stack temp_ids is empty, pop wasn't possible."}
+    };
     let label = format!("expr_{}", manager.ids_expr.start_next());
     let const_true = Operand::new_const(1);
     let const_false = Operand::new_const(0);
@@ -313,7 +325,10 @@ fn eval_not<'a>(eval: &Operand, code: &mut Vec<ZOP>,
         let result: u8 = if val > 0 { 0 } else { 1 };
         return Operand::Const(Constant { value: result });
     }
-    let save_var = Variable::new(temp_ids.pop().unwrap());
+    let save_var: Variable = match temp_ids.pop() {
+        Some(var) => Variable::new(var),
+        None      => panic!{"Stack temp_ids is empty, pop wasn't possible."}
+    };
     let label = format!("expr_{}", manager.ids_expr.start_next());
     code.push(ZOP::StoreVariable{ variable: save_var.clone(), value: Operand::new_const(0)});
     code.push(ZOP::JG{operand1: eval.clone(), operand2: Operand::new_const(0), jump_to_label: label.to_string()});
@@ -338,9 +353,19 @@ fn eval_unary_minus(eval: &Operand, code: &mut Vec<ZOP>, temp_ids: &mut Vec<u8>)
             if CodeGenManager::is_temp_var(var) {
                 Variable::new(var.id)
             } else {
-                Variable::new(temp_ids.pop().unwrap())
+                if let Some(temp) = temp_ids.pop() {
+                    Variable::new(temp)
+                } else {
+                    panic!{"Stack temp_ids is empty, pop wasn't possible."}
+                }
             }
-        }, _ => { Variable::new(temp_ids.pop().unwrap()) }
+        }, _ => {
+            if let Some(temp) = temp_ids.pop() {
+                Variable::new(temp)
+            } else {
+                panic!{"Stack temp_ids is empty, pop wasn't possible."}
+            }
+        }
     };
 
     code.push(ZOP::Sub {operand1: Operand::new_const(0), operand2: eval.clone(), save_variable: save_var.clone()});
@@ -408,7 +433,11 @@ fn determine_save_var(operand1: &Operand, operand2: &Operand, temp_ids: &mut Vec
             }
         }, _ => {}
     };
-    return Variable{id: temp_ids.pop().unwrap(), vartype: vartype };
+    if let Some(temp) = temp_ids.pop() {
+        return Variable{ id: temp, vartype: vartype };
+    } else {
+        panic!{"Stack temp_ids is empty, pop wasn't possible."}
+    }
 }
 
 fn count_constants(operand1: &Operand, operand2: &Operand) -> u8 {
