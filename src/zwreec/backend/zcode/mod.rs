@@ -22,6 +22,8 @@ pub fn temp_create_zcode_example<W: Write>(output: &mut W) {
     zfile.emit(vec![
         ZOP::Routine{name: "Start".to_string(), count_variables: 3},
         ZOP::Add{operand1: Operand::new_var(1), operand2: Operand::new_var(1), save_variable: Variable::new(1)},
+        ZOP::Call2S{jump_to_label: "itoa".to_string(), arg: Operand::new_large_const(17), result: Variable::new(1)},
+        ZOP::PrintUnicodeStr{address: Operand::new_var(1)},
         ZOP::PrintOps{text: "it works".to_string()},
         ZOP::Quit,
         ]);
