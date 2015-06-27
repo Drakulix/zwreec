@@ -3,6 +3,7 @@
 pub use super::zbytes::Bytes;
 pub use super::ztext;
 pub use super::op;
+use config::Config;
 
 #[derive(Clone, PartialEq, Debug)]
 pub enum Type {
@@ -157,6 +158,7 @@ pub struct Zfile {
     pub object_addr: u16,
     last_static_written: u16,
     pub heap_start: u16,
+    pub force_unicode: bool,
 }
 
 #[derive(Debug, PartialEq, Clone)]
@@ -194,6 +196,10 @@ impl Zfile {
 
     /// creates a new zfile
     pub fn new() -> Zfile {
+        Zfile::new_with_options(false)
+    }
+
+    pub fn new_with_options(force_unicode: bool) -> Zfile {
         Zfile {
             data: Bytes{bytes: Vec::new()},
             unicode_table: Vec::new(),
@@ -207,7 +213,12 @@ impl Zfile {
             static_addr: 0,
             last_static_written: 0x8000,
             heap_start: 0x800,
+            force_unicode: force_unicode,
         }
+    }
+
+    pub fn new_with_cfg(cfg: &Config) -> Zfile {
+        Zfile::new_with_options(cfg.force_unicode)
     }
 
     /// creates the header of a zfile
@@ -544,12 +555,12 @@ impl Zfile {
                 // zcode has no support for such high unicode values
                 current_text.push('?');
             } else {
-                if ztext::pos_in_unicode(character as u16, &self.unicode_table) != -1 {
+                if self.force_unicode == false && ztext::pos_in_unicode(character as u16, &self.unicode_table) != -1 {
                     self.gen_write_out_unicode(current_utf16.to_string());  // write out utf16 string
                     current_utf16.clear();
                     // unicode exist in table
                     current_text.push(character);
-                } else if self.unicode_table.len() < 97 {
+                } else if self.force_unicode == false && self.unicode_table.len() < 97 {
                     self.gen_write_out_unicode(current_utf16.to_string());  // write out utf16 string
                     current_utf16.clear();
                     // there is space in the unicode table

@@ -37,7 +37,7 @@ impl<'a> Codegen<'a> {
         Codegen {
             cfg: cfg,
             ast: ast,
-            zfile: Zfile::new()
+            zfile: Zfile::new_with_cfg(cfg)
         }
     }
 
