@@ -140,7 +140,7 @@ impl<'a> Parser<'a> {
                         Some(token) => match state.stack.pop() {
                             Some(Elem::NonTerminal(non_terminal)) => (ParseResult::Halt, (state.grammar_func)(state.cfg, non_terminal, Some(token), &mut state.stack)),
                             Some(Elem::Terminal(stack_token)) => {
-                                if stack_token == token {
+                                if stack_token.is_same_token(&token) {
                                     (ParseResult::Continue, None)
                                 } else {
                                     error_panic!(state.cfg => ParserError::TokenDoNotMatch{token: Some(token), stack: stack_token.clone()});
