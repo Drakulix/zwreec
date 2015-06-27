@@ -7,7 +7,9 @@ Zwreec is a compiler for [interactive fiction](http://en.wikipedia.org/wiki/Inte
 
 ## Requirements and Usage
 
-The library uses a [fork of rustlex](https://github.com/Farthen/rustlex) to to do lexical analysis. Since rustlex requires the Rust Nightly Builds, so does zwreec. More precisely, this library was *only* developed and tested against Rust 1.2.0-nightly, build 2015-06-01. You can install this specific version using the rustup script:
+The library uses a [fork of rustlex](https://github.com/Drakulix/rustlex) to to do lexical analysis.
+
+You can install Rust stable or nightly as you like via the [provided binaries](http://www.rust-lang.org/install.html) or the rustup script:
 
 ```sh
 $ curl -s https://static.rust-lang.org/rustup.sh | sh -s -- --channel=nightly --date=2015-06-02
