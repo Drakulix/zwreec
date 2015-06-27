@@ -4,7 +4,6 @@ use std::io::prelude::Read;
 use std::io::prelude::Write;
 use std::error::Error;
 use std::fs::File;
-use std::fs;
 use std::path::Path;
 
 
