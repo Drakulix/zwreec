@@ -50,6 +50,8 @@ pub enum NonTerminalType {
     Passage,
     Passagef,
     PassageContent,
+    Tags,
+    Tagsf,
     Formating,
     BoldFormatting,
     ItalicFormatting,
@@ -189,11 +191,53 @@ impl<'a> Parser<'a> {
 
                     None
                 },
+                (Sf, _ ) => {                    
+                    // Sf -> ε
+
+                    None
+                },
+
+                // Passage
                 (Passage, tok @ TokPassage { .. } ) => {
-                    stack.push(NonTerminal(PassageContent));
+                    stack.push(NonTerminal(Passagef));
                     stack.push(Terminal(tok.clone()));
 
                     Some(AddPassage(tok))
+                },
+
+                // Passagef
+                (Passagef, tok @ TokTagStart { .. } ) => {
+                    stack.push(NonTerminal(PassageContent));
+                    stack.push(Terminal(TokTagEnd{location: (0, 0)}));
+                    stack.push(NonTerminal(Tags));
+                    stack.push(Terminal(tok));
+
+                    None
+                },
+                (Passagef, _ ) => {
+                    stack.push(NonTerminal(PassageContent));
+
+                    None
+                },
+
+                // Tags
+                (Tags, tok @ TokTag { .. } ) => {                    
+                    stack.push(NonTerminal(Tagsf));
+                    stack.push(Terminal(tok));
+
+                    None
+                },
+
+                // tagsf
+                (Tagsf, TokTag { .. } ) => {                    
+                    stack.push(NonTerminal(Tags));
+
+                    None
+                },
+                (Tagsf, _ ) => {                    
+                    // Tagsf -> ε
+
+                    None
                 },
 
                 // PassageContent
