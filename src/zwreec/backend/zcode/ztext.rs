@@ -204,12 +204,3 @@ fn test_string_to_zchar() {
     vec.push('€' as u16);
     assert_eq!(string_to_zchar("nasty char: €",&vec), vec![19, 6, 24, 25, 30, 0, 8, 13, 6, 23, 5, 29, 0, 5, 6, 4, 27]);
 }
-
-// #[test]
-// fn test_encode() {
-//     let mut vec: Vec<u16> = Vec::new();
-//     let mut data = Bytes{bytes: Vec::new()};
-//     let byteLength = encode(&data,"hello",&vec);
-//     assert_eq!(byteLength,5);
-//     assert_eq!(data,5);    
-// }
