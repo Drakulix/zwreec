@@ -34,4 +34,4 @@ libc = "*"
 log = "*"
 term = "0.2"
 getopts = "0.2.10"
-rustlex_codegen = { version = "*", git = "https://github.com/Drakulix/rustlex", features = ["with-syntex"] }
+rustlex_codegen = { version = "*", git = "https://github.com/Drakulix/rustlex", rev = "72118ae0e9ada69a115984ad8e53260c8b50363c", features = ["with-syntex"] }
