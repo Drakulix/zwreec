@@ -87,8 +87,8 @@ impl AST {
     /// adds a child an goees one child down
     pub fn child_down(&mut self, token: Token) {
         // 
-        if token.clone() == (TokMacroIf { location: (0, 0) }) ||
-           token.clone() == (TokMacroElseIf { location: (0, 0) }) {
+        if token.clone().is_same_token(&TokMacroIf { location: (0, 0) }) ||
+           token.clone().is_same_token(&TokMacroElseIf { location: (0, 0) }) {
             self.is_in_if_expression = true;
         }
 
@@ -275,10 +275,10 @@ impl ASTNode {
         } else {
             match self {
                 &ASTNode::Default(ref node) => {
-                    token == node.category
+                    token.is_same_token(&node.category)
                 },
                 &ASTNode::Passage(ref node) => {
-                    token == node.category
+                    token.is_same_token(&node.category)
                 },
             }
         }
