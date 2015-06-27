@@ -93,10 +93,7 @@
 //! [log](../log/index.html). The reference binary implementation of zwreec also includes an
 //! implementation of the `Log` trait.
 
-#![feature(plugin)]
-#![plugin(rustlex)]
-#[allow(plugin_as_library)]
-extern crate rustlex;
+extern crate rustlex_codegen as rustlex;
 #[macro_use] extern crate log;
 extern crate time;
 extern crate term;
