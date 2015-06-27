@@ -999,11 +999,65 @@ impl Zfile {
 
     /// mem_free as a tracing garbage collection
     pub fn routine_mem_free(&mut self) {
+        let heap_start = self.heap_start;
+        let static_addr = self.static_addr;
+        let pos = Variable::new(1);
+        let zero = Variable::new(2);
+        let c = Variable::new(3);
+        let m = Variable::new(4);
+        let t = Variable::new(5);
         self.emit(vec![
             ZOP::Routine{name: "mem_free".to_string(), count_variables: 15},
-            // @TODO:
-            // durch den speicher suchen und schauen, ob es eine variable dazu gibt. sonst free=-1i16.
-            // inhalt, also länge < 0 heißt kein eintrag.
+            // set m to -1
+            ZOP::StoreVariable{variable: m.clone(), value: Operand::new_large_const(-1i16)},
+            // set pos to current position
+            ZOP::StoreVariable{variable: pos.clone(), value: Operand::new_large_const(heap_start as i16)},
+            ZOP::Dec{variable: pos.id},
+            ZOP::Dec{variable: pos.id},
+            ZOP::Label{name: "mem_free_loop".to_string()},
+            ZOP::Inc{variable: pos.id},
+            ZOP::Inc{variable: pos.id},
+            // exit at end of mem
+            ZOP::JE{operand1: Operand::new_var(pos.id), operand2: Operand::new_large_const(static_addr as i16), jump_to_label: "mem_free_exit".to_string()},
+            // read entry to c
+            ZOP::LoadW{array_address: Operand::new_var(pos.id), index: zero.clone(), variable: c.clone()},
+            // continue search if entry is free
+            ZOP::JL{operand1: Operand::new_var(c.id), operand2: Operand::new_large_const(0), jump_to_label: "mem_free_loop".to_string()},
+            // ZOP::PrintNumVar{variable: pos.clone()},
+            // ZOP::Print{text: "CHECK".to_string()},
+            // ZOP::PrintNumVar{variable: c.clone()},
+        ]);
+        for i in 16..256 {
+            self.emit(vec![
+                // check if entry at pos is not referenced by a global variable, then we free it, otherwise jump down
+                ZOP::JE{operand1: Operand::new_var(pos.id), operand2: Operand::new_var(i as u8), jump_to_label: "mem_free_continue".to_string()},
+            ]);
+        }
+        self.emit(vec![
+            // set t to position after the whole entry so now we skip length*2 (content)
+            ZOP::Add{operand1: Operand::new_var(pos.id), operand2: Operand::new_var(c.id), save_variable: t.clone()},
+            ZOP::Add{operand1: Operand::new_var(t.id), operand2: Operand::new_var(c.id), save_variable: t.clone()},
+            ZOP::Dec{variable: pos.id},
+            ZOP::Dec{variable: pos.id},
+            // ZOP::Print{text: "DELETE".to_string()},
+            ZOP::Label{name: "mem_free_delete".to_string()},
+            // continue until pos is at position t
+            ZOP::JE{operand1: Operand::new_var(pos.id), operand2: Operand::new_var(t.id), jump_to_label: "mem_free_loop".to_string()},
+            ZOP::Inc{variable: pos.id},
+            ZOP::Inc{variable: pos.id},
+            // exit at end of mem
+            ZOP::JE{operand1: Operand::new_var(pos.id), operand2: Operand::new_large_const(static_addr as i16), jump_to_label: "mem_free_exit".to_string()},
+            // write -1 to pos
+            ZOP::StoreW{array_address: Operand::new_var(pos.id), index: zero.clone(), variable: m.clone()},
+            ZOP::Jump{jump_to_label: "mem_free_delete".to_string()},
+            ZOP::Label{name: "mem_free_continue".to_string()},
+            // ZOP::Print{text: "IS-USED".to_string()},
+            // mem is not free but tells us the length of the entry
+            // length of entry is >= 0 so now we skip length*2 (content)
+            ZOP::Add{operand1: Operand::new_var(pos.id), operand2: Operand::new_var(c.id), save_variable: pos.clone()},
+            ZOP::Add{operand1: Operand::new_var(pos.id), operand2: Operand::new_var(c.id), save_variable: pos.clone()},
+            ZOP::Jump{jump_to_label: "mem_free_loop".to_string()},
+            ZOP::Label{name: "mem_free_exit".to_string()},
             ZOP::Ret{value: Operand::new_const(0)}
         ]);
     }
