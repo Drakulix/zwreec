@@ -100,56 +100,23 @@ fn eval_num_op<'a>(eval0: &Operand, eval1: &Operand, op_name: &str, code: &mut V
     match op_name {
         "+" => {
             if save_var.vartype == Type::String {
+                let a1 = Variable::new(temp_ids.pop().unwrap());
+                let o1 = Operand::new_var(a1.id);
+                let a2 = Variable::new(temp_ids.pop().unwrap());
+                let o2 = Operand::new_var(a2.id);
                 let addr1 = match eval0 {
                     &Operand::StringRef(_) => eval0,
                     &Operand::Var(Variable{id: _, vartype: Type::String}) => eval0,
-                    _ => panic!("num_to_str not implemented") // @TODO: would return addr of number converted to str in mem
+                    _ => { code.push(ZOP::Call2S{jump_to_label: "itoa".to_string(), arg: eval0.clone(), result: a1.clone()}); &o1 }
                 };
                 let addr2 = match eval1 {
                     &Operand::StringRef(_) => eval1,
                     &Operand::Var(Variable{id: _, vartype: Type::String}) => eval1,
-                    _ => panic!("num_to_str not implemented") // @TODO: would return addr of number converted to str in mem
+                    _ => { code.push(ZOP::Call2S{jump_to_label: "itoa".to_string(), arg: eval1.clone(), result: a2.clone()}); &o2 }
                 };
-                let len1 = Variable::new(temp_ids.pop().unwrap());
-                let len2 = Variable::new(temp_ids.pop().unwrap());
-                let tmp = Variable::new(temp_ids.pop().unwrap());
-                let codesnippet = vec![
-                    // set to 0 for index access
-                    ZOP::StoreVariable{variable: len1.clone(), value: Operand::new_large_const(0)},
-                    // read length of string1 which is stored at index 0
-                    ZOP::LoadW{array_address: addr1.clone(), index: len1.clone(), variable: len1.clone()},
-                    // set to 0 for index access
-                    ZOP::StoreVariable{variable: len2.clone(), value: Operand::new_large_const(0)},
-                    // read length of string2 which is stored at index 0
-                    ZOP::LoadW{array_address: addr2.clone(), index: len2.clone(), variable: len2.clone()},
-                    // store new length = len1+len2 in save_var
-                    ZOP::StoreVariable{variable: save_var.clone(), value: Operand::new_var(len1.id)},
-                    ZOP::Add{operand1: Operand::new_var(len2.id), operand2: Operand::new_var(save_var.id), save_variable: save_var.clone()},
-                    ZOP::Inc{variable: save_var.id},  // increase as we will also save the length at first u16
-                    ZOP::Call2S{jump_to_label: "malloc".to_string(), arg: Operand::new_var(save_var.id), result: save_var.clone()},
-                    // write len1+len2 to len2
-                    ZOP::Add{operand1: Operand::new_var(len1.id), operand2: Operand::new_var(len2.id), save_variable: len2.clone()},
-                    // set tmp to 0 for array index 0
-                    ZOP::StoreVariable{variable: tmp.clone(), value: Operand::new_large_const(0)},
-                    // and store len1+len2 in first u16
-                    ZOP::StoreW{array_address: Operand::new_var(save_var.id), index: tmp.clone(), variable: len2.clone()},
-                    // set tmp to save_var_addr+2
-                    ZOP::StoreVariable{variable: tmp.clone(), value: Operand::new_large_const(2)},
-                    ZOP::Add{operand1: Operand::new_var(tmp.id), operand2: Operand::new_var(save_var.id), save_variable: tmp.clone()},
-                    // strcopy (addr1 to save_var_addr+2)
-                    ZOP::CallVNA2{jump_to_label: "strcpy".to_string(), arg1: addr1.clone(), arg2: Operand::new_var(tmp.id)},
-                    // set tmp to save_var_addr+2+len1*2
-                    ZOP::Add{operand1: Operand::new_var(tmp.id), operand2: Operand::new_var(len1.id), save_variable: tmp.clone()},
-                    ZOP::Add{operand1: Operand::new_var(tmp.id), operand2: Operand::new_var(len1.id), save_variable: tmp.clone()},
-                    // strcopy (addr2 to save_var_addr+2+len1*2)
-                    ZOP::CallVNA2{jump_to_label: "strcpy".to_string(), arg1: addr2.clone(), arg2: Operand::new_var(tmp.id)},
-                ];
-                for instr in codesnippet {
-                    code.push(instr);
-                }
-                free_var_if_temp(&Operand::new_var(len1.id), temp_ids);
-                free_var_if_temp(&Operand::new_var(len2.id), temp_ids);
-                free_var_if_temp(&Operand::new_var(tmp.id), temp_ids);
+                code.push(ZOP::CallVSA2{jump_to_label: "strcat".to_string(), arg1: addr1.clone(), arg2: addr2.clone(), result: save_var.clone()});
+                free_var_if_temp(&Operand::new_var(a1.id), temp_ids);
+                free_var_if_temp(&Operand::new_var(a2.id), temp_ids);
             } else {
                 code.push(ZOP::Add{operand1: eval0.clone(), operand2: eval1.clone(), save_variable: save_var.clone()});
             }

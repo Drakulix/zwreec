@@ -1,4 +1,5 @@
 ::Start
+<<set $var4 to "x">>
 <<display linksToAllPassages>>
 
 ::Ascii
@@ -84,10 +85,13 @@ Braille Patterns:
 
 ::Variablen
 Variablen<<set $last to 3>>
-/%<<set $var1 to "string example">>%/
+/% comment %/
+set $var1 to "string example"; <<set $var1 to "string example">>
+$var4 is set to x in Start
+set $var4 to $var4 + "string example" + (-1*42) + $var1;  <<set $var4 to $var4 + "string" + (-1*42) + $var1>>
+var4: <<print $var4>>
 set $var2 to 1234; <<set $var2=1234>>
 set $var3 to true; <<set $var3=true>>
-variable set:
 print value of $var2: <<$var2>>
 print value of $var3: <<$var3>>
 
