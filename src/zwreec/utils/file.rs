@@ -70,11 +70,3 @@ pub fn save_target_file(target_file_name: &str) {
     // saving
     info!("save to file: {}", target_file_name)
 }
-
-pub fn temp_print_current_directory_files() {
-    let paths = fs::read_dir(&Path::new(".")).unwrap();
-
-    for path in paths {
-        debug!("Name: {}", path.unwrap().path().display())
-    }
-}

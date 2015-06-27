@@ -308,7 +308,11 @@ pub fn gen_zcode<'a>(node: &'a ASTNode, mut out: &mut Zfile, mut manager: &mut C
 pub fn function_random(arg_from: &Operand, arg_to: &Operand,
         code: &mut Vec<ZOP>, temp_ids: &mut Vec<u8>) -> Operand {
 
-    let range_var = Variable::new(temp_ids.pop().unwrap());
+    let range_var: Variable = match temp_ids.pop() {
+        Some(var) => Variable::new(var),
+        None      => panic!{"Function random has no range variable"}
+    };
+
     // Calculate range = to - from + 1
     code.push(ZOP::Sub{
         operand1: arg_to.clone(), 
@@ -321,7 +325,10 @@ pub fn function_random(arg_from: &Operand, arg_to: &Operand,
         save_variable: range_var.clone()
     });
 
-    let var = Variable::new(temp_ids.pop().unwrap());
+    let var: Variable = match temp_ids.pop() {
+        Some(var) => Variable::new(var),
+        None      => panic!{"Function random has no variable"}
+    };
 
     // get a random number between 1 and range
     code.push(ZOP::Random {range: Operand::new_var(range_var.id), variable: var.clone()} );
@@ -397,12 +404,20 @@ impl IdentifierProvider {
 
     // Pops the last id from the stack
     pub fn peek(&mut self) -> u32 {
-        self.id_stack.last().unwrap().clone()
+        if let Some(temp) = self.id_stack.last() {
+            return temp.clone()
+        }
+
+        panic!{"id_stack is empty, peek wasn't possible."}
     }
 
     // Pops the last id from the stack
     pub fn pop_id(&mut self) -> u32 {
-        self.id_stack.pop().unwrap()
+        if let Some(temp) = self.id_stack.pop() {
+            return temp.clone()
+        }
+
+        panic!{"id_stack is empty, pop wasn't possible."}
     }
 }
 
@@ -429,20 +444,29 @@ impl <'a> SymbolTable<'a> {
     // Returns the id for a given symbol
     // (check if is_known_symbol, otherwise panics)
     pub fn get_symbol_id(&self, symbol: &str) -> Variable {
-        let (b,_) = self.symbol_map.get(symbol).unwrap().clone();
-        b
+        if let Some(temp) = self.symbol_map.get(symbol) {
+            return temp.0.clone()
+        }
+
+        panic!{"symbol_map is empty, get_symbol_id wasn't possible."}
     }
 
     pub fn get_symbol_type(&self, symbol: &str) -> Type {
-        let (_,b) = self.symbol_map.get(symbol).unwrap().clone();
-        b
+        if let Some(temp) = self.symbol_map.get(symbol) {
+            return temp.1.clone()
+        }
+
+        panic!{"symbol_map is empty, get get_symbol_type wasn't possible."}
     }
 
     pub fn has_var_id(&self, id: u8) -> bool {
         for name in self.symbol_map.keys() {
-            let (var, _) = self.symbol_map.get(name).unwrap().clone();;
-            if var.id == id {
-                return true;
+            if let Some(temp) = self.symbol_map.get(name) {
+                if temp.0.clone().id == id {
+                    return true;
+                }
+            } else {
+                panic!{"symbol_map is empty, has_var_id wasn't possible."}
             }
         }
         false
@@ -450,9 +474,12 @@ impl <'a> SymbolTable<'a> {
 
     pub fn get_symbol_type_by_id(&self, id: u8) -> Type {
         for name in self.symbol_map.keys() {
-            let (var, vartype) = self.symbol_map.get(name).unwrap().clone();;
-            if var.id == id {
-                return vartype;
+            if let Some(temp) = self.symbol_map.get(name) {
+                if temp.0.clone().id == id {
+                    return temp.1.clone();
+                }
+            } else {
+                panic!{"symbol_map is empty, get_symbol_type_by_id wasn't possible."}
             }
         }
         panic!("should never happen: could not find the requested ID in symbol table")
