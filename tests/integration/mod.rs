@@ -133,17 +133,17 @@ fn no_start_passage_test() {
     test_compile(TESTFOLDER_FAIL.to_string() + "NoStartPassage.twee");
 }
 
-//#[test]
-//#[should_panic]
-//fn passage_not_allowed_chars1_test() {
-//    test_compile(TESTFOLDER_FAIL.to_string() + "PassageNotAllowedChars1.twee");
-//}
+#[test]
+#[should_panic]
+fn passage_not_allowed_chars1_test() {
+    test_compile(TESTFOLDER_FAIL.to_string() + "PassageNotAllowedChars1.twee");
+}
 
-//#[test]
-//#[should_panic]
-//fn passage_not_allowed_chars2_test() {
-//    test_compile(TESTFOLDER_FAIL.to_string() + "PassageNotAllowedChars2.twee");
-//}
+#[test]
+#[should_panic]
+fn passage_not_allowed_chars2_test() {
+    test_compile(TESTFOLDER_FAIL.to_string() + "PassageNotAllowedChars2.twee");
+}
 
 #[test]
 #[should_panic]
