@@ -81,11 +81,8 @@ pub fn lex<'a, R: Read>(cfg: &'a Config, input: &'a mut R) -> FilteringScan<Peek
                 }
 
                 match elem {
-                    (TokError {location, message}, _) => {
-                        error!("{}", message);
-                        if !state.cfg.force {
-                            panic!();
-                        }
+                    (x @ TokError {..}, _) => {
+                        error_panic!(state.cfg => x);
                         None
                     }
                     (TokText {location, text}, Some(TokText{ .. })) => {
@@ -341,20 +338,6 @@ fn unescape(s: String) -> String {
     }
 
     unescaped
-}
-
-fn bad_expression(s: String, loc: (u64,u64)) -> Token {
-    let (line, symbol) = loc;
-    //todo: error message should be "<<print>> bad expression: $test + bla"
-    let m = format!("<<print>> bad expression at {},{}: \"{}\"", line, symbol, s);
-    TokError{location: loc, message: m}
-}
-
-fn bad_argument(s: String, loc: (u64,u64)) -> Token {
-    let (line, symbol) = loc;
-    //todo: error message should be "<<Pop one>> bad argument: one"
-    let m = format!("<<display>> bad argument at {},{}: \"{}\"", line, symbol, s);
-    TokError{location: loc, message: m}
 }
 
 

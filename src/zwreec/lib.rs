@@ -99,10 +99,10 @@ extern crate time;
 extern crate term;
 extern crate getopts;
 
+#[macro_use] pub mod utils;
 pub mod config;
 pub mod frontend;
 pub mod backend;
-pub mod utils;
 
 use config::{Config,TestCase};
 use std::io::{Read,Write};
