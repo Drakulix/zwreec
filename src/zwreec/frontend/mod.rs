@@ -21,7 +21,8 @@
 //!
 //! // Parse Tokens
 //! let p = zwreec::frontend::parser::Parser::new(&cfg);
-//! let ast = zwreec::frontend::ast::AST::build(
+//! let ast_builder = zwreec::frontend::ast::ASTBuilder::new(&cfg);
+//! let ast = ast_builder.build(
 //!     p.parse(tokens)
 //! );
 //! ```
