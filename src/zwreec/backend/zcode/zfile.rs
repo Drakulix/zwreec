@@ -3,6 +3,7 @@
 pub use super::zbytes::Bytes;
 pub use super::ztext;
 pub use super::op;
+use config::Config;
 
 #[derive(Clone, PartialEq, Debug)]
 pub enum Type {
@@ -157,6 +158,8 @@ pub struct Zfile {
     pub object_addr: u16,
     last_static_written: u16,
     pub heap_start: u16,
+    pub force_unicode: bool,
+    pub easter_egg: bool,
 }
 
 #[derive(Debug, PartialEq, Clone)]
@@ -194,6 +197,10 @@ impl Zfile {
 
     /// creates a new zfile
     pub fn new() -> Zfile {
+        Zfile::new_with_options(false, false)
+    }
+
+    pub fn new_with_options(force_unicode: bool, easter_egg: bool) -> Zfile {
         Zfile {
             data: Bytes{bytes: Vec::new()},
             unicode_table: Vec::new(),
@@ -207,7 +214,13 @@ impl Zfile {
             static_addr: 0,
             last_static_written: 0x8000,
             heap_start: 0x800,
+            force_unicode: force_unicode,
+            easter_egg: easter_egg,
         }
+    }
+
+    pub fn new_with_cfg(cfg: &Config) -> Zfile {
+        Zfile::new_with_options(cfg.force_unicode, cfg.easter_egg)
     }
 
     /// creates the header of a zfile
@@ -544,12 +557,12 @@ impl Zfile {
                 // zcode has no support for such high unicode values
                 current_text.push('?');
             } else {
-                if ztext::pos_in_unicode(character as u16, &self.unicode_table) != -1 {
+                if self.force_unicode == false && ztext::pos_in_unicode(character as u16, &self.unicode_table) != -1 {
                     self.gen_write_out_unicode(current_utf16.to_string());  // write out utf16 string
                     current_utf16.clear();
                     // unicode exist in table
                     current_text.push(character);
-                } else if self.unicode_table.len() < 97 {
+                } else if self.force_unicode == false && self.unicode_table.len() < 97 {
                     self.gen_write_out_unicode(current_utf16.to_string());  // write out utf16 string
                     current_utf16.clear();
                     // there is space in the unicode table
@@ -753,83 +766,90 @@ impl Zfile {
 
     /// easter-egg, with konami-code to start
     pub fn routine_check_more(&mut self) {
-        self.emit(vec![
-            ZOP::Routine{name: "system_check_more".to_string(), count_variables: 1},
-            ZOP::ReadChar{local_var_id: 0x01},
-            ZOP::JE{operand1: Operand::new_var(0x01), operand2: Operand::new_const(129), jump_to_label: "system_check_more_ko_1".to_string()},
-            ZOP::Ret{value: Operand::new_const(0)},
-            ZOP::Label{name: "system_check_more_ko_1".to_string()},
-        
-            ZOP::ReadChar{local_var_id: 0x01},
-            ZOP::JE{operand1: Operand::new_var(0x01), operand2: Operand::new_const(130), jump_to_label: "system_check_more_ko_2".to_string()},
-            ZOP::Ret{value: Operand::new_const(0)},
-            ZOP::Label{name: "system_check_more_ko_2".to_string()},
+        if self.easter_egg {
+            self.emit(vec![
+                ZOP::Routine{name: "system_check_more".to_string(), count_variables: 1},
+                ZOP::ReadChar{local_var_id: 0x01},
+                ZOP::JE{operand1: Operand::new_var(0x01), operand2: Operand::new_const(129), jump_to_label: "system_check_more_ko_1".to_string()},
+                ZOP::Ret{value: Operand::new_const(0)},
+                ZOP::Label{name: "system_check_more_ko_1".to_string()},
 
-            ZOP::ReadChar{local_var_id: 0x01},
-            ZOP::JE{operand1: Operand::new_var(0x01), operand2: Operand::new_const(130), jump_to_label: "system_check_more_ko_3".to_string()},
-            ZOP::Ret{value: Operand::new_const(0)},
-            ZOP::Label{name: "system_check_more_ko_3".to_string()},
+                ZOP::ReadChar{local_var_id: 0x01},
+                ZOP::JE{operand1: Operand::new_var(0x01), operand2: Operand::new_const(130), jump_to_label: "system_check_more_ko_2".to_string()},
+                ZOP::Ret{value: Operand::new_const(0)},
+                ZOP::Label{name: "system_check_more_ko_2".to_string()},
 
-            ZOP::ReadChar{local_var_id: 0x01},
-            ZOP::JE{operand1: Operand::new_var(0x01), operand2: Operand::new_const(131), jump_to_label: "system_check_more_ko_4".to_string()},
-            ZOP::Ret{value: Operand::new_const(0)},
-            ZOP::Label{name: "system_check_more_ko_4".to_string()},
+                ZOP::ReadChar{local_var_id: 0x01},
+                ZOP::JE{operand1: Operand::new_var(0x01), operand2: Operand::new_const(130), jump_to_label: "system_check_more_ko_3".to_string()},
+                ZOP::Ret{value: Operand::new_const(0)},
+                ZOP::Label{name: "system_check_more_ko_3".to_string()},
 
-            ZOP::ReadChar{local_var_id: 0x01},
-            ZOP::JE{operand1: Operand::new_var(0x01), operand2: Operand::new_const(132), jump_to_label: "system_check_more_ko_5".to_string()},
-            ZOP::Ret{value: Operand::new_const(0)},
-            ZOP::Label{name: "system_check_more_ko_5".to_string()},
+                ZOP::ReadChar{local_var_id: 0x01},
+                ZOP::JE{operand1: Operand::new_var(0x01), operand2: Operand::new_const(131), jump_to_label: "system_check_more_ko_4".to_string()},
+                ZOP::Ret{value: Operand::new_const(0)},
+                ZOP::Label{name: "system_check_more_ko_4".to_string()},
 
-            ZOP::ReadChar{local_var_id: 0x01},
-            ZOP::JE{operand1: Operand::new_var(0x01), operand2: Operand::new_const(131), jump_to_label: "system_check_more_ko_6".to_string()},
-            ZOP::Ret{value: Operand::new_const(0)},
-            ZOP::Label{name: "system_check_more_ko_6".to_string()},
+                ZOP::ReadChar{local_var_id: 0x01},
+                ZOP::JE{operand1: Operand::new_var(0x01), operand2: Operand::new_const(132), jump_to_label: "system_check_more_ko_5".to_string()},
+                ZOP::Ret{value: Operand::new_const(0)},
+                ZOP::Label{name: "system_check_more_ko_5".to_string()},
 
-            ZOP::ReadChar{local_var_id: 0x01},
-            ZOP::JE{operand1: Operand::new_var(0x01), operand2: Operand::new_const(132), jump_to_label: "system_check_more_ko_7".to_string()},
-            ZOP::Ret{value: Operand::new_const(0)},
-            ZOP::Label{name: "system_check_more_ko_7".to_string()},
+                ZOP::ReadChar{local_var_id: 0x01},
+                ZOP::JE{operand1: Operand::new_var(0x01), operand2: Operand::new_const(131), jump_to_label: "system_check_more_ko_6".to_string()},
+                ZOP::Ret{value: Operand::new_const(0)},
+                ZOP::Label{name: "system_check_more_ko_6".to_string()},
 
-            ZOP::ReadChar{local_var_id: 0x01},
-            ZOP::JE{operand1: Operand::new_var(0x01), operand2: Operand::new_const(98), jump_to_label: "system_check_more_ko_8".to_string()},
-            ZOP::Ret{value: Operand::new_const(0)},
-            ZOP::Label{name: "system_check_more_ko_8".to_string()},
+                ZOP::ReadChar{local_var_id: 0x01},
+                ZOP::JE{operand1: Operand::new_var(0x01), operand2: Operand::new_const(132), jump_to_label: "system_check_more_ko_7".to_string()},
+                ZOP::Ret{value: Operand::new_const(0)},
+                ZOP::Label{name: "system_check_more_ko_7".to_string()},
 
-            ZOP::ReadChar{local_var_id: 0x01},
-            ZOP::JE{operand1: Operand::new_var(0x01), operand2: Operand::new_const(97), jump_to_label: "system_check_more_ko_9".to_string()},
-            ZOP::Ret{value: Operand::new_const(0)},
-            ZOP::Label{name: "system_check_more_ko_9".to_string()},
+                ZOP::ReadChar{local_var_id: 0x01},
+                ZOP::JE{operand1: Operand::new_var(0x01), operand2: Operand::new_const(98), jump_to_label: "system_check_more_ko_8".to_string()},
+                ZOP::Ret{value: Operand::new_const(0)},
+                ZOP::Label{name: "system_check_more_ko_8".to_string()},
 
-            ZOP::Label{name: "system_check_more_timer_loop".to_string()},
-            ZOP::ReadCharTimer{local_var_id: 0x01, timer: 1, routine: "system_check_more_anim".to_string()},
-            ZOP::Jump{jump_to_label: "system_check_more_timer_loop".to_string()},
-            ZOP::Quit,
+                ZOP::ReadChar{local_var_id: 0x01},
+                ZOP::JE{operand1: Operand::new_var(0x01), operand2: Operand::new_const(97), jump_to_label: "system_check_more_ko_9".to_string()},
+                ZOP::Ret{value: Operand::new_const(0)},
+                ZOP::Label{name: "system_check_more_ko_9".to_string()},
 
-            ZOP::Routine{name: "system_check_more_anim".to_string(), count_variables: 5},
-            ZOP::EraseWindow{value: -1},
+                ZOP::Label{name: "system_check_more_timer_loop".to_string()},
+                ZOP::ReadCharTimer{local_var_id: 0x01, timer: 1, routine: "system_check_more_anim".to_string()},
+                ZOP::Jump{jump_to_label: "system_check_more_timer_loop".to_string()},
+                ZOP::Quit,
 
-            ZOP::SetTextStyle{bold: false, reverse: false, monospace: true, italic: false},
-            ZOP::SetColor{foreground: 2, background: 9},
-            ZOP::Print{text: " ZWREEC Easter egg <3".to_string()},
-            ZOP::Newline,
+                ZOP::Routine{name: "system_check_more_anim".to_string(), count_variables: 5},
+                ZOP::EraseWindow{value: -1},
 
-            ZOP::StoreVariable{variable: Variable::new(1), value: Operand::new_const(20)},
-            ZOP::Label{name: "system_check_more_loop".to_string()},
-            ZOP::Random{range: Operand::new_const(8), variable: Variable::new(4)},
-            ZOP::Random{range: Operand::new_const(100), variable: Variable::new(5)},
-            ZOP::Add{operand1: Operand::new_var(5), operand2: Operand::new_const(10), save_variable: Variable::new(5)},
-            ZOP::Inc{variable: 4},
-            ZOP::SetColorVar{foreground: 4, background: 4},
-            ZOP::Print{text: "aa".to_string()},
-            ZOP::Inc{variable: 2},
+                ZOP::SetTextStyle{bold: false, reverse: false, monospace: true, italic: false},
+                ZOP::SetColor{foreground: 2, background: 9},
+                ZOP::Print{text: " ZWREEC Easter egg <3".to_string()},
+                ZOP::Newline,
 
-            ZOP::JL{operand1: Operand::new_var(2), operand2: Operand::new_var(1), jump_to_label: "system_check_more_loop".to_string()},
-            ZOP::Newline,
-            ZOP::Inc{variable: 3},
-            ZOP::StoreVariable{variable: Variable::new(2), value: Operand::new_const(0)},
-            ZOP::JL{operand1: Operand::new_var(3), operand2: Operand::new_var(1), jump_to_label: "system_check_more_loop".to_string()},
-            ZOP::Ret{value: Operand::new_const(0)}
-        ]);
+                ZOP::StoreVariable{variable: Variable::new(1), value: Operand::new_const(20)},
+                ZOP::Label{name: "system_check_more_loop".to_string()},
+                ZOP::Random{range: Operand::new_const(8), variable: Variable::new(4)},
+                ZOP::Random{range: Operand::new_const(100), variable: Variable::new(5)},
+                ZOP::Add{operand1: Operand::new_var(5), operand2: Operand::new_const(10), save_variable: Variable::new(5)},
+                ZOP::Inc{variable: 4},
+                ZOP::SetColorVar{foreground: 4, background: 4},
+                ZOP::Print{text: "aa".to_string()},
+                ZOP::Inc{variable: 2},
+
+                ZOP::JL{operand1: Operand::new_var(2), operand2: Operand::new_var(1), jump_to_label: "system_check_more_loop".to_string()},
+                ZOP::Newline,
+                ZOP::Inc{variable: 3},
+                ZOP::StoreVariable{variable: Variable::new(2), value: Operand::new_const(0)},
+                ZOP::JL{operand1: Operand::new_var(3), operand2: Operand::new_var(1), jump_to_label: "system_check_more_loop".to_string()},
+                ZOP::Ret{value: Operand::new_const(0)}
+            ]);
+        } else {
+            self.emit(vec![
+                ZOP::Routine{name: "system_check_more".to_string(), count_variables: 1},
+                ZOP::Ret{value: Operand::new_const(0)}
+            ]);
+        }
     }
 
     /// print UTF-16 string from addr

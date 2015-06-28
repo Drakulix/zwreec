@@ -165,6 +165,7 @@ pub struct Config {
     pub force: bool,
     /// Add easter egg to compiler
     pub easter_egg: bool,
+    pub force_unicode: bool,
     /// Instruct compiler to run these test-cases
     pub test_cases: Vec<TestCase>,
 }
@@ -182,6 +183,7 @@ impl Config {
         Config{
             force: false,
             easter_egg: true,
+            force_unicode: false,
             test_cases: Vec::new(),
         }
     }
@@ -225,6 +227,10 @@ impl Config {
                      cfg.easter_egg = true;
                      debug!("enabled easter-egg");
                 },
+                "force-unicode" => {
+                     cfg.force_unicode = true;
+                     debug!("enabled force-unicode");
+                },
                 _ => {
                     error!("Cannot enable feature {} - feature not known.", s);
                 }
@@ -236,6 +242,10 @@ impl Config {
                 "easter-egg" => {
                     cfg.easter_egg = false;
                     debug!("disabled easter-egg");
+                },
+                "force-unicode" => {
+                     cfg.force_unicode = false;
+                     debug!("enabled force-unicode");
                 },
                 _ => {
                     error!("Cannot disable feature {} - feature not known.", s);
@@ -319,7 +329,8 @@ pub fn zwreec_options(mut opts: getopts::Options) -> getopts::Options {
     opts.optmulti("F", "feature", "", "FEAT");
     opts.optmulti("N", "no-feature", "enable or disable a feature (can occur multiple times).
                         List of supported features (default):
-                            easter-egg (enabled)", "FEAT");
+                            easter-egg (enabled)
+                            force-unicode (disabled)", "FEAT");
     opts.optflag("e", "generate-sample-zcode", "writes out a sample zcode file, input file is not used and can be omitted");
 
     opts
