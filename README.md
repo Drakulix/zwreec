@@ -12,7 +12,7 @@ The library uses a [fork of rustlex](https://github.com/Drakulix/rustlex) to to 
 You can install Rust stable or nightly as you like via the [provided binaries](http://www.rust-lang.org/install.html) or the rustup script:
 
 ```sh
-$ curl -s https://static.rust-lang.org/rustup.sh | sh -s -- --channel=nightly --date=2015-06-02
+$ curl -s https://static.rust-lang.org/rustup.sh | sh -s
 ```
 
 Or install the Ubuntu/Debian Packages for [Rust](http://ppa.launchpad.net/hansjorg/rust/ubuntu/pool/main/r/rust-nightly/) and [Cargo](http://ppa.launchpad.net/hansjorg/rust/ubuntu/pool/main/c/cargo-nightly/).
