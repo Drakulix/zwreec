@@ -9,7 +9,6 @@ rustlex! TweeLexer {
     property function_parens:usize = 0;
 
     // Regular Expressions
-    let ANYTHING = .*;
     let WHITESPACE = ' ' | '\t';
     let UNDERSCORE = '_';
     let NEWLINE = '\n';
