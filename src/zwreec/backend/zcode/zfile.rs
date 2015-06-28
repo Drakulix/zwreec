@@ -230,7 +230,7 @@ impl Zfile {
 
         let alpha_addr: u16 = 0x40;
         let extension_addr: u16 = alpha_addr + 78;
-        self.unicode_table_addr = extension_addr as u16 + 4;
+        self.unicode_table_addr = extension_addr as u16 + 8;
 
         // 1 byte for the unicode count, 97 possible chars with 2 bytes
         self.global_addr = self.unicode_table_addr + 195;
@@ -289,9 +289,9 @@ impl Zfile {
 
         // header extension table
         self.data.write_u16(3, extension_addr as usize);     // Number of further words in table
-        self.data.write_u16(0, extension_addr as usize + 1); // x-coordinate of mouse after a click
-        self.data.write_u16(0, extension_addr as usize + 2); // y-coordinate of mouse after a click
-        self.data.write_u16(0, extension_addr as usize + 3); // if != 0: unicode translation table address (optional)
+        self.data.write_u16(0, extension_addr as usize + 2); // x-coordinate of mouse after a click
+        self.data.write_u16(0, extension_addr as usize + 4); // y-coordinate of mouse after a click
+        self.data.write_u16(self.unicode_table_addr, extension_addr as usize + 6); // if != 0: unicode translation table address (optional)
 
         // global variables
         // ...
