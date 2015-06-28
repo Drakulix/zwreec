@@ -562,7 +562,7 @@ impl Zfile {
                     current_utf16.clear();
                     // unicode exist in table
                     current_text.push(character);
-                } else if self.force_unicode == false && self.unicode_table.len() < 97 {
+                } else if self.force_unicode == false && self.unicode_table.len() < 96 {
                     self.gen_write_out_unicode(current_utf16.to_string());  // write out utf16 string
                     current_utf16.clear();
                     // there is space in the unicode table
