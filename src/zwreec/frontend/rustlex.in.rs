@@ -19,7 +19,7 @@ rustlex! TweeLexer {
     let TEXT_INITIAL = INITIAL_START_CHAR INITIAL_CHAR*;
 
     // If for example // is at a beginning of a line, then // is matched and not just /
-    let TEXT_START_CHAR = "ä"|"Ä"|"ü"|"Ü"|"ö"|"Ö"|"ß"|"ẞ" | [^"*!>#"'\n']; // add chars longer than one byte
+    let TEXT_START_CHAR = "ä"|"Ä"|"ü"|"Ü"|"ö"|"Ö"|"ß"|"ẞ"|"“"|"„"|"»"|"«"|"‘"|"’"|"…" | [^"*!>#"'\n']; // add chars longer than one byte
     let TEXT_CHAR = [^"/'_=~^{@<[" '\n'];
     let TEXT = TEXT_CHAR+ | ["/'_=~^{@<["];
 
