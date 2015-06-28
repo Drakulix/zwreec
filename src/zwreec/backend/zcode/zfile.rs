@@ -197,7 +197,7 @@ impl Zfile {
 
     /// creates a new zfile
     pub fn new() -> Zfile {
-        Zfile::new_with_options(true, false)
+        Zfile::new_with_options(false, false)
     }
 
     pub fn new_with_options(force_unicode: bool, easter_egg: bool) -> Zfile {
