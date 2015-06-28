@@ -585,7 +585,11 @@ impl Zfile {
                 self.emit(vec![ZOP::Call2NWithArg{jump_to_label: "print_unicode".to_string(), arg: Operand::new_large_const(0)}]);
                 self.strings.push(Zstring{chars: utf16bytes, orig: current_utf16.to_string(), from_addr: (self.data.len()-2) as u32, unicode: true, written_addr: 0});
             } else {
-                self.emit(vec![ZOP::PrintUnicode{c: current_utf16.chars().nth(0).unwrap() as u16}]);
+                if let Some(temp) = current_utf16.chars().nth(0) {
+                    self.emit(vec![ZOP::PrintUnicode{c: temp as u16}]);
+                } else {
+                    panic!{"No chars in current_utf16, can't print anything."}
+                }
             }
         }
     }

@@ -49,10 +49,14 @@ impl ExpressionParser {
                     // while(is_ranking_not_higher(oper_stack.top(), tok.clone())) { ...
                     for i in 0..length {
                         let i_rev = length - i - 1;
-                        let token: Token = self.oper_stack.get(i_rev).unwrap().clone();
-                        if is_ranking_not_higher(token, tok.clone()) {
+                        let token: Token = match self.oper_stack.get(i_rev) {
+                            Some(tok) => tok.clone(),
+                            None      => panic!{"No token in the operators stack."}
+                        };
+                        if is_ranking_not_higher(token.clone(), tok.clone()) {
                             self.new_operator_node();
                         }
+                        
                     }
 
                     self.oper_stack.push(tok.clone());
