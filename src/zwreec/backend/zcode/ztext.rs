@@ -32,7 +32,7 @@ pub fn encode(data: &mut Bytes, content: &str, unicode_table: &Vec<u16>) -> u16 
     for i in 0..len {
         let zasci_id =zchars[i];
 
-        two_bytes |= shift(zasci_id as u16, i as u8);
+        two_bytes |= shift(zasci_id as u16, i);
 
         if i % 3 == 2 {
             data.write_u16(two_bytes, pos_to_index(i));
@@ -43,7 +43,7 @@ pub fn encode(data: &mut Bytes, content: &str, unicode_table: &Vec<u16>) -> u16 
         if i == len -1 {
             if i % 3 != 2 {
                 for j in (i % 3) + 1..3 {
-                    two_bytes |= shift(0x05 as u16, j as u8);
+                    two_bytes |= shift(0x05 as u16, j);
                 }
 
                 data.write_u16(two_bytes, pos_to_index(i));
@@ -129,8 +129,8 @@ fn string_to_zchar(content: &str, unicode_table: &Vec<u16>) -> Vec<u8> {
 ///   1 2 3 4 5  1 2 3 4 5  1 2 3 4 5
 ///   1. zchar   2. zchar   3. zchar 
 ///   10         5          0
-fn shift(zchar: u16, position: u8) -> u16 {
-    let shift_length = 10 - (position % 3) * 5;
+fn shift(zchar: u16, position: usize) -> u16 {
+    let shift_length = 10 - (position % 3) as u16 * 5;
     zchar << shift_length
 }
 
