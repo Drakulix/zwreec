@@ -197,7 +197,7 @@ impl Zfile {
 
     /// creates a new zfile
     pub fn new() -> Zfile {
-        Zfile::new_with_options(false, false)
+        Zfile::new_with_options(true, false)
     }
 
     pub fn new_with_options(force_unicode: bool, easter_egg: bool) -> Zfile {
@@ -387,7 +387,7 @@ impl Zfile {
             // optimize to reuse strings if they are the same
             let mut string_found = false;
             for &(ref other, addr) in prev_strings.iter() {
-                if other.orig == string.orig && other.unicode == string.unicode {
+                if other.unicode == string.unicode && other.orig == string.orig {
                     string_found = true;
                     if string.unicode {
                         self.data.write_u16(addr as u16, string.from_addr as usize);  // normal addr
