@@ -66,7 +66,7 @@ impl Log for FileLogger {
             let _ = match record.level() {
                 LogLevel::Trace => {
                     writeln!(file_lock,
-                        "[{}] {}: ({:02}:{:02}:{:02}) [{}:{}] - {}",
+                        "{:02}:{:02}:{:02} [{}] {}: [{}:{}] {}",
                             record.level(),
                             record.target(),
                             cur_time.tm_hour,
@@ -79,7 +79,7 @@ impl Log for FileLogger {
                 },
                 _ => {
                     writeln!(file_lock,
-                        "[{}] {}: ({:02}:{:02}:{:02}) - {}",
+                        "{:02}:{:02}:{:02} [{}] {}: {}",
                             record.level(),
                             record.target(),
                             cur_time.tm_hour,

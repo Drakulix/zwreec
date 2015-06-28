@@ -65,24 +65,24 @@ impl Log for SimpleLogger {
             let _ = match record.level() {
                 LogLevel::Trace =>
                     writeln!(stderr_lock,
-                        "[{}] {}: ({:02}:{:02}:{:02}) [{}:{}] - {}",
-                            record.level(),
-                            record.target(),
+                        "{:02}:{:02}:{:02} [{}] {}: [{}:{}] {}",
                             cur_time.tm_hour,
                             cur_time.tm_min,
                             cur_time.tm_sec,
+                            record.level(),
+                            record.target(),
                             record.location().file(),
                             record.location().line(),
                             record.args()
                     ),
                 _ =>
                     writeln!(stderr_lock,
-                        "[{}] {}: ({:02}:{:02}:{:02}) - {}",
-                            record.level(),
-                            record.target(),
+                        "{:02}:{:02}:{:02} [{}] {}: {}",
                             cur_time.tm_hour,
                             cur_time.tm_min,
                             cur_time.tm_sec,
+                            record.level(),
+                            record.target(),
                             record.args()
                     ),
             };
