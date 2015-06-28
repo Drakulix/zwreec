@@ -393,15 +393,16 @@ mod tests {
 
     #[test]
     fn text_test() {
-        let ast = test_ast("::Passage\nTestText\nTestNextLine\n::NextPassage");
+        let ast = test_ast("::Start\nTestText\nTestNextLine\n::NextPassage\nOtherText");
 
         let expected = vec!(
-            (vec![0]  , TokPassage {name: "Passage".to_string(), location: (0, 0)}),
+            (vec![0]  , TokPassage {location: (0, 0), name: "Start".to_string()}),
             (vec![0,0], TokText {location: (0, 0), text: "TestText".to_string()}),
             (vec![0,1], TokNewLine {location: (0, 0)} ),
-            (vec![0,2], TokText {location: (0, 0), text: "".to_string()}),
+            (vec![0,2], TokText {location: (0, 0), text: "nTestNextLine".to_string()}),
             (vec![0,1], TokNewLine {location: (0, 0)}),
-            (vec![1]  , TokPassage {name: "".to_string(), location: (0, 0)}),
+            (vec![1]  , TokPassage {location: (0, 0), name: "NextPassage".to_string()}),
+            (vec![1,0], TokText {location: (0, 0), text: "OtherText".to_string()}),
 
         );
 
