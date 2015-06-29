@@ -1,6 +1,9 @@
 //! The `ast` module contains a lot of useful functionality
 //! to create and walk through the ast (abstract syntaxtree)
 
+use std::fmt::{Debug, Display, Formatter, Result, Write};
+
+use config::Config;
 use backend::zcode::zfile;
 use backend::zcode::zfile::{ZOP, Type};
 use frontend::codegen;
@@ -11,10 +14,15 @@ use frontend::lexer::Token::{TokMacroIf, TokMacroElseIf, TokExpression, TokPassa
 //==============================
 // ast
 
+pub struct ASTBuilder<'a> {
+    path: Vec<usize>,
+    is_in_if_expression: bool,
+    cfg: &'a Config,
+    ast: AST,
+}
+
 pub struct AST {
     passages: Vec<ASTNode>,
-    path: Vec<usize>,
-    is_in_if_expression: bool
 }
 
 pub enum ASTOperation {
@@ -27,19 +35,25 @@ pub enum ASTOperation {
     UpSpecial,
 }
 
-impl AST {
-    pub fn build<I: Iterator<Item=ASTOperation>>(ops: I) -> AST {
-        let mut ast = AST {
-            passages: Vec::new(),
+impl<'a> ASTBuilder<'a> {
+    pub fn new(cfg: &'a Config) -> ASTBuilder {
+        ASTBuilder {
             path: Vec::new(),
             is_in_if_expression: false,
-        };
-        for op in ops {
-            ast.operation(op);
+            cfg: cfg,
+            ast: AST {
+                passages: Vec::new()
+            }
         }
-        ast.parse_expressions();
+    }
 
-        ast
+    pub fn build<I: Iterator<Item=ASTOperation>>(mut self, ops: I) -> AST {
+        for op in ops {
+            self.operation(op);
+        }
+
+        self.parse_expressions();
+        self.ast
     }
 
     pub fn operation(&mut self, op: ASTOperation) {
@@ -57,18 +71,18 @@ impl AST {
 
     /// goes through the whole tree and parse the expressions
     fn parse_expressions(&mut self) {
-        for child in &mut self.passages {
-            child.parse_expressions();
+        for child in &mut self.ast.passages {
+            child.parse_expressions(&self.cfg);
         }
     }
 
     /// adds a passage to the path in the ast
     pub fn add_passage(&mut self, token: Token) {
         self.path.clear();
-        let ast_count_passages = self.count_childs(self.path.to_vec());
+        let ast_count_passages = self.ast.count_childs(self.path.to_vec());
 
         let node = ASTNode::Passage(NodePassage { category: token, childs: Vec::new() });
-        self.passages.push(node);
+        self.ast.passages.push(node);
 
         self.path.push(ast_count_passages);
     }
@@ -78,21 +92,21 @@ impl AST {
         if let Some(index) = self.path.first() {
             let mut new_path: Vec<usize> = self.path.to_vec();
             new_path.remove(0);
-            self.passages[*index].add_child(new_path, token);
+            self.ast.passages[*index].add_child(new_path, token);
         } else {
-            self.passages.push(ASTNode::Default(NodeDefault { category: token, childs: Vec::new() }));
+            self.ast.passages.push(ASTNode::Default(NodeDefault { category: token, childs: Vec::new() }));
         }
     }
 
     /// adds a child an goees one child down
     pub fn child_down(&mut self, token: Token) {
         //
-        if token.clone() == (TokMacroIf { location: (0, 0) }) ||
-           token.clone() == (TokMacroElseIf { location: (0, 0) }) {
+        if token.clone().is_same_token(&TokMacroIf { location: (0, 0) }) ||
+           token.clone().is_same_token(&TokMacroElseIf { location: (0, 0) }) {
             self.is_in_if_expression = true;
         }
 
-        let ast_count_childs = self.count_childs(self.path.to_vec());
+        let ast_count_childs = self.ast.count_childs(self.path.to_vec());
         self.add_child(token);
         self.path.push(ast_count_childs);
     }
@@ -134,8 +148,9 @@ impl AST {
         self.up();
         self.up();
     }
+}
 
-
+impl AST {
     /// convert ast to zcode
     pub fn to_zcode(&self, out: &mut zfile::Zfile) {
         let mut manager = codegen::CodeGenManager::new();
@@ -157,9 +172,14 @@ impl AST {
 
     /// prints the tree
     pub fn print(&self, force_print: bool) {
-        debug!("Abstract Syntax Tree: ");
+        if force_print {
+            println!("Abstract Syntax Tree: ");
+        } else {
+            debug!("Abstract Syntax Tree: ");
+        }
+
         for child in &self.passages {
-            child.print(0, force_print);
+            child.print(force_print);
         }
         debug!("");
     }
@@ -203,6 +223,16 @@ impl AST {
     }
 }
 
+impl Debug for AST {
+    fn fmt(&self, f: &mut Formatter) -> Result {
+        try!(f.write_str("Abstract Syntax Tree: \n"));
+        for child in &self.passages {
+            try!(child.fmt(f));
+        }
+        Ok(())
+    }
+}
+
 // ================================
 // node types
 #[derive(Clone)]
@@ -223,7 +253,6 @@ pub struct NodeDefault {
     pub category: Token,
     pub childs: Vec<ASTNode>
 }
-
 
 impl ASTNode {
     /// adds an child to the path in the ast
@@ -275,10 +304,10 @@ impl ASTNode {
         } else {
             match self {
                 &ASTNode::Default(ref node) => {
-                    token == node.category
+                    token.is_same_token(&node.category)
                 },
                 &ASTNode::Passage(ref node) => {
-                    token == node.category
+                    token.is_same_token(&node.category)
                 },
             }
         }
@@ -295,34 +324,37 @@ impl ASTNode {
         }
     }
 
-    /// prints an node of an ast
-    pub fn print(&self, indent: usize, force_print: bool) {
+    pub fn childs(&self) -> &Vec<ASTNode> {
+        match self {
+            &ASTNode::Passage(ref t) => {
+                &t.childs
+            },
+            &ASTNode::Default(ref t) => {
+                &t.childs
+            }
+        }
+    }
+
+    fn fmt_node(&self, f: &mut Formatter, indent: usize) -> Result {
         let mut spaces = "".to_string();
         for _ in 0..indent {
             spaces.push_str(" ");
         }
 
-        match self {
-            &ASTNode::Passage(ref t) => {
-                if force_print {
-                    println!("{}|- : {:?}", spaces, t.category);
-                } else {
-                    debug!("{}|- : {:?}", spaces, t.category);
-                }
-                for child in &t.childs {
-                    child.print(indent+2, force_print);
-                }
-            },
-            &ASTNode::Default(ref t) => {
-                if force_print {
-                    println!("{}|- : {:?}", spaces, t.category);
-                } else {
-                    debug!("{}|- : {:?}", spaces, t.category);
-                }
-                for child in &t.childs {
-                    child.print(indent+2, force_print);
-                }
-            }
+        try!(f.write_fmt(format_args!("{}|- : {:?}\n", spaces, self.category())));
+
+        for child in self.childs().iter() {
+            try!(child.fmt_node(f, indent+2));
+        }
+        Ok(())
+    }
+
+    /// prints an node of an ast
+    pub fn print(&self, force_print: bool) {
+        if force_print {
+            println!("{:?}", self);
+        } else {
+            debug!("{:?}", self);
         }
     }
 
@@ -334,26 +366,32 @@ impl ASTNode {
     }
 
     /// goes through the whole tree and parse the expressions
-    fn parse_expressions(&mut self) {
+    fn parse_expressions(&mut self, cfg: &Config) {
         match self {
             &mut ASTNode::Passage(ref mut node) => {
                 for mut child in node.childs.iter_mut() {
-                    child.parse_expressions();
+                    child.parse_expressions(cfg);
                 }
             },
             &mut ASTNode::Default(ref mut node) => {
                 match &node.category {
                     &TokExpression => {
-                        expressionparser::ExpressionParser::parse(node);
+                        expressionparser::ExpressionParser::parse(node, cfg);
                     },
                     _ => ()
                 }
 
                 for mut child in node.childs.iter_mut() {
-                    child.parse_expressions();
+                    child.parse_expressions(cfg);
                 }
             }
         }
+    }
+}
+
+impl Debug for ASTNode {
+    fn fmt(&self, f: &mut Formatter) -> Result {
+        self.fmt_node(f, 0)
     }
 }
 
@@ -375,9 +413,12 @@ mod tests {
         let mut cursor: Cursor<Vec<u8>> = Cursor::new(input.to_string().into_bytes());
         let tokens = lexer::lex(&cfg, &mut cursor);
         let parser = parser::Parser::new(&cfg);
-        AST::build(parser.parse(tokens.inspect(|ref token| {
+        let ast_ops = parser.parse(tokens.inspect(|ref token| {
             println!("{:?}", token);
-        })))
+        }));
+
+        let ast_builder = ASTBuilder::new(&cfg);
+        ast_builder.build(ast_ops)
     }
 
     /// checks expected
@@ -394,15 +435,16 @@ mod tests {
 
     #[test]
     fn text_test() {
-        let ast = test_ast("::Passage\nTestText\nTestNextLine\n::NextPassage");
+        let ast = test_ast("::Start\nTestText\nTestNextLine\n::NextPassage\nOtherText");
 
         let expected = vec!(
-            (vec![0]  , TokPassage {name: "Passage".to_string(), location: (0, 0)}),
+            (vec![0]  , TokPassage {location: (0, 0), name: "Start".to_string()}),
             (vec![0,0], TokText {location: (0, 0), text: "TestText".to_string()}),
             (vec![0,1], TokNewLine {location: (0, 0)} ),
-            (vec![0,2], TokText {location: (0, 0), text: "".to_string()}),
+            (vec![0,2], TokText {location: (0, 0), text: "nTestNextLine".to_string()}),
             (vec![0,1], TokNewLine {location: (0, 0)}),
-            (vec![1]  , TokPassage {name: "".to_string(), location: (0, 0)}),
+            (vec![1]  , TokPassage {location: (0, 0), name: "NextPassage".to_string()}),
+            (vec![1,0], TokText {location: (0, 0), text: "OtherText".to_string()}),
 
         );
 

@@ -3,21 +3,34 @@
 //! The idea is explained here: http://programmers.stackexchange.com/questions/254074/
 
 //use frontend::ast::*;
+use config::Config;
 use frontend::ast::{ASTNode, NodeDefault};
 use frontend::lexer::Token;
 use frontend::lexer::Token::*;
 
-
-pub struct ExpressionParser {
-    expr_stack: Vec<ASTNode>,
-    oper_stack: Vec<Token>,
+#[derive(Debug)]
+pub enum ExpressionParserError {
+    OperStackIsEmpty,
+    NoParseableSubExpression,
+    MoreThanOneRootExpression { count: usize, stack: Vec<ASTNode> },
+    NotEnoughElementsOnStack,
+    MissingNodeForBinaryNode,
+    DisallowedOperator { op: Token },
+    NotImplementedOperator { op: String },
 }
 
-impl ExpressionParser {
-    pub fn parse(node: &mut NodeDefault) {
+pub struct ExpressionParser<'a> {
+    expr_stack: Vec<ASTNode>,
+    oper_stack: Vec<Token>,
+    cfg: &'a Config,
+}
+
+impl<'a> ExpressionParser<'a> {
+    pub fn parse(node: &mut NodeDefault, cfg: &'a Config) {
         let mut expr_parser = ExpressionParser {
             expr_stack: Vec::new(),
             oper_stack: Vec::new(),
+            cfg: cfg,
         };
         expr_parser.parse_expressions(node);
     }
@@ -49,10 +62,17 @@ impl ExpressionParser {
                     // while(is_ranking_not_higher(oper_stack.top(), tok.clone())) { ...
                     for i in 0..length {
                         let i_rev = length - i - 1;
-                        let token: Token = self.oper_stack.get(i_rev).unwrap().clone();
-                        if is_ranking_not_higher(token, tok.clone()) {
+                        let token: Token = match self.oper_stack.get(i_rev) {
+                            Some(tok) => tok.clone(),
+                            None      => {
+                                error_panic!(self.cfg => ExpressionParserError::OperStackIsEmpty);
+                                return
+                            }
+                        };
+                        if self.is_ranking_not_higher(token.clone(), tok.clone()) {
                             self.new_operator_node();
                         }
+                        
                     }
 
                     self.oper_stack.push(tok.clone());
@@ -67,12 +87,12 @@ impl ExpressionParser {
                     // and then parse it again
                     let childs_copy = top.as_default().childs.to_vec();
                     let mut ast_node = NodeDefault { category: tok.clone(), childs: childs_copy };
-                    ExpressionParser::parse(&mut ast_node);
+                    ExpressionParser::parse(&mut ast_node, self.cfg);
 
                     if let Some(temp) = ast_node.childs.get(0) {
                         self.expr_stack.push(temp.clone());
                     } else {
-                        panic!{"no parsable sub-expression"}
+                        error_panic!(self.cfg => ExpressionParserError::NoParseableSubExpression);
                     }
                 },
                 _ => ()
@@ -93,7 +113,11 @@ impl ExpressionParser {
         }
 
         // finished. so add the root of the expressions as child.
-        assert!{self.expr_stack.len() == 1, "Only one expression can be the root. But there are {:?}.", self.expr_stack.len()};
+        if self.expr_stack.len() != 1 {
+            error_panic!(self.cfg => ExpressionParserError::MoreThanOneRootExpression { count: self.expr_stack.len(),
+                stack: self.expr_stack.clone() });
+        }
+
         if let Some(root) = self.expr_stack.pop() {
             node.childs.push(root);
         }
@@ -116,7 +140,10 @@ impl ExpressionParser {
             if self.expr_stack.len() > 0 {
                 let e2: ASTNode = match self.expr_stack.pop() {
                     Some(tok) => tok,
-                    None      => panic!{"Not enough elements on the stack to create a node"}
+                    None      => {
+                        error_panic!(self.cfg => ExpressionParserError::NotEnoughElementsOnStack);
+                        return
+                    }
                 };
 
                 let mut new_node: ASTNode;
@@ -126,7 +153,10 @@ impl ExpressionParser {
                 } else {
                     let e1: ASTNode = match self.expr_stack.pop() {
                         Some(tok) => tok,
-                        None      => panic!{"Missing Node to create binary node"}
+                        None      => {
+                            error_panic!(self.cfg => ExpressionParserError::MissingNodeForBinaryNode);
+                            return
+                        }
                     };
                     new_node = ASTNode::Default(NodeDefault { category: top_op.clone(), childs: vec![e1, e2] });
                 }
@@ -138,58 +168,67 @@ impl ExpressionParser {
             }
         }
     }
-}
 
-/// checks the operatores of two tokens returns true if operator of token1
-/// is more important then operator of token2
-/// the ranking is set in "operator_precedence"
-fn is_ranking_not_higher(token1: Token, token2: Token) -> bool {
-    let op1: String = match token1 {
-        TokUnaryMinus{ .. } => "_".to_string(),
-        TokNumOp     { op_name, .. } |
-        TokCompOp    { op_name, .. } |
-        TokLogOp     { op_name, .. } => {
-            op_name.clone()
-        },
-        _ => panic!{"not allowed operator"}
-    };
-    let op2: String = match token2 {
-        TokUnaryMinus{ .. } => "_".to_string(),
-        TokNumOp     { op_name, .. } |
-        TokCompOp    { op_name, .. } |
-        TokLogOp     { op_name, .. } => {
-            op_name.clone()
-        },
-        _ => panic!{"not allowed operator"}
-    };
+    /// checks the operatores of two tokens returns true if operator of token1
+    /// is more important then operator of token2
+    /// the ranking is set in "operator_precedence"
+    fn is_ranking_not_higher(&self, token1: Token, token2: Token) -> bool {
+        let op1: String = match token1 {
+            TokUnaryMinus{ .. } => "_".to_string(),
+            TokNumOp     { op_name, .. } |
+            TokCompOp    { op_name, .. } |
+            TokLogOp     { op_name, .. } => {
+                op_name.clone()
+            },
+            _ => {
+                error_panic!(self.cfg => ExpressionParserError::DisallowedOperator { op: token1.clone() });
+                return false
+            }
+        };
+        let op2: String = match token2 {
+            TokUnaryMinus{ .. } => "_".to_string(),
+            TokNumOp     { op_name, .. } |
+            TokCompOp    { op_name, .. } |
+            TokLogOp     { op_name, .. } => {
+                op_name.clone()
+            },
+            _ => {
+                error_panic!(self.cfg => ExpressionParserError::DisallowedOperator { op: token2.clone() });
+                return false
+            }
+        };
 
 
-    // special handling for the unary operators (two unary operators in a row)
-    //let op1_copy: &str = op1.as_slice();
-    if (op1 == "_" || op1 == "not" || op1 == "!") &&
-        operator_rank(op1.clone()) == operator_rank(op2.clone()) {
+        // special handling for the unary operators (two unary operators in a row)
+        //let op1_copy: &str = op1.as_slice();
+        if (op1 == "_" || op1 == "not" || op1 == "!") &&
+            self.operator_rank(op1.clone()) == self.operator_rank(op2.clone()) {
 
-        return false
+            return false
+        }
+
+        //
+        if self.operator_rank(op1) >= self.operator_rank(op2) {
+            return true
+        }
+
+        false
     }
 
-    //
-    if operator_rank(op1) >= operator_rank(op2) {
-        return true
-    }
-
-    false
-}
-
-/// ranking of the operators
-fn operator_rank(op: String) -> u8 {
-    match op.as_ref() {
-        "or" | "||"         => 1,
-        "and" | "&&"        => 2,
-        "is" | "==" | "eq" | "neq" | ">" | "gt" | ">=" | "gte" | "<" | "lt" | "<=" | "lte"
-                            => 3,
-        "+" | "-"           => 4,
-        "*" | "/" | "%"     => 5,
-        "_" | "not" | "!"   => 6, // _ is unary minus
-        _                   => panic!{"This operator is not implemented"}
+    /// ranking of the operators
+    fn operator_rank(&self, op: String) -> u8 {
+        match op.as_ref() {
+            "or" | "||"         => 1,
+            "and" | "&&"        => 2,
+            "is" | "==" | "eq" | "neq" | ">" | "gt" | ">=" | "gte" | "<" | "lt" | "<=" | "lte"
+                                => 3,
+            "+" | "-"           => 4,
+            "*" | "/" | "%"     => 5,
+            "_" | "not" | "!"   => 6, // _ is unary minus
+            _                   => {
+                error_panic!(self.cfg => ExpressionParserError::NotImplementedOperator { op: op });
+                0
+            }
+        }
     }
 }

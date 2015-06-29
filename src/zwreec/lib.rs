@@ -12,15 +12,19 @@
 //!
 //! # Requirements and Usage
 //!
-//! The library uses a [fork of rustlex](https://github.com/Farthen/rustlex) to
-//! to do lexical analysis. Since rustlex requires the Rust Nightly Builds, so
-//! does zwreec. More precisely, this library was *only* developed and tested
-//! against Rust 1.2.0-nightly, build 2015-06-01. You can install this specific
-//! version using:
+//! The library uses a [fork of rustlex](https://github.com/Drakulix/rustlex)
+//! to do lexical analysis.
+//! You can install Rust stable or nightly as you like via the
+//! [provided binaries](http://www.rust-lang.org/install.html)
+//! or the rustup script:
 //!
 //! ```sh
 //! $ curl -s https://static.rust-lang.org/rustup.sh | sh -s -- --channel=nightly --date=2015-06-02
 //! ```
+//!
+//! Or install the Ubuntu/Debian Packages for
+//! [Rust](http://ppa.launchpad.net/hansjorg/rust/ubuntu/pool/main/r/rust-nightly/) and
+//! [Cargo](http://ppa.launchpad.net/hansjorg/rust/ubuntu/pool/main/c/cargo-nightly/).
 //!
 //! To use zwreec in your project you can add it as a dependency to your `Cargo.toml`.
 //!
@@ -93,10 +97,7 @@
 //! [log](../log/index.html). The reference binary implementation of zwreec also includes an
 //! implementation of the `Log` trait.
 
-#![feature(plugin)]
-#![plugin(rustlex)]
-#[allow(plugin_as_library)]
-extern crate rustlex;
+extern crate rustlex_codegen as rustlex;
 #[macro_use] extern crate log;
 extern crate time;
 extern crate term;
@@ -139,11 +140,14 @@ pub fn compile<R: Read, W: Write>(cfg: Config, input: &mut R, output: &mut W) {
     // tokenize
     let tokens = frontend::lexer::lex(&cfg, input);
 
-    //create parser
+    // create parser
     let parser = frontend::parser::Parser::new(&cfg);
 
+    // create ast builder
+    let ast_builder = frontend::ast::ASTBuilder::new(&cfg);
+
     //build up ast from tokens
-    let ast = frontend::ast::AST::build(parser.parse(tokens.inspect(|ref token| {
+    let ast = ast_builder.build(parser.parse(tokens.inspect(|ref token| {
         debug!("{:?}", token);
     })));
     ast.print(false);

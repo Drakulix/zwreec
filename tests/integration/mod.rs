@@ -28,6 +28,12 @@ fn test_compile(input_filename: String) {
     let cfg = zwreec::config::Config::default_config();
 
     zwreec::compile(cfg, &mut input, &mut output);
+
+    let outvec = output.into_inner();
+
+    // check that the z-code version is 8
+    // this ensures that at least some z-code was emitted
+    assert_eq!(0x08, outvec[0]);
 }
 
 #[test]

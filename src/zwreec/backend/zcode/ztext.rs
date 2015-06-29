@@ -32,7 +32,7 @@ pub fn encode(data: &mut Bytes, content: &str, unicode_table: &Vec<u16>) -> u16 
     for i in 0..len {
         let zasci_id =zchars[i];
 
-        two_bytes |= shift(zasci_id as u16, i as u8);
+        two_bytes |= shift(zasci_id as u16, i);
 
         if i % 3 == 2 {
             data.write_u16(two_bytes, pos_to_index(i));
@@ -43,7 +43,7 @@ pub fn encode(data: &mut Bytes, content: &str, unicode_table: &Vec<u16>) -> u16 
         if i == len -1 {
             if i % 3 != 2 {
                 for j in (i % 3) + 1..3 {
-                    two_bytes |= shift(0x05 as u16, j as u8);
+                    two_bytes |= shift(0x05 as u16, j);
                 }
 
                 data.write_u16(two_bytes, pos_to_index(i));
@@ -129,8 +129,8 @@ fn string_to_zchar(content: &str, unicode_table: &Vec<u16>) -> Vec<u8> {
 ///   1 2 3 4 5  1 2 3 4 5  1 2 3 4 5
 ///   1. zchar   2. zchar   3. zchar 
 ///   10         5          0
-fn shift(zchar: u16, position: u8) -> u16 {
-    let shift_length = 10 - (position % 3) * 5;
+fn shift(zchar: u16, position: usize) -> u16 {
+    let shift_length = 10 - (position % 3) as u16 * 5;
     zchar << shift_length
 }
 
@@ -138,9 +138,6 @@ fn shift(zchar: u16, position: u8) -> u16 {
 ///  
 /// # Examples
 ///
-/// ```ignore
-/// assert_eq!(pos_in_alpha('c'), 2);
-/// ```
 fn pos_in_alpha(letter: u8) -> i8 {
     for i in 0..ALPHABET.len() {
         if ALPHABET[i] as u8 == letter {
@@ -175,9 +172,35 @@ pub fn pos_in_unicode(letter: u16, unicode_table: &Vec<u16>) -> i8 {
 ///
 /// # Examples
 ///
-/// ```ignore
-/// assert_eq!(pos_to_index(5), 2);
-/// ```
 fn pos_to_index(position: usize) -> usize {
     2 * (position / 3)
+}
+
+#[test]
+fn test_pos_in_alpha() {
+    assert_eq!(pos_in_alpha('a' as u8), 0);
+    assert_eq!(pos_in_alpha('b' as u8), 1);
+    assert_eq!(pos_in_alpha('c' as u8), 2);
+    assert_eq!(pos_in_alpha('A' as u8), 26);
+    assert_eq!(pos_in_alpha('B' as u8), 27);
+    assert_eq!(pos_in_alpha('C' as u8), 28);
+}
+
+#[test]
+fn test_pos_to_index() {
+    assert_eq!(pos_to_index(5), 2);
+}
+
+#[test]
+fn test_shift() {
+    assert_eq!(shift(6,2), 6);
+    assert_eq!(shift(26,5), 26);
+}
+
+#[test]
+fn test_string_to_zchar() {
+    let mut vec: Vec<u16> = Vec::new();
+    assert_eq!(string_to_zchar("i am a string, please test me, no unicode",&vec), vec![14, 0, 6, 18, 0, 6, 0, 24, 25, 23, 14, 19, 12, 5, 19, 0, 21, 17, 10, 6, 24, 10, 0, 25, 10, 24, 25, 0, 18, 10, 5, 19, 0, 19, 20, 0, 26, 19, 14, 8, 20, 9, 10]);
+    vec.push('€' as u16);
+    assert_eq!(string_to_zchar("nasty char: €",&vec), vec![19, 6, 24, 25, 30, 0, 8, 13, 6, 23, 5, 29, 0, 5, 6, 4, 27]);
 }

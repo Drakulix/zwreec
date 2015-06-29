@@ -3,6 +3,7 @@
 pub use super::zbytes::Bytes;
 pub use super::ztext;
 pub use super::op;
+use config::Config;
 
 #[derive(Clone, PartialEq, Debug)]
 pub enum Type {
@@ -92,6 +93,8 @@ pub enum ZOP {
   Call2S{jump_to_label: String, arg: Operand, result: Variable},
   CallVNA2{jump_to_label: String, arg1: Operand, arg2: Operand},
   CallVNA3{jump_to_label: String, arg1: Operand, arg2: Operand, arg3: Operand},
+  CallVSA2{jump_to_label: String, arg1: Operand, arg2: Operand, result: Variable},
+  CallVSA3{jump_to_label: String, arg1: Operand, arg2: Operand, arg3: Operand, result: Variable},
   Routine{name: String, count_variables: u8},
   Label{name: String},
   Newline,
@@ -155,6 +158,8 @@ pub struct Zfile {
     pub object_addr: u16,
     last_static_written: u16,
     pub heap_start: u16,
+    pub force_unicode: bool,
+    pub easter_egg: bool,
 }
 
 #[derive(Debug, PartialEq, Clone)]
@@ -192,6 +197,10 @@ impl Zfile {
 
     /// creates a new zfile
     pub fn new() -> Zfile {
+        Zfile::new_with_options(false, false)
+    }
+
+    pub fn new_with_options(force_unicode: bool, easter_egg: bool) -> Zfile {
         Zfile {
             data: Bytes{bytes: Vec::new()},
             unicode_table: Vec::new(),
@@ -205,7 +214,13 @@ impl Zfile {
             static_addr: 0,
             last_static_written: 0x8000,
             heap_start: 0x800,
+            force_unicode: force_unicode,
+            easter_egg: easter_egg,
         }
+    }
+
+    pub fn new_with_cfg(cfg: &Config) -> Zfile {
+        Zfile::new_with_options(cfg.force_unicode, cfg.easter_egg)
     }
 
     /// creates the header of a zfile
@@ -215,7 +230,7 @@ impl Zfile {
 
         let alpha_addr: u16 = 0x40;
         let extension_addr: u16 = alpha_addr + 78;
-        self.unicode_table_addr = extension_addr as u16 + 4;
+        self.unicode_table_addr = extension_addr as u16 + 8;
 
         // 1 byte for the unicode count, 97 possible chars with 2 bytes
         self.global_addr = self.unicode_table_addr + 195;
@@ -274,9 +289,9 @@ impl Zfile {
 
         // header extension table
         self.data.write_u16(3, extension_addr as usize);     // Number of further words in table
-        self.data.write_u16(0, extension_addr as usize + 1); // x-coordinate of mouse after a click
-        self.data.write_u16(0, extension_addr as usize + 2); // y-coordinate of mouse after a click
-        self.data.write_u16(0, extension_addr as usize + 3); // if != 0: unicode translation table address (optional)
+        self.data.write_u16(0, extension_addr as usize + 2); // x-coordinate of mouse after a click
+        self.data.write_u16(0, extension_addr as usize + 4); // y-coordinate of mouse after a click
+        self.data.write_u16(self.unicode_table_addr, extension_addr as usize + 6); // if != 0: unicode translation table address (optional)
 
         // global variables
         // ...
@@ -372,7 +387,7 @@ impl Zfile {
             // optimize to reuse strings if they are the same
             let mut string_found = false;
             for &(ref other, addr) in prev_strings.iter() {
-                if other.orig == string.orig && other.unicode == string.unicode {
+                if other.unicode == string.unicode && other.orig == string.orig {
                     string_found = true;
                     if string.unicode {
                         self.data.write_u16(addr as u16, string.from_addr as usize);  // normal addr
@@ -437,7 +452,7 @@ impl Zfile {
         for instr in &code {
             let addr = self.data.bytes.len();
             debug!("{:#x}: {:?}", addr, instr);
-            let (_, _, bytes) = self.write_zop(instr);
+            let (_, _, bytes) = self.write_zop(instr, false);
             let hexstrs: Vec<String> = bytes.iter().map(|b| format!("{:02X}", b)).collect();
             trace!("{:#x}: {}", addr, hexstrs.connect(" "));
         }
@@ -445,11 +460,19 @@ impl Zfile {
 
     /// write opcodes to file but also return written bytes for testing purposes
     /// as well as the resulting new labels and jumps
-    pub fn write_zop(&mut self, instr: &ZOP) -> (Vec<Zlabel>, Vec<Zjump>, Vec<u8>){
+    pub fn write_zop(&mut self, instr: &ZOP, return_new_jumps: bool) -> (Vec<Zlabel>, Vec<Zjump>, Vec<u8>){
         let beginning = self.data.bytes.len();
-        let old_jumps: Vec<Zjump> = self.jumps.clone();
-        let old_labels: Vec<Zlabel> = self.labels.clone();
+        let old_labels: Vec<Zlabel> = if return_new_jumps {
+            self.labels.clone()
+        } else {
+            Vec::new()
+        };
 
+        let old_jumps: Vec<Zjump> = if return_new_jumps {
+            self.jumps.clone()
+        } else {
+            Vec::new()
+        };
 
         //self.data.write_bytes()
         let bytes: Vec<u8> = match instr {
@@ -505,20 +528,26 @@ impl Zfile {
             &ZOP::Call2S{ref jump_to_label, ref arg, ref result} => self.op_call_2s(jump_to_label, arg, result),
             &ZOP::CallVNA2{ref jump_to_label, ref arg1, ref arg2} => self.op_call_vn_a2(jump_to_label, arg1, arg2),
             &ZOP::CallVNA3{ref jump_to_label, ref arg1, ref arg2, ref arg3} => self.op_call_vn_a3(jump_to_label, arg1, arg2, arg3),
+            &ZOP::CallVSA2{ref jump_to_label, ref arg1, ref arg2, ref result} => self.op_call_vs_a2(jump_to_label, arg1, arg2, result),
+            &ZOP::CallVSA3{ref jump_to_label, ref arg1, ref arg2, ref arg3, ref result} => self.op_call_vs_a3(jump_to_label, arg1, arg2, arg3, result),
             _ => ()
         }
         let mut new_jumps: Vec<Zjump> = vec![];
         let mut new_labels: Vec<Zlabel> = vec![];
-        for label in self.labels.iter() {
-            if !old_labels.contains(&label) {
-                new_labels.push(label.clone());
+        
+        if return_new_jumps {
+            for label in self.labels.iter() {
+                if !old_labels.contains(&label) {
+                    new_labels.push(label.clone());
+                }
+            }
+            for jump in self.jumps.iter() {
+                if !old_jumps.contains(&jump) {
+                    new_jumps.push(jump.clone());
+                }
             }
         }
-        for jump in self.jumps.iter() {
-            if !old_jumps.contains(&jump) {
-                new_jumps.push(jump.clone());
-            }
-        }
+        
         (new_labels, new_jumps, self.data.bytes[beginning..self.data.bytes.len()].to_vec())
     }
 
@@ -540,12 +569,12 @@ impl Zfile {
                 // zcode has no support for such high unicode values
                 current_text.push('?');
             } else {
-                if ztext::pos_in_unicode(character as u16, &self.unicode_table) != -1 {
+                if self.force_unicode == false && ztext::pos_in_unicode(character as u16, &self.unicode_table) != -1 {
                     self.gen_write_out_unicode(current_utf16.to_string());  // write out utf16 string
                     current_utf16.clear();
                     // unicode exist in table
                     current_text.push(character);
-                } else if self.unicode_table.len() < 97 {
+                } else if self.force_unicode == false && self.unicode_table.len() < 96 {
                     self.gen_write_out_unicode(current_utf16.to_string());  // write out utf16 string
                     current_utf16.clear();
                     // there is space in the unicode table
@@ -581,7 +610,11 @@ impl Zfile {
                 self.emit(vec![ZOP::Call2NWithArg{jump_to_label: "print_unicode".to_string(), arg: Operand::new_large_const(0)}]);
                 self.strings.push(Zstring{chars: utf16bytes, orig: current_utf16.to_string(), from_addr: (self.data.len()-2) as u32, unicode: true, written_addr: 0});
             } else {
-                self.emit(vec![ZOP::PrintUnicode{c: current_utf16.chars().nth(0).unwrap() as u16}]);
+                if let Some(temp) = current_utf16.chars().nth(0) {
+                    self.emit(vec![ZOP::PrintUnicode{c: temp as u16}]);
+                } else {
+                    panic!{"No chars in current_utf16, can't print anything."}
+                }
             }
         }
     }
@@ -638,6 +671,8 @@ impl Zfile {
         self.routine_malloc_init();
         self.routine_strcpy();
         self.routine_malloc();
+        self.routine_strcat();
+        self.routine_itoa();
         self.write_jumps();
         self.write_strings();
     }
@@ -743,83 +778,90 @@ impl Zfile {
 
     /// easter-egg, with konami-code to start
     pub fn routine_check_more(&mut self) {
-        self.emit(vec![
-            ZOP::Routine{name: "system_check_more".to_string(), count_variables: 1},
-            ZOP::ReadChar{local_var_id: 0x01},
-            ZOP::JE{operand1: Operand::new_var(0x01), operand2: Operand::new_const(129), jump_to_label: "system_check_more_ko_1".to_string()},
-            ZOP::Ret{value: Operand::new_const(0)},
-            ZOP::Label{name: "system_check_more_ko_1".to_string()},
-        
-            ZOP::ReadChar{local_var_id: 0x01},
-            ZOP::JE{operand1: Operand::new_var(0x01), operand2: Operand::new_const(130), jump_to_label: "system_check_more_ko_2".to_string()},
-            ZOP::Ret{value: Operand::new_const(0)},
-            ZOP::Label{name: "system_check_more_ko_2".to_string()},
+        if self.easter_egg {
+            self.emit(vec![
+                ZOP::Routine{name: "system_check_more".to_string(), count_variables: 1},
+                ZOP::ReadChar{local_var_id: 0x01},
+                ZOP::JE{operand1: Operand::new_var(0x01), operand2: Operand::new_const(129), jump_to_label: "system_check_more_ko_1".to_string()},
+                ZOP::Ret{value: Operand::new_const(0)},
+                ZOP::Label{name: "system_check_more_ko_1".to_string()},
 
-            ZOP::ReadChar{local_var_id: 0x01},
-            ZOP::JE{operand1: Operand::new_var(0x01), operand2: Operand::new_const(130), jump_to_label: "system_check_more_ko_3".to_string()},
-            ZOP::Ret{value: Operand::new_const(0)},
-            ZOP::Label{name: "system_check_more_ko_3".to_string()},
+                ZOP::ReadChar{local_var_id: 0x01},
+                ZOP::JE{operand1: Operand::new_var(0x01), operand2: Operand::new_const(130), jump_to_label: "system_check_more_ko_2".to_string()},
+                ZOP::Ret{value: Operand::new_const(0)},
+                ZOP::Label{name: "system_check_more_ko_2".to_string()},
 
-            ZOP::ReadChar{local_var_id: 0x01},
-            ZOP::JE{operand1: Operand::new_var(0x01), operand2: Operand::new_const(131), jump_to_label: "system_check_more_ko_4".to_string()},
-            ZOP::Ret{value: Operand::new_const(0)},
-            ZOP::Label{name: "system_check_more_ko_4".to_string()},
+                ZOP::ReadChar{local_var_id: 0x01},
+                ZOP::JE{operand1: Operand::new_var(0x01), operand2: Operand::new_const(130), jump_to_label: "system_check_more_ko_3".to_string()},
+                ZOP::Ret{value: Operand::new_const(0)},
+                ZOP::Label{name: "system_check_more_ko_3".to_string()},
 
-            ZOP::ReadChar{local_var_id: 0x01},
-            ZOP::JE{operand1: Operand::new_var(0x01), operand2: Operand::new_const(132), jump_to_label: "system_check_more_ko_5".to_string()},
-            ZOP::Ret{value: Operand::new_const(0)},
-            ZOP::Label{name: "system_check_more_ko_5".to_string()},
+                ZOP::ReadChar{local_var_id: 0x01},
+                ZOP::JE{operand1: Operand::new_var(0x01), operand2: Operand::new_const(131), jump_to_label: "system_check_more_ko_4".to_string()},
+                ZOP::Ret{value: Operand::new_const(0)},
+                ZOP::Label{name: "system_check_more_ko_4".to_string()},
 
-            ZOP::ReadChar{local_var_id: 0x01},
-            ZOP::JE{operand1: Operand::new_var(0x01), operand2: Operand::new_const(131), jump_to_label: "system_check_more_ko_6".to_string()},
-            ZOP::Ret{value: Operand::new_const(0)},
-            ZOP::Label{name: "system_check_more_ko_6".to_string()},
+                ZOP::ReadChar{local_var_id: 0x01},
+                ZOP::JE{operand1: Operand::new_var(0x01), operand2: Operand::new_const(132), jump_to_label: "system_check_more_ko_5".to_string()},
+                ZOP::Ret{value: Operand::new_const(0)},
+                ZOP::Label{name: "system_check_more_ko_5".to_string()},
 
-            ZOP::ReadChar{local_var_id: 0x01},
-            ZOP::JE{operand1: Operand::new_var(0x01), operand2: Operand::new_const(132), jump_to_label: "system_check_more_ko_7".to_string()},
-            ZOP::Ret{value: Operand::new_const(0)},
-            ZOP::Label{name: "system_check_more_ko_7".to_string()},
+                ZOP::ReadChar{local_var_id: 0x01},
+                ZOP::JE{operand1: Operand::new_var(0x01), operand2: Operand::new_const(131), jump_to_label: "system_check_more_ko_6".to_string()},
+                ZOP::Ret{value: Operand::new_const(0)},
+                ZOP::Label{name: "system_check_more_ko_6".to_string()},
 
-            ZOP::ReadChar{local_var_id: 0x01},
-            ZOP::JE{operand1: Operand::new_var(0x01), operand2: Operand::new_const(98), jump_to_label: "system_check_more_ko_8".to_string()},
-            ZOP::Ret{value: Operand::new_const(0)},
-            ZOP::Label{name: "system_check_more_ko_8".to_string()},
+                ZOP::ReadChar{local_var_id: 0x01},
+                ZOP::JE{operand1: Operand::new_var(0x01), operand2: Operand::new_const(132), jump_to_label: "system_check_more_ko_7".to_string()},
+                ZOP::Ret{value: Operand::new_const(0)},
+                ZOP::Label{name: "system_check_more_ko_7".to_string()},
 
-            ZOP::ReadChar{local_var_id: 0x01},
-            ZOP::JE{operand1: Operand::new_var(0x01), operand2: Operand::new_const(97), jump_to_label: "system_check_more_ko_9".to_string()},
-            ZOP::Ret{value: Operand::new_const(0)},
-            ZOP::Label{name: "system_check_more_ko_9".to_string()},
+                ZOP::ReadChar{local_var_id: 0x01},
+                ZOP::JE{operand1: Operand::new_var(0x01), operand2: Operand::new_const(98), jump_to_label: "system_check_more_ko_8".to_string()},
+                ZOP::Ret{value: Operand::new_const(0)},
+                ZOP::Label{name: "system_check_more_ko_8".to_string()},
 
-            ZOP::Label{name: "system_check_more_timer_loop".to_string()},
-            ZOP::ReadCharTimer{local_var_id: 0x01, timer: 1, routine: "system_check_more_anim".to_string()},
-            ZOP::Jump{jump_to_label: "system_check_more_timer_loop".to_string()},
-            ZOP::Quit,
+                ZOP::ReadChar{local_var_id: 0x01},
+                ZOP::JE{operand1: Operand::new_var(0x01), operand2: Operand::new_const(97), jump_to_label: "system_check_more_ko_9".to_string()},
+                ZOP::Ret{value: Operand::new_const(0)},
+                ZOP::Label{name: "system_check_more_ko_9".to_string()},
 
-            ZOP::Routine{name: "system_check_more_anim".to_string(), count_variables: 5},
-            ZOP::EraseWindow{value: -1},
+                ZOP::Label{name: "system_check_more_timer_loop".to_string()},
+                ZOP::ReadCharTimer{local_var_id: 0x01, timer: 1, routine: "system_check_more_anim".to_string()},
+                ZOP::Jump{jump_to_label: "system_check_more_timer_loop".to_string()},
+                ZOP::Quit,
 
-            ZOP::SetTextStyle{bold: false, reverse: false, monospace: true, italic: false},
-            ZOP::SetColor{foreground: 2, background: 9},
-            ZOP::Print{text: " ZWREEC Easter egg <3".to_string()},
-            ZOP::Newline,
+                ZOP::Routine{name: "system_check_more_anim".to_string(), count_variables: 5},
+                ZOP::EraseWindow{value: -1},
 
-            ZOP::StoreVariable{variable: Variable::new(1), value: Operand::new_const(20)},
-            ZOP::Label{name: "system_check_more_loop".to_string()},
-            ZOP::Random{range: Operand::new_const(8), variable: Variable::new(4)},
-            ZOP::Random{range: Operand::new_const(100), variable: Variable::new(5)},
-            ZOP::Add{operand1: Operand::new_var(5), operand2: Operand::new_const(10), save_variable: Variable::new(5)},
-            ZOP::Inc{variable: 4},
-            ZOP::SetColorVar{foreground: 4, background: 4},
-            ZOP::Print{text: "aa".to_string()},
-            ZOP::Inc{variable: 2},
+                ZOP::SetTextStyle{bold: false, reverse: false, monospace: true, italic: false},
+                ZOP::SetColor{foreground: 2, background: 9},
+                ZOP::Print{text: " ZWREEC Easter egg <3".to_string()},
+                ZOP::Newline,
 
-            ZOP::JL{operand1: Operand::new_var(2), operand2: Operand::new_var(1), jump_to_label: "system_check_more_loop".to_string()},
-            ZOP::Newline,
-            ZOP::Inc{variable: 3},
-            ZOP::StoreVariable{variable: Variable::new(2), value: Operand::new_const(0)},
-            ZOP::JL{operand1: Operand::new_var(3), operand2: Operand::new_var(1), jump_to_label: "system_check_more_loop".to_string()},
-            ZOP::Ret{value: Operand::new_const(0)}
-        ]);
+                ZOP::StoreVariable{variable: Variable::new(1), value: Operand::new_const(20)},
+                ZOP::Label{name: "system_check_more_loop".to_string()},
+                ZOP::Random{range: Operand::new_const(8), variable: Variable::new(4)},
+                ZOP::Random{range: Operand::new_const(100), variable: Variable::new(5)},
+                ZOP::Add{operand1: Operand::new_var(5), operand2: Operand::new_const(10), save_variable: Variable::new(5)},
+                ZOP::Inc{variable: 4},
+                ZOP::SetColorVar{foreground: 4, background: 4},
+                ZOP::Print{text: "aa".to_string()},
+                ZOP::Inc{variable: 2},
+
+                ZOP::JL{operand1: Operand::new_var(2), operand2: Operand::new_var(1), jump_to_label: "system_check_more_loop".to_string()},
+                ZOP::Newline,
+                ZOP::Inc{variable: 3},
+                ZOP::StoreVariable{variable: Variable::new(2), value: Operand::new_const(0)},
+                ZOP::JL{operand1: Operand::new_var(3), operand2: Operand::new_var(1), jump_to_label: "system_check_more_loop".to_string()},
+                ZOP::Ret{value: Operand::new_const(0)}
+            ]);
+        } else {
+            self.emit(vec![
+                ZOP::Routine{name: "system_check_more".to_string(), count_variables: 1},
+                ZOP::Ret{value: Operand::new_const(0)}
+            ]);
+        }
     }
 
     /// print UTF-16 string from addr
@@ -855,17 +897,23 @@ impl Zfile {
     /// malloc
     pub fn routine_malloc(&mut self) {
         let heap_start = self.heap_start;
-        // @TODO: let static_addr = self.static_addr;
+        let static_addr = self.static_addr;
         self.emit(vec![
             ZOP::Routine{name: "malloc".to_string(), count_variables: 15},
             // var1 is the allocation size given in needed amount of u16
             // var4 is the possible memory address
             // var2 contains entry at index var3 of var4
             // var3 is index on array at var4
+            // var5 has the upper boundary for var4 which is at static_addr-length*2
             // init var4 with heap_start
             ZOP::StoreVariable{variable: Variable::new(4), value: Operand::new_large_const(heap_start as i16)},
+            // calc var5
+            ZOP::StoreVariable{variable: Variable::new(5), value: Operand::new_large_const(static_addr as i16)},
+            ZOP::Sub{operand1: Operand::new_var(5), operand2: Operand::new_var(1), save_variable: Variable::new(5)},
+            ZOP::Sub{operand1: Operand::new_var(5), operand2: Operand::new_var(1), save_variable: Variable::new(5)},
             ZOP::Label{name: "malloc_loop".to_string()},
-            // @TODO: if var4 >= static_addr-length*2, we have to give up and quit
+            // check if we have to give up and quit
+            ZOP::JGE{operand1: Operand::new_var(4), operand2: Operand::new_var(5), jump_to_label: "malloc_fail".to_string()},
             // set var3 index to 0
             ZOP::StoreVariable{variable: Variable::new(3), value: Operand::new_large_const(0)},
             // read the entry of var4 at pos var3 to var2
@@ -881,7 +929,8 @@ impl Zfile {
             // if var3 is greater than the allocation size, we have found enough space at var4 and can return it
             ZOP::JG{operand1: Operand::new_var(3), operand2: Operand::new_var(1), jump_to_label: "malloc_return".to_string()},
             ZOP::Inc{variable: 3},  // increase index
-            // @TODO: if var4+var3*2 >= static_addr-length*2, we have to give up and quit
+            // check if we have to give up and quit
+            ZOP::JGE{operand1: Operand::new_var(4), operand2: Operand::new_var(5), jump_to_label: "malloc_fail".to_string()},
             // load entry of var4 at pos var3 to var2
             ZOP::LoadW{array_address: Operand::new_var(4), index: Variable::new(3), variable: Variable::new(2)},
             // continue testing for free memory if this one was free
@@ -891,7 +940,10 @@ impl Zfile {
             ZOP::Add{operand1: Operand::new_var(4), operand2: Operand::new_var(3), save_variable: Variable::new(4)},
             ZOP::Jump{jump_to_label: "malloc_loop".to_string()},
             ZOP::Label{name: "malloc_return".to_string()},
-            ZOP::Ret{value: Operand::new_var(4)}
+            ZOP::Ret{value: Operand::new_var(4)},
+            ZOP::Label{name: "malloc_fail".to_string()},
+            ZOP::Print{text: "MALLOC FAIL".to_string()},
+            ZOP::Quit,
         ]);
     }
 
@@ -917,6 +969,51 @@ impl Zfile {
         ]);
     }
 
+    /// strcat
+    /// returns a reference to a string concatenation of the first and second string parameters
+    pub fn routine_strcat(&mut self) {
+        let addr1 = Variable::new(1);
+        let addr2 = Variable::new(2);
+        let len1 = Variable::new(3);
+        let len2 = Variable::new(4);
+        let tmp = Variable::new(5);
+        let save_var = Variable::new(6);
+        self.emit(vec![
+            ZOP::Routine{name: "strcat".to_string(), count_variables: 15},
+            // var1 has the first str-addr, var2 the second str-addr
+            // set to 0 for index access
+            ZOP::StoreVariable{variable: len1.clone(), value: Operand::new_large_const(0)},
+            // read length of string1 which is stored at index 0
+            ZOP::LoadW{array_address: Operand::new_var(addr1.id), index: len1.clone(), variable: len1.clone()},
+            // set to 0 for index access
+            ZOP::StoreVariable{variable: len2.clone(), value: Operand::new_large_const(0)},
+            // read length of string2 which is stored at index 0
+            ZOP::LoadW{array_address: Operand::new_var(addr2.id), index: len2.clone(), variable: len2.clone()},
+            // store new length = len1+len2 in save_var
+            ZOP::StoreVariable{variable: save_var.clone(), value: Operand::new_var(len1.id)},
+            ZOP::Add{operand1: Operand::new_var(len2.id), operand2: Operand::new_var(save_var.id), save_variable: save_var.clone()},
+            ZOP::Inc{variable: save_var.id},  // increase as we will also save the length at first u16
+            ZOP::Call2S{jump_to_label: "malloc".to_string(), arg: Operand::new_var(save_var.id), result: save_var.clone()},
+            // write len1+len2 to len2
+            ZOP::Add{operand1: Operand::new_var(len1.id), operand2: Operand::new_var(len2.id), save_variable: len2.clone()},
+            // set tmp to 0 for array index 0
+            ZOP::StoreVariable{variable: tmp.clone(), value: Operand::new_large_const(0)},
+            // and store len1+len2 in first u16
+            ZOP::StoreW{array_address: Operand::new_var(save_var.id), index: tmp.clone(), variable: len2.clone()},
+            // set tmp to save_var_addr+2
+            ZOP::StoreVariable{variable: tmp.clone(), value: Operand::new_large_const(2)},
+            ZOP::Add{operand1: Operand::new_var(tmp.id), operand2: Operand::new_var(save_var.id), save_variable: tmp.clone()},
+            // strcopy (addr1 to save_var_addr+2)
+            ZOP::CallVNA2{jump_to_label: "strcpy".to_string(), arg1: Operand::new_var(addr1.id), arg2: Operand::new_var(tmp.id)},
+            // set tmp to save_var_addr+2+len1*2
+            ZOP::Add{operand1: Operand::new_var(tmp.id), operand2: Operand::new_var(len1.id), save_variable: tmp.clone()},
+            ZOP::Add{operand1: Operand::new_var(tmp.id), operand2: Operand::new_var(len1.id), save_variable: tmp.clone()},
+            // strcopy (addr2 to save_var_addr+2+len1*2)
+            ZOP::CallVNA2{jump_to_label: "strcpy".to_string(), arg1: Operand::new_var(addr2.id), arg2: Operand::new_var(tmp.id)},
+            ZOP::Ret{value: Operand::new_var(save_var.id)}
+        ]);
+    }
+
     /// malloc_init
     pub fn routine_malloc_init(&mut self) {
         let heap_start = self.heap_start;
@@ -938,12 +1035,120 @@ impl Zfile {
 
     /// mem_free as a tracing garbage collection
     pub fn routine_mem_free(&mut self) {
+        let heap_start = self.heap_start;
+        let static_addr = self.static_addr;
+        let global_addr = self.global_addr;
+        let pos = Variable::new(1);
+        let zero = Variable::new(2);
+        let c = Variable::new(3);
+        let m = Variable::new(4);
+        let t = Variable::new(5);
+        let varid = Variable::new(6);
+        let varcontent = Variable::new(7);
         self.emit(vec![
             ZOP::Routine{name: "mem_free".to_string(), count_variables: 15},
-            // @TODO:
-            // durch den speicher suchen und schauen, ob es eine variable dazu gibt. sonst free=-1i16.
-            // inhalt, also länge < 0 heißt kein eintrag.
+            // set m to -1
+            ZOP::StoreVariable{variable: m.clone(), value: Operand::new_large_const(-1i16)},
+            // set pos to current position
+            ZOP::StoreVariable{variable: pos.clone(), value: Operand::new_large_const(heap_start as i16)},
+            ZOP::Dec{variable: pos.id},
+            ZOP::Dec{variable: pos.id},
+            ZOP::Label{name: "mem_free_loop".to_string()},
+            ZOP::Inc{variable: pos.id},
+            ZOP::Inc{variable: pos.id},
+            // exit at end of mem
+            ZOP::JE{operand1: Operand::new_var(pos.id), operand2: Operand::new_large_const(static_addr as i16), jump_to_label: "mem_free_exit".to_string()},
+            // read entry to c
+            ZOP::LoadW{array_address: Operand::new_var(pos.id), index: zero.clone(), variable: c.clone()},
+            // continue search if entry is free
+            ZOP::JL{operand1: Operand::new_var(c.id), operand2: Operand::new_large_const(0), jump_to_label: "mem_free_loop".to_string()},
+            // ZOP::PrintNumVar{variable: pos.clone()},
+            // ZOP::Print{text: "CHECK".to_string()},
+            // ZOP::PrintNumVar{variable: c.clone()},
+            // start loop for checking and init varid to iterate on
+            ZOP::StoreVariable{variable: varid.clone(), value: Operand::new_large_const(15i16)},
+            ZOP::Label{name: "mem_free_check".to_string()},
+            ZOP::Inc{variable: varid.id},
+            ZOP::LoadW{array_address: Operand::new_large_const(global_addr as i16 - 32i16), index: varid.clone(), variable: varcontent.clone()},
+            // ZOP::PrintNumVar{variable: varid.clone()}, ZOP::Print{text: ":".to_string()},
+            // ZOP::PrintNumVar{variable: varcontent.clone()},
+            // ZOP::Print{text: " ".to_string()},
+            // check if entry at pos is not referenced by a global variable, then we free it, otherwise jump down
+            ZOP::JE{operand1: Operand::new_var(pos.id), operand2: Operand::new_var(varcontent.id), jump_to_label: "mem_free_continue".to_string()},
+            ZOP::JL{operand1: Operand::new_var(varid.id), operand2: Operand::new_large_const(255i16), jump_to_label: "mem_free_check".to_string()},
+            // finished loop for checking
+            // set t to position after the whole entry so now we skip length*2 (content)
+            ZOP::Add{operand1: Operand::new_var(pos.id), operand2: Operand::new_var(c.id), save_variable: t.clone()},
+            ZOP::Add{operand1: Operand::new_var(t.id), operand2: Operand::new_var(c.id), save_variable: t.clone()},
+            ZOP::Dec{variable: pos.id},
+            ZOP::Dec{variable: pos.id},
+            // ZOP::Print{text: "DELETE".to_string()},
+            ZOP::Label{name: "mem_free_delete".to_string()},
+            // continue until pos is at position t
+            ZOP::JE{operand1: Operand::new_var(pos.id), operand2: Operand::new_var(t.id), jump_to_label: "mem_free_loop".to_string()},
+            ZOP::Inc{variable: pos.id},
+            ZOP::Inc{variable: pos.id},
+            // exit at end of mem
+            ZOP::JE{operand1: Operand::new_var(pos.id), operand2: Operand::new_large_const(static_addr as i16), jump_to_label: "mem_free_exit".to_string()},
+            // write -1 to pos
+            ZOP::StoreW{array_address: Operand::new_var(pos.id), index: zero.clone(), variable: m.clone()},
+            ZOP::Jump{jump_to_label: "mem_free_delete".to_string()},
+            ZOP::Label{name: "mem_free_continue".to_string()},
+            // ZOP::Print{text: "IS-USED".to_string()},
+            // mem is not free but tells us the length of the entry
+            // length of entry is >= 0 so now we skip length*2 (content)
+            ZOP::Add{operand1: Operand::new_var(pos.id), operand2: Operand::new_var(c.id), save_variable: pos.clone()},
+            ZOP::Add{operand1: Operand::new_var(pos.id), operand2: Operand::new_var(c.id), save_variable: pos.clone()},
+            ZOP::Jump{jump_to_label: "mem_free_loop".to_string()},
+            ZOP::Label{name: "mem_free_exit".to_string()},
             ZOP::Ret{value: Operand::new_const(0)}
+        ]);
+    }
+
+    /// itoa
+    /// convert from number at arg1 to string at base of 10, returns the str addr
+    pub fn routine_itoa(&mut self) {
+        let number = Variable::new(1);  // var1 is the given number
+        let stra = Variable::new(2);  // the result string
+        let i = Variable::new(3);  // the current index
+        let zero = Variable::new(6);  // var14 stays 0
+        let tmp = Variable::new(4);
+        let z = Variable::new(5);
+        self.emit(vec![
+            ZOP::Routine{name: "itoa".to_string(), count_variables: 7},
+            // set first digit we handle to 10000
+            ZOP::StoreVariable{variable: z.clone(), value: Operand::new_large_const(10000i16)},
+            // maximum length is 7 characters like -12345 and length=6 at first u16
+            ZOP::Call2S{jump_to_label: "malloc".to_string(), arg: Operand::new_large_const(7), result: stra.clone()},
+            ZOP::Inc{variable: i.id},  // point at first character to be written
+            // write '-' if < 0
+            ZOP::JGE{operand1: Operand::new_var(number.id), operand2: Operand::new_large_const(0), jump_to_label: "itoa_write".to_string()},
+            ZOP::StoreVariable{variable: tmp.clone(), value: Operand::new_large_const('-' as i16)},
+            ZOP::StoreW{array_address: Operand::new_var(stra.id), index: i.clone(), variable: tmp.clone()},
+            ZOP::Inc{variable: i.id}, // go to next position
+            // and make number positive from now on (max 32767)
+            ZOP::Mul{operand1: Operand::new_large_const(-1i16), operand2: Operand::new_var(number.id), save_variable: number.clone()},
+            ZOP::Label{name: "itoa_write".to_string()},
+            // tmp=number/z
+            ZOP::Div{operand1: Operand::new_var(number.id), operand2: Operand::new_var(z.id), save_variable: tmp.clone()},
+            // do not write if digit is 0
+            ZOP::JE{operand1: Operand::new_var(tmp.id), operand2: Operand::new_large_const(0i16), jump_to_label: "itoa_continue".to_string()},
+            // write digit tmp as utf16
+            ZOP::Add{operand1: Operand::new_large_const('0' as i16), operand2: Operand::new_var(tmp.id), save_variable: tmp.clone()},
+            ZOP::StoreW{array_address: Operand::new_var(stra.id), index: i.clone(), variable: tmp.clone()},
+            ZOP::Inc{variable: i.id}, // go to next position
+            ZOP::Label{name: "itoa_continue".to_string()},
+            // number=number % z
+            ZOP::Mod{operand1: Operand::new_var(number.id), operand2: Operand::new_var(z.id), save_variable: number.clone()},
+            // continue with z/10
+            ZOP::Div{operand1: Operand::new_var(z.id), operand2: Operand::new_large_const(10i16), save_variable: z.clone()},
+            ZOP::JG{operand1: Operand::new_var(z.id), operand2: Operand::new_large_const(1i16), jump_to_label: "itoa_write".to_string()},
+            // write number as utf16 as it is in range 0-9
+            ZOP::Add{operand1: Operand::new_large_const('0' as i16), operand2: Operand::new_var(number.id), save_variable: tmp.clone()},
+            ZOP::StoreW{array_address: Operand::new_var(stra.id), index: i.clone(), variable: tmp.clone()},
+            // write length i at first position
+            ZOP::StoreW{array_address: Operand::new_var(stra.id), index: zero.clone(), variable: i.clone()},
+            ZOP::Ret{value: Operand::new_var(stra.id)}
         ]);
     }
 
@@ -1042,6 +1247,35 @@ impl Zfile {
         op::write_argument(arg1, &mut self.data.bytes);
         op::write_argument(arg2, &mut self.data.bytes);
         op::write_argument(arg3, &mut self.data.bytes);
+    }
+
+    /// calls a routine with two arguments and stores return value in result
+    /// call_vs is VAROP
+    pub fn op_call_vs_a2(&mut self, jump_to_label: &str, arg1: &Operand, arg2: &Operand, result: &Variable) {
+        let args: Vec<ArgType> = vec![ArgType::LargeConst, op::arg_type(&arg1), op::arg_type(&arg2), ArgType::Nothing];
+        self.op_var(0x0, args);
+
+        // the address of the jump_to_label
+        self.add_jump(jump_to_label.to_string(), JumpType::Routine);
+
+        op::write_argument(arg1, &mut self.data.bytes);
+        op::write_argument(arg2, &mut self.data.bytes);
+        self.data.append_byte(result.id);
+    }
+
+    /// calls a routine with two arguments and stores return value in result
+    /// call_vs is VAROP
+    pub fn op_call_vs_a3(&mut self, jump_to_label: &str, arg1: &Operand, arg2: &Operand, arg3: &Operand, result: &Variable) {
+        let args: Vec<ArgType> = vec![ArgType::LargeConst, op::arg_type(&arg1), op::arg_type(&arg2), op::arg_type(&arg3)];
+        self.op_var(0x0, args);
+
+        // the address of the jump_to_label
+        self.add_jump(jump_to_label.to_string(), JumpType::Routine);
+
+        op::write_argument(arg1, &mut self.data.bytes);
+        op::write_argument(arg2, &mut self.data.bytes);
+        op::write_argument(arg3, &mut self.data.bytes);
+        self.data.append_byte(result.id);
     }
 
     /// jumps to a label if the value of operand1 is equal to operand2
@@ -1241,10 +1475,10 @@ fn test_zfile_general_op_length() {
 fn test_zfile_label_and_jump_loop() {
     let mut zfile: Zfile = Zfile::new();
     zfile.start();
-    let (labels, jumps1, bytes1) =  zfile.write_zop(&ZOP::Label{name: "Start".to_string()});
+    let (labels, jumps1, bytes1) =  zfile.write_zop(&ZOP::Label{name: "Start".to_string()}, true);
     assert_eq!(jumps1.len() + bytes1.len(), 0);
     assert_eq!(labels.len(), 1);
-    let (labels2, jumps, bytes) =  zfile.write_zop(&ZOP::Jump{jump_to_label: "Start".to_string()});
+    let (labels2, jumps, bytes) =  zfile.write_zop(&ZOP::Jump{jump_to_label: "Start".to_string()}, true);
     assert_eq!(labels2.len(), 0);
     assert_eq!(jumps.len(), 1);
     assert_eq!(bytes.len(), 3);
@@ -1398,3 +1632,45 @@ fn test_op_ret() {
 fn test_op_store_var() {
     assert_eq!(op::op_store_var(&Variable::new(2),&Operand::new_var(10)),vec![0x2d,0x02,0x0a]);
 }
+
+#[test]
+fn test_encode_variable_arguments() {
+    assert_eq!(op::encode_variable_arguments(vec![ArgType::Variable]),0x80);
+    assert_eq!(op::encode_variable_arguments(vec![ArgType::SmallConst]),0x40);
+    assert_eq!(op::encode_variable_arguments(vec![ArgType::LargeConst]),0x00);
+    assert_eq!(op::encode_variable_arguments(vec![ArgType::Nothing]),0xc0);
+    assert_eq!(op::encode_variable_arguments(vec![ArgType::Reference]),0x40);
+}
+
+#[test]
+fn test_op_2() {
+    assert_eq!(op::op_2(0x02,vec![ArgType::Variable]),vec![0x42]);
+    assert_eq!(op::op_2(0x02,vec![ArgType::LargeConst]),vec![0xc2,0x0f]);
+    assert_eq!(op::op_2(0x02,vec![ArgType::SmallConst]),vec![0x02]);
+    assert_eq!(op::op_2(0x02,vec![ArgType::Reference]),vec![0x02]);
+}
+
+#[test]
+fn test_op_1() {
+    assert_eq!(op::op_1(0x02,ArgType::Variable),vec![0xa2]);
+    assert_eq!(op::op_1(0x02,ArgType::LargeConst),vec![0x82]);
+    assert_eq!(op::op_1(0x02,ArgType::SmallConst),vec![0x92]);
+    assert_eq!(op::op_1(0x02,ArgType::Reference),vec![0x92]);
+}
+
+#[test]
+fn test_op_var() {
+    assert_eq!(op::op_var(0x02,vec![ArgType::Variable]),vec![0xe2,0x80]);
+    assert_eq!(op::op_var(0x02,vec![ArgType::LargeConst]),vec![0xe2,0x00]);
+    assert_eq!(op::op_var(0x02,vec![ArgType::SmallConst]),vec![0xe2,0x40]);
+    assert_eq!(op::op_var(0x02,vec![ArgType::Reference]),vec![0xe2,0x40]);
+}
+
+#[test]
+fn test_op_0() {
+    assert_eq!(op::op_0(0x02),vec![0xb2]);
+    assert_eq!(op::op_0(0x04),vec![0xb4]);
+    assert_eq!(op::op_0(0x08),vec![0xb8]);
+    assert_eq!(op::op_0(0x03),vec![0xb3]);
+}
+
