@@ -106,7 +106,7 @@ fn parse_arguments(args: Vec<String>, opts: getopts::Options) -> (getopts::Match
 
     if matches.opt_present("help") {
         usage(matches.opt_present("verbose"));
-        exit(1);
+        exit(0);
     }
 
     if matches.opt_present("version") {
