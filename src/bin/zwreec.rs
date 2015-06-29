@@ -36,7 +36,7 @@ fn short_options() -> getopts::Options {
     opts.optflagmulti("v", "verbose", "Be more verbose. Can be used multiple times.");
     opts.optflag("q", "quiet", "Be quiet");
     opts.optflag("w", "overwrite", "Overwrite output file if necessary.");
-    opts.optflagopt("l", "logfile", "Specify log file (default standard error)", "LOGFILE");
+    opts.optflagopt("l", "logfile", "Specify log file (additionally to logging on stderr)", "LOGFILE");
     opts.optopt("o", "", "Name of the output file", "FILE");
     opts.optflag("h", "help", "Display this help and exit");
     opts.optflag("V", "version", "Display version");
@@ -142,7 +142,9 @@ fn parse_arguments(args: Vec<String>, opts: getopts::Options) -> (getopts::Match
         let name = if let Some(n) = matches.opt_str("logfile") {
             n
         } else {
-            "zwreec.log".to_string()
+            println!("Error: logfile option specified but no logfile name given");
+            usage(false);
+            exit(1);
         };
         loggers.push(logger::FileLogger::new(
                         logger::LogLevelFilter::Trace,
