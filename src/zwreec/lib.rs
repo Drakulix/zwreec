@@ -140,11 +140,14 @@ pub fn compile<R: Read, W: Write>(cfg: Config, input: &mut R, output: &mut W) {
     // tokenize
     let tokens = frontend::lexer::lex(&cfg, input);
 
-    //create parser
+    // create parser
     let parser = frontend::parser::Parser::new(&cfg);
 
+    // create ast builder
+    let ast_builder = frontend::ast::ASTBuilder::new(&cfg);
+
     //build up ast from tokens
-    let ast = frontend::ast::AST::build(parser.parse(tokens.inspect(|ref token| {
+    let ast = ast_builder.build(parser.parse(tokens.inspect(|ref token| {
         debug!("{:?}", token);
     })));
     ast.print(false);

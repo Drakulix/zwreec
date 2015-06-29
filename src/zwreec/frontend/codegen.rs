@@ -33,7 +33,7 @@ struct Codegen<'a> {
 }
 
 impl<'a> Codegen<'a> {
-    pub fn new(cfg: &Config, ast: ast::AST) -> Codegen {
+    pub fn new(cfg: &'a Config, ast: ast::AST) -> Codegen<'a> {
         Codegen {
             cfg: cfg,
             ast: ast,
