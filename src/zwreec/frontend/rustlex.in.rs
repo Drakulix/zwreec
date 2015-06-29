@@ -1,6 +1,5 @@
 rustlex! TweeLexer {
     // Properties
-    property new_line:bool = true;
     property format_bold_open:bool = false;
     property format_italic_open:bool = false;
     property format_under_open:bool = false;
@@ -108,18 +107,23 @@ rustlex! TweeLexer {
         NEWLINE => |_:&mut TweeLexer<R>| -> Option<Token> { None }
 
         COMMENT =>  |_:&mut TweeLexer<R>| -> Option<Token> { None }
-
     }
 
-    NEWLINE {
-        PASSAGE_START => |lexer:&mut TweeLexer<R>| -> Option<Token>{
-            lexer.PASSAGE();
-            None
-        }
+    I_IGNORE_NEWLINE {
+        NEWLINE =>  |_:&mut TweeLexer<R>| -> Option<Token> { None }
+    }
 
+    I_IGNORE_WHITESPACE {
+        WHITESPACE =>  |_:&mut TweeLexer<R>| -> Option<Token> { None }
+    }
+
+    I_EMIT_COLON {
+        COLON =>      |lexer:&mut TweeLexer<R>| Some(TokColon     {location: lexer.yylloc()} )
+    }
+
+    I_PASSAGE_CONTENT {
         MACRO_START => |lexer:&mut TweeLexer<R>| -> Option<Token>{
             lexer.MACRO();
-            lexer.new_line = true;
             None
         }
 
@@ -182,6 +186,42 @@ rustlex! TweeLexer {
             lexer.MONO_TEXT();
             Some(TokFormatMonoStart {location: lexer.yylloc()} )
         }
+
+        COMMENT =>  |lexer:&mut TweeLexer<R>| -> Option<Token> {
+            lexer.NON_NEWLINE();
+            None
+        }
+        NEWLINE =>  |lexer:&mut TweeLexer<R>| {
+            lexer.NEWLINE();
+            Some(TokNewLine {location: lexer.yylloc()} )
+        }
+    }
+
+    I_EXPRESSION {
+        VAR_NAME => |lexer:&mut TweeLexer<R>| Some(TokVariable{location: lexer.yylloc(), name: lexer.yystr()} )
+        STRING =>   |lexer:&mut TweeLexer<R>| Some(TokString  {location: lexer.yylloc(), value: unescape(lexer.yystr())} )
+        FLOAT =>    |lexer:&mut TweeLexer<R>| Some(TokFloat   {location: lexer.yylloc(), value: lexer.yystr()[..].parse().unwrap()} )
+        INT =>        |lexer:&mut TweeLexer<R>| Some(TokInt       {location: lexer.yylloc(), value: lexer.yystr()[..].parse().unwrap()} )
+        BOOL =>     |lexer:&mut TweeLexer<R>| Some(TokBoolean {location: lexer.yylloc(), value: lexer.yystr()} )
+        NUM_OP =>   |lexer:&mut TweeLexer<R>| Some(TokNumOp   {location: lexer.yylloc(), op_name: lexer.yystr()} )
+        COMP_OP =>  |lexer:&mut TweeLexer<R>| Some(TokCompOp  {location: lexer.yylloc(), op_name: lexer.yystr()} )
+        LOG_OP =>   |lexer:&mut TweeLexer<R>| Some(TokLogOp   {location: lexer.yylloc(), op_name: lexer.yystr()} )
+    }
+
+    I_EXPRESSION_SIMPLE {
+        PAREN_OPEN => |lexer:&mut TweeLexer<R>| Some(TokParenOpen {location: lexer.yylloc()} )
+        PAREN_CLOSE =>|lexer:&mut TweeLexer<R>| Some(TokParenClose{location: lexer.yylloc()} )
+        SEMI_COLON => |lexer:&mut TweeLexer<R>| Some(TokSemiColon {location: lexer.yylloc()} )
+        ASSIGN =>     |lexer:&mut TweeLexer<R>| Some(TokAssign    {location: lexer.yylloc(), var_name: "".to_string(), op_name: lexer.yystr()} )
+    }
+
+    NEWLINE {
+        :I_PASSAGE_CONTENT
+        PASSAGE_START => |lexer:&mut TweeLexer<R>| -> Option<Token>{
+            lexer.PASSAGE();
+            None
+        }
+
         FORMAT_BUL_LIST =>  |lexer:&mut TweeLexer<R>| {
             lexer.NON_NEWLINE();
             Some(TokFormatBulList {location: lexer.yylloc()} )
@@ -194,90 +234,18 @@ rustlex! TweeLexer {
             lexer.NON_NEWLINE();
             Some(TokFormatHeading {location: lexer.yylloc(), rank: lexer.yystr().trim().len()} )
         }
+
         TEXT_START_CHAR => |lexer:&mut TweeLexer<R>| {
             lexer.NON_NEWLINE();
             Some(TokText {location: lexer.yylloc(), text: lexer.yystr()} )
         }
+
         FORMAT_HORIZONTAL_LINE  =>  |lexer:&mut TweeLexer<R>| Some(TokFormatHorizontalLine {location: lexer.yylloc()} )
         FORMAT_INDENT_BLOCK  =>  |lexer:&mut TweeLexer<R>| Some(TokFormatIndentBlock {location: lexer.yylloc()} )
-
-        COMMENT =>  |lexer:&mut TweeLexer<R>| -> Option<Token> {
-            lexer.NON_NEWLINE();
-            None
-        }
-
-        NEWLINE => |lexer:&mut TweeLexer<R>| Some(TokNewLine {location: lexer.yylloc()} )
     }
 
     NON_NEWLINE {
-
-        MACRO_START => |lexer:&mut TweeLexer<R>| -> Option<Token>{
-            lexer.MACRO();
-            lexer.new_line = false;
-            None
-        }
-
-        LINK_SIMPLE =>  |lexer:&mut TweeLexer<R>| {
-            lexer.LINK_VAR_CHECK();
-            let s =  lexer.yystr();
-            let trimmed = &s[2 .. s.len()-1];
-            let name = &trimmed.to_string();
-            Some(TokPassageLink {location: lexer.yylloc(), display_name: name.clone(), passage_name: name.clone()} )
-        }
-
-        LINK_LABELED =>  |lexer:&mut TweeLexer<R>| {
-            lexer.LINK_VAR_CHECK();
-            let s =  lexer.yystr();
-            let trimmed = &s[2 .. s.len()-1];
-            let matches = &trimmed.split("|").collect::<Vec<&str>>();
-            assert_eq!(matches.len(), 2);
-            let text = matches[0].to_string();
-            let name = matches[1].to_string();
-            Some(TokPassageLink {location: lexer.yylloc(), display_name: text, passage_name: name} )
-        }
-
-        FORMAT_ITALIC => |lexer:&mut TweeLexer<R>| {
-            lexer.format_italic_open = !lexer.format_italic_open;
-            if lexer.format_italic_open {Some(TokFormatItalicStart {location: lexer.yylloc()} )}
-            else {Some(TokFormatItalicEnd {location: lexer.yylloc()} )}
-        }
-        FORMAT_BOLD => |lexer:&mut TweeLexer<R>| {
-            lexer.format_bold_open = !lexer.format_bold_open;
-            if lexer.format_bold_open {Some(TokFormatBoldStart {location: lexer.yylloc()} )}
-            else {Some(TokFormatBoldEnd {location: lexer.yylloc()} )}
-        }
-        FORMAT_UNDER => |lexer:&mut TweeLexer<R>| {
-            lexer.format_under_open = !lexer.format_under_open;
-            if lexer.format_under_open {Some(TokFormatUnderStart {location: lexer.yylloc()} )}
-            else {Some(TokFormatUnderEnd {location: lexer.yylloc()} )}
-        }
-        FORMAT_STRIKE => |lexer:&mut TweeLexer<R>| {
-            lexer.format_strike_open = !lexer.format_strike_open;
-            if lexer.format_strike_open {Some(TokFormatStrikeStart {location: lexer.yylloc()} )}
-            else {Some(TokFormatStrikeEnd {location: lexer.yylloc()} )}
-        }
-        FORMAT_SUB => |lexer:&mut TweeLexer<R>| {
-            lexer.format_sub_open = !lexer.format_sub_open;
-            if lexer.format_sub_open {Some(TokFormatSubStart {location: lexer.yylloc()} )}
-            else {Some(TokFormatSubEnd {location: lexer.yylloc()} )}
-        }
-        FORMAT_SUP => |lexer:&mut TweeLexer<R>| {
-            lexer.format_sup_open = !lexer.format_sup_open;
-            if lexer.format_sup_open {Some(TokFormatSupStart {location: lexer.yylloc()} )}
-            else {Some(TokFormatSupEnd {location: lexer.yylloc()} )}
-        }
-        FORMAT_MONO_START => |lexer:&mut TweeLexer<R>| {
-            lexer.MONO_TEXT();
-            Some(TokFormatMonoStart {location: lexer.yylloc()} )
-        }
-
-        NEWLINE =>  |lexer:&mut TweeLexer<R>| {
-            lexer.NEWLINE();
-            Some(TokNewLine {location: lexer.yylloc()} )
-        }
-
-        COMMENT =>  |_:&mut TweeLexer<R>| -> Option<Token> { None }
-
+        :I_PASSAGE_CONTENT
         TEXT =>  |lexer:&mut TweeLexer<R>| Some(TokText {location: lexer.yylloc(), text: lexer.yystr()} )
     }
 
@@ -294,8 +262,8 @@ rustlex! TweeLexer {
     }
 
     TAGS {
+        :I_IGNORE_WHITESPACE
         TAG => |lexer:&mut TweeLexer<R>| Some(TokTag {location: lexer.yylloc(), tag_name: lexer.yystr()} )
-        WHITESPACE =>  |_:&mut TweeLexer<R>| -> Option<Token> { None }
         TAG_END => |lexer:&mut TweeLexer<R>| {
             lexer.PASSAGE();
             Some(TokTagEnd {location: lexer.yylloc()})
@@ -303,7 +271,6 @@ rustlex! TweeLexer {
     }
 
     MONO_TEXT {
-
         TEXT_MONO =>  |lexer:&mut TweeLexer<R>| Some(TokText {location: lexer.yylloc(), text: lexer.yystr()} )
         FORMAT_MONO_END => |lexer:&mut TweeLexer<R>| {
             lexer.NON_NEWLINE();
@@ -375,6 +342,11 @@ rustlex! TweeLexer {
     }
 
     MACRO_CONTENT {
+        :I_EXPRESSION
+        :I_EXPRESSION_SIMPLE
+        :I_IGNORE_NEWLINE
+        :I_IGNORE_WHITESPACE
+        :I_EMIT_COLON
 
         // Expression Stuff
         FUNCTION =>  |lexer:&mut TweeLexer<R>| {
@@ -385,24 +357,7 @@ rustlex! TweeLexer {
             lexer.FUNCTION_ARGS();
             Some(TokFunction {location: lexer.yylloc(), name: name.clone()} )
         }
-        STRING =>     |lexer:&mut TweeLexer<R>| Some(TokString    {location: lexer.yylloc(), value: unescape(lexer.yystr())} )
-        VAR_NAME =>   |lexer:&mut TweeLexer<R>| Some(TokVariable  {location: lexer.yylloc(), name: lexer.yystr()} )
-        FLOAT =>      |lexer:&mut TweeLexer<R>| Some(TokFloat     {location: lexer.yylloc(), value: lexer.yystr()[..].parse().unwrap()} )
-        INT =>        |lexer:&mut TweeLexer<R>| Some(TokInt       {location: lexer.yylloc(), value: lexer.yystr()[..].parse().unwrap()} )
-        BOOL =>       |lexer:&mut TweeLexer<R>| Some(TokBoolean   {location: lexer.yylloc(), value: lexer.yystr()} )
-        NUM_OP =>     |lexer:&mut TweeLexer<R>| Some(TokNumOp     {location: lexer.yylloc(), op_name: lexer.yystr()} )
-        COMP_OP =>    |lexer:&mut TweeLexer<R>| Some(TokCompOp    {location: lexer.yylloc(), op_name: lexer.yystr()} )
-        LOG_OP =>     |lexer:&mut TweeLexer<R>| Some(TokLogOp     {location: lexer.yylloc(), op_name: lexer.yystr()} )
-        PAREN_OPEN => |lexer:&mut TweeLexer<R>| Some(TokParenOpen {location: lexer.yylloc()} )
-        PAREN_CLOSE =>|lexer:&mut TweeLexer<R>| Some(TokParenClose{location: lexer.yylloc()} )
-        SEMI_COLON => |lexer:&mut TweeLexer<R>| Some(TokSemiColon {location: lexer.yylloc()} )
-        ASSIGN =>     |lexer:&mut TweeLexer<R>| Some(TokAssign    {location: lexer.yylloc(), var_name: "".to_string(), op_name: lexer.yystr()} )
-        COLON =>      |lexer:&mut TweeLexer<R>| Some(TokColon     {location: lexer.yylloc()} )
         // Expression Stuff End
-
-        NEWLINE =>  |_:&mut TweeLexer<R>| -> Option<Token> { None }
-
-        WHITESPACE =>  |_:&mut TweeLexer<R>| -> Option<Token> { None }
 
         MACRO_END => |lexer:&mut TweeLexer<R>| {
             lexer.NON_NEWLINE();
@@ -411,6 +366,8 @@ rustlex! TweeLexer {
     }
 
     MACRO_CONTENT_DISPLAY {
+        :I_IGNORE_NEWLINE
+        :I_IGNORE_WHITESPACE
 
         MACRO_DISPLAY_PASSAGE_NAME  => |lexer:&mut TweeLexer<R>| {
             Some(TokMacroDisplay {location: lexer.yylloc(), passage_name: lexer.yystr().trim().to_string()} )
@@ -420,10 +377,6 @@ rustlex! TweeLexer {
             Some(TokMacroDisplay {passage_name: unescape(lexer.yystr()), location: lexer.yylloc()})
         }
 
-        NEWLINE =>  |_:&mut TweeLexer<R>| -> Option<Token> { None }
-
-        WHITESPACE =>  |_:&mut TweeLexer<R>| -> Option<Token> { None }
-
         MACRO_END => |lexer:&mut TweeLexer<R>| {
             lexer.NON_NEWLINE();
             Some(TokMacroEnd {location: lexer.yylloc()} )
@@ -431,10 +384,8 @@ rustlex! TweeLexer {
     }
 
     MACRO_CONTENT_SHORT_PRINT {
-
-        NEWLINE =>  |_:&mut TweeLexer<R>| -> Option<Token> { None }
-
-        WHITESPACE =>  |_:&mut TweeLexer<R>| -> Option<Token> { None }
+        :I_IGNORE_NEWLINE
+        :I_IGNORE_WHITESPACE
 
         MACRO_END => |lexer:&mut TweeLexer<R>| {
             lexer.NON_NEWLINE();
@@ -443,6 +394,8 @@ rustlex! TweeLexer {
     }
 
     MACRO_CONTENT_SHORT_DISPLAY {
+        :I_IGNORE_NEWLINE
+        :I_IGNORE_WHITESPACE
 
         // Expression Stuff
         FUNCTION =>   |_:&mut TweeLexer<R>| -> Option<Token> { None }
@@ -461,10 +414,6 @@ rustlex! TweeLexer {
         COLON =>      |_:&mut TweeLexer<R>| -> Option<Token> { None }
         // Expression Stuff End
 
-        NEWLINE =>  |_:&mut TweeLexer<R>| -> Option<Token> { None }
-
-        WHITESPACE =>  |_:&mut TweeLexer<R>| -> Option<Token> { None }
-
         MACRO_END => |lexer:&mut TweeLexer<R>| {
             lexer.NON_NEWLINE();
             Some(TokMacroEnd {location: lexer.yylloc()} )
@@ -472,16 +421,10 @@ rustlex! TweeLexer {
     }
 
     FUNCTION_ARGS {
-        WHITESPACE =>   |_:&mut TweeLexer<R>| -> Option<Token> {None}
-        COLON =>    |lexer:&mut TweeLexer<R>| Some(TokColon   {location: lexer.yylloc()} )
-        VAR_NAME => |lexer:&mut TweeLexer<R>| Some(TokVariable{location: lexer.yylloc(), name: lexer.yystr()} )
-        FLOAT =>    |lexer:&mut TweeLexer<R>| Some(TokFloat   {location: lexer.yylloc(), value: lexer.yystr()[..].parse().unwrap()} )
-        INT =>      |lexer:&mut TweeLexer<R>| Some(TokInt     {location: lexer.yylloc(), value: lexer.yystr()[..].parse().unwrap()} )
-        STRING =>   |lexer:&mut TweeLexer<R>| Some(TokString  {location: lexer.yylloc(), value: unescape(lexer.yystr())} )
-        BOOL =>     |lexer:&mut TweeLexer<R>| Some(TokBoolean {location: lexer.yylloc(), value: lexer.yystr()} )
-        NUM_OP =>   |lexer:&mut TweeLexer<R>| Some(TokNumOp   {location: lexer.yylloc(), op_name: lexer.yystr()} )
-        COMP_OP =>  |lexer:&mut TweeLexer<R>| Some(TokCompOp  {location: lexer.yylloc(), op_name: lexer.yystr()} )
-        LOG_OP =>   |lexer:&mut TweeLexer<R>| Some(TokLogOp   {location: lexer.yylloc(), op_name: lexer.yystr()} )
+        :I_EXPRESSION
+        :I_IGNORE_WHITESPACE
+        :I_EMIT_COLON
+
         PAREN_OPEN =>  |lexer:&mut TweeLexer<R>| {
             lexer.function_parens += 1;
             Some(TokParenOpen {location: lexer.yylloc()} )
@@ -510,20 +453,8 @@ rustlex! TweeLexer {
     }
 
     LINK_VAR_SET {
-        // Expression Stuff
-        VAR_NAME =>   |lexer:&mut TweeLexer<R>| Some(TokVariable  {location: lexer.yylloc(), name: lexer.yystr()} )
-        FLOAT =>      |lexer:&mut TweeLexer<R>| Some(TokFloat     {location: lexer.yylloc(), value: lexer.yystr()[..].parse().unwrap()} )
-        INT =>        |lexer:&mut TweeLexer<R>| Some(TokInt       {location: lexer.yylloc(), value: lexer.yystr()[..].parse().unwrap()} )
-        STRING =>     |lexer:&mut TweeLexer<R>| Some(TokString    {location: lexer.yylloc(), value: unescape(lexer.yystr())} )
-        BOOL =>       |lexer:&mut TweeLexer<R>| Some(TokBoolean   {location: lexer.yylloc(), value: lexer.yystr()} )
-        NUM_OP =>     |lexer:&mut TweeLexer<R>| Some(TokNumOp     {location: lexer.yylloc(), op_name: lexer.yystr()} )
-        COMP_OP =>    |lexer:&mut TweeLexer<R>| Some(TokCompOp    {location: lexer.yylloc(), op_name: lexer.yystr()} )
-        LOG_OP =>     |lexer:&mut TweeLexer<R>| Some(TokLogOp     {location: lexer.yylloc(), op_name: lexer.yystr()} )
-        PAREN_OPEN => |lexer:&mut TweeLexer<R>| Some(TokParenOpen {location: lexer.yylloc()} )
-        PAREN_CLOSE =>|lexer:&mut TweeLexer<R>| Some(TokParenClose{location: lexer.yylloc()} )
-        SEMI_COLON => |lexer:&mut TweeLexer<R>| Some(TokSemiColon {location: lexer.yylloc()} )
-        ASSIGN =>     |lexer:&mut TweeLexer<R>| Some(TokAssign    {location: lexer.yylloc(), var_name: "".to_string(), op_name: lexer.yystr()} )
-        // Expression Stuff End
+        :I_EXPRESSION
+        :I_EXPRESSION_SIMPLE
 
         LINK_CLOSE => |lexer:&mut TweeLexer<R>| -> Option<Token> {
             lexer.LINK_WAIT_CLOSE();
