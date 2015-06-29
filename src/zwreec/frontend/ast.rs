@@ -427,7 +427,6 @@ mod tests {
             let b = ast.is_specific_token(item.1.clone(), item.0.to_vec());
             if b == false {
                 ast.print(true);
-                println!("FAILED WITH TOKEN {:?} at {:?}", item.0, item.1);
             }
             assert!(ast.is_specific_token(item.1.clone(), item.0.to_vec()));
         }
