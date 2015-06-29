@@ -325,15 +325,38 @@ pub enum TestCase {
 /// As you can see, `options()` returns your own command line options, which are then conditionally
 /// expanded by using `zwreec_options()`.
 pub fn zwreec_options(mut opts: getopts::Options) -> getopts::Options {
-    opts.optflag("f", "force", "force opening of output file");
+    opts.optflag("f", "force", "Try ignoring any errors that may occur and generate Z-Code anyways.
+        This feature is highly unstable and may lead to corrupt output files.");
     opts.optmulti("F", "feature", "", "FEAT");
-    opts.optmulti("N", "no-feature", "enable or disable a feature (can occur multiple times).
-                        List of supported features (default):
-                            easter-egg (enabled)
-                            force-unicode (disabled)", "FEAT");
-    opts.optflag("e", "generate-sample-zcode", "writes out a sample zcode file, input file is not used and can be omitted");
+    opts.optmulti("N", "no-feature", "Enable or disable a feature (can occur multiple times).
+        For more information about the supported features run --help with -v and see the feature
+        list at the end of the output", "FEAT");
+    opts.optflag("e", "generate-sample-zcode", "Write out a sample zcode file, input file is not used and can be omitted");
 
     opts
+}
+
+pub fn zwreec_usage(verbose: bool, opts: getopts::Options, brief: &str) -> String {
+    use std::fmt::format;
+    let options = zwreec_options(opts);
+
+    let options_usage = options.usage(brief);
+
+    let features_usage = if verbose {
+        "List of supported features (default value in parenthesis)
+    easter-egg (enabled) 
+        Enables the generation of easter egg code. Enter the secret combination
+        in your Z-Machine interpreter to activate the easter egg
+    force-unicode (disabled)
+        Force the generation of unicode print opcodes every time a unicode
+        character is encountered. This disables the generation of the unicode
+        translation table"
+    } else {
+        "Additional help:
+    --help -v           Print the full set of options zwreec accepts"
+    };
+
+    format(format_args!("{}\n{}\n", options_usage, features_usage.to_string()))
 }
 
 #[cfg(test)]

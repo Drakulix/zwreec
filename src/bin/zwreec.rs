@@ -33,13 +33,13 @@ macro_rules! print_stderr(
 /// usage information.
 fn short_options() -> getopts::Options {
     let mut opts = getopts::Options::new();
-    opts.optflagmulti("v", "verbose", "be more verbose. Can be used multiple times.");
-    opts.optflag("q", "quiet", "be quiet");
-    opts.optflag("w", "overwrite", "overwrite output file if necessary.");
-    opts.optflagopt("l", "logfile", "specify log file (default zwreec.log)", "LOGFILE");
-    opts.optopt("o", "", "name of the output file", "FILE");
-    opts.optflag("h", "help", "display this help and exit");
-    opts.optflag("V", "version", "display version");
+    opts.optflagmulti("v", "verbose", "Be more verbose. Can be used multiple times.");
+    opts.optflag("q", "quiet", "Be quiet");
+    opts.optflag("w", "overwrite", "Overwrite output file if necessary.");
+    opts.optflagopt("l", "logfile", "Specify log file (additionally to logging on stderr)", "LOGFILE");
+    opts.optopt("o", "", "Name of the output file", "FILE");
+    opts.optflag("h", "help", "Display this help and exit");
+    opts.optflag("V", "version", "Display version");
 
     opts
 }
@@ -56,10 +56,7 @@ fn usage(verbose: bool) {
 
     let brief = format!("Usage: zwreec [-hV] [-vqwf] [-l [LOGFILE]] [-o OUTPUT] INPUT");
 
-    println!("{}\n
-Additional help:
-    --help -v           Print the full set of options zwreec accepts",
-        options.usage(&brief));
+    println!("{}", config::zwreec_usage(verbose, options, &brief));
 }
 
 /// Parse command line arguments
@@ -109,7 +106,7 @@ fn parse_arguments(args: Vec<String>, opts: getopts::Options) -> (getopts::Match
 
     if matches.opt_present("help") {
         usage(matches.opt_present("verbose"));
-        exit(1);
+        exit(0);
     }
 
     if matches.opt_present("version") {
@@ -145,7 +142,9 @@ fn parse_arguments(args: Vec<String>, opts: getopts::Options) -> (getopts::Match
         let name = if let Some(n) = matches.opt_str("logfile") {
             n
         } else {
-            "zwreec.log".to_string()
+            println!("Error: logfile option specified but no logfile name given");
+            usage(false);
+            exit(1);
         };
         loggers.push(logger::FileLogger::new(
                         logger::LogLevelFilter::Trace,
