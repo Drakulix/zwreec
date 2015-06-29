@@ -452,7 +452,7 @@ impl Zfile {
         for instr in &code {
             let addr = self.data.bytes.len();
             debug!("{:#x}: {:?}", addr, instr);
-            let (_, _, bytes) = self.write_zop(instr);
+            let (_, _, bytes) = self.write_zop(instr, false);
             let hexstrs: Vec<String> = bytes.iter().map(|b| format!("{:02X}", b)).collect();
             trace!("{:#x}: {}", addr, hexstrs.connect(" "));
         }
@@ -460,11 +460,19 @@ impl Zfile {
 
     /// write opcodes to file but also return written bytes for testing purposes
     /// as well as the resulting new labels and jumps
-    pub fn write_zop(&mut self, instr: &ZOP) -> (Vec<Zlabel>, Vec<Zjump>, Vec<u8>){
+    pub fn write_zop(&mut self, instr: &ZOP, return_new_jumps: bool) -> (Vec<Zlabel>, Vec<Zjump>, Vec<u8>){
         let beginning = self.data.bytes.len();
-        let old_jumps: Vec<Zjump> = self.jumps.clone();
-        let old_labels: Vec<Zlabel> = self.labels.clone();
+        let old_labels: Vec<Zlabel> = if return_new_jumps {
+            self.labels.clone()
+        } else {
+            Vec::new()
+        };
 
+        let old_jumps: Vec<Zjump> = if return_new_jumps {
+            self.jumps.clone()
+        } else {
+            Vec::new()
+        };
 
         //self.data.write_bytes()
         let bytes: Vec<u8> = match instr {
@@ -526,16 +534,20 @@ impl Zfile {
         }
         let mut new_jumps: Vec<Zjump> = vec![];
         let mut new_labels: Vec<Zlabel> = vec![];
-        for label in self.labels.iter() {
-            if !old_labels.contains(&label) {
-                new_labels.push(label.clone());
+        
+        if return_new_jumps {
+            for label in self.labels.iter() {
+                if !old_labels.contains(&label) {
+                    new_labels.push(label.clone());
+                }
+            }
+            for jump in self.jumps.iter() {
+                if !old_jumps.contains(&jump) {
+                    new_jumps.push(jump.clone());
+                }
             }
         }
-        for jump in self.jumps.iter() {
-            if !old_jumps.contains(&jump) {
-                new_jumps.push(jump.clone());
-            }
-        }
+        
         (new_labels, new_jumps, self.data.bytes[beginning..self.data.bytes.len()].to_vec())
     }
 
@@ -1463,10 +1475,10 @@ fn test_zfile_general_op_length() {
 fn test_zfile_label_and_jump_loop() {
     let mut zfile: Zfile = Zfile::new();
     zfile.start();
-    let (labels, jumps1, bytes1) =  zfile.write_zop(&ZOP::Label{name: "Start".to_string()});
+    let (labels, jumps1, bytes1) =  zfile.write_zop(&ZOP::Label{name: "Start".to_string()}, true);
     assert_eq!(jumps1.len() + bytes1.len(), 0);
     assert_eq!(labels.len(), 1);
-    let (labels2, jumps, bytes) =  zfile.write_zop(&ZOP::Jump{jump_to_label: "Start".to_string()});
+    let (labels2, jumps, bytes) =  zfile.write_zop(&ZOP::Jump{jump_to_label: "Start".to_string()}, true);
     assert_eq!(labels2.len(), 0);
     assert_eq!(jumps.len(), 1);
     assert_eq!(bytes.len(), 3);
