@@ -183,7 +183,7 @@ impl Config {
         Config{
             force: false,
             easter_egg: true,
-            force_unicode: true,
+            force_unicode: false,
             test_cases: Vec::new(),
         }
     }
@@ -330,7 +330,7 @@ pub fn zwreec_options(mut opts: getopts::Options) -> getopts::Options {
     opts.optmulti("N", "no-feature", "enable or disable a feature (can occur multiple times).
                         List of supported features (default):
                             easter-egg (enabled)
-                            force-unicode (enabled)", "FEAT");
+                            force-unicode (disabled)", "FEAT");
     opts.optflag("e", "generate-sample-zcode", "writes out a sample zcode file, input file is not used and can be omitted");
 
     opts
