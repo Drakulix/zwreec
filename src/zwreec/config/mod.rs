@@ -325,7 +325,8 @@ pub enum TestCase {
 /// As you can see, `options()` returns your own command line options, which are then conditionally
 /// expanded by using `zwreec_options()`.
 pub fn zwreec_options(mut opts: getopts::Options) -> getopts::Options {
-    opts.optflag("f", "force", "Force opening of output file");
+    opts.optflag("f", "force", "Try ignoring any errors that may occur and generate Z-Code anyways.
+        This feature is highly unstable and may lead to corrupt output files.");
     opts.optmulti("F", "feature", "", "FEAT");
     opts.optmulti("N", "no-feature", "Enable or disable a feature (can occur multiple times).
         For more information about the supported features run --help with -v and see the feature
