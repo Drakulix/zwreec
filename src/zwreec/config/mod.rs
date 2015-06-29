@@ -355,7 +355,7 @@ pub fn zwreec_usage(verbose: bool, opts: getopts::Options, brief: &str) -> Strin
     --help -v           Print the full set of options zwreec accepts"
     };
 
-    format(format_args!("{}\n{}", options_usage, features_usage.to_string()))
+    format(format_args!("{}\n{}\n", options_usage, features_usage.to_string()))
 }
 
 #[cfg(test)]
