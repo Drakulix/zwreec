@@ -122,34 +122,37 @@ pub fn gen_zcode<'a>(node: &'a ASTNode, mut out: &mut Zfile, mut manager: &mut C
                     ]
                 },
                 &TokAssign {ref var_name, ref op_name, .. } => {
-                    if op_name == "=" || op_name == "to" {
-                        let mut code: Vec<ZOP> = vec![];
-                        if t.childs.len() == 1 {
-                            let expression_node = &t.childs[0].as_default();
-                            let result = match expression_node.category {
-                                TokExpression => {
-                                    if expression_node.childs.len() != 1 {
-                                        panic!("Unsupported expression!")
-                                    }
-                                    evaluate_expression(&expression_node.childs[0], &mut code, manager, &mut out)
-                                }, _ => panic!("Unsupported expression!")
-                            };
-                            if !manager.symbol_table.is_known_symbol(var_name) {
-                                let vartype = match result {
-                                    Operand::StringRef(_) => Type::String,
-                                    Operand::Var(ref var) => var.vartype.clone(),
-                                    _ => Type::Integer
-                                };
-                                manager.symbol_table.insert_new_symbol(&var_name, vartype);
+                    let mut code: Vec<ZOP> = vec![];
+                    if t.childs.len() != 1 {
+                        return vec![];
+                    }
+                    let expression_node = &t.childs[0].as_default();
+                    let result = match expression_node.category {
+                        TokExpression => {
+                            if expression_node.childs.len() != 1 {
+                                panic!("Unsupported expression!")
                             }
-                            let symbol_id = manager.symbol_table.get_symbol_id(var_name);
-                            code.push(ZOP::StoreVariable{variable: symbol_id, value: result});
-                            code
-                        } else {
-                            debug!("Assign Expression currently not supported.");
-                            vec![]
-                        }
-                    } else { vec![] }
+                            evaluate_expression(&expression_node.childs[0], &mut code, manager, &mut out)
+                        }, _ => panic!("Unsupported expression!")
+                    };
+                    if !manager.symbol_table.is_known_symbol(var_name) {
+                        let vartype = match result {
+                            Operand::StringRef(_) => Type::String,
+                            Operand::Var(ref var) => var.vartype.clone(),
+                            _ => Type::Integer
+                        };
+                        manager.symbol_table.insert_new_symbol(&var_name, vartype);
+                    }
+                    let symbol_id = manager.symbol_table.get_symbol_id(var_name);
+                    match &**op_name {
+                        "=" | "to" => code.push(ZOP::StoreVariable{variable: symbol_id, value: result}),
+                        "+=" => code.push(ZOP::Add{operand1: Operand::new_var(symbol_id.id), operand2: result, save_variable: symbol_id}),
+                        "-=" => code.push(ZOP::Sub{operand1: Operand::new_var(symbol_id.id), operand2: result, save_variable: symbol_id}),
+                        "*=" => code.push(ZOP::Mul{operand1: Operand::new_var(symbol_id.id), operand2: result, save_variable: symbol_id}),
+                        "/=" => code.push(ZOP::Div{operand1: Operand::new_var(symbol_id.id), operand2: result, save_variable: symbol_id}),
+                        _ => {}
+                    };
+                    code
                 },
                 &TokMacroIf { .. } => {
                     if t.childs.len() < 2 {
