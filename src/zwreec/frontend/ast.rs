@@ -304,10 +304,10 @@ impl ASTNode {
         } else {
             match self {
                 &ASTNode::Default(ref node) => {
-                    token.is_same_token(&node.category)
+                    token == node.category
                 },
                 &ASTNode::Passage(ref node) => {
-                    token.is_same_token(&node.category)
+                    token == node.category
                 },
             }
         }
@@ -426,7 +426,8 @@ mod tests {
         for item in expected.iter() {
             let b = ast.is_specific_token(item.1.clone(), item.0.to_vec());
             if b == false {
-                ast.print(true);
+                //ast.print(true);
+                println!("FAILED WITH TOKEN {:?} at {:?}", item.0, item.1);
             }
             assert!(ast.is_specific_token(item.1.clone(), item.0.to_vec()));
         }
@@ -437,13 +438,13 @@ mod tests {
         let ast = test_ast("::Start\nTestText\nTestNextLine\n::NextPassage\nOtherText");
 
         let expected = vec!(
-            (vec![0]  , TokPassage {location: (0, 0), name: "Start".to_string()}),
-            (vec![0,0], TokText {location: (0, 0), text: "TestText".to_string()}),
-            (vec![0,1], TokNewLine {location: (0, 0)} ),
-            (vec![0,2], TokText {location: (0, 0), text: "nTestNextLine".to_string()}),
-            (vec![0,1], TokNewLine {location: (0, 0)}),
-            (vec![1]  , TokPassage {location: (0, 0), name: "NextPassage".to_string()}),
-            (vec![1,0], TokText {location: (0, 0), text: "OtherText".to_string()}),
+            (vec![0]  , TokPassage {location: (1, 3), name: "Start".to_string()}),
+            (vec![0,0], TokText {location: (2, 1), text: "TestText".to_string()}),
+            (vec![0,1], TokNewLine {location: (2, 9)} ),
+            (vec![0,2], TokText {location: (3, 1), text: "TestNextLine".to_string()}),
+            (vec![0,3], TokNewLine {location: (3, 13)}),
+            (vec![1]  , TokPassage {location: (4, 3), name: "NextPassage".to_string()}),
+            (vec![1,0], TokText {location: (5, 1), text: "OtherText".to_string()}),
 
         );
 
