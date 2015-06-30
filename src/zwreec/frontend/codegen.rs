@@ -171,7 +171,7 @@ pub fn gen_zcode<'a>(node: &'a ASTNode, mut out: &mut Zfile, mut manager: &mut C
                     let if_label = format!("if_{}", if_id);
                     let after_if_label = format!("after_if_{}", if_id);
                     let after_else_label = format!("after_else_{}", if_id);
-                    code.push(ZOP::JG{operand1: result, operand2: Operand::new_const(0), jump_to_label: if_label.to_string()});
+                    code.push(ZOP::JNE{operand1: result, operand2: Operand::new_const(0), jump_to_label: if_label.to_string()});
                     code.push(ZOP::Jump{jump_to_label: after_if_label.to_string()});
                     code.push(ZOP::Label{name: if_label.to_string()});
 
@@ -206,7 +206,7 @@ pub fn gen_zcode<'a>(node: &'a ASTNode, mut out: &mut Zfile, mut manager: &mut C
                     let if_label = format!("if_{}", if_id);
                     let after_if_label = format!("after_if_{}", manager.ids_if.pop_id());
                     let after_else_label = format!("after_else_{}", manager.ids_if.peek());
-                    code.push(ZOP::JG{operand1: result, operand2: Operand::new_const(0), jump_to_label: if_label.to_string()});
+                    code.push(ZOP::JNE{operand1: result, operand2: Operand::new_const(0), jump_to_label: if_label.to_string()});
                     code.push(ZOP::Jump{jump_to_label: after_if_label.to_string()});
                     code.push(ZOP::Label{name: if_label.to_string()});
 
