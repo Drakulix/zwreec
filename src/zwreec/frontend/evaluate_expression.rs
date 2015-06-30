@@ -286,7 +286,7 @@ fn eval_not<'a>(eval: &Operand, code: &mut Vec<ZOP>,
         temp_ids: &mut Vec<u8>, mut manager: &mut CodeGenManager<'a>) -> Operand {
     if eval.is_const() {
         let val = eval.const_value();
-        let result: u8 = if val > 0 { 0 } else { 1 };
+        let result: u8 = if val != 0 { 0 } else { 1 };
         return Operand::Const(Constant { value: result });
     }
     let save_var: Variable = match temp_ids.pop() {
@@ -295,7 +295,7 @@ fn eval_not<'a>(eval: &Operand, code: &mut Vec<ZOP>,
     };
     let label = format!("expr_{}", manager.ids_expr.start_next());
     code.push(ZOP::StoreVariable{ variable: save_var.clone(), value: Operand::new_const(0)});
-    code.push(ZOP::JG{operand1: eval.clone(), operand2: Operand::new_const(0), jump_to_label: label.to_string()});
+    code.push(ZOP::JNE{operand1: eval.clone(), operand2: Operand::new_const(0), jump_to_label: label.to_string()});
     code.push(ZOP::StoreVariable{ variable: save_var.clone(), value: Operand::new_const(1)});
     code.push(ZOP::Label {name: label.to_string()});
     free_var_if_temp(eval, temp_ids);
