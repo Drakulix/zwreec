@@ -719,8 +719,11 @@ impl Zfile {
     }
 
 
-    /// checks all stored links and make them choiceable
-    /// with the keyboard
+    /// checks all stored links and make them choiceable with the keyboard
+    /// the routine checks if there are if there are < 10 links or more:
+    /// if < 10: key 1-9 are supported, jumps immediately
+    /// if >=10: 99 links are supported, on the first position is no 0 allowed
+    ///          to jump to a < 10 link you have to press enter
     pub fn routine_check_links(&mut self) {
         let save_at_addr: u16 = 1 + self.object_addr;
         self.emit(vec![
