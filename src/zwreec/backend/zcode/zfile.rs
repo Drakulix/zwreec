@@ -741,7 +741,6 @@ impl Zfile {
 
             // detect keys for <9 links
             ZOP::Label{name: "system_check_links_loop".to_string()},
-            ZOP::Print{text: "DETECT < 9".to_string()},
             ZOP::ReadChar{local_var_id: 0x01},
             // check for the start of the konami code
             ZOP::JE{operand1: Operand::new_var(0x01), operand2: Operand::new_const(129), jump_to_label: "system_check_links_jmp".to_string()},
@@ -751,14 +750,6 @@ impl Zfile {
 
             ZOP::Label{name: "system_check_links_after".to_string()},
             ZOP::Sub{operand1: Operand::new_var(1), operand2: Operand::new_const(48), save_variable: Variable::new(1)},
-
-            // temp
-            /*ZOP::PrintNumVar{variable: Variable::new(1)},
-            ZOP::Newline,
-            ZOP::PrintNumVar{variable: Variable::new(16)},
-            ZOP::Newline,*/
-
-            // check if the number is possible
             // check if the the detected key is > numbers of links
             // => "wrong key => jump before key-detection
             ZOP::JG{operand1: Operand::new_var(1), operand2: Operand::new_var(16), jump_to_label: "system_check_links_loop".to_string()},
@@ -771,13 +762,11 @@ impl Zfile {
 
             // detect keys for >9 links
             ZOP::Label{name: "system_check_links_more_than_9".to_string()},
-            ZOP::Print{text: ">9 links".to_string()},
             // detect frst position
             ZOP::ReadChar{local_var_id: 1},
             ZOP::Sub{operand1: Operand::new_var(1), operand2: Operand::new_const(48), save_variable: Variable::new(1)},
             ZOP::PrintNumVar{variable: Variable::new(1)},
 
-            // check if the number is possible
             // check if the the detected key is > 9
             ZOP::JG{operand1: Operand::new_var(1), operand2: Operand::new_const(9), jump_to_label: "system_check_links_error".to_string()},
             // check if key < 1, 0 is not valid
@@ -800,20 +789,9 @@ impl Zfile {
             // first position, so multiply with 10
             ZOP::Mul{operand1: Operand::new_var(1), operand2: Operand::new_const(10), save_variable: Variable::new(3)},
             ZOP::Add{operand1: Operand::new_var(3), operand2: Operand::new_var(2), save_variable: Variable::new(3)},
-            ZOP::Newline,
-            ZOP::PrintNumVar{variable: Variable::new(3)},
-            ZOP::Print{text: "_".to_string()},
-            ZOP::PrintNumVar{variable: Variable::new(16)},
-            ZOP::Newline,
             // check if the the calculated number > number of link
             ZOP::JG{operand1: Operand::new_var(3), operand2: Operand::new_var(16), jump_to_label: "system_check_links_error".to_string()},
 
-
-            // detect return
-            //ZOP::ReadChar{local_var_id: 3},
-
-            // check if the last key is an enter => jump to load address
-            //ZOP::JE{operand1: Operand::new_var(3), operand2: Operand::new_const(13), jump_to_label: "system_check_links_error".to_string()},
             ZOP::Jump{jump_to_label: "system_check_links_load_link_address".to_string()},
             // error
             ZOP::Label{name: "system_check_links_error".to_string()},
@@ -823,7 +801,6 @@ impl Zfile {
 
             // loads the address of the link from the array
             ZOP::Label{name: "system_check_links_load_link_address".to_string()},
-            ZOP::Print{text: "LOAD ADDRESS".to_string()},
             // decrement 0x03 becouse the array starts at 0 and not at 1
             ZOP::Dec{variable: 3},
             ZOP::LoadW{array_address: Operand::new_large_const(save_at_addr as i16), index: Variable::new(3), variable: Variable::new(2)},
