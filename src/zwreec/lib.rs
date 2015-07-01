@@ -150,7 +150,7 @@ pub fn compile<R: Read, W: Write>(cfg: Config, input: &mut R, output: &mut W) {
     let ast = ast_builder.build(parser.parse(tokens.inspect(|ref token| {
         debug!("{:?}", token);
     })));
-    ast.print(false);
+    debug!("{:?}", ast);
 
     // create code
     frontend::codegen::generate_zcode(&cfg, ast, output);

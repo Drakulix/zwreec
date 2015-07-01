@@ -1,6 +1,6 @@
 //! The `codegen` module is for the creating of zcode from an ast
 
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::error::Error;
 use std::io::Write;
 
@@ -9,15 +9,29 @@ use config::Config;
 use frontend::ast;
 use frontend::ast::ASTNode;
 use frontend::evaluate_expression::evaluate_expression;
+use frontend::lexer::Token;
 use frontend::lexer::Token::*;
 
+#[derive(Debug)]
+pub enum CodeGenError {
+    CouldNotWriteToOutput { why: String },
+    InvalidAST,
+    NoMatch { token: Token },
+    NoStartPassage,
+    PassageDoesNotExist { name: String, token: Token },
+    UnsupportedExpression { token: Token },
+    UnsupportedIfExpression { token: Token },
+    UnsupportedElseIfExpression { token: Token },
+    UnsupportedExpressionType { name: String },
+    UnsupportedLongExpression { name: String, token: Token },
+}
 
 pub fn generate_zcode<W: Write>(cfg: &Config, ast: ast::AST, output: &mut W) {
     let mut codegenerator = Codegen::new(cfg, ast);
     codegenerator.start_codegen();
     match output.write_all(&(*codegenerator.zfile_bytes())) {
         Err(why) => {
-            panic!("Could not write to output: {}", Error::description(&why));
+            error_panic!(cfg => CodeGenError::CouldNotWriteToOutput { why: Error::description(&why).to_string() } );
         },
         Ok(_) => {
             info!("Wrote zcode to output");
@@ -46,7 +60,7 @@ impl<'a> Codegen<'a> {
         //self.zfile.op_quit();
         //self.zfile.routine("main", 0);
 
-        self.ast.to_zcode(&mut self.zfile);
+        self.ast_to_zcode();
         
         self.zfile.op_quit();
 
@@ -56,6 +70,26 @@ impl<'a> Codegen<'a> {
     pub fn zfile_bytes(&self) -> &Vec<u8> {
         &self.zfile.data.bytes
     }
+
+    /// convert ast to zcode
+    pub fn ast_to_zcode(&mut self) {
+        let mut manager = CodeGenManager::new(self.cfg);
+
+        // adds a vec of passagenames to the manager
+        manager.passages = self.ast.passage_nodes_to_string();
+
+        // Insert temp variables for internal calculations
+        manager.symbol_table.insert_new_symbol("int0", Type::Integer);
+
+        let mut code: Vec<ZOP> = vec![];
+        for child in &self.ast.passages {
+            for instr in gen_zcode(child, &mut self.zfile, &mut manager) {
+                code.push(instr);
+            }
+        }
+
+        self.zfile.emit(code);
+    }
 }
 
 
@@ -63,6 +97,12 @@ impl<'a> Codegen<'a> {
 pub fn gen_zcode<'a>(node: &'a ASTNode, mut out: &mut Zfile, mut manager: &mut CodeGenManager<'a>) -> Vec<ZOP> {
     let mut state_copy = manager.format_state.clone();
     let mut set_formatting = false;
+    let cfg = manager.cfg;
+
+    // Check for start passage. If it does not exist abort.
+    if !manager.passages.contains(&"Start".to_string()) {
+        error_force_panic!(CodeGenError::NoStartPassage);
+    }
     
     match node {
         &ASTNode::Passage(ref node) => {
@@ -72,7 +112,7 @@ pub fn gen_zcode<'a>(node: &'a ASTNode, mut out: &mut Zfile, mut manager: &mut C
                     code.push(ZOP::Routine{name: name.to_string(), count_variables: 15});
                 },
                 _ => {
-                    debug!("no match 1");
+                    error_panic!(cfg => CodeGenError::InvalidAST);
                 }
             };
 
@@ -112,14 +152,20 @@ pub fn gen_zcode<'a>(node: &'a ASTNode, mut out: &mut Zfile, mut manager: &mut C
                 },
                 &TokPassageLink {ref display_name, ref passage_name, .. } => {
                     set_formatting = true;
-                    vec![
-                    ZOP::Call2NWithAddress{jump_to_label: "system_add_link".to_string(), address: passage_name.to_string()},
-                    ZOP::SetColor{foreground: 8, background: 2},
-                    ZOP::Print{text: format!("{}[", display_name)},
-                    ZOP::PrintNumVar{variable: Variable::new(16)},
-                    ZOP::Print{text: "]".to_string()},
-                    ZOP::SetColor{foreground: 9, background: 2},
-                    ]
+
+                    if manager.passages.contains(passage_name) {
+                        vec![
+                        ZOP::Call2NWithAddress{jump_to_label: "system_add_link".to_string(), address: passage_name.to_string()},
+                        ZOP::SetColor{foreground: 8, background: 2},
+                        ZOP::Print{text: format!("{}[", display_name)},
+                        ZOP::PrintNumVar{variable: Variable::new(16)},
+                        ZOP::Print{text: "]".to_string()},
+                        ZOP::SetColor{foreground: 9, background: 2},
+                        ]
+                    } else {
+                        error_panic!(cfg => CodeGenError::PassageDoesNotExist { name: passage_name.clone(), token: t.category.clone() });
+                        vec![]
+                    }
                 },
                 &TokAssign {ref var_name, ref op_name, .. } => {
                     let mut code: Vec<ZOP> = vec![];
@@ -130,10 +176,10 @@ pub fn gen_zcode<'a>(node: &'a ASTNode, mut out: &mut Zfile, mut manager: &mut C
                     let result = match expression_node.category {
                         TokExpression => {
                             if expression_node.childs.len() != 1 {
-                                panic!("Unsupported expression!")
+                                error_panic!(cfg => CodeGenError::UnsupportedExpression { token: expression_node.category.clone() } );
                             }
                             evaluate_expression(&expression_node.childs[0], &mut code, manager, &mut out)
-                        }, _ => panic!("Unsupported expression!")
+                        }, _ => error_force_panic!(CodeGenError::UnsupportedExpression { token: expression_node.category.clone() } )
                     };
                     if !manager.symbol_table.is_known_symbol(var_name) {
                         let vartype = match result {
@@ -156,13 +202,15 @@ pub fn gen_zcode<'a>(node: &'a ASTNode, mut out: &mut Zfile, mut manager: &mut C
                 },
                 &TokMacroIf { .. } => {
                     if t.childs.len() < 2 {
-                        panic!("Unsupported if-expression!");
+                        error_panic!(cfg => CodeGenError::UnsupportedIfExpression { token: t.category.clone() } );
                     }
 
                     // check if the first node is an expression node
                     let expression_node = match t.childs[0].as_default().category {
                         TokExpression => t.childs[0].as_default(),
-                        _ =>  panic!("Unsupported if-expression!")
+                        _ =>  {
+                            error_force_panic!(CodeGenError::UnsupportedIfExpression { token: t.category.clone() } );
+                        }
                     };
 
                     let mut code: Vec<ZOP> = vec![];
@@ -190,7 +238,7 @@ pub fn gen_zcode<'a>(node: &'a ASTNode, mut out: &mut Zfile, mut manager: &mut C
                 },
                 &TokMacroElseIf { .. } => {
                     if t.childs.len() < 2 {
-                        panic!("Unsupported elseif-expression!");
+                        error_panic!(cfg => CodeGenError::UnsupportedElseIfExpression { token: t.category.clone() } );
                     }
 
                     let mut code: Vec<ZOP> = vec![];
@@ -198,7 +246,9 @@ pub fn gen_zcode<'a>(node: &'a ASTNode, mut out: &mut Zfile, mut manager: &mut C
                     // check if the first node is an expression node
                     let expression_node = match t.childs[0].as_default().category {
                         TokExpression => t.childs[0].as_default(),
-                        _ =>  panic!("Unsupported elseif-expression!")
+                        _ => {
+                            error_force_panic!(CodeGenError::UnsupportedElseIfExpression { token: t.category.clone() } );
+                        }
                     };
 
                     // Evaluate the contained expression
@@ -239,18 +289,26 @@ pub fn gen_zcode<'a>(node: &'a ASTNode, mut out: &mut Zfile, mut manager: &mut C
 
                 &TokMacroDisplay {ref passage_name, .. } => {
                     let var = Variable::new(17);
-                    vec![
-                    // activates the display-modus
-                    ZOP::StoreVariable{variable: var.clone(), value: Operand::new_const(1)},
-                    ZOP::Call1N{jump_to_label: passage_name.to_string()},
 
-                    // deactivates the display-modus
-                    ZOP::StoreVariable{variable: var.clone(), value: Operand::new_const(0)},
-                    ]
+                    // Check if the passage exists
+                    if manager.passages.contains(passage_name) {
+                        vec![
+                        // activates the display-mode
+                        ZOP::StoreVariable{variable: var.clone(), value: Operand::new_const(1)},
+                        ZOP::Call1N{jump_to_label: passage_name.to_string()},
+
+                        // deactivates the display-mode
+                        ZOP::StoreVariable{variable: var.clone(), value: Operand::new_const(0)},
+                        ]
+                    } else {
+                        error_panic!(cfg => CodeGenError::PassageDoesNotExist { name: passage_name.clone(), token: t.category.clone() });
+                        vec![]
+                    }
+
                 },
                 &TokMacroPrint { .. } => {
                     if t.childs.len() != 1 {
-                        panic!("Doesn't support print with 0 or more than one argument");
+                        error_force_panic!(CodeGenError::UnsupportedLongExpression { name: "print".to_string(), token: t.category.clone() });
                     }
 
                     let mut code: Vec<ZOP> = vec![];
@@ -268,7 +326,7 @@ pub fn gen_zcode<'a>(node: &'a ASTNode, mut out: &mut Zfile, mut manager: &mut C
                             };
                         },
                         _ => {
-                            panic!("Unsupported Expression");
+                            error_panic!(cfg => CodeGenError::UnsupportedExpression { token: child.category.clone() } );
                         }
                     };
                     code
@@ -288,7 +346,7 @@ pub fn gen_zcode<'a>(node: &'a ASTNode, mut out: &mut Zfile, mut manager: &mut C
                     }
                 },
                 _ => {
-                    debug!("no match if");
+                    error_panic!(cfg => CodeGenError::NoMatch { token: t.category.clone() } );
                     vec![]
                 },
             };
@@ -352,9 +410,10 @@ pub fn function_random(arg_from: &Operand, arg_to: &Operand,
 }
 
 pub struct CodeGenManager<'a> {
+    pub cfg: &'a Config,
     pub ids_if: IdentifierProvider,
     pub ids_expr: IdentifierProvider,
-    pub passages: Vec<String>,
+    pub passages: HashSet<String>,
     pub symbol_table: SymbolTable<'a>,
     pub format_state: FormattingState
 }
@@ -370,11 +429,12 @@ pub struct SymbolTable<'a> {
 }
 
 impl <'a> CodeGenManager<'a> {
-    pub fn new() -> CodeGenManager<'a> {
+    pub fn new(cfg: &'a Config) -> CodeGenManager<'a> {
         CodeGenManager {
+            cfg: cfg,
             ids_if: IdentifierProvider::new(),
             ids_expr: IdentifierProvider::new(),
-            passages: Vec::new(),
+            passages: HashSet::new(),
             symbol_table: SymbolTable::new(),
             format_state: FormattingState {bold: false, italic: false, mono: false, inverted: false},
         }

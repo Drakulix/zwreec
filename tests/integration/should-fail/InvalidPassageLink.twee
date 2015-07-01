@@ -1,0 +1,6 @@
+::Start
+Should work: <<display Passage1>>
+Should fail: <<display Passage2>>
+
+::Passage1
+Test
