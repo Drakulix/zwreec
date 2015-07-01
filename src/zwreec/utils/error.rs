@@ -3,14 +3,26 @@ use std::fmt::{Display, Formatter, Result, Write};
 use frontend::lexer::Token;
 use frontend::parser::ParserError;
 use frontend::expressionparser::ExpressionParserError;
+use frontend::codegen::CodeGenError;
 
 macro_rules! error_panic(
     ($cfg:expr => $($arg:tt)+) => (
         {
-            error!("{}", $($arg)*);
             if !$cfg.force {
-                panic!()
+                error!("{}", $($arg)*);
+                panic!("Config is set to panic at any error. Try setting the --force flag to ignore this and other errors.")
+            } else {
+                warn!("{}", $($arg)*);
             }
+        }
+    )
+);
+
+macro_rules! error_force_panic(
+    ($($arg:tt)+) => (
+        {
+            error!("{}", $($arg)*);
+            panic!("Can't continue. This error is not recoverable and not ignorable through --force.");
         }
     )
 );
@@ -27,7 +39,7 @@ impl Display for Token {
 
 impl Display for ParserError {
     fn fmt(&self, f: &mut Formatter) -> Result {
-        try!(f.write_str("[!!!] Critical Parser Error [!!!]\n"));
+        try!(f.write_str("[!!!] Critical Parser Error\n[!!!] "));
         match self {
             &ParserError::TokenDoNotMatch{ref token, ref stack} =>
                 match token {
@@ -44,7 +56,7 @@ impl Display for ParserError {
 
 impl Display for ExpressionParserError {
     fn fmt(&self, f: &mut Formatter) -> Result {
-        try!(f.write_str("[!!!] Critical Expression Parser Error [!!!]\n"));
+        try!(f.write_str("[!!!] Critical Expression Parser Error\n[!!!] "));
         match self {
             &ExpressionParserError::OperStackIsEmpty => {
                 try!(f.write_str("No token in the operators stack."))
@@ -66,6 +78,45 @@ impl Display for ExpressionParserError {
             },
             &ExpressionParserError::NotImplementedOperator { ref op } => {
                 try!(f.write_fmt(format_args!("This operator is not implemented: '{}'", op)))
+            }
+        };
+        Ok(())
+    }
+}
+
+impl Display for CodeGenError {
+    fn fmt(&self, f: &mut Formatter) -> Result {
+        try!(f.write_str("[!!!] Critical Codegen Error:\n[!!!] "));
+        match self {
+            &CodeGenError::CouldNotWriteToOutput { ref why } => {
+                try!(f.write_fmt(format_args!("Could not write to output: {}", why)))
+            },
+            &CodeGenError::UnsupportedExpression { ref token } => {
+                try!(f.write_fmt(format_args!("Unsupported expression at {}:{}", token.location().0, token.location().1)))
+            },
+            &CodeGenError::UnsupportedIfExpression { ref token } => {
+                try!(f.write_fmt(format_args!("Unsupported if-expression at {}:{}", token.location().0, token.location().1)))
+            },
+            &CodeGenError::UnsupportedElseIfExpression { ref token } => {
+                try!(f.write_fmt(format_args!("Unsupported else-if-expression at {}:{}", token.location().0, token.location().1)))
+            },
+            &CodeGenError::UnsupportedExpressionType { ref name } => {
+                try!(f.write_fmt(format_args!("This expression type is not supported right now: {}", name)))
+            },
+            &CodeGenError::UnsupportedLongExpression { ref name, ref token } => {
+                try!(f.write_fmt(format_args!("Error at {}:{}: {} does not support any kind of expression, only variables or constants.", token.location().0, token.location().1, name)))
+            },
+            &CodeGenError::NoMatch { ref token } => {
+                try!(f.write_fmt(format_args!("Can't find any AST operation for token: {}", token)))
+            },
+            &CodeGenError::PassageDoesNotExist { ref name, ref token } => {
+                try!(f.write_fmt(format_args!("Referenced passage '{}' at {}:{} but the passage does not exist", name, token.location().0, token.location().1)))
+            },
+            &CodeGenError::InvalidAST => {
+                try!(f.write_str("Internal error: Unexpected AST node. This should not happen."))
+            },
+            &CodeGenError::NoStartPassage => {
+                try!(f.write_str("Start passage does not exist or can not be found. Every Twee file needs a passage with the name 'Start'."))
             }
         };
         Ok(())

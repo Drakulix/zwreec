@@ -2,11 +2,9 @@
 //! to create and walk through the ast (abstract syntaxtree)
 
 use std::fmt::{Debug, Display, Formatter, Result, Write};
+use std::collections::HashSet;
 
 use config::Config;
-use backend::zcode::zfile;
-use backend::zcode::zfile::{ZOP, Type};
-use frontend::codegen;
 use frontend::expressionparser;
 use frontend::lexer::Token;
 use frontend::lexer::Token::{TokMacroIf, TokMacroElseIf, TokExpression, TokPassage};
@@ -22,7 +20,7 @@ pub struct ASTBuilder<'a> {
 }
 
 pub struct AST {
-    passages: Vec<ASTNode>,
+    pub passages: Vec<ASTNode>,
 }
 
 pub enum ASTOperation {
@@ -151,39 +149,6 @@ impl<'a> ASTBuilder<'a> {
 }
 
 impl AST {
-    /// convert ast to zcode
-    pub fn to_zcode(&self, out: &mut zfile::Zfile) {
-        let mut manager = codegen::CodeGenManager::new();
-
-        // adds a vec of passagenames to the manager
-        manager.passages = self.passage_nodes_to_string();
-
-        // Insert temp variables for internal calculations
-        manager.symbol_table.insert_new_symbol("int0", Type::Integer);
-
-        let mut code: Vec<ZOP> = vec![];
-        for child in &self.passages {
-            for instr in codegen::gen_zcode(child, out, &mut manager) {
-                code.push(instr);
-            }
-        }
-        out.emit(code);
-    }
-
-    /// prints the tree
-    pub fn print(&self, force_print: bool) {
-        if force_print {
-            println!("Abstract Syntax Tree: ");
-        } else {
-            debug!("Abstract Syntax Tree: ");
-        }
-
-        for child in &self.passages {
-            child.print(force_print);
-        }
-        debug!("");
-    }
-
     /// counts the childs of the path in the asts
     pub fn count_childs(&self, path: Vec<usize>) -> usize {
         if let Some(index) = path.first() {
@@ -208,12 +173,13 @@ impl AST {
         }
     }
 
-    fn passage_nodes_to_string(&self) -> Vec<String> {
-        let mut passages: Vec<String> = Vec::new();
+    /// cycle through all passages an returns a vector with all passage-titles
+    pub fn passage_nodes_to_string(&self) -> HashSet<String> {
+        let mut passages: HashSet<String> = HashSet::with_capacity(self.passages.len());
         for child in &self.passages {
             match child.category() {
                 TokPassage {ref name, .. } => {
-                    passages.push(name.clone());
+                    passages.insert(name.clone());
                 }
                 _ => ()
             }
