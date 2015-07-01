@@ -4,6 +4,7 @@ use frontend::lexer::Token;
 use frontend::parser::ParserError;
 use frontend::expressionparser::ExpressionParserError;
 use frontend::codegen::CodeGenError;
+use frontend::evaluate_expression::EvaluateExpressionError;
 
 macro_rules! error_panic(
     ($cfg:expr => $($arg:tt)+) => (
@@ -113,12 +114,59 @@ impl Display for CodeGenError {
                 try!(f.write_fmt(format_args!("Referenced passage '{}' at {}:{} but the passage does not exist", name, token.location().0, token.location().1)))
             },
             &CodeGenError::InvalidAST => {
-                try!(f.write_str("Internal error: Unexpected AST node. This should not happen."))
+                try!(f.write_str("Internal error: Unexpected AST node. This should not happen. Report a bug please."))
             },
             &CodeGenError::NoStartPassage => {
                 try!(f.write_str("Start passage does not exist or can not be found. Every Twee file needs a passage with the name 'Start'."))
+            },
+            &CodeGenError::IdentifierStackEmpty => {
+                try!(f.write_str("Identifier stack is empty. Operation wasn't possible."))
+            },
+            &CodeGenError::SymbolMapEmpty => {
+                try!(f.write_str("Symbol map is empty. Operation wasn't possible."))
+            },
+            &CodeGenError::CouldNotFindSymbolId => {
+                try!(f.write_str("Could not find symbol ID in symbol table. Report a bug."))
             }
         };
         Ok(())
     }
 }
+
+impl Display for EvaluateExpressionError {
+    fn fmt(&self, f: &mut Formatter) -> Result {
+        try!(f.write_str("[!!!] Critical Error while evaluating expression:\n[!!!] "));
+        match self {
+            &EvaluateExpressionError::NumericOperatorNeedsTwoArguments { ref op_name, location: (line, ch) } => {
+                try!(f.write_fmt(format_args!("Numeric Operator '{}' at {}:{} needs two arguments", op_name, line, ch)))
+            },
+            &EvaluateExpressionError::UnsupportedOperator { ref op_name, location: (line, ch) } => {
+                try!(f.write_fmt(format_args!("Operator '{}' at {}:{} is not supported right now", op_name, line, ch)))
+            },
+            &EvaluateExpressionError::UnsupportedFunctionArgsLen { ref name, location: (line, ch), expected } => {
+                try!(f.write_fmt(format_args!("Function '{}' at {}:{} can only take {} arguments", name, line, ch, expected)))
+            },
+            &EvaluateExpressionError::UnsupportedFunctionArgType { ref name, index, location: (line, ch) } => {
+                try!(f.write_fmt(format_args!("Function '{}' at {}:{}: Unsupported argument type at argument #{}", name, line, ch, index)))
+            }
+            &EvaluateExpressionError::InvalidAST => {
+                try!(f.write_str("Internal error: Unsupported AST node. This should not happen. Report a bug please."));
+            },
+            &EvaluateExpressionError::UnsupportedFunction { ref name, location: (line, ch) } => {
+                try!(f.write_fmt(format_args!("Function '{}' at {}:{} is not supported right now", name, line, ch)))
+            },
+            &EvaluateExpressionError::NoTempIdLeftOnStack => {
+                try!(f.write_str("No temporary identifier left on the stack. Expression is too long."))
+            },
+            &EvaluateExpressionError::UnhandledToken { ref token } => {
+                try!(f.write_fmt(format_args!("Unhandled token in expression: {:?}", token)))
+            }
+        };
+        Ok(())
+    }
+}
+
+
+
+
+
