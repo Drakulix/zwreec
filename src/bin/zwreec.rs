@@ -216,7 +216,7 @@ fn parse_output(matches: &getopts::Matches) -> Option<Box<Write>> {
                        path.display());
                 return None;
             } else {
-                warn!("Output file {} already exists", path.display());
+                warn!("Overwriting output file {}", path.display());
             }
         }
 
