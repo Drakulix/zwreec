@@ -7,7 +7,7 @@ use frontend::codegen;
 use frontend::codegen::{CodeGenManager};
 use frontend::lexer::Token;
 use frontend::lexer::Token::{TokNumOp, TokCompOp, TokLogOp, TokInt, TokBoolean, TokVariable, TokFunction, TokString, TokUnaryMinus};
-use config::Config;
+#[allow(unused_imports)] use config::Config;
 
 #[derive(Debug)]
 pub enum EvaluateExpressionError {
