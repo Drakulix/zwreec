@@ -451,7 +451,7 @@ impl <'a> SymbolTable<'a> {
             return temp.0.clone()
         }
 
-        panic!{"symbol_map is empty, get_symbol_id wasn't possible."}
+        panic!{"symbol_map is empty, get_symbol_id with the symbol '{:?}' wasn't possible.", symbol}
     }
 
     pub fn get_symbol_type(&self, symbol: &str) -> Type {
@@ -459,7 +459,7 @@ impl <'a> SymbolTable<'a> {
             return temp.1.clone()
         }
 
-        panic!{"symbol_map is empty, get get_symbol_type wasn't possible."}
+        panic!{"symbol_map is empty, get get_symbol_type with the symbol '{:?}' wasn't possible.", symbol}
     }
 
     pub fn has_var_id(&self, id: u8) -> bool {
@@ -469,7 +469,7 @@ impl <'a> SymbolTable<'a> {
                     return true;
                 }
             } else {
-                panic!{"symbol_map is empty, has_var_id wasn't possible."}
+                panic!{"symbol_map is empty, has_var_id with the id '{:?}' wasn't possible.", id}
             }
         }
         false
