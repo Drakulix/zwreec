@@ -737,7 +737,7 @@ impl Zfile {
             ZOP::SetTextStyle{bold: false, reverse: false, monospace: true, italic: false},
             ZOP::Print{text: "---------------------------------------".to_string()},
             ZOP::Newline,
-            ZOP::Print{text: "Please press a number to select a link:".to_string()},
+            ZOP::Print{text: "Please press a number to select a link (end with Q):".to_string()},
             ZOP::Newline,
 
             // check if there are more than 9 links
@@ -746,6 +746,8 @@ impl Zfile {
             // detect keys for <9 links
             ZOP::Label{name: "system_check_links_loop".to_string()},
             ZOP::ReadChar{local_var_id: 0x01},
+            // Quit programme on Q
+            ZOP::JE{operand1: Operand::new_var(0x01), operand2: Operand::new_const(81), jump_to_label: "system_check_links_end_quit".to_string()},
             // check for the start of the konami code
             ZOP::JE{operand1: Operand::new_var(0x01), operand2: Operand::new_const(129), jump_to_label: "system_check_links_jmp".to_string()},
             ZOP::Jump{jump_to_label: "system_check_links_after".to_string()},
@@ -768,6 +770,8 @@ impl Zfile {
             ZOP::Label{name: "system_check_links_more_than_9".to_string()},
             // detect frst position
             ZOP::ReadChar{local_var_id: 1},
+            // Quit programme on Q
+            ZOP::JE{operand1: Operand::new_var(0x01), operand2: Operand::new_const(81), jump_to_label: "system_check_links_end_quit".to_string()},
             ZOP::Sub{operand1: Operand::new_var(1), operand2: Operand::new_const(48), save_variable: Variable::new(1)},
             ZOP::PrintNumVar{variable: Variable::new(1)},
 
