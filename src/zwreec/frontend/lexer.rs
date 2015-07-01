@@ -683,4 +683,50 @@ mod tests {
 
         assert_tok_eq(expected, tokens);
     }
+
+    #[test]
+    fn html_filter_test() {
+        let tokens = test_lex("Text\n\n::Start\n<!DOCTYPE html>\n<html lang=\"de\">\n\n<head>\n  <meta charset=\"UTF-8\"/>\n  <title>Example</title>\n  <img src=\"smiley.gif\" alt=\"Smiley face\" height=\"42\" width=\"42\">\n  <style type=\"text/css\">\n    <a href=\"http://www.w3schools.com\">Visit W3Schools.com!</a>\n  </style>\n\n</head>\n<body>\n\n</body>\n</html>\n\n::Passage1 [stylesheet]\ntext shouldn't be displayed\n\n::Passage2\ntext <html><b>should</b></html> be displayed\n\n::Passage3 [script]\ntext shouldn't be displayed\n");
+        let expected = vec![
+            TokPassage {name: "Start".to_string(), location: (3, 3)},
+            TokNewLine { location: (4, 16) },
+            TokNewLine { location: (5, 17) },
+            TokNewLine { location: (6, 1) },
+            TokNewLine { location: (7, 7) },
+            TokText { location: (8, 1), text: "  ".to_string() },
+            TokNewLine { location: (8, 26) },
+            TokText { location: (9, 1), text: "  Example".to_string() },
+            TokNewLine { location: (9, 25) },
+            TokText { location: (10, 1), text: "  ".to_string() },
+            TokNewLine { location: (10, 66) },
+            TokText { location: (11, 1), text: "  ".to_string() },
+            TokNewLine { location: (11, 26) },
+            TokText { location: (12, 1), text: "    Visit W3Schools.com!".to_string() },
+            TokNewLine { location: (12, 64) },
+            TokText { location: (13, 1), text: "  ".to_string() },
+            TokNewLine { location: (13, 11) },
+            TokNewLine { location: (14, 1) },
+            TokNewLine { location: (15, 8) },
+            TokNewLine { location: (16, 7) },
+            TokNewLine { location: (17, 1) },
+            TokNewLine { location: (18, 8) },
+            TokNewLine { location: (19, 8) },
+            TokNewLine { location: (20, 1) },
+            TokPassage { location: (21, 3), name: "Passage1".to_string() },
+            TokTagStart { location: (21, 12) },
+            TokTag { location: (21, 13), tag_name: "stylesheet".to_string() },
+            TokTagEnd { location: (21, 23) },
+            TokPassage { location: (24, 3), name: "Passage2".to_string() },
+            TokText { location: (25, 1), text: "text should be displayed".to_string() },
+            TokNewLine { location: (25, 45) },
+            TokNewLine { location: (26, 1) },
+            TokPassage { location: (27, 3), name: "Passage3".to_string() },
+            TokTagStart { location: (27, 12) },
+            TokTag { location: (27, 13), tag_name: "script".to_string() },
+            TokTagEnd { location: (27, 19) },
+
+        ];
+
+        assert_tok_eq(expected, tokens);
+    }
 }

@@ -1,5 +1,9 @@
 rustlex! TweeLexer {
-    // Properties
+
+    //=============================
+    // properties
+
+    property ignore_passage:bool = false;
     property format_bold_open:bool = false;
     property format_italic_open:bool = false;
     property format_under_open:bool = false;
@@ -8,32 +12,49 @@ rustlex! TweeLexer {
     property format_sup_open:bool = false;
     property function_parens:usize = 0;
 
-    // Regular Expressions
-    let WHITESPACE = ' ' | '\t';
-    let UNDERSCORE = '_';
-    let NEWLINE = '\n';
+    //=============================
+    // regular expressions
 
-    let INITIAL_START_CHAR = [^": "'\n''\t'] | ':' [^": "'\n''\t'];
-    let INITIAL_CHAR = [^" "'\n''\t'];
-    let TEXT_INITIAL = INITIAL_START_CHAR INITIAL_CHAR*;
+    let WHITESPACE = ' ' | '\t';
+    let NEWLINE = '\n';
+    let UNDERSCORE = '_';
+    let COLON = ',';
+    let SEMI_COLON = ';';
+    let PAREN_OPEN = '(';
+    let PAREN_CLOSE = ')';
+    let DIGIT = ['0'-'9'];
+    let LETTER = ['a'-'z''A'-'Z'];
+    let HTTP = ("http"("s")?|"ftp")"://"[^"/$.?# "'\n''\t']+"."[^" "'\n''\t']+;
+
+    let START_CHAR_IGNORE = [^":"'\n'] | ':' [^":"'\n'];
+    let CHAR_IGNORE = [^'\n''\t'];
+    let TEXT_IGNORE = START_CHAR_IGNORE CHAR_IGNORE*;
+
+    let COMMENT = "/%" ([^"%"]*(("%")*[^"%/"])?)* ("%")* "%/";
+    let HTML_START = "<html" (" "[^">"]*)? ">";
+    let HTML_END = "</html>";
+    let HTML_DOCTYPE = "<!DOCTYPE" (" "[^">"]*)? ">";
+    let HTML_TAGNAME = "a" | "abbr" | "acronym" | "body" | "b" | "br" | "center" | "div" | "head" | "header" | "img" | "meta" | "p" | "style" | "title";
+    let HTML_TAG = "<" HTML_TAGNAME (" "[^">"]*)? ">" | "</" HTML_TAGNAME ">";
+    let HTML_TEXT = .;
+
+    let PASSAGE_START = "::" ':'*;
+
+    let PASSAGENAME_CHAR_START = [^"[]$<>:|" '\n'];
+    let PASSAGENAME_CHAR = ":"? PASSAGENAME_CHAR_START;
+    let PASSAGENAME = PASSAGENAME_CHAR_START PASSAGENAME_CHAR* ':'?;
+
+    let TAG_START = '[';
+    let TAG_END = ']';
+    let TAG = ['a'-'z''A'-'Z''0'-'9''.''_']+;
 
     // If for example // is at a beginning of a line, then // is matched and not just /
-    let HTTP = ("http"("s")?|"ftp")"://"[^"/$.?# "'\n''\t']+"."[^" "'\n''\t']+;
-    let TEXT_START_CHAR = [^"*!>#"'\n'] | HTTP;
+    let TEXT_CHAR_START = [^"!>#"'\n'] | HTTP;
     let TEXT_CHAR = [^"/'_=~^{@<[" '\n'] | HTTP;
     let TEXT = TEXT_CHAR+ | ["/'_=~^{@<["];
 
-    let TEXT_MONO_CHAR = [^"}"'\n'];
-    let TEXT_MONO = TEXT_MONO_CHAR+ | "}" | "}}";
-
-    let PASSAGE_START = "::" ':'*;
-    let PASSAGE_CHAR_NORMAL = [^"[]$<>:|" '\n'];
-    let PASSAGE_CHAR = PASSAGE_CHAR_NORMAL | ':' PASSAGE_CHAR_NORMAL;
-    let PASSAGE_NAME = PASSAGE_CHAR_NORMAL PASSAGE_CHAR* ':'?;
-
-    let TAG = ['a'-'z''A'-'Z''0'-'9''.''_']+;
-    let TAG_START = '[';
-    let TAG_END = ']';
+    let VARIABLE_CHAR = LETTER | DIGIT | UNDERSCORE;
+    let VARIABLE = '$' (LETTER | UNDERSCORE) VARIABLE_CHAR*;
 
     let FORMAT_ITALIC = "//";
     let FORMAT_BOLD = "''";
@@ -41,74 +62,49 @@ rustlex! TweeLexer {
     let FORMAT_STRIKE = "==";
     let FORMAT_SUB = "~~";
     let FORMAT_SUP = "^^";
-    let FORMAT_MONO_START = "{{{";
-    let FORMAT_MONO_END = "}}}";
-
-    //TODO ignore content
-    let FORMAT_INLINE = "@@";
-
-    let FORMAT_BUL_LIST = "*" WHITESPACE*;
+    let FORMAT_HEADING = ("!" | "!!" | "!!!" | "!!!!" | "!!!!!") WHITESPACE*;
     let FORMAT_NUMB_LIST = "#" WHITESPACE*;
     let FORMAT_INDENT_BLOCK = "<<<" NEWLINE;
     let FORMAT_HORIZONTAL_LINE = "----" NEWLINE;
+    let FORMAT_INLINE = "@@"; //TODO ignore content
 
-    let FORMAT_HEADING = ("!" | "!!" | "!!!" | "!!!!" | "!!!!!") WHITESPACE*;
-
-    let MACRO_START = "<<";
-    let MACRO_END = ">>";
-
-    let PAREN_OPEN = '(';
-    let PAREN_CLOSE = ')';
-
-    let DIGIT = ['0'-'9'];
-    let LETTER = ['a'-'z''A'-'Z'];
-    let VAR_CHAR = LETTER | DIGIT | UNDERSCORE;
-    let VAR_NAME = '$' (LETTER | UNDERSCORE) VAR_CHAR*;
-
-    let INT = /*"-"?*/ DIGIT+;
-    let FLOAT = "-"? (DIGIT+ "." DIGIT*) | "-"? (DIGIT* "." DIGIT+) | "-"? "Infinity";
-
-    let STRING = '"' ([^'\\''"']|'\\'.)* '"' | "'" ([^'\\'"'"]|'\\'.)* "'";
-
-    let BOOL = "true" | "false";
-
-    let COLON = ',';
-
-    let FUNCTION_NAME = (LETTER | UNDERSCORE) VAR_CHAR*;
-    let FUNCTION = FUNCTION_NAME '(';
-
-    let MACRO_NAME = [^" >"'\n']* ( WHITESPACE+ "if")?;
-    let MACRO_DISPLAY_PASSAGE_NAME = [^'"''>'' ''\t''\n'] ([^">"]*(">"[^">"])?)* [^'"''>'' ''\t''\n'] | [^"'>"' ''\t''\n'] ([^">"]*(">"[^">"])?)* [^"'>"' ''\t''\n'];
-
-    let ASSIGN = "=" | "to" | "+=" | "-=" | "*=" | "/=";
-    let SEMI_COLON = ';';
-    let NUM_OP = ["+-*/%"];
-    let COMP_OP = "is" | "==" | "eq" | "neq" | ">" | "gt" | ">=" | "gte" | "<" | "lt" | "<=" | "lte";
-    let LOG_OP = "and" | "&&" | "or" | "||" | "not" | "!";
+    let FORMAT_MONO_START = "{{{";
+    let FORMAT_MONO_END = "}}}";
+    let MONOSPACE_CHAR = [^"}"'\n'];
+    let MONOSPACE_TEXT = MONOSPACE_CHAR+ | "}" | "}}";
 
     let LINK_OPEN = '[';
     let LINK_CLOSE = ']';
     let LINK_TEXT = [^'\n'"|[]"]+;
+    let LINK_SIMPLE = "[[" (PASSAGENAME | VARIABLE) "]";
+    let LINK_LABELED = "[[" LINK_TEXT "|" (PASSAGENAME | VARIABLE) "]";
 
-    let LINK_SIMPLE = "[[" (PASSAGE_NAME | VAR_NAME) "]";
-    let LINK_LABELED = "[[" LINK_TEXT "|" (PASSAGE_NAME | VAR_NAME) "]";
+    let MACRO_START = "<<";
+    let MACRO_END = ">>";
+    let MACRONAME = [^" >"'\n']* ( WHITESPACE+ "if")?;
+    let MACRO_DISPLAY_PASSAGENAME = [^'"''>'' ''\t''\n'] ([^">"]*(">"[^">"])?)* [^'"''>'' ''\t''\n'] | [^"'>"' ''\t''\n'] ([^">"]*(">"[^">"])?)* [^"'>"' ''\t''\n'];
 
-    let COMMENT = "/%" ([^"%"]*(("%")*[^"%/"])?)* ("%")* "%/";
-    let HTML = "<html>" .* "</html>";
+    let INT = DIGIT+;
+    let FLOAT = (DIGIT+ "." DIGIT*) | (DIGIT* "." DIGIT+) | "Infinity";
+    let STRING = '"' ([^'\\''"']|'\\'.)* '"' | "'" ([^'\\'"'"]|'\\'.)* "'";
+    let BOOL = "true" | "false";
+
+    let ASSIGN = "=" | "to" | "+=" | "-=" | "*=" | "/=";
+    let NUM_OP = ["+-*/%"];
+    let COMP_OP = "is" | "==" | "eq" | "neq" | ">" | "gt" | ">=" | "gte" | "<" | "lt" | "<=" | "lte";
+    let LOG_OP = "and" | "&&" | "or" | "||" | "not" | "!";
+
+    let FUNCTION_NAME = (LETTER | UNDERSCORE) VARIABLE_CHAR*;
+    let FUNCTION = FUNCTION_NAME '(';
 
     INITIAL {
         PASSAGE_START => |lexer:&mut TweeLexer<R>| -> Option<Token> {
+            if lexer.ignore_passage { lexer.ignore_passage = false; }
             lexer.PASSAGE();
             None
         }
-
-        TEXT_INITIAL =>  |_:&mut TweeLexer<R>| -> Option<Token> { None }
-
-        WHITESPACE =>  |_:&mut TweeLexer<R>| -> Option<Token> { None }
-
+        TEXT_IGNORE =>  |_:&mut TweeLexer<R>| -> Option<Token> { None }
         NEWLINE => |_:&mut TweeLexer<R>| -> Option<Token> { None }
-
-        COMMENT =>  |_:&mut TweeLexer<R>| -> Option<Token> { None }
     }
 
     I_IGNORE_NEWLINE {
@@ -188,22 +184,36 @@ rustlex! TweeLexer {
             lexer.MONO_TEXT();
             Some(TokFormatMonoStart {location: lexer.yylloc()} )
         }
-        HTML =>  |lexer:&mut TweeLexer<R>| -> Option<Token> {
-            lexer.NON_NEWLINE();
+
+        HTML_DOCTYPE =>  |_:&mut TweeLexer<R>| -> Option<Token> { None }
+        HTML_START => |lexer:&mut TweeLexer<R>| -> Option<Token> {
+            lexer.HTML();
             None
         }
+
         COMMENT =>  |lexer:&mut TweeLexer<R>| -> Option<Token> {
             lexer.NON_NEWLINE();
             None
         }
+
         NEWLINE =>  |lexer:&mut TweeLexer<R>| {
             lexer.NEWLINE();
             Some(TokNewLine {location: lexer.yylloc()} )
         }
     }
 
+    HTML {
+        HTML_END => |lexer:&mut TweeLexer<R>| -> Option<Token> {
+            lexer.NON_NEWLINE();
+            None
+        }
+        HTML_TEXT =>  |lexer:&mut TweeLexer<R>| Some(TokText {location: lexer.yylloc(), text: lexer.yystr()} )
+        HTML_TAG => |_:&mut TweeLexer<R>| -> Option<Token> { None }
+        NEWLINE => |lexer:&mut TweeLexer<R>| Some(TokNewLine {location: lexer.yylloc()} )
+    }
+
     I_EXPRESSION {
-        VAR_NAME => |lexer:&mut TweeLexer<R>| Some(TokVariable{location: lexer.yylloc(), name: lexer.yystr()} )
+        VARIABLE => |lexer:&mut TweeLexer<R>| Some(TokVariable{location: lexer.yylloc(), name: lexer.yystr()} )
         STRING =>   |lexer:&mut TweeLexer<R>| Some(TokString  {location: lexer.yylloc(), value: unescape(lexer.yystr())} )
         FLOAT =>    |lexer:&mut TweeLexer<R>| Some(TokFloat   {location: lexer.yylloc(), value: lexer.yystr()[..].parse().unwrap()} )
         INT =>      |lexer:&mut TweeLexer<R>| Some(TokInt     {location: lexer.yylloc(), value: lexer.yystr()[..].parse().unwrap()} )
@@ -227,10 +237,6 @@ rustlex! TweeLexer {
             None
         }
 
-        FORMAT_BUL_LIST =>  |lexer:&mut TweeLexer<R>| {
-            lexer.NON_NEWLINE();
-            Some(TokFormatBulList {location: lexer.yylloc()} )
-        }
         FORMAT_NUMB_LIST =>  |lexer:&mut TweeLexer<R>| {
             lexer.NON_NEWLINE();
             Some(TokFormatNumbList {location: lexer.yylloc()} )
@@ -240,7 +246,7 @@ rustlex! TweeLexer {
             Some(TokFormatHeading {location: lexer.yylloc(), rank: lexer.yystr().trim().len()} )
         }
 
-        TEXT_START_CHAR => |lexer:&mut TweeLexer<R>| {
+        TEXT_CHAR_START => |lexer:&mut TweeLexer<R>| {
             lexer.NON_NEWLINE();
             Some(TokText {location: lexer.yylloc(), text: lexer.yystr()} )
         }
@@ -255,7 +261,7 @@ rustlex! TweeLexer {
     }
 
     PASSAGE {
-        PASSAGE_NAME => |lexer:&mut TweeLexer<R>| Some(TokPassage {name: lexer.yystr().trim().to_string(), location: lexer.yylloc()} )
+        PASSAGENAME => |lexer:&mut TweeLexer<R>| Some(TokPassage {name: lexer.yystr().trim().to_string(), location: lexer.yylloc()} )
         TAG_START => |lexer:&mut TweeLexer<R>| {
             lexer.TAGS();
             Some(TokTagStart {location: lexer.yylloc()})
@@ -268,15 +274,31 @@ rustlex! TweeLexer {
 
     TAGS {
         :I_IGNORE_WHITESPACE
-        TAG => |lexer:&mut TweeLexer<R>| Some(TokTag {location: lexer.yylloc(), tag_name: lexer.yystr()} )
+
+        TAG =>  |lexer:&mut TweeLexer<R>| -> Option<Token> {
+            match lexer.yystr().trim().as_ref() {
+                "script" => {
+                    lexer.ignore_passage = true;
+                    Some(TokTag {location: lexer.yylloc(), tag_name: lexer.yystr().trim().to_string()} )
+                },
+                "stylesheet" => {
+                    lexer.ignore_passage = true;
+                    Some(TokTag {location: lexer.yylloc(), tag_name: lexer.yystr().trim().to_string()} )
+                },
+                _ => {
+                    Some(TokTag {location: lexer.yylloc(), tag_name: lexer.yystr().trim().to_string()} )
+                }
+            }
+        }
+
         TAG_END => |lexer:&mut TweeLexer<R>| {
-            lexer.PASSAGE();
+            if !lexer.ignore_passage { lexer.PASSAGE(); } else { lexer.INITIAL(); }
             Some(TokTagEnd {location: lexer.yylloc()})
         }
     }
 
     MONO_TEXT {
-        TEXT_MONO =>  |lexer:&mut TweeLexer<R>| Some(TokText {location: lexer.yylloc(), text: lexer.yystr()} )
+        MONOSPACE_TEXT =>  |lexer:&mut TweeLexer<R>| Some(TokText {location: lexer.yylloc(), text: lexer.yystr()} )
         FORMAT_MONO_END => |lexer:&mut TweeLexer<R>| {
             lexer.NON_NEWLINE();
             Some(TokFormatMonoEnd {location: lexer.yylloc()} )
@@ -293,7 +315,7 @@ rustlex! TweeLexer {
             None
         }
 
-        MACRO_NAME =>  |lexer:&mut TweeLexer<R>| -> Option<Token> {
+        MACRONAME =>  |lexer:&mut TweeLexer<R>| -> Option<Token> {
             let replaced_string = str::replace(lexer.yystr().trim(),  " ", "");
 
             match replaced_string.as_ref() {
@@ -340,7 +362,7 @@ rustlex! TweeLexer {
             }
         }
 
-        VAR_NAME =>  |lexer:&mut TweeLexer<R>| {
+        VARIABLE =>  |lexer:&mut TweeLexer<R>| {
             lexer.MACRO_CONTENT_SHORT_PRINT();
             Some(TokMacroContentVar {location: lexer.yylloc(), var_name: lexer.yystr()} )
         }
@@ -374,7 +396,7 @@ rustlex! TweeLexer {
         :I_IGNORE_NEWLINE
         :I_IGNORE_WHITESPACE
 
-        MACRO_DISPLAY_PASSAGE_NAME  => |lexer:&mut TweeLexer<R>| {
+        MACRO_DISPLAY_PASSAGENAME  => |lexer:&mut TweeLexer<R>| {
             Some(TokMacroDisplay {location: lexer.yylloc(), passage_name: lexer.yystr().trim().to_string()} )
         }
 
@@ -405,7 +427,7 @@ rustlex! TweeLexer {
         // Expression Stuff
         FUNCTION =>   |_:&mut TweeLexer<R>| -> Option<Token> { None }
         STRING =>     |_:&mut TweeLexer<R>| -> Option<Token> { None }
-        VAR_NAME =>   |_:&mut TweeLexer<R>| -> Option<Token> { None }
+        VARIABLE =>   |_:&mut TweeLexer<R>| -> Option<Token> { None }
         FLOAT =>      |_:&mut TweeLexer<R>| -> Option<Token> { None }
         INT =>        |_:&mut TweeLexer<R>| -> Option<Token> { None }
         BOOL =>       |_:&mut TweeLexer<R>| -> Option<Token> { None }
