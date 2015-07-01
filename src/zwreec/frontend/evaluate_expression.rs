@@ -7,7 +7,7 @@ use frontend::codegen;
 use frontend::codegen::{CodeGenManager};
 use frontend::lexer::Token;
 use frontend::lexer::Token::{TokNumOp, TokCompOp, TokLogOp, TokInt, TokBoolean, TokVariable, TokFunction, TokString, TokUnaryMinus};
-
+use config::Config;
 
 #[derive(Debug)]
 pub enum EvaluateExpressionError {
@@ -239,6 +239,7 @@ fn direct_eval_num_op<'a>(eval0: &Operand, eval1: &Operand, op_name: &str, locat
         Operand::Const(Constant { value: result as u8 })
     }
 }
+
 
 fn eval_comp_op<'a>(eval0: &Operand, eval1: &Operand, op_name: &str, location: (u64, u64), code: &mut Vec<ZOP>,
         temp_ids: &mut Vec<u8>, mut manager: &mut CodeGenManager<'a>) -> Operand {
@@ -532,4 +533,15 @@ fn boolstr_to_const(string: &str) -> Operand {
         "true" => Operand::Const(Constant { value: 1 }),
         _ => Operand::Const(Constant { value: 0 })
     }
+}
+
+#[test]
+fn test_direct_eval_num_op(){
+    let cfg = Config::default_config();
+    let manager = CodeGenManager::new(&cfg);
+    assert_eq!(direct_eval_num_op(&Operand::new_large_const(10), &Operand::new_large_const(20), &"+".to_string(), (0x0000000000000000, 0x0000000000000000), &manager).const_value(),30 as i16);
+    assert_eq!(direct_eval_num_op(&Operand::new_large_const(66), &Operand::new_large_const(74), &"-".to_string(), (0x0000000000000000, 0x0000000000000000), &manager).const_value(),-8 as i16);
+    assert_eq!(direct_eval_num_op(&Operand::new_large_const(45), &Operand::new_large_const(10), &"*".to_string(), (0x0000000000000000, 0x0000000000000000), &manager).const_value(),450 as i16);
+    assert_eq!(direct_eval_num_op(&Operand::new_large_const(99), &Operand::new_large_const(3), &"/".to_string(), (0x0000000000000000, 0x0000000000000000), &manager).const_value(),33 as i16);
+    assert_eq!(direct_eval_num_op(&Operand::new_large_const(90), &Operand::new_large_const(2), &"%".to_string(), (0x0000000000000000, 0x0000000000000000), &manager).const_value(),0 as i16);
 }
