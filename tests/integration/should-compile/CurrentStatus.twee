@@ -214,11 +214,11 @@ Italic-Bold
 ''//          --------------------------//''
 
 Mono:
-{{{Z-char 6789abcdef0123456789abcdef
-current   --------------------------
-  A0      abcdefghijklmnopqrstuvwxyz
-  A1      ABCDEFGHIJKLMNOPQRSTUVWXYZ
-  A2        0123456789.,!?_#'"/\-:()
-          --------------------------}}}
+{{{Z-char 6789abcdef0123456789abcdef}}}
+{{{current   --------------------------}}}
+{{{  A0      abcdefghijklmnopqrstuvwxyz}}}
+{{{  A1      ABCDEFGHIJKLMNOPQRSTUVWXYZ}}}
+{{{  A2        0123456789.,!?_#'"/\-:()}}}
+{{{          --------------------------}}}
 
 <<linksToAllPassages>>
