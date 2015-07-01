@@ -672,4 +672,15 @@ mod tests {
 
         assert_tok_eq(expected, tokens);
     }
+
+    #[test]
+    fn url_test() {
+        let tokens = test_lex("::Start\nhttp://foo.com/blah_blahhttp://foo.com/blah_blah/ http://foo.com/blah_blah_(wikipedia) http://foo.com/blah_blah_(wikipedia)_(again) http://www.example.com/wpstyle/?p=364 https://www.example.com/foo/?bar=baz&inga=42&quux http://✪df.ws/123 http://userid:password@example.com:8080 http://userid:password@example.com:8080/ http://userid@example.com http://userid@example.com/ http://userid@example.com:8080 http://userid@example.com:8080/ http://userid:password@example.com http://userid:password@example.com/ http://142.42.1.1/ http://142.42.1.1:8080/ http://➡.ws/䨹 http://⌘.ws http://⌘.ws/ http://foo.com/blah_(wikipedia)#cite-1 http://foo.com/blah_(wikipedia)_blah#cite-1 http://foo.com/unicode_(✪)_in_parens http://foo.com/(something)?after=parens http://☺.damowmow.com/ http://code.google.com/events/#&product=browser http://j.mp ftp://foo.bar/baz http://foo.bar/?q=Test%20URL-encoded%20stuff http://例子.测试 http://उदाहरण.परीक्षा http://-.~_!$&'()*+,;=:%40:80%2f::::::@example.com http://1337.net http://a.b-c.de http://223.255.255.254");
+        let expected = vec![
+            TokPassage {name: "Start".to_string(), location: (1, 3)},
+            TokText {text: "http://foo.com/blah_blahhttp://foo.com/blah_blah/ http://foo.com/blah_blah_(wikipedia) http://foo.com/blah_blah_(wikipedia)_(again) http://www.example.com/wpstyle/?p=364 https://www.example.com/foo/?bar=baz&inga=42&quux http://\u{272a}df.ws/123 http://userid:password@example.com:8080 http://userid:password@example.com:8080/ http://userid@example.com http://userid@example.com/ http://userid@example.com:8080 http://userid@example.com:8080/ http://userid:password@example.com http://userid:password@example.com/ http://142.42.1.1/ http://142.42.1.1:8080/ http://➡.ws/䨹 http://⌘.ws http://⌘.ws/ http://foo.com/blah_(wikipedia)#cite-1 http://foo.com/blah_(wikipedia)_blah#cite-1 http://foo.com/unicode_(\u{272a})_in_parens http://foo.com/(something)?after=parens http://\u{263a}.damowmow.com/ http://code.google.com/events/#&product=browser http://j.mp ftp://foo.bar/baz http://foo.bar/?q=Test%20URL-encoded%20stuff http://\u{4f8b}\u{5b50}.\u{6d4b}\u{8bd5} http://\u{909}\u{926}\u{93e}\u{939}\u{930}\u{923}.\u{92a}\u{930}\u{940}\u{915}\u{94d}\u{937}\u{93e} http://-.~_!$&\'()*+,;=:%40:80%2f::::::@example.com http://1337.net http://a.b-c.de http://223.255.255.254".to_string(), location: (2, 1)},
+        ];
+
+        assert_tok_eq(expected, tokens);
+    }
 }
