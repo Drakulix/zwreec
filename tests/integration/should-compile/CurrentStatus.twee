@@ -1,16 +1,96 @@
 ::Start
+Start Passage
 <<set $var4 to "x">>
 <<display linksToAllPassages>>
 
-::Ascii
-ASCII-Zeichen
-<<set $last to 1>>
 
- !"#$%&'()*+,-./0123456789:;<=>?
-@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]_
-'abcdefghijklmnopqrstuvwxyz{|}~
+/%==============================================================================
+ LINKS TO ALL PASSAGES %/
+
+::linksToAllPassages
+Menu:
+Expressions: [[Expressions(Int / Bool)|Expressions]] or [[Expressions(Strings / Other)|StringExpressions]]
+ASCII-Zeichensatz: [[ASCII|Ascii]]
+Unicode-Zeichen: [[Unicode]]
+Variablen set und print: [[Variablen]]
+If: [[If and Else|If]]
+Format: [[Format]]
+Links: (siehe links oben)
+/%==============================================================================
+ EXPRESSIONS %/
+::Expressions
+Expressions
+1+2 = <<print 1+2>>
+1*2-3*4-5*6-7 = <<print 1*2-3*4-5*6-7>>
+$i = ((1-2)*(3+4))*(5-6)*(7-8): <<set $i to ((1-2)*(3+4))*(5-6)*(7-8)>><<print $i>>
+$i < 0? <<print $i<0>>
+$i > 0? <<print $i>0>>
+$i is -7? <<print $i is -7>>
+
+Bools
+not false? <<print not false>>
+true or false and true and false or true? <<print true or false and true and false or true>>
+
+
 
 <<linksToAllPassages>>
+
+/%==============================================================================
+ STRING EXPRESSIONS %/
+::StringExpressions
+StringExpressions
+$a = "hallo": <<set $a = "hallo">><<print $a>>
+$b = $a+" welt": <<set $b = $a+" welt">><<print $b>>
+$c = $a+", "+$b+"!": <<set $c = $a+", "+$b+"!">><<print $c>>
+
+$a is "hallo"?: <<print $a is "hallo">>
+$b is "welt"?: <<print $b is "welt">>
+
+$d = 10+15: <<set $d = 10+15>><<print $d>>
+$e = $a+$d: <<set $e = $a+$d>><<print $e>>
+
+Random
+Random 0..100: <<print random(0, 100)>>
+Random 0..5+20: <<print random(0, 5+20)>>
+
+<<linksToAllPassages>>
+
+
+/%==============================================================================
+ VARIABLE %/
+::Variablen
+Variablen<<set $last to 3>>
+/% comment %/
+set $var1 to "string example"; <<set $var1 to "string example">>
+$var4 is set to x in Start
+set $var4 to $var4 + "string example" + (-1*42) + $var1;  <<set $var4 to $var4 + "string" + (-1*42) + $var1>>
+var4: <<print $var4>>
+set $var2 to 1234; <<set $var2=1234>>
+set $var3 to true; <<set $var3=true>>
+print value of $var2: <<$var2>>
+print value of $var3: <<$var3>>
+
+<<display 'linksToAllPassages'>>
+
+/%==============================================================================
+ IF-ELSE %/
+::If
+Verzweigungen:
+variable last: <<$last>>
+Last passage: <<if $last == 1>>ASCII<<else>><<if $last == 2>>Unicode<<else>><<if $last == 3>>Variablen<<else>><<if $last == 5>>Format<<endif>><<endif>><<endif>><<endif>>
+
+<<if $last == 3>>
+last passage was: Ascii
+<<endif>>
+
+<<if $last == 4>>
+last passage was: Unicode
+<<endif>>
+
+<<display linksToAllPassages>>
+
+/%==============================================================================
+ UNICODE %/
 
 ::Unicode
 Unicode
@@ -83,35 +163,20 @@ Braille Patterns:
 
 <<display "linksToAllPassages">>
 
-::Variablen
-Variablen<<set $last to 3>>
-/% comment %/
-set $var1 to "string example"; <<set $var1 to "string example">>
-$var4 is set to x in Start
-set $var4 to $var4 + "string example" + (-1*42) + $var1;  <<set $var4 to $var4 + "string" + (-1*42) + $var1>>
-var4: <<print $var4>>
-set $var2 to 1234; <<set $var2=1234>>
-set $var3 to true; <<set $var3=true>>
-print value of $var2: <<$var2>>
-print value of $var3: <<$var3>>
+/%==============================================================================
+ ASCII %/
+::Ascii
+ASCII-Zeichen
+<<set $last to 1>>
 
-<<display 'linksToAllPassages'>>
-
-::If
-Verzweigungen:
-variable last: <<$last>>
-Last passage: <<if $last == 1>>ASCII<<else>><<if $last == 2>>Unicode<<else>><<if $last == 3>>Variablen<<else>><<if $last == 5>>Format<<endif>><<endif>><<endif>><<endif>>
-
-<<if $last == 3>>
-last passage was: Ascii
-<<endif>>
-
-<<if $last == 4>>
-last passage was: Unicode
-<<endif>>
+ !"#$%&'()*+,-./0123456789:;<=>?
+@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]_
+'abcdefghijklmnopqrstuvwxyz{|}~
 
 <<display linksToAllPassages>>
 
+/%==============================================================================
+ FORMATING %/
 :: Format
 Formatierung
 <<set $last to 5>>
@@ -157,12 +222,3 @@ current   --------------------------
           --------------------------}}}
 
 <<linksToAllPassages>>
-
-
-::linksToAllPassages
-ASCII-Zeichensatz: [[ASCII|Ascii]]
-Unicode-Zeichen: [[Unicode]]
-Variablen set und print: [[Variablen]]
-If: [[If and Else|If]]
-Format: [[Format]]
-Links: (siehe links oben)
