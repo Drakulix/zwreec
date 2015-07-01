@@ -122,6 +122,7 @@ pub enum ZOP {
   Mod{operand1: Operand, operand2: Operand, save_variable: Variable},
   Or{operand1: Operand, operand2: Operand, save_variable: Variable},
   And{operand1: Operand, operand2: Operand, save_variable: Variable},
+  Not{operand: Operand, result: Variable},
   Jump{jump_to_label: String},
   Dec{variable: u8},
   LoadW{array_address: Operand, index: Variable, variable: Variable},
@@ -487,6 +488,7 @@ impl Zfile {
             &ZOP::Or{ref operand1, ref operand2, ref save_variable} => op::op_or(operand1, operand2, save_variable),
             &ZOP::And{ref operand1, ref operand2, ref save_variable} => op::op_and(operand1, operand2, save_variable),
             &ZOP::Mod{ref operand1, ref operand2, ref save_variable} => op::op_mod(operand1, operand2, save_variable),
+            &ZOP::Not{ref operand, ref result} => op::op_not(operand, result),
             &ZOP::StoreVariable{ref variable, ref value} => op::op_store_var(variable, value),
             &ZOP::Ret{ref value} => op::op_ret(value),
             &ZOP::PrintAddr{ref address} => op::op_print_addr(address),
@@ -670,6 +672,7 @@ impl Zfile {
         self.routine_mem_free();
         self.routine_malloc_init();
         self.routine_strcpy();
+        self.routine_strcmp();
         self.routine_malloc();
         self.routine_strcat();
         self.routine_itoa();
@@ -1011,6 +1014,56 @@ impl Zfile {
             // strcopy (addr2 to save_var_addr+2+len1*2)
             ZOP::CallVNA2{jump_to_label: "strcpy".to_string(), arg1: Operand::new_var(addr2.id), arg2: Operand::new_var(tmp.id)},
             ZOP::Ret{value: Operand::new_var(save_var.id)}
+        ]);
+    }
+
+    /// strcmp
+    /// returns 0 if both given strings are equal and -1 if the first is
+    /// alphabetically smaller than the second and +1 vice versa
+    pub fn routine_strcmp(&mut self) {
+        let addr1 = Variable::new(1);
+        let addr2 = Variable::new(2);
+        let len1 = Variable::new(3);
+        let len2 = Variable::new(4);
+        let count = Variable::new(5);
+        let c1 = Variable::new(6);
+        let c2 = Variable::new(7);
+        self.emit(vec![
+            ZOP::Routine{name: "strcmp".to_string(), count_variables: 15},
+            // var1 has the first str-addr, var2 the second str-addr
+            // set to 0 for index access
+            ZOP::StoreVariable{variable: count.clone(), value: Operand::new_large_const(0)},
+            // read length of string1 which is stored at index 0
+            ZOP::LoadW{array_address: Operand::new_var(addr1.id), index: count.clone(), variable: len1.clone()},
+            // read length of string2 which is stored at index 0
+            ZOP::LoadW{array_address: Operand::new_var(addr2.id), index: count.clone(), variable: len2.clone()},
+            // handle case that one has length 0 so that we do not enter the loop
+            ZOP::JE{operand1: Operand::new_var(len1.id), operand2: Operand::new_large_const(0), jump_to_label: "strcmp_firstzero".to_string()},
+            ZOP::JE{operand1: Operand::new_var(len2.id), operand2: Operand::new_large_const(0), jump_to_label: "strcmp_secondzero".to_string()},
+            ZOP::Label{name: "strcmp_loop".to_string()},
+            ZOP::Inc{variable: count.id},
+            // check if one of the strings ended, then see whether one is longer in _fristzero/_secondzero
+            ZOP::JG{operand1: Operand::new_var(count.id), operand2: Operand::new_var(len1.id), jump_to_label: "strcmp_firstzero".to_string()},
+            ZOP::JG{operand1: Operand::new_var(count.id), operand2: Operand::new_var(len2.id), jump_to_label: "strcmp_secondzero".to_string()},
+            // read the two characters
+            ZOP::LoadW{array_address: Operand::new_var(addr1.id), index: count.clone(), variable: c1.clone()},
+            ZOP::LoadW{array_address: Operand::new_var(addr2.id), index: count.clone(), variable: c2.clone()},
+            // compare them
+            ZOP::JG{operand1: Operand::new_var(c1.id), operand2: Operand::new_var(c2.id), jump_to_label: "strcmp_greater".to_string()},
+            ZOP::JL{operand1: Operand::new_var(c1.id), operand2: Operand::new_var(c2.id), jump_to_label: "strcmp_lesser".to_string()},
+            ZOP::Jump{jump_to_label: "strcmp_loop".to_string()},
+            ZOP::Label{name: "strcmp_firstzero".to_string()},
+            ZOP::JE{operand1: Operand::new_var(len1.id), operand2: Operand::new_var(len2.id), jump_to_label: "strcmp_equal".to_string()},
+            ZOP::Ret{value: Operand::new_large_const(-1)},
+            ZOP::Label{name: "strcmp_secondzero".to_string()},
+            ZOP::JE{operand1: Operand::new_var(len1.id), operand2: Operand::new_var(len2.id), jump_to_label: "strcmp_equal".to_string()},
+            ZOP::Ret{value: Operand::new_large_const(1)},
+            ZOP::Label{name: "strcmp_equal".to_string()},
+            ZOP::Ret{value: Operand::new_large_const(0)},
+            ZOP::Label{name: "strcmp_lesser".to_string()},
+            ZOP::Ret{value: Operand::new_large_const(-1)},
+            ZOP::Label{name: "strcmp_greater".to_string()},
+            ZOP::Ret{value: Operand::new_large_const(1)},
         ]);
     }
 
