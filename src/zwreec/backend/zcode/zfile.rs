@@ -1727,3 +1727,7 @@ fn test_op_0() {
     assert_eq!(op::op_0(0x03),vec![0xb3]);
 }
 
+#[test]
+fn test_op_not() {
+        assert_eq!(op::op_not(&Operand::new_var(1),&Variable::new(2)),vec![0xf8,0xbf,0x01,0x02]);
+}
