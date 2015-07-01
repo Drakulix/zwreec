@@ -18,8 +18,9 @@ rustlex! TweeLexer {
     let TEXT_INITIAL = INITIAL_START_CHAR INITIAL_CHAR*;
 
     // If for example // is at a beginning of a line, then // is matched and not just /
-    let TEXT_START_CHAR = [^"*!>#"'\n'];
-    let TEXT_CHAR = [^"/'_=~^{@<[" '\n'];
+    let HTTP = ("http"("s")?|"ftp")"://"[^"/$.?# "'\n''\t']+"."[^" "'\n''\t']+;
+    let TEXT_START_CHAR = [^"*!>#"'\n'] | HTTP;
+    let TEXT_CHAR = [^"/'_=~^{@<[" '\n'] | HTTP;
     let TEXT = TEXT_CHAR+ | ["/'_=~^{@<["];
 
     let TEXT_MONO_CHAR = [^"}"'\n'];
@@ -93,6 +94,7 @@ rustlex! TweeLexer {
     let LINK_LABELED = "[[" LINK_TEXT "|" (PASSAGE_NAME | VAR_NAME) "]";
 
     let COMMENT = "/%" ([^"%"]*(("%")*[^"%/"])?)* ("%")* "%/";
+    let HTML = "<html>" .* "</html>";
 
     INITIAL {
         PASSAGE_START => |lexer:&mut TweeLexer<R>| -> Option<Token> {
@@ -186,7 +188,10 @@ rustlex! TweeLexer {
             lexer.MONO_TEXT();
             Some(TokFormatMonoStart {location: lexer.yylloc()} )
         }
-
+        HTML =>  |lexer:&mut TweeLexer<R>| -> Option<Token> {
+            lexer.NON_NEWLINE();
+            None
+        }
         COMMENT =>  |lexer:&mut TweeLexer<R>| -> Option<Token> {
             lexer.NON_NEWLINE();
             None
@@ -201,7 +206,7 @@ rustlex! TweeLexer {
         VAR_NAME => |lexer:&mut TweeLexer<R>| Some(TokVariable{location: lexer.yylloc(), name: lexer.yystr()} )
         STRING =>   |lexer:&mut TweeLexer<R>| Some(TokString  {location: lexer.yylloc(), value: unescape(lexer.yystr())} )
         FLOAT =>    |lexer:&mut TweeLexer<R>| Some(TokFloat   {location: lexer.yylloc(), value: lexer.yystr()[..].parse().unwrap()} )
-        INT =>        |lexer:&mut TweeLexer<R>| Some(TokInt       {location: lexer.yylloc(), value: lexer.yystr()[..].parse().unwrap()} )
+        INT =>      |lexer:&mut TweeLexer<R>| Some(TokInt     {location: lexer.yylloc(), value: lexer.yystr()[..].parse().unwrap()} )
         BOOL =>     |lexer:&mut TweeLexer<R>| Some(TokBoolean {location: lexer.yylloc(), value: lexer.yystr()} )
         NUM_OP =>   |lexer:&mut TweeLexer<R>| Some(TokNumOp   {location: lexer.yylloc(), op_name: lexer.yystr()} )
         COMP_OP =>  |lexer:&mut TweeLexer<R>| Some(TokCompOp  {location: lexer.yylloc(), op_name: lexer.yystr()} )
