@@ -171,7 +171,8 @@ impl AST {
     }
 
     /// prints the tree
-    pub fn print(&self, force_print: bool) {
+    /*pub fn print(&self, force_print: bool) {
+        println!("print ast {:?}", force_print);
         if force_print {
             println!("Abstract Syntax Tree: ");
         } else {
@@ -182,7 +183,7 @@ impl AST {
             child.print(force_print);
         }
         debug!("");
-    }
+    }*/
 
     /// counts the childs of the path in the asts
     pub fn count_childs(&self, path: Vec<usize>) -> usize {
@@ -350,13 +351,14 @@ impl ASTNode {
     }
 
     /// prints an node of an ast
-    pub fn print(&self, force_print: bool) {
+    /*pub fn print(&self, force_print: bool) {
+        println!("print {:?}", force_print);
         if force_print {
             println!("{:?}", self);
         } else {
             debug!("{:?}", self);
         }
-    }
+    }*/
 
     pub fn as_default(&self) -> &NodeDefault {
         match self {
@@ -426,7 +428,8 @@ mod tests {
         for item in expected.iter() {
             let b = ast.is_specific_token(item.1.clone(), item.0.to_vec());
             if b == false {
-                ast.print(true);
+                //ast.print(true);
+                println!("{:?}", ast);
             }
             assert!(ast.is_specific_token(item.1.clone(), item.0.to_vec()));
         }
