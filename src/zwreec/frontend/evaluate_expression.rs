@@ -5,9 +5,21 @@ use backend::zcode::zfile::{ZOP, Operand, Variable, Constant, LargeConstant, Zfi
 use frontend::ast::{ASTNode};
 use frontend::codegen;
 use frontend::codegen::{CodeGenManager};
+use frontend::lexer::Token;
 use frontend::lexer::Token::{TokNumOp, TokCompOp, TokLogOp, TokInt, TokBoolean, TokVariable, TokFunction, TokString, TokUnaryMinus};
 
 
+#[derive(Debug)]
+pub enum EvaluateExpressionError {
+    InvalidAST,
+    NumericOperatorNeedsTwoArguments { op_name: String, location: (u64, u64) },
+    UnhandledToken { token: Token },
+    UnsupportedOperator { op_name: String, location: (u64, u64) },
+    UnsupportedFunction { name: String, location: (u64, u64) },
+    UnsupportedFunctionArgsLen { name: String, location: (u64, u64), expected: u64 },
+    UnsupportedFunctionArgType { name: String, index: u64, location: (u64, u64) },
+    NoTempIdLeftOnStack,
+}
 
 pub fn evaluate_expression<'a>(node: &'a ASTNode, code: &mut Vec<ZOP>, mut manager: &mut CodeGenManager<'a>, mut out: &mut Zfile) -> Operand {
     let mut temp_ids = CodeGenManager::new_temp_var_vec();
@@ -18,25 +30,44 @@ pub fn evaluate_expression<'a>(node: &'a ASTNode, code: &mut Vec<ZOP>, mut manag
 fn evaluate_expression_internal<'a>(node: &'a ASTNode, code: &mut Vec<ZOP>,
         temp_ids: &mut Vec<u8>, mut manager: &mut CodeGenManager<'a>, mut out: &mut Zfile) -> Operand {
     let n = node.as_default();
+    let cfg = manager.cfg;
 
     match n.category {
-        TokNumOp { ref op_name, .. } => {
+        TokNumOp { ref op_name, ref location } => {
             if n.childs.len() != 2 {
-                panic!("Numeric operators need two arguments!")
+                error_panic!(cfg => EvaluateExpressionError::NumericOperatorNeedsTwoArguments { op_name: op_name.clone(), location: location.clone() } );
+
+                // Try error recovery. Ignores operator.
+                warn!("Trying to fix expression. This will compile but probably not do what you want.");
+                if n.childs.len() >= 1 {
+                    return evaluate_expression_internal(&n.childs[0], code, temp_ids, manager, &mut out)
+                } else {
+                    return Operand::Const(Constant { value: 0 })
+                }
             }
+
             let eval0 = evaluate_expression_internal(&n.childs[0], code, temp_ids, manager, &mut out);
             let eval1 = evaluate_expression_internal(&n.childs[1], code, temp_ids, manager, &mut out);
-            eval_num_op(&eval0, &eval1, &**op_name, code, temp_ids)
+            eval_num_op(&eval0, &eval1, &**op_name, location.clone(), code, temp_ids, manager)
         },
-        TokCompOp { ref op_name, .. } => {
+        TokCompOp { ref op_name, ref location } => {
             if n.childs.len() != 2 {
-                panic!("Numeric operators need two arguments!")
+                error_panic!(cfg => EvaluateExpressionError::NumericOperatorNeedsTwoArguments { op_name: op_name.clone(), location: location.clone() } );
+
+                // Try error recovery. Ignores operator.
+                warn!("Trying to fix expression. This will compile but probably not do what you want.");
+                if n.childs.len() >= 1 {
+                    return evaluate_expression_internal(&n.childs[0], code, temp_ids, manager, &mut out)
+                } else {
+                    return Operand::Const(Constant { value: 0 })
+                }
             }
+
             let eval0 = evaluate_expression_internal(&n.childs[0], code, temp_ids, manager, &mut out);
             let eval1 = evaluate_expression_internal(&n.childs[1], code, temp_ids, manager, &mut out);
-            eval_comp_op(&eval0, &eval1, &**op_name, code, temp_ids, manager)
+            eval_comp_op(&eval0, &eval1, &**op_name, location.clone(), code, temp_ids, manager)
         },
-        TokLogOp { ref op_name, .. } => {
+        TokLogOp { ref op_name, ref location } => {
             let eval0 = evaluate_expression_internal(&n.childs[0], code, temp_ids, manager, &mut out);
 
             match &**op_name {
@@ -47,7 +78,17 @@ fn evaluate_expression_internal<'a>(node: &'a ASTNode, code: &mut Vec<ZOP>,
                 "not" | "!" => {
                     eval_not(&eval0, code, temp_ids, manager)
                 },
-                _ => panic!("unhandled op")
+                _ => {
+                    error_panic!(cfg => EvaluateExpressionError::UnsupportedOperator { op_name: op_name.clone(), location: location.clone() } );
+
+                    // Try error recovery. Ignores operator.
+                    warn!("Trying to fix expression. This will compile but probably not do what you want.");
+                    if n.childs.len() >= 1 {
+                        return evaluate_expression_internal(&n.childs[0], code, temp_ids, manager, &mut out)
+                    } else {
+                        return Operand::Const(Constant { value: 0 })
+                    }
+                }
             }
         },
         TokUnaryMinus { .. } => {
@@ -66,16 +107,23 @@ fn evaluate_expression_internal<'a>(node: &'a ASTNode, code: &mut Vec<ZOP>,
         TokVariable { ref name, .. } => {
             Operand::Var(manager.symbol_table.get_symbol_id(name))
         },
-        TokFunction { ref name, .. } => {
+        TokFunction { ref name, ref location } => {
             match &**name {
                 "random" => {
                     let args = &node.as_default().childs;
                     if args.len() != 2 {
-                        panic!("Function random only supports 2 args");
+                        let error = EvaluateExpressionError::UnsupportedFunctionArgsLen {
+                            name: "random".to_string(), location: location.clone(), expected: 2 };
+                        error_panic!(cfg => error);
+                        if args.len() <= 1 {
+                            return Operand::Const(Constant { value: 0 })
+                        } else {
+                            warn!("Ignoring the additional arguments.");
+                        }
                     }
 
                     if args[0].as_default().childs.len() != 1 || args[1].as_default().childs.len() != 1 {
-                        panic!("Unsupported Expression");
+                        error_force_panic!(EvaluateExpressionError::InvalidAST);
                     }
 
                     let from = &args[0].as_default().childs[0];
@@ -83,18 +131,24 @@ fn evaluate_expression_internal<'a>(node: &'a ASTNode, code: &mut Vec<ZOP>,
 
                     let from_value = evaluate_expression_internal(from, code, temp_ids, manager, &mut out);
                     let to_value = evaluate_expression_internal(to, code, temp_ids, manager, &mut out);
-                    codegen::function_random(&from_value, &to_value, code, temp_ids)
+                    codegen::function_random(manager, &from_value, &to_value, code, temp_ids, location.clone())
                 },
-                _ => { panic!("Unsupported function: {}", name)}
+                _ => {
+                    error_panic!(cfg => EvaluateExpressionError::UnsupportedFunction { name: name.clone(), location: location.clone() });
+                    Operand::Const(Constant { value: 0 })
+                }
             }
         },
-        _ => panic!("unhandled token {:?}", n.category)
+        _ => {
+            error_panic!(cfg => EvaluateExpressionError::UnhandledToken { token: n.category.clone() } );
+            Operand::Const(Constant { value: 0 })
+        }
     }
 }
 
-fn eval_num_op<'a>(eval0: &Operand, eval1: &Operand, op_name: &str, code: &mut Vec<ZOP>, temp_ids: &mut Vec<u8>) -> Operand {
+fn eval_num_op<'a>(eval0: &Operand, eval1: &Operand, op_name: &str, location: (u64, u64), code: &mut Vec<ZOP>, temp_ids: &mut Vec<u8>, manager: &CodeGenManager<'a>) -> Operand {
     if count_constants(eval0, eval1) == 2 {
-        return direct_eval_num_op(eval0, eval1, op_name);
+        return direct_eval_num_op(eval0, eval1, op_name, location, manager);
     }
     let save_var = determine_save_var(eval0, eval1, temp_ids);
     match op_name {
@@ -102,12 +156,12 @@ fn eval_num_op<'a>(eval0: &Operand, eval1: &Operand, op_name: &str, code: &mut V
             if save_var.vartype == Type::String {
                 let a1: Variable = match temp_ids.pop() {
                     Some(var) => Variable::new(var),
-                    None      => panic!{"Stack temp_ids is empty, pop wasn't possible."}
+                    None      => error_force_panic!(EvaluateExpressionError::NoTempIdLeftOnStack)
                 };
                 let o1 = Operand::new_var(a1.id);
                 let a2: Variable = match temp_ids.pop() {
                     Some(var) => Variable::new(var),
-                    None      => panic!{"Stack temp_ids is empty, pop wasn't possible."}
+                    None      => error_force_panic!(EvaluateExpressionError::NoTempIdLeftOnStack)
                 };
                 let o2 = Operand::new_var(a2.id);
                 let addr1 = match eval0 {
@@ -139,7 +193,9 @@ fn eval_num_op<'a>(eval0: &Operand, eval1: &Operand, op_name: &str, code: &mut V
         "%" => {
             code.push(ZOP::Mod{operand1: eval0.clone(), operand2: eval1.clone(), save_variable: save_var.clone()});
         },
-        _ => panic!("unhandled op")
+        _ => {
+            error_panic!(manager.cfg => EvaluateExpressionError::UnsupportedOperator { op_name: op_name.to_string(), location: location.clone() })
+        }
     };
 
     free_var_if_both_temp(eval0, eval1, temp_ids);
@@ -149,7 +205,7 @@ fn eval_num_op<'a>(eval0: &Operand, eval1: &Operand, op_name: &str, code: &mut V
 
 
 
-fn direct_eval_num_op(eval0: &Operand, eval1: &Operand, op_name: &str) -> Operand {
+fn direct_eval_num_op<'a>(eval0: &Operand, eval1: &Operand, op_name: &str, location: (u64, u64), manager: &CodeGenManager<'a>) -> Operand {
     let mut out_large = false;
     let val0 = eval0.const_value();
     let val1 = eval1.const_value();
@@ -171,7 +227,11 @@ fn direct_eval_num_op(eval0: &Operand, eval1: &Operand, op_name: &str) -> Operan
         "%" => {
             val0 % val1
         },
-        _ => panic!("unhandled op")
+        _ => {
+            error_panic!(manager.cfg => EvaluateExpressionError::UnsupportedOperator { op_name: op_name.to_string(), location: location.clone() });
+            warn!("Returning the first argument of the expression");
+            val0
+        }
     };
     if out_large {
         Operand::LargeConst(LargeConstant { value: result })
@@ -180,14 +240,14 @@ fn direct_eval_num_op(eval0: &Operand, eval1: &Operand, op_name: &str) -> Operan
     }
 }
 
-fn eval_comp_op<'a>(eval0: &Operand, eval1: &Operand, op_name: &str, code: &mut Vec<ZOP>,
+fn eval_comp_op<'a>(eval0: &Operand, eval1: &Operand, op_name: &str, location: (u64, u64), code: &mut Vec<ZOP>,
         temp_ids: &mut Vec<u8>, mut manager: &mut CodeGenManager<'a>) -> Operand {
     if count_constants(eval0, eval1) == 2 {
-        return direct_eval_comp_op(eval0, eval1, op_name);
+        return direct_eval_comp_op(eval0, eval1, op_name, location.clone(), manager);
     }
     let save_var: Variable = match temp_ids.pop() {
         Some(var) => Variable::new(var),
-        None      => panic!{"Stack temp_ids is empty, pop wasn't possible."}
+        None      => error_force_panic!(EvaluateExpressionError::NoTempIdLeftOnStack)
     };
     let label = format!("expr_{}", manager.ids_expr.start_next());
     let const_true = Operand::new_const(1);
@@ -223,7 +283,11 @@ fn eval_comp_op<'a>(eval0: &Operand, eval1: &Operand, op_name: &str, code: &mut 
             code.push(ZOP::JG{operand1: eval0.clone(), operand2: eval1.clone(), jump_to_label: label.to_string()});
             code.push(ZOP::StoreVariable{ variable: save_var.clone(), value: const_false});
         },
-        _ => panic!("unhandled op")
+        _ => {
+            error_panic!(manager.cfg => EvaluateExpressionError::UnsupportedOperator { op_name: op_name.to_string(), location: location.clone() });
+            warn!("Assuming 'false' as the result");
+            code.push(ZOP::StoreVariable{ variable: save_var.clone(), value: const_false });
+        }
     };
     code.push(ZOP::Label {name: label.to_string()});
     free_var_if_temp(eval0, temp_ids);
@@ -233,7 +297,7 @@ fn eval_comp_op<'a>(eval0: &Operand, eval1: &Operand, op_name: &str, code: &mut 
 
 /// Directly evaluates the given compare operation.
 /// Both operands must be constants.
-fn direct_eval_comp_op(eval0: &Operand, eval1: &Operand, op_name: &str) -> Operand {
+fn direct_eval_comp_op<'a>(eval0: &Operand, eval1: &Operand, op_name: &str, location: (u64, u64), manager: &CodeGenManager<'a>) -> Operand {
     let val0 = eval0.const_value();
     let val1 = eval1.const_value();
     let result = match op_name {
@@ -243,7 +307,11 @@ fn direct_eval_comp_op(eval0: &Operand, eval1: &Operand, op_name: &str) -> Opera
         "<=" | "lte" => { val0 <= val1 },
         ">=" | "gte" => { val0 >= val1 },
         ">" | "gt" => { val0 > val1 },
-        _ => panic!("unhandled op")
+        _ => {
+            error_panic!(manager.cfg => EvaluateExpressionError::UnsupportedOperator { op_name: op_name.to_string(), location: location.clone() });
+            warn!("Assuming 'false' as the result");
+            false
+        }
     };
     if result {
         Operand::Const(Constant {value: 1})
@@ -291,7 +359,7 @@ fn eval_not<'a>(eval: &Operand, code: &mut Vec<ZOP>,
     }
     let save_var: Variable = match temp_ids.pop() {
         Some(var) => Variable::new(var),
-        None      => panic!{"Stack temp_ids is empty, pop wasn't possible."}
+        None      => error_force_panic!(EvaluateExpressionError::NoTempIdLeftOnStack)
     };
     let label = format!("expr_{}", manager.ids_expr.start_next());
     code.push(ZOP::StoreVariable{ variable: save_var.clone(), value: Operand::new_const(0)});
@@ -302,7 +370,7 @@ fn eval_not<'a>(eval: &Operand, code: &mut Vec<ZOP>,
     Operand::Var(save_var)
 }
 
-fn eval_unary_minus(eval: &Operand, code: &mut Vec<ZOP>, temp_ids: &mut Vec<u8>) -> Operand {
+fn eval_unary_minus<'a>(eval: &Operand, code: &mut Vec<ZOP>, temp_ids: &mut Vec<u8>) -> Operand {
     if eval.is_const() {
         let large = match eval { &Operand::LargeConst(_) => { true }, _ => { false } };
         if large {
@@ -320,14 +388,14 @@ fn eval_unary_minus(eval: &Operand, code: &mut Vec<ZOP>, temp_ids: &mut Vec<u8>)
                 if let Some(temp) = temp_ids.pop() {
                     Variable::new(temp)
                 } else {
-                    panic!{"Stack temp_ids is empty, pop wasn't possible."}
+                    error_force_panic!(EvaluateExpressionError::NoTempIdLeftOnStack)
                 }
             }
         }, _ => {
             if let Some(temp) = temp_ids.pop() {
                 Variable::new(temp)
             } else {
-                panic!{"Stack temp_ids is empty, pop wasn't possible."}
+                error_force_panic!(EvaluateExpressionError::NoTempIdLeftOnStack)
             }
         }
     };
@@ -400,7 +468,7 @@ fn determine_save_var(operand1: &Operand, operand2: &Operand, temp_ids: &mut Vec
     if let Some(temp) = temp_ids.pop() {
         return Variable{ id: temp, vartype: vartype };
     } else {
-        panic!{"Stack temp_ids is empty, pop wasn't possible."}
+        error_force_panic!(EvaluateExpressionError::NoTempIdLeftOnStack)
     }
 }
 

@@ -4,11 +4,11 @@ use std::collections::{HashMap, HashSet};
 use std::error::Error;
 use std::io::Write;
 
-use backend::zcode::zfile::{FormattingState, Operand, Variable, ZOP, Zfile, Type};
+use backend::zcode::zfile::{Constant, FormattingState, Operand, Variable, ZOP, Zfile, Type};
 use config::Config;
 use frontend::ast;
 use frontend::ast::ASTNode;
-use frontend::evaluate_expression::evaluate_expression;
+use frontend::evaluate_expression::{evaluate_expression, EvaluateExpressionError};
 use frontend::lexer::Token;
 use frontend::lexer::Token::*;
 
@@ -24,6 +24,9 @@ pub enum CodeGenError {
     UnsupportedElseIfExpression { token: Token },
     UnsupportedExpressionType { name: String },
     UnsupportedLongExpression { name: String, token: Token },
+    IdentifierStackEmpty,
+    SymbolMapEmpty,
+    CouldNotFindSymbolId,
 }
 
 pub fn generate_zcode<W: Write>(cfg: &Config, ast: ast::AST, output: &mut W) {
@@ -366,13 +369,49 @@ pub fn gen_zcode<'a>(node: &'a ASTNode, mut out: &mut Zfile, mut manager: &mut C
 }
 
 /// random(from, to) -> zcode op_random(0, range)
-pub fn function_random(arg_from: &Operand, arg_to: &Operand,
-        code: &mut Vec<ZOP>, temp_ids: &mut Vec<u8>) -> Operand {
+pub fn function_random(manager: &CodeGenManager, arg_from: &Operand, arg_to: &Operand,
+        code: &mut Vec<ZOP>, temp_ids: &mut Vec<u8>, location: (u64, u64)) -> Operand {
 
     let range_var: Variable = match temp_ids.pop() {
         Some(var) => Variable::new(var),
-        None      => panic!{"Function random has no range variable"}
+        None      => error_force_panic!(EvaluateExpressionError::NoTempIdLeftOnStack)
     };
+
+    match arg_from {
+        &Operand::Var(ref var) => {
+            if var.vartype != Type::Integer {
+                error_panic!(manager.cfg =>EvaluateExpressionError::UnsupportedFunctionArgType { name: "random".to_string(),
+                    index: 0, location: location } );
+                return Operand::Const(Constant { value: 0 })
+            }
+        }
+        &Operand::StringRef(_) => {
+            error_panic!(manager.cfg =>EvaluateExpressionError::UnsupportedFunctionArgType { name: "random".to_string(),
+                index: 0, location: location } );
+            return Operand::Const(Constant { value: 0 })
+        }
+        _ => {
+            // type from is fine
+        }
+    }
+
+    match arg_to {
+        &Operand::Var(ref var) => {
+            if var.vartype != Type::Integer {
+                error_panic!(manager.cfg =>EvaluateExpressionError::UnsupportedFunctionArgType { name: "random".to_string(),
+                    index: 1, location: location } );
+                return Operand::Const(Constant { value: 0 })
+            }
+        }
+        &Operand::StringRef(_) => {
+            error_panic!(manager.cfg =>EvaluateExpressionError::UnsupportedFunctionArgType { name: "random".to_string(),
+                index: 0, location: location } );
+            return Operand::Const(Constant { value: 0 })
+        }
+        _ => {
+            // type to is fine
+        }
+    }
 
     // Calculate range = to - from + 1
     code.push(ZOP::Sub{
@@ -388,7 +427,7 @@ pub fn function_random(arg_from: &Operand, arg_to: &Operand,
 
     let var: Variable = match temp_ids.pop() {
         Some(var) => Variable::new(var),
-        None      => panic!{"Function random has no variable"}
+        None      => error_force_panic!(EvaluateExpressionError::NoTempIdLeftOnStack)
     };
 
     // get a random number between 1 and range
@@ -471,7 +510,7 @@ impl IdentifierProvider {
             return temp.clone()
         }
 
-        panic!{"id_stack is empty, peek wasn't possible."}
+        error_force_panic!(CodeGenError::IdentifierStackEmpty);
     }
 
     // Pops the last id from the stack
@@ -480,7 +519,7 @@ impl IdentifierProvider {
             return temp.clone()
         }
 
-        panic!{"id_stack is empty, pop wasn't possible."}
+        error_force_panic!(CodeGenError::IdentifierStackEmpty);
     }
 }
 
@@ -511,7 +550,7 @@ impl <'a> SymbolTable<'a> {
             return temp.0.clone()
         }
 
-        panic!{"symbol_map is empty, get_symbol_id with the symbol '{:?}' wasn't possible.", symbol}
+        error_force_panic!(CodeGenError::SymbolMapEmpty)
     }
 
     pub fn get_symbol_type(&self, symbol: &str) -> Type {
@@ -519,7 +558,7 @@ impl <'a> SymbolTable<'a> {
             return temp.1.clone()
         }
 
-        panic!{"symbol_map is empty, get get_symbol_type with the symbol '{:?}' wasn't possible.", symbol}
+        error_force_panic!(CodeGenError::SymbolMapEmpty)
     }
 
     pub fn has_var_id(&self, id: u8) -> bool {
@@ -529,7 +568,7 @@ impl <'a> SymbolTable<'a> {
                     return true;
                 }
             } else {
-                panic!{"symbol_map is empty, has_var_id with the id '{:?}' wasn't possible.", id}
+                error_force_panic!(CodeGenError::SymbolMapEmpty)
             }
         }
         false
@@ -542,9 +581,10 @@ impl <'a> SymbolTable<'a> {
                     return temp.1.clone();
                 }
             } else {
-                panic!{"symbol_map is empty, get_symbol_type_by_id wasn't possible."}
+                error_force_panic!(CodeGenError::SymbolMapEmpty)
             }
         }
-        panic!("should never happen: could not find the requested ID in symbol table")
+
+        error_force_panic!(CodeGenError::CouldNotFindSymbolId)
     }
 }
