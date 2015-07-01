@@ -734,9 +734,10 @@ impl Zfile {
 
             // jumps to the end, if there a no links
             ZOP::JE{operand1: Operand::new_var(16), operand2: Operand::new_const(0x00), jump_to_label: "system_check_links_end_quit".to_string()},
-            ZOP::Print{text: "--------------------".to_string()},
+            ZOP::SetTextStyle{bold: false, reverse: false, monospace: true, italic: false},
+            ZOP::Print{text: "---------------------------------------".to_string()},
             ZOP::Newline,
-            ZOP::Print{text: "press a key... ".to_string()},
+            ZOP::Print{text: "Please press a number to select a link:".to_string()},
             ZOP::Newline,
 
             // check if there are more than 9 links
@@ -804,6 +805,7 @@ impl Zfile {
 
             // loads the address of the link from the array
             ZOP::Label{name: "system_check_links_load_link_address".to_string()},
+            ZOP::SetTextStyle{bold: false, reverse: false, monospace: false, italic: false},
             // decrement 0x03 becouse the array starts at 0 and not at 1
             ZOP::Dec{variable: 3},
             ZOP::LoadW{array_address: Operand::new_large_const(save_at_addr as i16), index: Variable::new(3), variable: Variable::new(2)},
