@@ -21,10 +21,12 @@ pub struct ASTBuilder<'a> {
     ast: AST,
 }
 
+/// The AST holds only a vectory of all passage-nodes
 pub struct AST {
     passages: Vec<ASTNode>,
 }
 
+/// the parser creates an iterator with these enums to build the AST
 pub enum ASTOperation {
     AddPassage(Token),
     AddChild(Token),
@@ -47,6 +49,7 @@ impl<'a> ASTBuilder<'a> {
         }
     }
 
+    /// gets an iterator of ASTOperation and returns an AST
     pub fn build<I: Iterator<Item=ASTOperation>>(mut self, ops: I) -> AST {
         for op in ops {
             self.operation(op);
@@ -56,6 +59,7 @@ impl<'a> ASTBuilder<'a> {
         self.ast
     }
 
+    /// ASTOperation-enum -> function match
     pub fn operation(&mut self, op: ASTOperation) {
         use self::ASTOperation::*;
         match op {
@@ -170,21 +174,6 @@ impl AST {
         out.emit(code);
     }
 
-    /// prints the tree
-    /*pub fn print(&self, force_print: bool) {
-        println!("print ast {:?}", force_print);
-        if force_print {
-            println!("Abstract Syntax Tree: ");
-        } else {
-            debug!("Abstract Syntax Tree: ");
-        }
-
-        for child in &self.passages {
-            child.print(force_print);
-        }
-        debug!("");
-    }*/
-
     /// counts the childs of the path in the asts
     pub fn count_childs(&self, path: Vec<usize>) -> usize {
         if let Some(index) = path.first() {
@@ -209,6 +198,7 @@ impl AST {
         }
     }
 
+    /// cycle through all passages an returns a vector with all passage-titles
     fn passage_nodes_to_string(&self) -> Vec<String> {
         let mut passages: Vec<String> = Vec::new();
         for child in &self.passages {
@@ -224,6 +214,7 @@ impl AST {
     }
 }
 
+/// To Print the AST
 impl Debug for AST {
     fn fmt(&self, f: &mut Formatter) -> Result {
         try!(f.write_str("Abstract Syntax Tree: \n"));
@@ -314,6 +305,7 @@ impl ASTNode {
         }
     }
 
+    /// returns the category-Token of the current node
     pub fn category(&self) -> Token {
         match self {
             &ASTNode::Passage(ref t) => {
@@ -325,6 +317,7 @@ impl ASTNode {
         }
     }
 
+    /// returns e vector of all childs of the current node
     pub fn childs(&self) -> &Vec<ASTNode> {
         match self {
             &ASTNode::Passage(ref t) => {
@@ -350,16 +343,7 @@ impl ASTNode {
         Ok(())
     }
 
-    /// prints an node of an ast
-    /*pub fn print(&self, force_print: bool) {
-        println!("print {:?}", force_print);
-        if force_print {
-            println!("{:?}", self);
-        } else {
-            debug!("{:?}", self);
-        }
-    }*/
-
+    /// wraps the ASTNode to NodeDefault if it is an NodeDefault
     pub fn as_default(&self) -> &NodeDefault {
         match self {
             &ASTNode::Default(ref def) => def,
@@ -428,7 +412,6 @@ mod tests {
         for item in expected.iter() {
             let b = ast.is_specific_token(item.1.clone(), item.0.to_vec());
             if b == false {
-                //ast.print(true);
                 println!("{:?}", ast);
             }
             assert!(ast.is_specific_token(item.1.clone(), item.0.to_vec()));
