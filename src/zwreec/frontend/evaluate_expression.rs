@@ -536,6 +536,20 @@ fn boolstr_to_const(string: &str) -> Operand {
 }
 
 #[test]
+fn test_count_constants(){
+    assert_eq!(count_constants(&Operand::new_large_const(10),&Operand::new_large_const(10)),2);
+    assert_eq!(count_constants(&Operand::new_var(10),&Operand::new_large_const(10)),1);
+    assert_eq!(count_constants(&Operand::new_large_const(10),&Operand::new_var(10)),1);
+    assert_eq!(count_constants(&Operand::new_var(10),&Operand::new_var(10)),0);
+}
+
+#[test]
+fn test_boolstr_to_const(){
+    assert_eq!(boolstr_to_const(&"true".to_string()).const_value(),1);
+    assert_eq!(boolstr_to_const(&"false".to_string()).const_value(),0);
+}
+
+#[test]
 fn test_direct_eval_num_op(){
     let cfg = Config::default_config();
     let manager = CodeGenManager::new(&cfg);
