@@ -6,10 +6,12 @@ pub use super::op;
 use config::Config;
 
 #[derive(Clone, PartialEq, Debug)]
+#[allow(dead_code)]
 pub enum Type {
-    Bool,
-    Integer,
-    String,
+    None = 0,
+    Bool = 1,
+    Integer = 2,
+    String = 3,
 }
 
 #[derive(Debug,Clone)]
@@ -25,6 +27,7 @@ pub enum Operand {
     Const(Constant) ,
     LargeConst(LargeConstant),
     StringRef(LargeConstant),
+    BoolConst(Constant),
 }
 
 impl Operand {
@@ -48,17 +51,22 @@ impl Operand {
         Operand::Var(Variable::new_string(id))
     }
 
+    pub fn new_var_bool(id: u8) -> Operand {
+        Operand::Var(Variable::new_bool(id))
+    }
+
     pub fn const_value(&self) -> i16 {
         match self {
             &Operand::Const(ref constant) => constant.value as i16,
             &Operand::LargeConst(ref constant) => constant.value,
+            &Operand::BoolConst(ref constant) => constant.value as i16,
             _ => panic!("Operand must be a constant!")
         }
     }
 
     pub fn is_const(&self) -> bool {
         match self {
-            &Operand::Const(_) | &Operand::LargeConst(_) => true,
+            &Operand::Const(_) | &Operand::LargeConst(_) | &Operand::BoolConst(_) => true,
             _ => false
         }
     }
@@ -73,6 +81,9 @@ impl Variable {
     }
     pub fn new_bool(id: u8) -> Variable {
         Variable { id: id, vartype: Type::Bool }
+    }
+    pub fn new_type(id: u8, vartype: Type) -> Variable {
+        Variable { id: id, vartype: vartype }
     }
 }
 
@@ -104,6 +115,8 @@ pub enum ZOP {
   StoreVariable{variable: Variable, value: Operand},
   StoreW{array_address: Operand, index: Variable, variable: Variable},
   StoreB{array_address: Operand, index: Variable, variable: Variable},
+  StoreBOperand{array_address: Operand, index: Operand, operand: Operand},
+  LoadBOperand{array_address: Operand, index: Operand, variable: Variable},
   Inc{variable: u8},
   Ret{value: Operand},
   JE{operand1: Operand, operand2: Operand, jump_to_label: String},
@@ -127,6 +140,8 @@ pub enum ZOP {
   Dec{variable: u8},
   LoadW{array_address: Operand, index: Variable, variable: Variable},
   EraseWindow{value: i8},
+  SetVarType{variable: Variable, vartype: Type},
+  GetVarType{variable: Variable, result: Variable},
   Quit,
 }
 
@@ -158,6 +173,7 @@ pub struct Zfile {
     static_addr: u16,
     pub object_addr: u16,
     last_static_written: u16,
+    pub type_store: u16,
     pub heap_start: u16,
     pub force_unicode: bool,
     pub easter_egg: bool,
@@ -214,7 +230,8 @@ impl Zfile {
             object_addr: 0,
             static_addr: 0,
             last_static_written: 0x8000,
-            heap_start: 0x800,
+            heap_start: 0x600,
+            type_store: 0x400,
             force_unicode: force_unicode,
             easter_egg: easter_egg,
         }
@@ -502,6 +519,8 @@ impl Zfile {
             &ZOP::LoadW{ref array_address, ref index, ref variable} => op::op_loadw(array_address, index, variable),
             &ZOP::StoreW{ref array_address, ref index, ref variable} => op::op_storew(array_address, index, variable),
             &ZOP::StoreB{ref array_address, ref index, ref variable} => op::op_storeb(array_address, index, variable),
+            &ZOP::StoreBOperand{ref array_address, ref index, ref operand} => op::op_storeboperand(array_address, index, operand),
+            &ZOP::LoadBOperand{ref array_address, ref index, ref variable} => op::op_loadb(array_address, index, variable),
             &ZOP::Call1NVar{variable} => op::op_call_1n_var(variable),
             &ZOP::EraseWindow{value} => op::op_erase_window(value),
 
@@ -532,6 +551,8 @@ impl Zfile {
             &ZOP::CallVNA3{ref jump_to_label, ref arg1, ref arg2, ref arg3} => self.op_call_vn_a3(jump_to_label, arg1, arg2, arg3),
             &ZOP::CallVSA2{ref jump_to_label, ref arg1, ref arg2, ref result} => self.op_call_vs_a2(jump_to_label, arg1, arg2, result),
             &ZOP::CallVSA3{ref jump_to_label, ref arg1, ref arg2, ref arg3, ref result} => self.op_call_vs_a3(jump_to_label, arg1, arg2, arg3, result),
+            &ZOP::SetVarType{ref variable, ref vartype} => self.set_var_type(variable, vartype),
+            &ZOP::GetVarType{ref variable, ref result} => self.get_var_type(variable, result),
             _ => ()
         }
         let mut new_jumps: Vec<Zjump> = vec![];
@@ -1146,6 +1167,7 @@ impl Zfile {
         let heap_start = self.heap_start;
         let static_addr = self.static_addr;
         let global_addr = self.global_addr;
+        let type_store = self.type_store;
         let pos = Variable::new(1);
         let zero = Variable::new(2);
         let c = Variable::new(3);
@@ -1209,6 +1231,12 @@ impl Zfile {
             ZOP::Add{operand1: Operand::new_var(pos.id), operand2: Operand::new_var(c.id), save_variable: pos.clone()},
             ZOP::Jump{jump_to_label: "mem_free_loop".to_string()},
             ZOP::Label{name: "mem_free_exit".to_string()},
+            // set type entries variables 0-15 of type_store to 0 for no type
+            ZOP::StoreVariable{variable: pos.clone(), value: Operand::new_large_const(0)},
+            ZOP::Label{name: "mem_free_uninit_local_var_types".to_string()},
+            ZOP::StoreB{array_address: Operand::new_large_const(type_store as i16), index: pos.clone(), variable: zero.clone()},
+            ZOP::Inc{variable: pos.id},
+            ZOP::JL{operand1: Operand::new_var(pos.id), operand2: Operand::new_large_const(16i16), jump_to_label: "mem_free_uninit_local_var_types".to_string()},
             ZOP::Ret{value: Operand::new_const(0)}
         ]);
     }
@@ -1257,6 +1285,20 @@ impl Zfile {
             // write length i at first position
             ZOP::StoreW{array_address: Operand::new_var(stra.id), index: zero.clone(), variable: i.clone()},
             ZOP::Ret{value: Operand::new_var(stra.id)}
+        ]);
+    }
+
+    fn set_var_type(&mut self, variable: &Variable, vartype: &Type) {
+        let type_store = self.type_store;
+        self.emit(vec![
+            ZOP::StoreBOperand{array_address: Operand::new_large_const(type_store as i16), index: Operand::new_const(variable.id), operand: Operand::new_const(vartype.clone() as u8)},
+        ]);
+    }
+
+    fn get_var_type(&mut self, variable: &Variable, result: &Variable) {
+        let type_store = self.type_store;
+        self.emit(vec![
+            ZOP::LoadBOperand{array_address: Operand::new_large_const(type_store as i16), index: Operand::new_const(variable.id), variable: result.clone()},
         ]);
     }
 

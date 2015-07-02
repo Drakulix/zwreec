@@ -73,7 +73,7 @@ fn evaluate_expression_internal<'a>(node: &'a ASTNode, code: &mut Vec<ZOP>,
                 if n.childs.len() >= 1 {
                     return evaluate_expression_internal(&n.childs[0], code, temp_ids, manager, &mut out)
                 } else {
-                    return Operand::Const(Constant { value: 0 })
+                    return Operand::BoolConst(Constant { value: 0 })
                 }
             }
 
@@ -100,7 +100,7 @@ fn evaluate_expression_internal<'a>(node: &'a ASTNode, code: &mut Vec<ZOP>,
                     if n.childs.len() >= 1 {
                         return evaluate_expression_internal(&n.childs[0], code, temp_ids, manager, &mut out)
                     } else {
-                        return Operand::Const(Constant { value: 0 })
+                        return Operand::BoolConst(Constant { value: 0 })
                     }
                 }
             }
@@ -211,7 +211,7 @@ fn eval_num_op<'a>(eval0: &Operand, eval1: &Operand, op_name: &str, location: (u
             error_panic!(manager.cfg => EvaluateExpressionError::UnsupportedOperator { op_name: op_name.to_string(), location: location.clone() })
         }
     };
-
+    code.push(ZOP::SetVarType{variable: save_var.clone(), vartype: save_var.vartype.clone()});
     free_var_if_both_temp(eval0, eval1, temp_ids);
 
     Operand::Var(save_var)
@@ -261,7 +261,7 @@ fn eval_comp_op<'a>(eval0: &Operand, eval1: &Operand, op_name: &str, location: (
         return direct_eval_comp_op(eval0, eval1, op_name, location.clone(), manager);
     }
     let save_var: Variable = match temp_ids.pop() {
-        Some(var) => Variable::new(var),
+        Some(var) => Variable::new_bool(var),
         None      => error_force_panic!(EvaluateExpressionError::NoTempIdLeftOnStack)
     };
     let label = format!("expr_{}", manager.ids_expr.start_next());
@@ -349,6 +349,7 @@ fn eval_comp_op<'a>(eval0: &Operand, eval1: &Operand, op_name: &str, location: (
         };
     }
     code.push(ZOP::Label {name: label.to_string()});
+    code.push(ZOP::SetVarType{variable: save_var.clone(), vartype: save_var.vartype.clone()});
     free_var_if_temp(eval0, temp_ids);
     free_var_if_temp(eval1, temp_ids);
     Operand::Var(save_var)
@@ -373,30 +374,23 @@ fn direct_eval_comp_op<'a>(eval0: &Operand, eval1: &Operand, op_name: &str, loca
         }
     };
     if result {
-        Operand::Const(Constant {value: 1})
+        Operand::BoolConst(Constant {value: 1})
     } else {
-        Operand::Const(Constant {value: 0})
+        Operand::BoolConst(Constant {value: 0})
     }
 }
 
 fn eval_and_or(eval0: &Operand, eval1: &Operand, op_name: &str, code: &mut Vec<ZOP>,
         temp_ids: &mut Vec<u8>) -> Operand {
     if count_constants(&eval0, &eval1) == 2 {
-        let mut out_large = false;
         let val0 = eval0.const_value();
         let val1 = eval1.const_value();
-        match eval0 { &Operand::LargeConst(_) => {out_large = true; }, _ => {} };
-        match eval1 { &Operand::LargeConst(_) => {out_large = true; }, _ => {} };
         let result = if op_name == "or" || op_name == "||" {
                 val0 | val1
             } else {
                 val0 & val1
             };
-        if out_large {
-            return Operand::LargeConst(LargeConstant { value: result })
-        } else {
-            return Operand::Const(Constant { value: result as u8 })
-        }
+        return Operand::BoolConst(Constant { value: if result == 0 { 0 } else { 1 } });
     }
 
     let save_var = determine_save_var(eval0, eval1, temp_ids);
@@ -405,8 +399,9 @@ fn eval_and_or(eval0: &Operand, eval1: &Operand, op_name: &str, code: &mut Vec<Z
     } else {
         code.push(ZOP::And{operand1: eval0.clone(), operand2: eval1.clone(), save_variable: save_var.clone()});
     }
+    code.push(ZOP::SetVarType{variable: save_var.clone(), vartype: Type::Bool});
     free_var_if_both_temp(eval0, eval1, temp_ids);
-    Operand::Var(save_var)
+    Operand::new_var_bool(save_var.id)
 }
 
 fn eval_not<'a>(eval: &Operand, code: &mut Vec<ZOP>,
@@ -414,10 +409,10 @@ fn eval_not<'a>(eval: &Operand, code: &mut Vec<ZOP>,
     if eval.is_const() {
         let val = eval.const_value();
         let result: u8 = if val != 0 { 0 } else { 1 };
-        return Operand::Const(Constant { value: result });
+        return Operand::BoolConst(Constant { value: result });
     }
     let save_var: Variable = match temp_ids.pop() {
-        Some(var) => Variable::new(var),
+        Some(var) => Variable::new_bool(var),
         None      => error_force_panic!(EvaluateExpressionError::NoTempIdLeftOnStack)
     };
     let label = format!("expr_{}", manager.ids_expr.start_next());
@@ -425,6 +420,7 @@ fn eval_not<'a>(eval: &Operand, code: &mut Vec<ZOP>,
     code.push(ZOP::JNE{operand1: eval.clone(), operand2: Operand::new_const(0), jump_to_label: label.to_string()});
     code.push(ZOP::StoreVariable{ variable: save_var.clone(), value: Operand::new_const(1)});
     code.push(ZOP::Label {name: label.to_string()});
+    code.push(ZOP::SetVarType{variable: save_var.clone(), vartype: save_var.vartype.clone()});
     free_var_if_temp(eval, temp_ids);
     Operand::Var(save_var)
 }
@@ -460,6 +456,7 @@ fn eval_unary_minus<'a>(eval: &Operand, code: &mut Vec<ZOP>, temp_ids: &mut Vec<
     };
 
     code.push(ZOP::Sub {operand1: Operand::new_const(0), operand2: eval.clone(), save_variable: save_var.clone()});
+    code.push(ZOP::SetVarType{variable: save_var.clone(), vartype: save_var.vartype.clone()});
 
     Operand::new_var(save_var.id)
 }
@@ -502,11 +499,13 @@ fn determine_save_var(operand1: &Operand, operand2: &Operand, temp_ids: &mut Vec
     let type1 = match operand1 {
         &Operand::Var(ref var) => var.vartype.clone(),
         &Operand::StringRef(_) => Type::String,
+        &Operand::BoolConst(_) => Type::Bool,
         _ => { Type::Integer }
     };
     let type2 = match operand2 {
         &Operand::Var(ref var) => var.vartype.clone(),
         &Operand::StringRef(_) => Type::String,
+        &Operand::BoolConst(_) => Type::Bool,
         _ => { Type::Integer }
     };
     let vartype = determine_result_type(type1, type2);
@@ -544,8 +543,8 @@ fn count_constants(operand1: &Operand, operand2: &Operand) -> u8 {
 
 fn boolstr_to_const(string: &str) -> Operand {
     match string {
-        "true" => Operand::Const(Constant { value: 1 }),
-        _ => Operand::Const(Constant { value: 0 })
+        "true" => Operand::BoolConst(Constant { value: 1 }),
+        _ => Operand::BoolConst(Constant { value: 0 })
     }
 }
 

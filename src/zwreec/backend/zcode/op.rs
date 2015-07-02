@@ -61,6 +61,39 @@ pub fn op_storeb(array_address: &Operand, index: &Variable, variable: &Variable)
     bytes
 }
 
+/// stores a value to an array
+/// stores the value of operand to the address in: array_address + index
+pub fn op_storeboperand(array_address: &Operand, index: &Operand, operand: &Operand) -> Vec<u8> {
+    // assert!(array_address > 0, "not allowed array-address, becouse in _some_ interpreters (for example zoom) it crahs. -.-");
+    let args: Vec<ArgType> = vec![arg_type(&array_address), arg_type(&index), arg_type(&operand), ArgType::Nothing];
+    let mut bytes = op_var(0x02, args);
+
+    // array address
+    write_argument(array_address, &mut bytes);
+
+    // array index
+    write_argument(index, &mut bytes);
+
+    // value
+    write_argument(operand, &mut bytes);
+    bytes
+}
+
+/// loads a byte from an array in a variable
+/// loadb is an 2op, BUT with 3 ops -.-
+pub fn op_loadb(array_address: &Operand, index: &Operand, variable: &Variable) -> Vec<u8> {
+    let mut bytes = op_2(0x10, vec![arg_type(&array_address), arg_type(&index)]);
+
+    // array address
+    write_argument(array_address, &mut bytes);
+    // array index
+    write_argument(index, &mut bytes);
+
+    // variable
+    bytes.push(variable.id);
+    bytes
+}
+
 
 /// loads a word from an array in a variable
 /// loadw is an 2op, BUT with 3 ops -.-
@@ -410,6 +443,7 @@ pub fn arg_type(operand: &Operand) -> ArgType {
     match operand {
         &Operand::Var(_) => ArgType::Variable,
         &Operand::Const(_) => ArgType::SmallConst,
+        &Operand::BoolConst(_) => ArgType::SmallConst,
         &Operand::LargeConst(_) => ArgType::LargeConst,
         &Operand::StringRef(_) => ArgType::LargeConst,
     }
@@ -419,6 +453,7 @@ pub fn write_argument(operand: &Operand, v: &mut Vec<u8>){
     match operand {
         &Operand::Var(ref var)=> v.push(var.id),
         &Operand::Const(ref constant) => v.push(constant.value),
+        &Operand::BoolConst(ref constant) => v.push(constant.value),
         &Operand::LargeConst(ref constant) => write_i16(constant.value, v),
         &Operand::StringRef(ref constant) => write_i16(constant.value, v),
     };
