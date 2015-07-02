@@ -42,10 +42,10 @@ To build the binary, you need the rust version as outlined in [Requirements and
 Usage](#requirements-and-usage). Then you can build the binary using
 
 ```sh
-$ cargo build
+$ cargo build --release
 ```
 
-The resulting binary can be found at `target/debug/zwreec` or downloaded at [https://github.com/Drakulix/zwreec/releases/tag/v0.4.0](). 
+The resulting binary can be found at `target/release/zwreec` or downloaded at [https://github.com/Drakulix/zwreec/releases/tag/v0.4.0](https://github.com/Drakulix/zwreec/releases/tag/v0.4.0). 
 
 #### Usage
 
