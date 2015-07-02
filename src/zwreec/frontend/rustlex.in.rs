@@ -56,7 +56,7 @@ rustlex! TweeLexer {
     let TAG = ['a'-'z''A'-'Z''0'-'9''.''_']+;
 
     // If for example // is at a beginning of a line, then // is matched and not just /
-    let TEXT_CHAR_START = [^"!>#"'\n'] | HTTP;
+    let TEXT_CHAR_START = [^"!#"'\n'] | HTTP;
     let TEXT_CHAR = [^"/'_=~^{@<[" '\n'] | HTTP;
     let TEXT = TEXT_CHAR+ | ["/'_=~^{@<["];
 
