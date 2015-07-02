@@ -336,11 +336,13 @@ pub fn zwreec_options(mut opts: getopts::Options) -> getopts::Options {
     opts
 }
 
+/// Prints a usage
+///
+/// This takes your options and prints a usage for those options including the library options
 pub fn zwreec_usage(verbose: bool, opts: getopts::Options, brief: &str) -> String {
     use std::fmt::format;
-    let options = zwreec_options(opts);
 
-    let options_usage = options.usage(brief);
+    let options_usage = opts.usage(brief);
 
     let features_usage = if verbose {
         "List of supported features (default value in parenthesis)
