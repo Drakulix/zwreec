@@ -547,10 +547,10 @@ fn test_and_or(){
     vec.push(2);
     vec.push(3);
     vec.push(10);
-    assert_eq!(eval_and_or(&Operand::new_large_const(0), &Operand::new_large_const(1), &"or".to_string(), &mut vec2, &mut vec).const_value(),1 as i16);
-    assert_eq!(eval_and_or(&Operand::new_large_const(0), &Operand::new_large_const(1), &"and".to_string(), &mut vec2, &mut vec).const_value(),0 as i16);
-    assert_eq!(eval_and_or(&Operand::new_large_const(0), &Operand::new_large_const(0), &"or".to_string(), &mut vec2, &mut vec).const_value(),0 as i16);
-    assert_eq!(eval_and_or(&Operand::new_large_const(1), &Operand::new_large_const(1), &"and".to_string(), &mut vec2, &mut vec).const_value(),1 as i16);
+    assert_eq!(eval_and_or(&Operand::new_large_const(0), &Operand::new_large_const(1), "or", &mut vec2, &mut vec).const_value(),1 as i16);
+    assert_eq!(eval_and_or(&Operand::new_large_const(0), &Operand::new_large_const(1), "and", &mut vec2, &mut vec).const_value(),0 as i16);
+    assert_eq!(eval_and_or(&Operand::new_large_const(0), &Operand::new_large_const(0), "or", &mut vec2, &mut vec).const_value(),0 as i16);
+    assert_eq!(eval_and_or(&Operand::new_large_const(1), &Operand::new_large_const(1), "and", &mut vec2, &mut vec).const_value(),1 as i16);
 }
 
 #[test]
@@ -609,9 +609,9 @@ fn test_boolstr_to_const(){
 fn test_direct_eval_num_op(){
     let cfg = Config::default_config();
     let manager = CodeGenManager::new(&cfg);
-    assert_eq!(direct_eval_num_op(&Operand::new_large_const(10), &Operand::new_large_const(20), &"+".to_string(), (0x0000000000000000, 0x0000000000000000), &manager).const_value(),30 as i16);
-    assert_eq!(direct_eval_num_op(&Operand::new_large_const(66), &Operand::new_large_const(74), &"-".to_string(), (0x0000000000000000, 0x0000000000000000), &manager).const_value(),-8 as i16);
-    assert_eq!(direct_eval_num_op(&Operand::new_large_const(45), &Operand::new_large_const(10), &"*".to_string(), (0x0000000000000000, 0x0000000000000000), &manager).const_value(),450 as i16);
-    assert_eq!(direct_eval_num_op(&Operand::new_large_const(99), &Operand::new_large_const(3), &"/".to_string(), (0x0000000000000000, 0x0000000000000000), &manager).const_value(),33 as i16);
-    assert_eq!(direct_eval_num_op(&Operand::new_large_const(90), &Operand::new_large_const(2), &"%".to_string(), (0x0000000000000000, 0x0000000000000000), &manager).const_value(),0 as i16);
+    assert_eq!(direct_eval_num_op(&Operand::new_large_const(10), &Operand::new_large_const(20), "+", (0x0000000000000000, 0x0000000000000000), &manager).const_value(),30 as i16);
+    assert_eq!(direct_eval_num_op(&Operand::new_large_const(66), &Operand::new_large_const(74), "-", (0x0000000000000000, 0x0000000000000000), &manager).const_value(),-8 as i16);
+    assert_eq!(direct_eval_num_op(&Operand::new_large_const(45), &Operand::new_large_const(10), "*", (0x0000000000000000, 0x0000000000000000), &manager).const_value(),450 as i16);
+    assert_eq!(direct_eval_num_op(&Operand::new_large_const(99), &Operand::new_large_const(3), "/", (0x0000000000000000, 0x0000000000000000), &manager).const_value(),33 as i16);
+    assert_eq!(direct_eval_num_op(&Operand::new_large_const(90), &Operand::new_large_const(2), "%", (0x0000000000000000, 0x0000000000000000), &manager).const_value(),0 as i16);
 }
