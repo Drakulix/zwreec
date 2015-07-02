@@ -415,6 +415,7 @@ fn eval_not<'a>(eval: &Operand, code: &mut Vec<ZOP>,
     Operand::Var(save_var)
 }
 
+
 fn eval_unary_minus<'a>(eval: &Operand, code: &mut Vec<ZOP>, temp_ids: &mut Vec<u8>) -> Operand {
     if eval.is_const() {
         let large = match eval { &Operand::LargeConst(_) => { true }, _ => { false } };
@@ -533,6 +534,30 @@ fn boolstr_to_const(string: &str) -> Operand {
         "true" => Operand::Const(Constant { value: 1 }),
         _ => Operand::Const(Constant { value: 0 })
     }
+}
+
+#[test]
+fn test_eval_unary_minus(){
+    let mut vec2: Vec<ZOP> = Vec::new();
+    let mut vec: Vec<u8> = Vec::new();
+    vec.push(1);
+    vec.push(2);
+    vec.push(3);
+    vec.push(4);
+    assert_eq!(eval_unary_minus(&Operand::new_large_const(10), &mut vec2, &mut vec).const_value(),-10);
+    assert_eq!(eval_unary_minus(&Operand::new_const(10), &mut vec2, &mut vec).const_value(),246);
+}
+
+#[test]
+fn test_determine_save_var (){
+    let mut vec: Vec<u8> = Vec::new();
+    vec.push(1);
+    vec.push(2);
+    vec.push(3);
+    vec.push(4);
+    let var = determine_save_var(&Operand::new_var(10), &Operand::new_var(10), &mut vec);
+    assert_eq!(var.id,10);
+    assert_eq!(var.vartype,Type::Integer);
 }
 
 #[test]
