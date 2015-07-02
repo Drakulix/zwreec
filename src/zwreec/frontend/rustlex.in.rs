@@ -56,7 +56,7 @@ rustlex! TweeLexer {
     let TAG = ['a'-'z''A'-'Z''0'-'9''.''_']+;
 
     // If for example // is at a beginning of a line, then // is matched and not just /
-    let TEXT_CHAR_START = [^"!>#"'\n'] | HTTP;
+    let TEXT_CHAR_START = [^"!#"'\n'] | HTTP;
     let TEXT_CHAR = [^"/'_=~^{@<[" '\n'] | HTTP;
     let TEXT = TEXT_CHAR+ | ["/'_=~^{@<["];
 
@@ -98,7 +98,7 @@ rustlex! TweeLexer {
 
     let ASSIGN = "=" | "to" | "+=" | "-=" | "*=" | "/=";
     let NUM_OP = ["+-*/%"];
-    let COMP_OP = "is" | "==" | "eq" | "neq" | ">" | "gt" | ">=" | "gte" | "<" | "lt" | "<=" | "lte";
+    let COMP_OP = "is" | "==" | "eq" | "!=" | "neq" | ">" | "gt" | ">=" | "gte" | "<" | "lt" | "<=" | "lte";
     let LOG_OP = "and" | "&&" | "or" | "||" | "not" | "!";
 
     let FUNCTION_NAME = (LETTER | UNDERSCORE) VARIABLE_CHAR*;
