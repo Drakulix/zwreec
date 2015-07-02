@@ -79,6 +79,18 @@
 326 should print 0: <<print 12345neq12345>>
 327 should print 1: <<print 12345neq1234>>
 
-328 should print 1: <<print "hallo"=="hallo">>
-329 should print 0: <<print "hallo"=="hallo2">>
+328 should print 0: <<print "hallo"=="hallo2">><<set $var2 to "hal">><<set $var2 to $var2+"lo">><<set $var3 to "hallo2">>
+339 should print 0: <<print $var3==$var2>>
+330 should print 0: <<print "hallu" <= "hallo">>
+331 should print 0: <<print "hall" >= "hallo">>
+332 should print 0: <<print $var3 < $var2>>
+333 should print 0: <<print $var3 < $var3>>
+334 should print 0: <<print $var3 neq $var3>>
 
+335 should print not 0: <<print "hallo"=="hallo">>
+336 should print not 0: <<print "hallo"==$var2>>
+337 should print not 0: <<print "haa" < "hallo">>
+338 should print not 0: <<print "hall" <= "hallo">>
+339 should print not 0: <<print $var3 >= $var2>>
+340 should print not 0: <<print $var3 > $var2>>
+341 should print not 0: <<print $var2 >= $var2>>

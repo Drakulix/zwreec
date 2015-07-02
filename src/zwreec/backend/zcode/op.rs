@@ -230,6 +230,16 @@ pub fn op_and(operand1: &Operand, operand2: &Operand, save_variable: &Variable) 
     bytes
 }
 
+/// bitwise NOT
+pub fn op_not(arg: &Operand, variable: &Variable) -> Vec<u8> {
+    let args: Vec<ArgType> = vec![arg_type(arg), ArgType::Nothing, ArgType::Nothing, ArgType::Nothing];
+    let mut bytes = op_var(0x18, args);
+    write_argument(arg, &mut bytes);
+    bytes.push(variable.id);
+    bytes
+}
+
+
 /// subtraktion
 /// save_variable = operand1 - operand2
 pub fn op_sub(operand1: &Operand, operand2: &Operand, save_variable: &Variable) -> Vec<u8> {
