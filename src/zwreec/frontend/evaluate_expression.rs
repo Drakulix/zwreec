@@ -365,6 +365,7 @@ fn direct_eval_comp_op<'a>(eval0: &Operand, eval1: &Operand, op_name: &str, loca
     }
 }
 
+
 fn eval_and_or(eval0: &Operand, eval1: &Operand, op_name: &str, code: &mut Vec<ZOP>,
         temp_ids: &mut Vec<u8>) -> Operand {
     if count_constants(&eval0, &eval1) == 2 {
@@ -394,6 +395,7 @@ fn eval_and_or(eval0: &Operand, eval1: &Operand, op_name: &str, code: &mut Vec<Z
     free_var_if_both_temp(eval0, eval1, temp_ids);
     Operand::Var(save_var)
 }
+
 
 fn eval_not<'a>(eval: &Operand, code: &mut Vec<ZOP>,
         temp_ids: &mut Vec<u8>, mut manager: &mut CodeGenManager<'a>) -> Operand {
@@ -536,6 +538,35 @@ fn boolstr_to_const(string: &str) -> Operand {
     }
 }
 
+
+#[test]
+fn test_and_or(){
+    let mut vec2: Vec<ZOP> = Vec::new();
+    let mut vec: Vec<u8> = Vec::new();
+    vec.push(1);
+    vec.push(2);
+    vec.push(3);
+    vec.push(10);
+    assert_eq!(eval_and_or(&Operand::new_large_const(0), &Operand::new_large_const(1), &"or".to_string(), &mut vec2, &mut vec).const_value(),1 as i16);
+    assert_eq!(eval_and_or(&Operand::new_large_const(0), &Operand::new_large_const(1), &"and".to_string(), &mut vec2, &mut vec).const_value(),0 as i16);
+    assert_eq!(eval_and_or(&Operand::new_large_const(0), &Operand::new_large_const(0), &"or".to_string(), &mut vec2, &mut vec).const_value(),0 as i16);
+    assert_eq!(eval_and_or(&Operand::new_large_const(1), &Operand::new_large_const(1), &"and".to_string(), &mut vec2, &mut vec).const_value(),1 as i16);
+}
+
+#[test]
+fn test_eval_not(){
+    let cfg = Config::default_config();
+    let mut manager = CodeGenManager::new(&cfg);
+    let mut vec2: Vec<ZOP> = Vec::new();
+    let mut vec: Vec<u8> = Vec::new();
+    vec.push(1);
+    vec.push(2);
+    vec.push(3);
+    vec.push(10);
+    assert_eq!(eval_not(&Operand::new_large_const(10), &mut vec2, &mut vec, &mut manager).const_value(),0);
+    assert_eq!(eval_not(&Operand::new_const(0), &mut vec2, &mut vec, &mut manager).const_value(),1);
+}
+
 #[test]
 fn test_eval_unary_minus(){
     let mut vec2: Vec<ZOP> = Vec::new();
@@ -543,7 +574,7 @@ fn test_eval_unary_minus(){
     vec.push(1);
     vec.push(2);
     vec.push(3);
-    vec.push(4);
+    vec.push(10);
     assert_eq!(eval_unary_minus(&Operand::new_large_const(10), &mut vec2, &mut vec).const_value(),-10);
     assert_eq!(eval_unary_minus(&Operand::new_const(10), &mut vec2, &mut vec).const_value(),246);
 }
