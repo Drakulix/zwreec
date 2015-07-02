@@ -78,25 +78,25 @@ impl TermLogger {
                             cur_time.tm_hour,
                             cur_time.tm_min,
                             cur_time.tm_sec));
+                try!(stderr_lock.fg(color));
+                try!(write!(stderr_lock, "{}", record.level()));
+                try!(stderr_lock.reset());
+                try!(write!(stderr_lock, "] "));
 
                 match record.level() {
                     LogLevel::Error |
                     LogLevel::Warn  |
                     LogLevel::Info  |
                     LogLevel::Debug => {
-                        try!(stderr_lock.fg(color));
-                        try!(write!(stderr_lock, "{}", record.level()));
-                        try!(stderr_lock.reset());
                         try!(writeln!(stderr_lock,
-                            "] {}: {}",
+                            "{}: {}",
                                 record.target(),
                                 record.args()
                         ));
                     },
                     LogLevel::Trace => {
                         try!(writeln!(stderr_lock,
-                            "[{}] {}: [{}:{}] - {}",
-                                record.level(),
+                            "{}: [{}:{}] - {}",
                                 record.target(),
                                 record.location().file(),
                                 record.location().line(),
