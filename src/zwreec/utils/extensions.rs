@@ -105,6 +105,7 @@ pub enum ParseResult {
     End,
 }
 
+
 /// An iterator to maintain state while iterating another iterator and allows more complex parsing
 // (allowing holding the current iterator value, continue if its goes empty and filter the output)
 #[must_use = "iterator adaptors are lazy and do nothing unless consumed"]
@@ -166,6 +167,50 @@ impl<A:Clone, I: Sized+Iterator<Item=A>>ParserExt for I {
         Parser{iter: self, f: f, state: initial_state, iter_state: ParseResult::Continue, current_elem: None}
     }
 }
+
+
+#[must_use = "iterator adaptors are lazy and do nothing unless consumed"]
+#[derive(Clone)]
+pub struct Wait<B, I, E, F>
+    where
+    I: Iterator,
+    F: FnMut(&mut E, I::Item) -> Option<B> {
+        iter: I,
+        f: F,
+        current_elem: Option<B>,
+}
+
+impl<B, I, E, F> Iterator for Wait<B, I, E, F> where
+    I: Iterator,
+    F: FnMut(&mut E, I::Item) -> Option<B>,
+{
+    type Item = B;
+
+    #[inline]
+    fn next(&mut self) -> Option<B> {
+        while let Some(elem) =  self.iter.next() {
+            match self.f(self.current_elem, elem) {
+                Some(elem) => {
+                    let return_val = self.current_elem;
+                    self.current_elem = elem;
+                    match return_val {
+                        Some(value) => return Some(value),
+                        None => continue,
+                    }
+                },
+                None => continue,
+            }
+        }
+        None
+    }
+
+    #[inline]
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        let (_, upper) = self.iter.size_hint();
+        (0, upper) // can't know a lower bound, due to the waiting function
+    }
+}
+
 
 #[test]
 fn peeking_test() {
