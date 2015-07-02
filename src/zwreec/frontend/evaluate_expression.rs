@@ -615,3 +615,33 @@ fn test_direct_eval_num_op(){
     assert_eq!(direct_eval_num_op(&Operand::new_large_const(99), &Operand::new_large_const(3), "/", (0x0000000000000000, 0x0000000000000000), &manager).const_value(),33 as i16);
     assert_eq!(direct_eval_num_op(&Operand::new_large_const(90), &Operand::new_large_const(2), "%", (0x0000000000000000, 0x0000000000000000), &manager).const_value(),0 as i16);
 }
+
+#[test]
+fn test_direct_eval_comp_op(){
+    let cfg = Config::default_config();
+    let manager = CodeGenManager::new(&cfg);
+    assert_eq!(direct_eval_comp_op(&Operand::new_large_const(20), &Operand::new_large_const(20), "is", (0x0000000000000000, 0x0000000000000000), &manager).const_value(),1 as i16);
+    assert_eq!(direct_eval_comp_op(&Operand::new_large_const(15), &Operand::new_large_const(15), "==", (0x0000000000000000, 0x0000000000000000), &manager).const_value(),1 as i16);
+    assert_eq!(direct_eval_comp_op(&Operand::new_large_const(4), &Operand::new_large_const(4), "eq", (0x0000000000000000, 0x0000000000000000), &manager).const_value(),1 as i16);
+    assert_eq!(direct_eval_comp_op(&Operand::new_large_const(66), &Operand::new_large_const(74), "neq", (0x0000000000000000, 0x0000000000000000), &manager).const_value(),1 as i16);
+    assert_eq!(direct_eval_comp_op(&Operand::new_large_const(2), &Operand::new_large_const(10), "<", (0x0000000000000000, 0x0000000000000000), &manager).const_value(),1 as i16);
+    assert_eq!(direct_eval_comp_op(&Operand::new_large_const(5), &Operand::new_large_const(6), "lt", (0x0000000000000000, 0x0000000000000000), &manager).const_value(),1 as i16);
+    assert_eq!(direct_eval_comp_op(&Operand::new_large_const(5), &Operand::new_large_const(5), "<=", (0x0000000000000000, 0x0000000000000000), &manager).const_value(),1 as i16);
+    assert_eq!(direct_eval_comp_op(&Operand::new_large_const(2), &Operand::new_large_const(5), "lte", (0x0000000000000000, 0x0000000000000000), &manager).const_value(),1 as i16);
+    assert_eq!(direct_eval_comp_op(&Operand::new_large_const(6), &Operand::new_large_const(6), ">=", (0x0000000000000000, 0x0000000000000000), &manager).const_value(),1 as i16);
+    assert_eq!(direct_eval_comp_op(&Operand::new_large_const(6), &Operand::new_large_const(5), "gte", (0x0000000000000000, 0x0000000000000000), &manager).const_value(),1 as i16);
+    assert_eq!(direct_eval_comp_op(&Operand::new_large_const(4), &Operand::new_large_const(3), ">", (0x0000000000000000, 0x0000000000000000), &manager).const_value(),1 as i16);
+    assert_eq!(direct_eval_comp_op(&Operand::new_large_const(1), &Operand::new_large_const(0), "gt", (0x0000000000000000, 0x0000000000000000), &manager).const_value(),1 as i16);
+    assert_eq!(direct_eval_comp_op(&Operand::new_large_const(0), &Operand::new_large_const(20), "is", (0x0000000000000000, 0x0000000000000000), &manager).const_value(),0 as i16);
+    assert_eq!(direct_eval_comp_op(&Operand::new_large_const(1), &Operand::new_large_const(15), "==", (0x0000000000000000, 0x0000000000000000), &manager).const_value(),0 as i16);
+    assert_eq!(direct_eval_comp_op(&Operand::new_large_const(43), &Operand::new_large_const(4), "eq", (0x0000000000000000, 0x0000000000000000), &manager).const_value(),0 as i16);
+    assert_eq!(direct_eval_comp_op(&Operand::new_large_const(74), &Operand::new_large_const(74), "neq", (0x0000000000000000, 0x0000000000000000), &manager).const_value(),0 as i16);
+    assert_eq!(direct_eval_comp_op(&Operand::new_large_const(12), &Operand::new_large_const(10), "<", (0x0000000000000000, 0x0000000000000000), &manager).const_value(),0 as i16);
+    assert_eq!(direct_eval_comp_op(&Operand::new_large_const(15), &Operand::new_large_const(6), "lt", (0x0000000000000000, 0x0000000000000000), &manager).const_value(),0 as i16);
+    assert_eq!(direct_eval_comp_op(&Operand::new_large_const(6), &Operand::new_large_const(5), "<=", (0x0000000000000000, 0x0000000000000000), &manager).const_value(),0 as i16);
+    assert_eq!(direct_eval_comp_op(&Operand::new_large_const(7), &Operand::new_large_const(5), "lte", (0x0000000000000000, 0x0000000000000000), &manager).const_value(),0 as i16);
+    assert_eq!(direct_eval_comp_op(&Operand::new_large_const(5), &Operand::new_large_const(6), ">=", (0x0000000000000000, 0x0000000000000000), &manager).const_value(),0 as i16);
+    assert_eq!(direct_eval_comp_op(&Operand::new_large_const(3), &Operand::new_large_const(5), "gte", (0x0000000000000000, 0x0000000000000000), &manager).const_value(),0 as i16);
+    assert_eq!(direct_eval_comp_op(&Operand::new_large_const(2), &Operand::new_large_const(3), ">", (0x0000000000000000, 0x0000000000000000), &manager).const_value(),0 as i16);
+    assert_eq!(direct_eval_comp_op(&Operand::new_large_const(0), &Operand::new_large_const(0), "gt", (0x0000000000000000, 0x0000000000000000), &manager).const_value(),0 as i16);
+}
