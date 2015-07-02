@@ -160,6 +160,7 @@ use std::vec::Vec;
 ///     println!("Egg!");
 /// }
 /// ```
+#[derive(Clone)]
 pub struct Config {
     /// Force compilation despite errors
     pub force: bool,
@@ -259,7 +260,7 @@ impl Config {
 
 // TODO: If this stays only one Test Case, enum should be removed
 /// The Type used to define backend tests for the compiler
-#[derive(PartialEq)]
+#[derive(PartialEq,Clone)]
 pub enum TestCase {
     /// Skips the normal compiler chain and builds an example zcode file by 
     /// using every opcode.

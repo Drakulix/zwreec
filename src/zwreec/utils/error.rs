@@ -1,6 +1,7 @@
 use std::fmt::{Display, Formatter, Result, Write};
 
 use frontend::lexer::Token;
+use frontend::lexer::LexerError;
 use frontend::parser::ParserError;
 use frontend::expressionparser::ExpressionParserError;
 use frontend::codegen::CodeGenError;
@@ -33,6 +34,18 @@ impl Display for Token {
         match self {
             &Token::TokError{ref message, ..} => try!(f.write_str(&*message)),
             _ => try!(f.write_fmt(format_args!("{:?}", self))),
+        };
+        Ok(())
+    }
+}
+
+impl Display for LexerError {
+    fn fmt(&self, f: &mut Formatter) -> Result {
+        try!(f.write_str("[!!!] Critical Lexer Error\n[!!!] "));
+        match self {
+            &LexerError::UnexpectedCharacter { character, location } => {
+                try!(f.write_fmt(format_args!("Unexpected character '{}' at {}:{}", character, location.0, location.1)))
+            }
         };
         Ok(())
     }
