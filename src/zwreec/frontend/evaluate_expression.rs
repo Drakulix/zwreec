@@ -601,8 +601,8 @@ fn test_count_constants(){
 
 #[test]
 fn test_boolstr_to_const(){
-    assert_eq!(boolstr_to_const(&"true".to_string()).const_value(),1);
-    assert_eq!(boolstr_to_const(&"false".to_string()).const_value(),0);
+    assert_eq!(boolstr_to_const("true").const_value(),1);
+    assert_eq!(boolstr_to_const("false").const_value(),0);
 }
 
 #[test]
