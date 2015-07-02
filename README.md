@@ -45,7 +45,7 @@ Usage](#requirements-and-usage). Then you can build the binary using
 $ cargo build
 ```
 
-The resulting binary can be found at `target/debug/zwreec`. 
+The resulting binary can be found at `target/debug/zwreec` or downloaded at [https://github.com/Drakulix/zwreec/releases/tag/v0.4.0](). 
 
 #### Usage
 
