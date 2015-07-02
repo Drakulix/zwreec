@@ -271,7 +271,7 @@ fn eval_comp_op<'a>(eval0: &Operand, eval1: &Operand, op_name: &str, location: (
                 code.push(ZOP::JE{operand1: eval0.clone(), operand2: eval1.clone(), jump_to_label: label.to_string()});
                 code.push(ZOP::StoreVariable{ variable: save_var.clone(), value: const_false});
             },
-            "neq" => {
+            "!=" | "neq" => {
                 code.push(ZOP::StoreVariable{ variable: save_var.clone(), value: const_false});
                 code.push(ZOP::JE{operand1: eval0.clone(), operand2: eval1.clone(), jump_to_label: label.to_string()});
                 code.push(ZOP::StoreVariable{ variable: save_var.clone(), value: const_true});
@@ -310,7 +310,7 @@ fn eval_comp_op<'a>(eval0: &Operand, eval1: &Operand, op_name: &str, location: (
                 code.push(ZOP::Not{operand: Operand::new_var(save_var.id), result: save_var.clone()});
                 code.push(ZOP::And{operand1: Operand::new_var(save_var.id), operand2: Operand::new_large_const(1i16), save_variable: save_var.clone()});
             },
-            "neq" => {},  // we can leave the result as it is
+            "!=" | "neq" => {},  // we can leave the result as it is
             "<" | "lt" =>  {  // we want only true if the result was -1,
                 // so for 0 and 1 we AND with every bit on except the last bit off which is then gone
                 // and the result is 0. for -1 this does not make it 0 as there are more bits left
@@ -347,7 +347,7 @@ fn direct_eval_comp_op<'a>(eval0: &Operand, eval1: &Operand, op_name: &str, loca
     let val1 = eval1.const_value();
     let result = match op_name {
         "is" | "==" | "eq" => { val0 == val1 },
-        "neq" => { val0 != val1 },
+        "!=" | "neq" => { val0 != val1 },
         "<" | "lt" =>  { val0 < val1 },
         "<=" | "lte" => { val0 <= val1 },
         ">=" | "gte" => { val0 >= val1 },

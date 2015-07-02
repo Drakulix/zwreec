@@ -191,7 +191,7 @@ impl<'a> Parser<'a> {
 
                     None
                 },
-                (Sf, _ ) => {                    
+                (Sf, _ ) => {
                     // Sf -> ε
 
                     None
@@ -221,7 +221,7 @@ impl<'a> Parser<'a> {
                 },
 
                 // Tags
-                (Tags, tok @ TokTag { .. } ) => {                    
+                (Tags, tok @ TokTag { .. } ) => {
                     stack.push(NonTerminal(Tagsf));
                     stack.push(Terminal(tok));
 
@@ -229,12 +229,12 @@ impl<'a> Parser<'a> {
                 },
 
                 // tagsf
-                (Tagsf, TokTag { .. } ) => {                    
+                (Tagsf, TokTag { .. } ) => {
                     stack.push(NonTerminal(Tags));
 
                     None
                 },
-                (Tagsf, _ ) => {                    
+                (Tagsf, _ ) => {
                     // Tagsf -> ε
 
                     None
@@ -646,7 +646,7 @@ impl<'a> Parser<'a> {
 
                 // B2
                 (B2, TokCompOp { location, op_name: op }) => match &*op {
-                    "is" | "==" | "eq" | "neq" | ">" | "gt" | ">=" | "gte" | "<" | "lt" | "<=" | "lte" => {
+                    "is" | "==" | "eq" | "!=" | "neq" | ">" | "gt" | ">=" | "gte" | "<" | "lt" | "<=" | "lte" => {
                         stack.push(NonTerminal(B2));
                         stack.push(NonTerminal(F));
                         stack.push(Terminal(TokCompOp{location: location.clone(), op_name: op.clone()}));

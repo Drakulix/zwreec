@@ -98,7 +98,7 @@ rustlex! TweeLexer {
 
     let ASSIGN = "=" | "to" | "+=" | "-=" | "*=" | "/=";
     let NUM_OP = ["+-*/%"];
-    let COMP_OP = "is" | "==" | "eq" | "neq" | ">" | "gt" | ">=" | "gte" | "<" | "lt" | "<=" | "lte";
+    let COMP_OP = "is" | "==" | "eq" | "!=" | "neq" | ">" | "gt" | ">=" | "gte" | "<" | "lt" | "<=" | "lte";
     let LOG_OP = "and" | "&&" | "or" | "||" | "not" | "!";
 
     let FUNCTION_NAME = (LETTER | UNDERSCORE) VARIABLE_CHAR*;
