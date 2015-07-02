@@ -32,7 +32,9 @@ use config::Config;
 
 use self::Token::*;
 
-pub struct LexerError;
+pub enum LexerError {
+    UnexpectedCharacter { character: char, location: (u64, u64) }
+}
 
 /// Stores the state for the custom iterator `scan_filter()`
 ///
@@ -66,7 +68,10 @@ pub struct ScanState<'a> {
 #[allow(unused_variables)]
 pub fn lex<'a, R: Read>(cfg: &'a Config, input: &'a mut R) -> FilteringScan<Peeking<TweeLexer<BufReader<&'a mut R>>, Token>, ScanState<'a>, fn(&mut ScanState, (Token, Option<Token>)) -> Option<Token>>  {
 
-    TweeLexer::new(BufReader::new(input)).peeking().scan_filter(
+    let mut lexer = TweeLexer::new(BufReader::new(input));
+    lexer.cfg = Some(cfg.clone());
+    
+    lexer.peeking().scan_filter(
         ScanState {
             cfg: cfg,
             current_text: String::new(),

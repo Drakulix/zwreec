@@ -48,11 +48,7 @@ fn short_options() -> getopts::Options {
 /// The verbose flag signals if all options should be shown.
 /// NOTE: This is similar to librustc_driver's usage function.
 fn usage(verbose: bool) {
-    let options = if verbose {
-        config::zwreec_options(short_options())
-    } else {
-        short_options()
-    };
+    let options = short_options();
 
     let brief = format!("Usage: zwreec [-hV] [-vqwf] [-l [LOGFILE]] [-o OUTPUT] INPUT");
 
@@ -216,7 +212,7 @@ fn parse_output(matches: &getopts::Matches) -> Option<Box<Write>> {
                        path.display());
                 return None;
             } else {
-                warn!("Output file {} already exists", path.display());
+                warn!("Overwriting output file {}", path.display());
             }
         }
 

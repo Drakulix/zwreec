@@ -123,6 +123,12 @@ fn invalid_macro_test() {
 
 #[test]
 #[should_panic]
+fn invalid_passage_link() {
+    test_compile(TESTFOLDER_FAIL.to_string() + "InvalidPassageLink.twee");
+}
+
+#[test]
+#[should_panic]
 fn multiple_else_test() {
     test_compile(TESTFOLDER_FAIL.to_string() + "MultipleElse.twee");
 }

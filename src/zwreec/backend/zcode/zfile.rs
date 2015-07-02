@@ -719,45 +719,100 @@ impl Zfile {
     }
 
 
-    /// checks all stored links and make them choiceable
-    /// with the keyboard
+    /// checks all stored links and make them choiceable with the keyboard
+    /// the routine checks if there are if there are < 10 links or more:
+    /// if < 10: key 1-9 are supported, jumps immediately
+    /// if >=10: 99 links are supported, on the first position is no 0 allowed
+    ///          to jump to a < 10 link you have to press enter
     pub fn routine_check_links(&mut self) {
         let save_at_addr: u16 = 1 + self.object_addr;
         self.emit(vec![
-            ZOP::Routine{name: "system_check_links".to_string(), count_variables: 2},
+            ZOP::Routine{name: "system_check_links".to_string(), count_variables: 3},
 
             // jumps to the end, if this passage was called as <<display>>
             ZOP::JE{operand1: Operand::new_var(17), operand2: Operand::new_const(0x01), jump_to_label: "system_check_links_end_ret".to_string()},
 
             // jumps to the end, if there a no links
             ZOP::JE{operand1: Operand::new_var(16), operand2: Operand::new_const(0x00), jump_to_label: "system_check_links_end_quit".to_string()},
-            ZOP::Print{text: "--------------------".to_string()},
+            ZOP::SetTextStyle{bold: false, reverse: false, monospace: true, italic: false},
+            ZOP::Print{text: "---------------------------------------".to_string()},
             ZOP::Newline,
-            ZOP::Print{text: "press a key... ".to_string()},
+            ZOP::Print{text: "Please press a number to select a link (end with Q):".to_string()},
             ZOP::Newline,
 
+            // check if there are more than 9 links
+            ZOP::JG{operand1: Operand::new_var(16), operand2: Operand::new_const(9), jump_to_label: "system_check_links_more_than_9".to_string()},
+
+            // detect keys for <9 links
             ZOP::Label{name: "system_check_links_loop".to_string()},
             ZOP::ReadChar{local_var_id: 0x01},
+            // Quit programme on Q
+            ZOP::JE{operand1: Operand::new_var(0x01), operand2: Operand::new_const(81), jump_to_label: "system_check_links_end_quit".to_string()},
+            // check for the start of the konami code
             ZOP::JE{operand1: Operand::new_var(0x01), operand2: Operand::new_const(129), jump_to_label: "system_check_links_jmp".to_string()},
             ZOP::Jump{jump_to_label: "system_check_links_after".to_string()},
             ZOP::Label{name: "system_check_links_jmp".to_string()},
             ZOP::Call1N{jump_to_label: "system_check_more".to_string()},
 
             ZOP::Label{name: "system_check_links_after".to_string()},
-
-            ZOP::Sub{operand1: Operand::new_var(0x01), operand2: Operand::new_const(48), save_variable: Variable::new(0x01)},
-
-            // check if the link in 0x01 exist, if not
+            ZOP::Sub{operand1: Operand::new_var(1), operand2: Operand::new_const(48), save_variable: Variable::new(1)},
+            // check if the the detected key is > numbers of links
             // => "wrong key => jump before key-detection
-            ZOP::JL{operand1: Operand::new_var(16), operand2: Operand::new_var(0x01), jump_to_label: "system_check_links_loop".to_string()},
+            ZOP::JG{operand1: Operand::new_var(1), operand2: Operand::new_var(16), jump_to_label: "system_check_links_loop".to_string()},
+            // check if key < 1, 0 is not valid
+            ZOP::JL{operand1: Operand::new_var(1), operand2: Operand::new_const(1), jump_to_label: "system_check_links_loop".to_string()},
+            // jump over the >9 links test
+            // stores the index in 3
+            ZOP::StoreVariable{variable: Variable::new(3), value: Operand::new_var(1)},
+            ZOP::Jump{jump_to_label: "system_check_links_load_link_address".to_string()},
 
-            // check if the key-48 is < 0, if it is => jump before key-detection
-            ZOP::StoreVariable{variable: Variable::new(0x02), value: Operand::new_const(1)},
-            ZOP::JL{operand1: Operand::new_var(0x01), operand2: Operand::new_var(0x02), jump_to_label: "system_check_links_loop".to_string()},
-            ZOP::Dec{variable: 0x01},
+            // detect keys for >9 links
+            ZOP::Label{name: "system_check_links_more_than_9".to_string()},
+            // detect frst position
+            ZOP::ReadChar{local_var_id: 1},
+            // Quit programme on Q
+            ZOP::JE{operand1: Operand::new_var(0x01), operand2: Operand::new_const(81), jump_to_label: "system_check_links_end_quit".to_string()},
+            ZOP::Sub{operand1: Operand::new_var(1), operand2: Operand::new_const(48), save_variable: Variable::new(1)},
+            ZOP::PrintNumVar{variable: Variable::new(1)},
+
+            // check if the the detected key is > 9
+            ZOP::JG{operand1: Operand::new_var(1), operand2: Operand::new_const(9), jump_to_label: "system_check_links_error".to_string()},
+            // check if key < 1, 0 is not valid
+            ZOP::JL{operand1: Operand::new_var(1), operand2: Operand::new_const(1), jump_to_label: "system_check_links_error".to_string()},
+            // stores the index in 3
+            ZOP::StoreVariable{variable: Variable::new(3), value: Operand::new_var(1)},
+
+            // detect snd position
+            ZOP::ReadChar{local_var_id: 2},
+            // if enter, then we are finished
+            ZOP::JE{operand1: Operand::new_var(2), operand2: Operand::new_const(13), jump_to_label: "system_check_links_load_link_address".to_string()},
+            ZOP::Sub{operand1: Operand::new_var(2), operand2: Operand::new_const(48), save_variable: Variable::new(2)},
+            ZOP::PrintNumVar{variable: Variable::new(2)},
+            // check if the the detected key is > 9
+            ZOP::JG{operand1: Operand::new_var(2), operand2: Operand::new_const(9), jump_to_label: "system_check_links_error".to_string()},
+            // check if key < 0
+            ZOP::JL{operand1: Operand::new_var(2), operand2: Operand::new_const(0), jump_to_label: "system_check_links_error".to_string()},
+            // calculates the the number of the frst position*10 + number of the
+            // snd position
+            // first position, so multiply with 10
+            ZOP::Mul{operand1: Operand::new_var(1), operand2: Operand::new_const(10), save_variable: Variable::new(3)},
+            ZOP::Add{operand1: Operand::new_var(3), operand2: Operand::new_var(2), save_variable: Variable::new(3)},
+            // check if the the calculated number > number of link
+            ZOP::JG{operand1: Operand::new_var(3), operand2: Operand::new_var(16), jump_to_label: "system_check_links_error".to_string()},
+
+            ZOP::Jump{jump_to_label: "system_check_links_load_link_address".to_string()},
+            // error
+            ZOP::Label{name: "system_check_links_error".to_string()},
+            ZOP::Newline,
+            ZOP::Print{text: "Not a valid link, try again: ".to_string()},
+            ZOP::Jump{jump_to_label: "system_check_links_more_than_9".to_string()},
 
             // loads the address of the link from the array
-            ZOP::LoadW{array_address: Operand::new_large_const(save_at_addr as i16), index: Variable::new(1), variable: Variable::new(2)},
+            ZOP::Label{name: "system_check_links_load_link_address".to_string()},
+            ZOP::SetTextStyle{bold: false, reverse: false, monospace: false, italic: false},
+            // decrement 0x03 becouse the array starts at 0 and not at 1
+            ZOP::Dec{variable: 3},
+            ZOP::LoadW{array_address: Operand::new_large_const(save_at_addr as i16), index: Variable::new(3), variable: Variable::new(2)},
 
             // no more links exist
             ZOP::StoreVariable{variable: Variable::new(16), value: Operand::new_const(0)},

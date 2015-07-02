@@ -1,8 +1,15 @@
 rustlex! TweeLexer {
 
+    // Callback
+    callback => |lexer:&TweeLexer<R>, ch: char, location: (u64, u64)| {
+        let cfg = lexer.cfg.clone();
+        error_panic!(&cfg.unwrap() => LexerError::UnexpectedCharacter { character: ch.clone(), location: location.clone() } )
+    }
+
     //=============================
     // properties
 
+    property cfg: Option<Config> = None;
     property ignore_passage:bool = false;
     property format_bold_open:bool = false;
     property format_italic_open:bool = false;
