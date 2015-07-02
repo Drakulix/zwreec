@@ -25,7 +25,7 @@ test = false
 doc = false
 
 [build-dependencies]
-rustlex_codegen = { version = "*", git = "https://github.com/farthen/rustlex", rev = "cb6b8c9ab406e8a86698bd28ebd7b82f12f62c79", features = ["with-syntex"] }
+rustlex_codegen = { version = "*", git = "https://github.com/farthen/rustlex", rev = "03fa1fb65725818883907e3659c07c70fc3128cb", features = ["with-syntex"] }
 syntex          = "*"
 
 [dependencies]
@@ -34,4 +34,4 @@ libc = "*"
 log = "*"
 term = "0.2"
 getopts = "0.2.10"
-rustlex_codegen = { version = "*", git = "https://github.com/farthen/rustlex", rev = "cb6b8c9ab406e8a86698bd28ebd7b82f12f62c79", features = ["with-syntex"] }
+rustlex_codegen = { version = "*", git = "https://github.com/farthen/rustlex", rev = "03fa1fb65725818883907e3659c07c70fc3128cb", features = ["with-syntex"] }
