@@ -1,5 +1,13 @@
-//! The `evaluate_expressions` module...
-
+//! The `evaluate_expressions` module evaluates expressions from
+//! the AST and compiles them into zCode.
+//!
+//! This module takes the root node of an expression and traverses
+//! the contained subtree. It analyses if a sub-expression only
+//! contains constants and if so, evaluates them while compiling.
+//! Otherwise it translates the expressions into zCode. The module uses
+//! a finite amount of local variables in zCode to evaluate the
+//! expressions. Hence only expressions with limited size are
+//! supported.
 
 use backend::zcode::zfile::{ZOP, Operand, Variable, Constant, LargeConstant, Zfile, Type};
 use frontend::ast::{ASTNode};
@@ -21,6 +29,12 @@ pub enum EvaluateExpressionError {
     NoTempIdLeftOnStack,
 }
 
+/// This functions evaluates an expression from the AST and returns an `Operand` containing the result.
+/// # Arguments
+/// `node` is the root node of the expression. Mostly the child of `TokExpression` is what you want to give here.
+/// `code` is the vector where the zCode shall be written to.
+/// `manager` is the manager from `codegen`. It is required for the symbol table and label ids.
+/// `out` is the `ZFile` compiling to. It is required for storing strings.
 pub fn evaluate_expression<'a>(node: &'a ASTNode, code: &mut Vec<ZOP>, mut manager: &mut CodeGenManager<'a>, mut out: &mut Zfile) -> Operand {
     let mut temp_ids = CodeGenManager::new_temp_var_vec();
     evaluate_expression_internal(node, code, &mut temp_ids, manager, &mut out)
@@ -271,7 +285,7 @@ fn eval_comp_op<'a>(eval0: &Operand, eval1: &Operand, op_name: &str, location: (
                 code.push(ZOP::JE{operand1: eval0.clone(), operand2: eval1.clone(), jump_to_label: label.to_string()});
                 code.push(ZOP::StoreVariable{ variable: save_var.clone(), value: const_false});
             },
-            "neq" => {
+            "!=" | "neq" => {
                 code.push(ZOP::StoreVariable{ variable: save_var.clone(), value: const_false});
                 code.push(ZOP::JE{operand1: eval0.clone(), operand2: eval1.clone(), jump_to_label: label.to_string()});
                 code.push(ZOP::StoreVariable{ variable: save_var.clone(), value: const_true});
@@ -310,7 +324,7 @@ fn eval_comp_op<'a>(eval0: &Operand, eval1: &Operand, op_name: &str, location: (
                 code.push(ZOP::Not{operand: Operand::new_var(save_var.id), result: save_var.clone()});
                 code.push(ZOP::And{operand1: Operand::new_var(save_var.id), operand2: Operand::new_large_const(1i16), save_variable: save_var.clone()});
             },
-            "neq" => {},  // we can leave the result as it is
+            "!=" | "neq" => {},  // we can leave the result as it is
             "<" | "lt" =>  {  // we want only true if the result was -1,
                 // so for 0 and 1 we AND with every bit on except the last bit off which is then gone
                 // and the result is 0. for -1 this does not make it 0 as there are more bits left
@@ -347,7 +361,7 @@ fn direct_eval_comp_op<'a>(eval0: &Operand, eval1: &Operand, op_name: &str, loca
     let val1 = eval1.const_value();
     let result = match op_name {
         "is" | "==" | "eq" => { val0 == val1 },
-        "neq" => { val0 != val1 },
+        "!=" | "neq" => { val0 != val1 },
         "<" | "lt" =>  { val0 < val1 },
         "<=" | "lte" => { val0 <= val1 },
         ">=" | "gte" => { val0 >= val1 },

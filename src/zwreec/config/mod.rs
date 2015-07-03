@@ -160,6 +160,7 @@ use std::vec::Vec;
 ///     println!("Egg!");
 /// }
 /// ```
+#[derive(Clone)]
 pub struct Config {
     /// Force compilation despite errors
     pub force: bool,
@@ -259,7 +260,7 @@ impl Config {
 
 // TODO: If this stays only one Test Case, enum should be removed
 /// The Type used to define backend tests for the compiler
-#[derive(PartialEq)]
+#[derive(PartialEq,Clone)]
 pub enum TestCase {
     /// Skips the normal compiler chain and builds an example zcode file by 
     /// using every opcode.
@@ -336,11 +337,18 @@ pub fn zwreec_options(mut opts: getopts::Options) -> getopts::Options {
     opts
 }
 
-pub fn zwreec_usage(verbose: bool, opts: getopts::Options, brief: &str) -> String {
+/// Prints a usage
+///
+/// This takes your options and prints a usage for those options.
+/// It also includes zwreec_options and a feature list if a verbose usage was requested.
+pub fn zwreec_usage(verbose: bool, mut opts: getopts::Options, brief: &str) -> String {
     use std::fmt::format;
-    let options = zwreec_options(opts);
 
-    let options_usage = options.usage(brief);
+    if verbose {
+        opts = zwreec_options(opts);
+    }
+
+    let options_usage = opts.usage(brief);
 
     let features_usage = if verbose {
         "List of supported features (default value in parenthesis)

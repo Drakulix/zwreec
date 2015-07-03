@@ -758,7 +758,7 @@ mod tests {
 
     #[test]
     fn comp_expressions_test() {
-        let ast = test_ast("::Start\n<<print 5==5>>\n<<print 12345==1234>>\n<<print 5is5>>\n<<print 12345is1234>>\n<<print 10>=10>>\n<<print 15>=10>>\n<<print 8>=10>>\n<<print 10gte10>>\n<<print 15gte10>>\n<<print 8gte10>>\n<<print 10<=10>>\n<<print 15<=10>>\n<<print 8<=10>>\n<<print 10lte10>>\n<<print 8lte10>>\n<<print 15<10>>\n<<print 8<10>>\n<<print 10lt10>>\n<<print 15lt10>>\n<<print 8lt10>>\n<<print 10>10>>\n<<print 15>10>>\n<<print 8>10>>\n<<print 10gt10>>\n<<print 15gt10>>\n<<print 8gt10>>\n<<print 5neq5>>\n<<print 12345neq1234>>\n<<print \"hallo\"==\"hallo\">>\n<<print \"hallo\"==\"hallo2\">>\n");
+        let ast = test_ast("::Start\n<<print 5==5>>\n<<print 12345==1234>>\n<<print 5is5>>\n<<print 12345is1234>>\n<<print 10>=10>>\n<<print 15>=10>>\n<<print 8>=10>>\n<<print 10gte10>>\n<<print 15gte10>>\n<<print 8gte10>>\n<<print 10<=10>>\n<<print 15<=10>>\n<<print 8<=10>>\n<<print 10lte10>>\n<<print 8lte10>>\n<<print 15<10>>\n<<print 8<10>>\n<<print 10lt10>>\n<<print 15lt10>>\n<<print 8lt10>>\n<<print 10>10>>\n<<print 15>10>>\n<<print 8>10>>\n<<print 10gt10>>\n<<print 15gt10>>\n<<print 8gt10>>\n<<print 5neq5>>\n<<print 12345neq1234>>\n<<print 5!=5>>\n<<print 12345 != 1234>>\n<<print \"hallo\"==\"hallo\">>\n<<print \"hallo\"==\"hallo2\">>\n");
 
         let expected = vec!(
             (vec![0]                  , TokPassage { location: (1, 3), name: "Start".to_string() }),
@@ -932,16 +932,28 @@ mod tests {
             (vec![0,55]               , TokNewLine { location: (29, 23) }),
             (vec![0,56]               , TokMacroPrint { location: (30, 3) }),
             (vec![0,56,0]             , TokExpression),
-            (vec![0,56,0,0]           , TokCompOp { location: (30, 16), op_name: "==".to_string() }),
-            (vec![0,56,0,0,0]         , TokString { location: (30, 9), value: "hallo".to_string() }),
-            (vec![0,56,0,0,1]         , TokString { location: (30, 18), value: "hallo".to_string() }),
-            (vec![0,57]               , TokNewLine { location: (30, 27) }),
+            (vec![0,56,0,0]           , TokCompOp { location: (30, 10), op_name: "!=".to_string() }),
+            (vec![0,56,0,0,0]         , TokInt { location: (30, 9), value: 5 }),
+            (vec![0,56,0,0,1]         , TokInt { location: (30, 12), value: 5 }),
+            (vec![0,57]               , TokNewLine { location: (30, 15) }),
             (vec![0,58]               , TokMacroPrint { location: (31, 3) }),
             (vec![0,58,0]             , TokExpression),
-            (vec![0,58,0,0]           , TokCompOp { location: (31, 16), op_name: "==".to_string() }),
-            (vec![0,58,0,0,0]         , TokString { location: (31, 9), value: "hallo".to_string() }),
-            (vec![0,58,0,0,1]         , TokString { location: (31, 18), value: "hallo2".to_string() }),
-            (vec![0,59]               , TokNewLine { location: (31, 28) }),
+            (vec![0,58,0,0]           , TokCompOp { location: (31, 15), op_name: "!=".to_string() }),
+            (vec![0,58,0,0,0]         , TokInt { location: (31, 9), value: 12345 }),
+            (vec![0,58,0,0,1]         , TokInt { location: (31, 18), value: 1234 }),
+            (vec![0,59]               , TokNewLine { location: (31, 24) }),
+            (vec![0,60]               , TokMacroPrint { location: (32, 3) }),
+            (vec![0,60,0]             , TokExpression),
+            (vec![0,60,0,0]           , TokCompOp { location: (32, 16), op_name: "==".to_string() }),
+            (vec![0,60,0,0,0]         , TokString { location: (32, 9), value: "hallo".to_string() }),
+            (vec![0,60,0,0,1]         , TokString { location: (32, 18), value: "hallo".to_string() }),
+            (vec![0,61]               , TokNewLine { location: (32, 27) }),
+            (vec![0,62]               , TokMacroPrint { location: (33, 3) }),
+            (vec![0,62,0]             , TokExpression),
+            (vec![0,62,0,0]           , TokCompOp { location: (33, 16), op_name: "==".to_string() }),
+            (vec![0,62,0,0,0]         , TokString { location: (33, 9), value: "hallo".to_string() }),
+            (vec![0,62,0,0,1]         , TokString { location: (33, 18), value: "hallo2".to_string() }),
+            (vec![0,63]               , TokNewLine { location: (33, 28) }),
         );
 
         test_expected(expected, ast);
