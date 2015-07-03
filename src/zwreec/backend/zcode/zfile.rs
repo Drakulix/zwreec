@@ -94,6 +94,7 @@ pub enum ZOP {
   PrintUnicodeStr{address: Operand},
   Print{text: String},
   PrintNumVar{variable: Variable},
+  PrintVar{variable: Variable},
   PrintPaddr{address: Operand},  // packed address
   PrintAddr{address: Operand},
   PrintOps{text: String},
@@ -533,6 +534,7 @@ impl Zfile {
             &ZOP::PrintUnicodeStr{ref address} => self.op_print_unicode_str(address),
             &ZOP::Print{ref text} => self.op_print(text),
             &ZOP::PrintOps{ref text} => self.gen_print_ops(text),
+            &ZOP::PrintVar{ref variable} => self.print_var(variable),
             &ZOP::Routine{ref name, count_variables} => self.routine(name, count_variables),
             &ZOP::Label{ref name} => self.label(name),
             &ZOP::Jump{ref jump_to_label} => self.op_jump(jump_to_label),
@@ -697,6 +699,7 @@ impl Zfile {
         self.routine_malloc();
         self.routine_strcat();
         self.routine_itoa();
+        self.routine_print_var();
         self.write_jumps();
         self.write_strings();
     }
@@ -1285,6 +1288,41 @@ impl Zfile {
             // write length i at first position
             ZOP::StoreW{array_address: Operand::new_var(stra.id), index: zero.clone(), variable: i.clone()},
             ZOP::Ret{value: Operand::new_var(stra.id)}
+        ]);
+    }
+
+    /// helper function to print out the content of a variable according to the type of it
+    pub fn routine_print_var(&mut self) {
+        let varid = Variable::new(1);  // first argument
+        let varcontent = Variable::new(2);  // second argument
+        let vartype = Variable::new(3);
+        let type_store = self.type_store;
+        self.emit(vec![
+            ZOP::Routine{name: "print_var".to_string(), count_variables: 4},
+            // get vartype
+            ZOP::LoadBOperand{array_address: Operand::new_large_const(type_store as i16), index: Operand::new_var(varid.id), variable: vartype.clone()},
+            ZOP::JE{operand1: Operand::new_var(vartype.id), operand2: Operand::new_const(Type::String as u8), jump_to_label: "print_var_string".to_string()},
+            ZOP::JE{operand1: Operand::new_var(vartype.id), operand2: Operand::new_const(Type::Bool as u8), jump_to_label: "print_var_bool".to_string()},
+            // print number
+            ZOP::PrintNumVar{variable: varcontent.clone()},
+            ZOP::Ret{value: Operand::new_const(0)},
+            ZOP::Label{name: "print_var_bool".to_string()},
+            ZOP::JE{operand1: Operand::new_var(varcontent.id), operand2: Operand::new_const(0), jump_to_label: "print_var_boolfalse".to_string()},
+            ZOP::Print{text: "true".to_string()},
+            ZOP::Ret{value: Operand::new_const(0)},
+            ZOP::Label{name: "print_var_boolfalse".to_string()},
+            ZOP::Print{text: "false".to_string()},
+            ZOP::Ret{value: Operand::new_const(0)},
+            ZOP::Label{name: "print_var_string".to_string()},
+            // print var string
+            ZOP::PrintUnicodeStr{address: Operand::new_var(varcontent.id)},
+            ZOP::Ret{value: Operand::new_const(0)},
+        ]);
+    }
+
+    fn print_var(&mut self, variable: &Variable) {
+        self.emit(vec![
+            ZOP::CallVNA2{jump_to_label: "print_var".to_string(), arg1: Operand::new_const(variable.id), arg2: Operand::new_var(variable.id)},
         ]);
     }
 

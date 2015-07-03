@@ -188,6 +188,7 @@ pub fn gen_zcode<'a>(node: &'a ASTNode, mut out: &mut Zfile, mut manager: &mut C
                         let vartype = match result {
                             Operand::StringRef(_) => Type::String,
                             Operand::Var(ref var) => var.vartype.clone(),
+                            Operand::BoolConst(_) => Type::Bool,
                             _ => Type::Integer
                         };
                         manager.symbol_table.insert_new_symbol(&var_name, vartype);
@@ -323,7 +324,7 @@ pub fn gen_zcode<'a>(node: &'a ASTNode, mut out: &mut Zfile, mut manager: &mut C
                         TokExpression => {
                             let eval = evaluate_expression(&child.childs[0], &mut code, manager, &mut out);
                             match eval {
-                                Operand::Var(var) => if var.vartype == Type::String { code.push(ZOP::PrintUnicodeStr{address: Operand::new_var_string(var.id)}); } else { code.push(ZOP::PrintNumVar{variable: var}); },
+                                Operand::Var(var) => code.push(ZOP::PrintVar{variable: var}),
                                 Operand::StringRef(addr) => code.push(ZOP::PrintUnicodeStr{address: Operand::new_large_const(addr.value)}),
                                 Operand::Const(c) => code.push(ZOP::Print{text: format!("{}", c.value)}),
                                 Operand::LargeConst(c) => code.push(ZOP::Print{text: format!("{}", c.value)}),
@@ -338,20 +339,7 @@ pub fn gen_zcode<'a>(node: &'a ASTNode, mut out: &mut Zfile, mut manager: &mut C
                 },
                 &TokMacroContentVar {ref var_name, .. } => {
                     let var_id = manager.symbol_table.get_symbol_id(&*var_name);
-                    match manager.symbol_table.get_symbol_type(&*var_name) {
-                        Type::Integer => {
-                            vec![ZOP::PrintNumVar{variable: var_id}]
-                        },
-                        Type::String => {
-                            vec![ZOP::PrintUnicodeStr{address: Operand::new_var(var_id.id)}]
-                        },
-                        Type::Bool => {
-                            vec![ZOP::PrintNumVar{variable: var_id}]
-                        },
-                        Type::None => {
-                            vec![ZOP::Print{text: "0".to_string()}]
-                        }
-                    }
+                    vec![ZOP::PrintVar{variable: var_id}]
                 },
                 _ => {
                     error_panic!(cfg => CodeGenError::NoMatch { token: t.category.clone() } );
