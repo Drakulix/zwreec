@@ -160,7 +160,7 @@ pub fn gen_zcode<'a>(node: &'a ASTNode, mut out: &mut Zfile, mut manager: &mut C
                         vec![
                         ZOP::Call2NWithAddress{jump_to_label: "system_add_link".to_string(), address: passage_name.to_string()},
                         ZOP::SetColor{foreground: 8, background: 2},
-                        ZOP::Print{text: format!("{}[", display_name)},
+                        ZOP::PrintOps{text: format!("{}[", display_name)},
                         ZOP::PrintNumVar{variable: Variable::new(16)},
                         ZOP::Print{text: "]".to_string()},
                         ZOP::SetColor{foreground: 9, background: 2},
