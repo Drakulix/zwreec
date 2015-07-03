@@ -119,7 +119,7 @@ fn evaluate_expression_internal<'a>(node: &'a ASTNode, code: &mut Vec<ZOP>,
             Operand::new_string_ref(out.write_string(value) as i16)
         },
         TokVariable { ref name, .. } => {
-            Operand::Var(manager.symbol_table.get_symbol_id(name))
+            Operand::Var(manager.symbol_table.get_and_add_symbol_id(name))
         },
         TokFunction { ref name, ref location } => {
             match &**name {
@@ -167,51 +167,38 @@ fn eval_num_op<'a>(eval0: &Operand, eval1: &Operand, op_name: &str, location: (u
     let save_var = determine_save_var(eval0, eval1, temp_ids);
     match op_name {
         "+" => {
-            if save_var.vartype == Type::String {
-                let a1: Variable = match temp_ids.pop() {
-                    Some(var) => Variable::new(var),
-                    None      => error_force_panic!(EvaluateExpressionError::NoTempIdLeftOnStack)
-                };
-                let o1 = Operand::new_var(a1.id);
-                let a2: Variable = match temp_ids.pop() {
-                    Some(var) => Variable::new(var),
-                    None      => error_force_panic!(EvaluateExpressionError::NoTempIdLeftOnStack)
-                };
-                let o2 = Operand::new_var(a2.id);
-                let addr1 = match eval0 {
-                    &Operand::StringRef(_) => eval0,
-                    &Operand::Var(Variable{id: _, vartype: Type::String}) => eval0,
-                    _ => { code.push(ZOP::Call2S{jump_to_label: "itoa".to_string(), arg: eval0.clone(), result: a1.clone()}); &o1 }
-                };
-                let addr2 = match eval1 {
-                    &Operand::StringRef(_) => eval1,
-                    &Operand::Var(Variable{id: _, vartype: Type::String}) => eval1,
-                    _ => { code.push(ZOP::Call2S{jump_to_label: "itoa".to_string(), arg: eval1.clone(), result: a2.clone()}); &o2 }
-                };
-                code.push(ZOP::CallVSA2{jump_to_label: "strcat".to_string(), arg1: addr1.clone(), arg2: addr2.clone(), result: save_var.clone()});
-                free_var_if_temp(&Operand::new_var(a1.id), temp_ids);
-                free_var_if_temp(&Operand::new_var(a2.id), temp_ids);
-            } else {
-                code.push(ZOP::Add{operand1: eval0.clone(), operand2: eval1.clone(), save_variable: save_var.clone()});
-            }
+            let tmp1: Variable = match temp_ids.pop() {
+                Some(var) => Variable::new(var),
+                None      => error_force_panic!(EvaluateExpressionError::NoTempIdLeftOnStack)
+            };
+            let tmp2: Variable = match temp_ids.pop() {
+                Some(var) => Variable::new(var),
+                None      => error_force_panic!(EvaluateExpressionError::NoTempIdLeftOnStack)
+            };
+            code.push(ZOP::AddTypes{operand1: eval0.clone(), operand2: eval1.clone(), tmp1: tmp1.clone(), tmp2: tmp2.clone(), save_variable: save_var.clone()});
+            free_var_if_temp(&Operand::new_var(tmp1.id), temp_ids);
+            free_var_if_temp(&Operand::new_var(tmp2.id), temp_ids);
         },
         "-" => {
             code.push(ZOP::Sub{operand1: eval0.clone(), operand2: eval1.clone(), save_variable: save_var.clone()});
+            code.push(ZOP::SetVarType{variable: save_var.clone(), vartype: save_var.vartype.clone()});
         },
         "*" => {
             code.push(ZOP::Mul{operand1: eval0.clone(), operand2: eval1.clone(), save_variable: save_var.clone()});
+            code.push(ZOP::SetVarType{variable: save_var.clone(), vartype: save_var.vartype.clone()});
         },
         "/" => {
             code.push(ZOP::Div{operand1: eval0.clone(), operand2: eval1.clone(), save_variable: save_var.clone()});
+            code.push(ZOP::SetVarType{variable: save_var.clone(), vartype: save_var.vartype.clone()});
         },
         "%" => {
             code.push(ZOP::Mod{operand1: eval0.clone(), operand2: eval1.clone(), save_variable: save_var.clone()});
+            code.push(ZOP::SetVarType{variable: save_var.clone(), vartype: save_var.vartype.clone()});
         },
         _ => {
             error_panic!(manager.cfg => EvaluateExpressionError::UnsupportedOperator { op_name: op_name.to_string(), location: location.clone() })
         }
     };
-    code.push(ZOP::SetVarType{variable: save_var.clone(), vartype: save_var.vartype.clone()});
     free_var_if_both_temp(eval0, eval1, temp_ids);
 
     Operand::Var(save_var)

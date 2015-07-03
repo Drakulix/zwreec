@@ -195,14 +195,20 @@ pub fn gen_zcode<'a>(node: &'a ASTNode, mut out: &mut Zfile, mut manager: &mut C
                     }
                     let symbol_id = manager.symbol_table.get_symbol_id(var_name);
                     match &**op_name {
-                        "=" | "to" => code.push(ZOP::StoreVariable{variable: symbol_id.clone(), value: result}),
-                        "+=" => code.push(ZOP::Add{operand1: Operand::new_var(symbol_id.id), operand2: result, save_variable: symbol_id.clone()}),
-                        "-=" => code.push(ZOP::Sub{operand1: Operand::new_var(symbol_id.id), operand2: result, save_variable: symbol_id.clone()}),
-                        "*=" => code.push(ZOP::Mul{operand1: Operand::new_var(symbol_id.id), operand2: result, save_variable: symbol_id.clone()}),
-                        "/=" => code.push(ZOP::Div{operand1: Operand::new_var(symbol_id.id), operand2: result, save_variable: symbol_id.clone()}),
+                        "=" | "to" => { code.push(ZOP::StoreVariable{variable: symbol_id.clone(), value: result.clone()});
+                                        code.push(ZOP::CopyVarType{variable: symbol_id.clone(), from: result});
+                                      },
+                        "+=" => { code.push(ZOP::Add{operand1: Operand::new_var(symbol_id.id), operand2: result, save_variable: symbol_id.clone()});
+                                  code.push(ZOP::SetVarType{variable: symbol_id.clone(), vartype: symbol_id.vartype}); },
+                        "-=" => { code.push(ZOP::Sub{operand1: Operand::new_var(symbol_id.id), operand2: result, save_variable: symbol_id.clone()});
+                                  code.push(ZOP::SetVarType{variable: symbol_id.clone(), vartype: symbol_id.vartype}); },
+                        "*=" => { code.push(ZOP::Mul{operand1: Operand::new_var(symbol_id.id), operand2: result, save_variable: symbol_id.clone()});
+                                  code.push(ZOP::SetVarType{variable: symbol_id.clone(), vartype: symbol_id.vartype}); },
+                        "/=" =>  {code.push(ZOP::Div{operand1: Operand::new_var(symbol_id.id), operand2: result, save_variable: symbol_id.clone()});
+                                  code.push(ZOP::SetVarType{variable: symbol_id.clone(), vartype: symbol_id.vartype}); },
                         _ => {}
                     };
-                    code.push(ZOP::SetVarType{variable: symbol_id.clone(), vartype: symbol_id.vartype});
+                    
                     code
                 },
                 &TokMacroIf { .. } => {
@@ -338,7 +344,7 @@ pub fn gen_zcode<'a>(node: &'a ASTNode, mut out: &mut Zfile, mut manager: &mut C
                     code
                 },
                 &TokMacroContentVar {ref var_name, .. } => {
-                    let var_id = manager.symbol_table.get_symbol_id(&*var_name);
+                    let var_id = manager.symbol_table.get_and_add_symbol_id(&*var_name);
                     vec![ZOP::PrintVar{variable: var_id}]
                 },
                 _ => {
@@ -544,6 +550,18 @@ impl <'a> SymbolTable<'a> {
             return temp.0.clone()
         }
 
+        error_force_panic!(CodeGenError::SymbolMapEmpty)
+    }
+
+    // Returns the id for a given symbol
+    // (check if is_known_symbol, otherwise adds it silently as type None)
+    pub fn get_and_add_symbol_id(&mut self, symbol: &'a str) -> Variable {
+        if !self.symbol_map.contains_key(symbol) {
+            self.insert_new_symbol(symbol, Type::None);
+        }
+        if let Some(temp) = self.symbol_map.get(symbol) {
+            return temp.0.clone()
+        }
         error_force_panic!(CodeGenError::SymbolMapEmpty)
     }
 
