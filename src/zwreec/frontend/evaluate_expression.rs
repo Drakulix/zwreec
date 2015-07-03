@@ -336,7 +336,7 @@ fn eval_comp_op<'a>(eval0: &Operand, eval1: &Operand, op_name: &str, location: (
         };
     }
     code.push(ZOP::Label {name: label.to_string()});
-    code.push(ZOP::SetVarType{variable: save_var.clone(), vartype: save_var.vartype.clone()});
+    code.push(ZOP::SetVarType{variable: save_var.clone(), vartype: Type::Bool});
     free_var_if_temp(eval0, temp_ids);
     free_var_if_temp(eval1, temp_ids);
     Operand::Var(save_var)
@@ -443,7 +443,7 @@ fn eval_unary_minus<'a>(eval: &Operand, code: &mut Vec<ZOP>, temp_ids: &mut Vec<
     };
 
     code.push(ZOP::Sub {operand1: Operand::new_const(0), operand2: eval.clone(), save_variable: save_var.clone()});
-    code.push(ZOP::SetVarType{variable: save_var.clone(), vartype: save_var.vartype.clone()});
+    code.push(ZOP::SetVarType{variable: save_var.clone(), vartype: Type::Integer});
 
     Operand::new_var(save_var.id)
 }
