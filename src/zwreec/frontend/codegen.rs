@@ -198,14 +198,20 @@ pub fn gen_zcode<'a>(node: &'a ASTNode, mut out: &mut Zfile, mut manager: &mut C
                         "=" | "to" => { code.push(ZOP::StoreVariable{variable: symbol_id.clone(), value: result.clone()});
                                         code.push(ZOP::CopyVarType{variable: symbol_id.clone(), from: result});
                                       },
-                        "+=" => { code.push(ZOP::Add{operand1: Operand::new_var(symbol_id.id), operand2: result, save_variable: symbol_id.clone()});
-                                  code.push(ZOP::SetVarType{variable: symbol_id.clone(), vartype: symbol_id.vartype}); },
+                        "+=" => {   // using temp local variables which are not the result's variable
+                                    let tmp1: u8 = match result {
+                                        Operand::Var(ref var) => if var.id < 3 { 15 } else { 2 },
+                                        _ => 15
+                                    };
+                                    let tmp2: u8 = tmp1-1;
+                                    code.push(ZOP::AddTypes{operand1: Operand::new_var(symbol_id.id), operand2: result, tmp1: Variable::new(tmp1), tmp2: Variable::new(tmp2), save_variable: symbol_id.clone()});
+                                    },
                         "-=" => { code.push(ZOP::Sub{operand1: Operand::new_var(symbol_id.id), operand2: result, save_variable: symbol_id.clone()});
-                                  code.push(ZOP::SetVarType{variable: symbol_id.clone(), vartype: symbol_id.vartype}); },
+                                   },
                         "*=" => { code.push(ZOP::Mul{operand1: Operand::new_var(symbol_id.id), operand2: result, save_variable: symbol_id.clone()});
-                                  code.push(ZOP::SetVarType{variable: symbol_id.clone(), vartype: symbol_id.vartype}); },
+                                   },
                         "/=" =>  {code.push(ZOP::Div{operand1: Operand::new_var(symbol_id.id), operand2: result, save_variable: symbol_id.clone()});
-                                  code.push(ZOP::SetVarType{variable: symbol_id.clone(), vartype: symbol_id.vartype}); },
+                                   },
                         _ => {}
                     };
                     
