@@ -184,6 +184,7 @@ pub struct Zfile {
     pub heap_start: u16,
     pub force_unicode: bool,
     pub easter_egg: bool,
+    pub no_colours: bool,
 }
 
 #[derive(Debug, PartialEq, Clone)]
@@ -221,10 +222,10 @@ impl Zfile {
 
     /// creates a new zfile
     pub fn new() -> Zfile {
-        Zfile::new_with_options(false, false)
+        Zfile::new_with_options(false, false, false)
     }
 
-    pub fn new_with_options(force_unicode: bool, easter_egg: bool) -> Zfile {
+    pub fn new_with_options(force_unicode: bool, easter_egg: bool, no_colours: bool) -> Zfile {
         Zfile {
             data: Bytes{bytes: Vec::new()},
             unicode_table: Vec::new(),
@@ -241,11 +242,12 @@ impl Zfile {
             type_store: 0x400,
             force_unicode: force_unicode,
             easter_egg: easter_egg,
+            no_colours: no_colours,
         }
     }
 
     pub fn new_with_cfg(cfg: &Config) -> Zfile {
-        Zfile::new_with_options(cfg.force_unicode, cfg.easter_egg)
+        Zfile::new_with_options(cfg.force_unicode, cfg.easter_egg, cfg.no_colours)
     }
 
     /// creates the header of a zfile
@@ -275,7 +277,7 @@ impl Zfile {
         // 2: bold
         // 3: italic
         // 4: fixed
-        self.data.write_byte(0x1d, 0x01);
+        self.data.write_byte(if self.no_colours { 0x1c } else { 0x1d } , 0x01);
 
         // release version (0x02 und 0x03)
         self.data.write_u16(0, 0x02);
@@ -518,8 +520,8 @@ impl Zfile {
             &ZOP::Ret{ref value} => op::op_ret(value),
             &ZOP::PrintAddr{ref address} => op::op_print_addr(address),
             &ZOP::PrintPaddr{ref address} => op::op_print_paddr(address),
-            &ZOP::SetColor{foreground, background} => op::op_set_color(foreground, background),
-            &ZOP::SetColorVar{foreground, background} => op::op_set_color_var(foreground, background),
+            &ZOP::SetColor{foreground, background} => if self.no_colours { Vec::new() } else { op::op_set_color(foreground, background) },
+            &ZOP::SetColorVar{foreground, background} => if self.no_colours { Vec::new() } else {  op::op_set_color_var(foreground, background) },
             &ZOP::Random{ref range, ref variable} => op::op_random(range, variable),
             &ZOP::PrintNumVar{ref variable} => op::op_print_num_var(variable),
             &ZOP::SetTextStyle{bold, reverse, monospace, italic} => op::op_set_text_style(bold, reverse, monospace, italic),
