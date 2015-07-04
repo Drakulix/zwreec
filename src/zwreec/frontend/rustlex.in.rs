@@ -57,8 +57,8 @@ rustlex! TweeLexer {
     let TAG = ['a'-'z''A'-'Z''0'-'9''.''_']+;
 
     // If for example // is at a beginning of a line, then // is matched and not just /
-    let TEXT_CHAR_START = [^"!#"'\n'] | HTTP;
-    let TEXT_CHAR = [^"/'_=~^{@<[" '\n'] | HTTP;
+    let TEXT_CHAR_START = [^"!#"'\n''\\'] | '\\'[^'\n'] | HTTP;
+    let TEXT_CHAR = [^"/'_=~^{@<[" '\n''\\'] | '\\'[^'\n'] | HTTP;
     let TEXT = TEXT_CHAR+ | ["/'_=~^{@<["];
     let TEXT_HEADING = [^'\n']+;
 
@@ -75,6 +75,7 @@ rustlex! TweeLexer {
     let FORMAT_NUMB_LIST = "#" WHITESPACE*;
     let FORMAT_INDENT_BLOCK = "<<<" NEWLINE;
     let FORMAT_HORIZONTAL_LINE = "----" NEWLINE;
+    let FORMAT_ESCAPE_NEWLINE = '\\' NEWLINE;
     let FORMAT_INLINE = "@@"; //TODO ignore content
 
     let FORMAT_MONO_START = "{{{";
@@ -128,7 +129,13 @@ rustlex! TweeLexer {
         COLON =>      |lexer:&mut TweeLexer<R>| Some(TokColon     {location: lexer.yylloc()} )
     }
 
+    I_ALLOW_NEWLINE_ESCAPE {
+        FORMAT_ESCAPE_NEWLINE => |_:&mut TweeLexer<R>| -> Option<Token> { None }
+    }
+
     I_PASSAGE_CONTENT {
+        :I_ALLOW_NEWLINE_ESCAPE
+
         MACRO_START => |lexer:&mut TweeLexer<R>| -> Option<Token>{
             lexer.MACRO();
             None
