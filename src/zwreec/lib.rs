@@ -161,7 +161,7 @@ pub fn compile<R: Read, W: Write>(cfg: Config, input: &mut R, output: &mut W) {
     frontend::codegen::generate_zcode(&cfg, ast, output);
 }
 
-/// checks the input if there is an bom, if true it will delete it
+/// checks the input if there is an BOM, if true it will delete it
 fn handle_bom_encoding<'a, R: Read>(input: &'a mut R) -> Cursor<Vec<u8>> {
     let mut reader = BufReader::new(input);
     let mut content = String::new();
@@ -172,7 +172,7 @@ fn handle_bom_encoding<'a, R: Read>(input: &'a mut R) -> Cursor<Vec<u8>> {
 
     let mut v: Vec<u8> = content.bytes().collect();
     if v.len() < 5 {
-        error!("The file is to short for a valid twee File");
+        error!("The file is too short for a valid twee File");
     }
     let has_bom = if &v[0..3] == [0xef, 0xbb, 0xbf] {
         true
@@ -180,7 +180,7 @@ fn handle_bom_encoding<'a, R: Read>(input: &'a mut R) -> Cursor<Vec<u8>> {
         false
     };
     if has_bom {
-        debug!("File has Byte order mark");
+        debug!("File has Byte order mark. Removing...");
         v.remove(0);
         v.remove(0);
         v.remove(0);
