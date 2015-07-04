@@ -159,6 +159,8 @@ pub enum Token {
     TokMacroDisplay           {location: (u64, u64), passage_name: String},
     TokMacroSilently          {location: (u64, u64)},
     TokMacroEndSilently       {location: (u64, u64)},
+    TokMacroNoBr              {location: (u64, u64)},
+    TokMacroEndNoBr           {location: (u64, u64)},
     TokParenOpen              {location: (u64, u64)},
     TokParenClose             {location: (u64, u64)},
     TokVariable               {location: (u64, u64), name: String},
@@ -225,6 +227,8 @@ impl Token {
             &TokMacroDisplay{location, ..} |
             &TokMacroSilently{location} |
             &TokMacroEndSilently{location} |
+            &TokMacroNoBr{location} |
+            &TokMacroEndNoBr{location} |
             &TokParenOpen{location} |
             &TokParenClose{location} |
             &TokVariable{location, ..} |
@@ -294,6 +298,8 @@ impl Token {
             (&TokMacroPrint{..}, &TokMacroPrint{..}) => true,
             (&TokMacroDisplay{..}, &TokMacroDisplay{..}) => true,
             (&TokMacroSilently{..}, &TokMacroSilently{..}) => true,
+            (&TokMacroEndNoBr{..}, &TokMacroEndNoBr{..}) => true,
+            (&TokMacroNoBr{..}, &TokMacroNoBr{..}) => true,
             (&TokMacroEndSilently{..}, &TokMacroEndSilently{..}) => true,
             (&TokParenOpen{..}, &TokParenOpen{..}) => true,
             (&TokParenClose{..}, &TokParenClose{..}) => true,
