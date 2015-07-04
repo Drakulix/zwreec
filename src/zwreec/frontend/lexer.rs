@@ -737,7 +737,7 @@ mod tests {
 
     #[test]
     fn escape_line_break_test() {
-        let tokens = test_lex("::Start\nTest\\\n<<if true>>\\\nLi\\ne\n<<else>>\nBla\\\n<<endif>>\nTest");
+        let tokens = test_lex("::Start\nTest\\\n<<if true>>\\\nLi\\ne\n<<else>>\nBla\\\n<<endif>>\n\\\nTest");
         let expected = vec![
             TokPassage { name: "Start".to_string(), location: (1, 3) },
             TokText { text: "Test".to_string(), location: (2, 1) },
@@ -753,7 +753,7 @@ mod tests {
             TokMacroEndIf { location: (7, 3) },
             TokMacroEnd { location: (7, 8) },
             TokNewLine { location: (7, 10) },
-            TokText { text: "Test".to_string(), location: (8, 1) },
+            TokText { text: "Test".to_string(), location: (9, 1) },
         ];
 
         assert_tok_eq(expected, tokens);
