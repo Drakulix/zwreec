@@ -222,22 +222,22 @@ impl Zfile {
 
     /// creates a new zfile
     pub fn new() -> Zfile {
-        Zfile::new_with_options(false, false, false)
+        Zfile::new_with_options(false, false, false, false)
     }
 
-    pub fn new_with_options(force_unicode: bool, easter_egg: bool, no_colours: bool) -> Zfile {
+    pub fn new_with_options(force_unicode: bool, easter_egg: bool, no_colours: bool, half_memory: bool) -> Zfile {
         Zfile {
             data: Bytes{bytes: Vec::new()},
             unicode_table: Vec::new(),
             jumps: Vec::new(),
             labels: Vec::new(),
             strings: Vec::new(),
-            program_addr: 0xfff8,
+            program_addr: if half_memory { 0x7918 } else { 0xfff8 },
             unicode_table_addr: 0,
             global_addr: 0,
             object_addr: 0,
             static_addr: 0,
-            last_static_written: 0x8000,
+            last_static_written: if half_memory { 0x4000 } else { 0x8000 },
             heap_start: 0x600,
             type_store: 0x400,
             force_unicode: force_unicode,
@@ -247,7 +247,7 @@ impl Zfile {
     }
 
     pub fn new_with_cfg(cfg: &Config) -> Zfile {
-        Zfile::new_with_options(cfg.force_unicode, cfg.easter_egg, cfg.no_colours)
+        Zfile::new_with_options(cfg.force_unicode, cfg.easter_egg, cfg.no_colours, cfg.half_memory)
     }
 
     /// creates the header of a zfile
