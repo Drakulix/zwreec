@@ -238,7 +238,7 @@ impl Zfile {
         Zfile::new_with_options(false, false, false, false)
     }
 
-    fn new_with_options(force_unicode: bool, easter_egg: bool, no_colours: bool, half_memory: bool) -> Zfile {
+    pub fn new_with_options(force_unicode: bool, easter_egg: bool, no_colours: bool, half_memory: bool) -> Zfile {
         Zfile {
             data: Bytes{bytes: Vec::new()},
             unicode_table: Vec::new(),
