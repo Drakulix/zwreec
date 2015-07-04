@@ -1,3 +1,6 @@
+//! contains most of the op-codes (only the opcode who usees jumps or labels)
+//! are still in zfile
+
 pub use super::zfile::ArgType;
 pub use super::zfile::JumpType;
 pub use super::zfile::Zjump;
@@ -18,7 +21,6 @@ pub fn op_erase_window(value: i8) -> Vec<u8> {
 /// calls a routine (the address is stored in a variable)
 pub fn op_call_1n_var(variable: u8) -> Vec<u8> {
     let mut bytes = op_1(0x0f, ArgType::Variable);
-    //self.add_jump(jump_to_label.to_string(), JumpType::Routine);
     bytes.push(variable);
     bytes
 }
@@ -234,14 +236,12 @@ pub fn op_print_paddr(address: &Operand) -> Vec<u8> {
    bytes
 }
 
-
 /// prints string at given adress
 pub fn op_print_addr(address: &Operand) -> Vec<u8> {
    let mut bytes = op_1(0x07, arg_type(&address));
    write_argument(address, &mut bytes);
    bytes
 }
-
 
 /// returns a LargeConst
 pub fn op_ret(value: &Operand) -> Vec<u8> {
@@ -250,8 +250,7 @@ pub fn op_ret(value: &Operand) -> Vec<u8> {
     bytes
 }
 
-
-// saves an operand to the variable
+/// saves an operand to the variable
 pub fn op_store_var(variable: &Variable, value: &Operand) -> Vec<u8> {
     let args: Vec<ArgType> = vec![ArgType::Reference, arg_type(&value)];
     let mut bytes = op_2(0x0d, args);
@@ -260,7 +259,7 @@ pub fn op_store_var(variable: &Variable, value: &Operand) -> Vec<u8> {
     bytes
 }
 
-// saves an operand to the variable id which is given as operand
+/// saves an operand to the variable id which is given as operand
 pub fn op_store_var_id(variable: &Variable, value: &Operand) -> Vec<u8> {
     let args: Vec<ArgType> = vec![ArgType::Variable, arg_type(&value)];
     let mut bytes = op_2(0x0d, args);
@@ -370,10 +369,12 @@ pub fn op_inc( variable: u8) -> Vec<u8> {
     bytes
 }
 
+/// adds a newline
 pub fn op_newline() -> Vec<u8> {
     op_0(0x0b)
 }
 
+/// quits the zcode programm immediately
 pub fn quit() -> Vec<u8> {
     op_0(0x0a)
 }

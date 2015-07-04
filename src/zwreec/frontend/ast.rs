@@ -23,10 +23,12 @@ pub struct AST {
     pub passages: Vec<ASTNode>,
 }
 
+/// the parser use these ASTOperations to create the ast
 pub enum ASTOperation {
     AddPassage(Token),
     AddChild(Token),
     ChildDown(Token),
+    ChildUp(Token),
     Up,
     UpChild(Token),
     UpChildDown(Token),
@@ -54,12 +56,14 @@ impl<'a> ASTBuilder<'a> {
         self.ast
     }
 
+    /// calls the matching function to a given ASTOperation
     pub fn operation(&mut self, op: ASTOperation) {
         use self::ASTOperation::*;
         match op {
             AddPassage(passage) => self.add_passage(passage),
             AddChild(child) => self.add_child(child),
             ChildDown(child) => self.child_down(child),
+            ChildUp(child) => self.child_up(child),
             Up => self.up(),
             UpChild(child) => self.up_child(child),
             UpChildDown(child) => self.up_child_down(child),
@@ -129,6 +133,12 @@ impl<'a> ASTBuilder<'a> {
         }
     }
 
+    /// adds a child and goes one lvl up
+    pub fn child_up(&mut self, token: Token) {
+        self.add_child(token);
+        self.up();
+    }
+
     /// goes one lvl up and adds and child
     pub fn up_child(&mut self, token: Token) {
         self.up();
@@ -148,6 +158,7 @@ impl<'a> ASTBuilder<'a> {
     }
 }
 
+/// ast-implementation
 impl AST {
     /// counts the childs of the path in the asts
     pub fn count_childs(&self, path: Vec<usize>) -> usize {
@@ -220,6 +231,7 @@ pub struct NodeDefault {
     pub childs: Vec<ASTNode>
 }
 
+/// the implementation of a node
 impl ASTNode {
     /// adds an child to the path in the ast
     pub fn add_child(&mut self, path: Vec<usize>, token: Token) {
@@ -279,6 +291,7 @@ impl ASTNode {
         }
     }
 
+    /// returns the current category of a node
     pub fn category(&self) -> Token {
         match self {
             &ASTNode::Passage(ref t) => {
@@ -290,6 +303,7 @@ impl ASTNode {
         }
     }
 
+    /// returns all childs of a node
     pub fn childs(&self) -> &Vec<ASTNode> {
         match self {
             &ASTNode::Passage(ref t) => {
@@ -301,6 +315,7 @@ impl ASTNode {
         }
     }
 
+    /// for nice ast-printing
     fn fmt_node(&self, f: &mut Formatter, indent: usize) -> Result {
         let mut spaces = "".to_string();
         for _ in 0..indent {
@@ -315,15 +330,7 @@ impl ASTNode {
         Ok(())
     }
 
-    /// prints an node of an ast
-    pub fn print(&self, force_print: bool) {
-        if force_print {
-            println!("{:?}", self);
-        } else {
-            debug!("{:?}", self);
-        }
-    }
-
+    /// wraps the ASTNode to NodeDefault
     pub fn as_default(&self) -> &NodeDefault {
         match self {
             &ASTNode::Default(ref def) => def,
@@ -392,7 +399,6 @@ mod tests {
         for item in expected.iter() {
             let b = ast.is_specific_token(item.1.clone(), item.0.to_vec());
             if b == false {
-                //ast.print(true);
                 println!("FAILED WITH TOKEN {:?} at {:?}", item.0, item.1);
             }
             assert!(ast.is_specific_token(item.1.clone(), item.0.to_vec()));

@@ -70,7 +70,7 @@ pub fn lex<'a, R: Read>(cfg: &'a Config, input: &'a mut R) -> FilteringScan<Peek
 
     let mut lexer = TweeLexer::new(BufReader::new(input));
     lexer.cfg = Some(cfg.clone());
-    
+
     lexer.peeking().scan_filter(
         ScanState {
             cfg: cfg,
@@ -146,7 +146,7 @@ pub enum Token {
     TokFormatNumbList         {location: (u64, u64)},
     TokFormatIndentBlock      {location: (u64, u64)},
     TokFormatHorizontalLine   {location: (u64, u64)},
-    TokFormatHeading          {location: (u64, u64), rank: usize},
+    TokFormatHeading          {location: (u64, u64), rank: u8, text: String},
     TokMacroStart             {location: (u64, u64)},
     TokMacroEnd               {location: (u64, u64)},
     TokMacroContentVar        {location: (u64, u64), var_name: String},
@@ -159,6 +159,8 @@ pub enum Token {
     TokMacroDisplay           {location: (u64, u64), passage_name: String},
     TokMacroSilently          {location: (u64, u64)},
     TokMacroEndSilently       {location: (u64, u64)},
+    TokMacroNoBr              {location: (u64, u64)},
+    TokMacroEndNoBr           {location: (u64, u64)},
     TokParenOpen              {location: (u64, u64)},
     TokParenClose             {location: (u64, u64)},
     TokVariable               {location: (u64, u64), name: String},
@@ -225,6 +227,8 @@ impl Token {
             &TokMacroDisplay{location, ..} |
             &TokMacroSilently{location} |
             &TokMacroEndSilently{location} |
+            &TokMacroNoBr{location} |
+            &TokMacroEndNoBr{location} |
             &TokParenOpen{location} |
             &TokParenClose{location} |
             &TokVariable{location, ..} |
@@ -294,6 +298,8 @@ impl Token {
             (&TokMacroPrint{..}, &TokMacroPrint{..}) => true,
             (&TokMacroDisplay{..}, &TokMacroDisplay{..}) => true,
             (&TokMacroSilently{..}, &TokMacroSilently{..}) => true,
+            (&TokMacroEndNoBr{..}, &TokMacroEndNoBr{..}) => true,
+            (&TokMacroNoBr{..}, &TokMacroNoBr{..}) => true,
             (&TokMacroEndSilently{..}, &TokMacroEndSilently{..}) => true,
             (&TokParenOpen{..}, &TokParenOpen{..}) => true,
             (&TokParenClose{..}, &TokParenClose{..}) => true,

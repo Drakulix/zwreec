@@ -1,16 +1,17 @@
 //! The `zcode` module contains a lot of useful functionality
 //! to deal with all the zcode related stuff
 
+pub mod op;
 pub mod zbytes;
 pub mod zfile;
 pub mod ztext;
 pub mod ee;
-pub mod op;
 
-use self::zfile::{Zfile, Operand, Variable, ZOP, Type};
 
 use std::error::Error;
 use std::io::Write;
+
+use self::zfile::{Zfile, Operand, Variable, ZOP, Type};
 
 
 /// an example to show the current status of the z-code implementation
