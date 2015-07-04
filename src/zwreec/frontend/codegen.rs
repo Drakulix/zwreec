@@ -169,14 +169,14 @@ pub fn gen_zcode<'a>(node: &'a ASTNode, mut out: &mut Zfile, mut manager: &mut C
                     manager.is_silent = false;
                     vec![]
                 },
-                &TokMacroNoBr { .. } => {
-                    manager.is_silent = true;
+                /*&TokMacroNoBr { .. } => {
+                    manager.is_nobr = true;
                     vec![]
                 },
                 &TokMacroEndNoBr { .. } => {
-                    manager.is_silent = false;
+                    manager.is_nobr = false;
                     vec![]
-                },
+                },*/
                 &TokPassageLink {ref display_name, ref passage_name, .. } => {
                     if !manager.is_silent {
                         set_formatting = true;
