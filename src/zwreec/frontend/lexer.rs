@@ -70,7 +70,7 @@ pub fn lex<'a, R: Read>(cfg: &'a Config, input: &'a mut R) -> FilteringScan<Peek
 
     let mut lexer = TweeLexer::new(BufReader::new(input));
     lexer.cfg = Some(cfg.clone());
-    
+
     lexer.peeking().scan_filter(
         ScanState {
             cfg: cfg,
@@ -146,7 +146,7 @@ pub enum Token {
     TokFormatNumbList         {location: (u64, u64)},
     TokFormatIndentBlock      {location: (u64, u64)},
     TokFormatHorizontalLine   {location: (u64, u64)},
-    TokFormatHeading          {location: (u64, u64), rank: usize},
+    TokFormatHeading          {location: (u64, u64), rank: usize, text: String},
     TokMacroStart             {location: (u64, u64)},
     TokMacroEnd               {location: (u64, u64)},
     TokMacroContentVar        {location: (u64, u64), var_name: String},
