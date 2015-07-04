@@ -363,7 +363,7 @@ pub fn op_newline() -> Vec<u8> {
     op_0(0x0b)
 }
 
-/// quits the zcode programm immidently
+/// quits the zcode programm immediately
 pub fn quit() -> Vec<u8> {
     op_0(0x0a)
 }
