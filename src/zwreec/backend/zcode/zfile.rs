@@ -2,6 +2,7 @@
 //! 
 pub use super::zbytes::Bytes;
 pub use super::ztext;
+pub use super::ee::routine_easteregg;
 pub use super::op;
 use config::Config;
 
@@ -145,6 +146,7 @@ pub enum ZOP {
   Jump{jump_to_label: String},
   Dec{variable: u8},
   LoadW{array_address: Operand, index: Variable, variable: Variable},
+  SetCursor{line: u8, col: u8},
   EraseWindow{value: i8},
   SetVarType{variable: Variable, vartype: Type},
   CopyVarType{variable: Variable, from: Operand},
@@ -533,6 +535,7 @@ impl Zfile {
             &ZOP::LoadBOperand{ref array_address, ref index, ref variable} => op::op_loadb(array_address, index, variable),
             &ZOP::Call1NVar{variable} => op::op_call_1n_var(variable),
             &ZOP::EraseWindow{value} => op::op_erase_window(value),
+            &ZOP::SetCursor{line, col} => op::op_set_cursor(line, col),
             &ZOP::PushVar{ref variable} => op::op_push_var(variable),
             &ZOP::PullVar{ref variable} => op::op_pull(variable.id.clone()),
 
@@ -922,37 +925,10 @@ impl Zfile {
                 ZOP::JE{operand1: Operand::new_var(0x01), operand2: Operand::new_const(97), jump_to_label: "system_check_more_ko_9".to_string()},
                 ZOP::Ret{value: Operand::new_const(0)},
                 ZOP::Label{name: "system_check_more_ko_9".to_string()},
-
-                ZOP::Label{name: "system_check_more_timer_loop".to_string()},
-                ZOP::ReadCharTimer{local_var_id: 0x01, timer: 1, routine: "system_check_more_anim".to_string()},
-                ZOP::Jump{jump_to_label: "system_check_more_timer_loop".to_string()},
-                ZOP::Quit,
-
-                ZOP::Routine{name: "system_check_more_anim".to_string(), count_variables: 5},
-                ZOP::EraseWindow{value: -1},
-
-                ZOP::SetTextStyle{bold: false, reverse: false, monospace: true, italic: false},
-                ZOP::SetColor{foreground: 2, background: 9},
-                ZOP::Print{text: " ZWREEC Easter egg <3".to_string()},
-                ZOP::Newline,
-
-                ZOP::StoreVariable{variable: Variable::new(1), value: Operand::new_const(20)},
-                ZOP::Label{name: "system_check_more_loop".to_string()},
-                ZOP::Random{range: Operand::new_const(8), variable: Variable::new(4)},
-                ZOP::Random{range: Operand::new_const(100), variable: Variable::new(5)},
-                ZOP::Add{operand1: Operand::new_var(5), operand2: Operand::new_const(10), save_variable: Variable::new(5)},
-                ZOP::Inc{variable: 4},
-                ZOP::SetColorVar{foreground: 4, background: 4},
-                ZOP::Print{text: "aa".to_string()},
-                ZOP::Inc{variable: 2},
-
-                ZOP::JL{operand1: Operand::new_var(2), operand2: Operand::new_var(1), jump_to_label: "system_check_more_loop".to_string()},
-                ZOP::Newline,
-                ZOP::Inc{variable: 3},
-                ZOP::StoreVariable{variable: Variable::new(2), value: Operand::new_const(0)},
-                ZOP::JL{operand1: Operand::new_var(3), operand2: Operand::new_var(1), jump_to_label: "system_check_more_loop".to_string()},
+                ZOP::Call1N{jump_to_label: "easter_egg_start".to_string()},
                 ZOP::Ret{value: Operand::new_const(0)}
             ]);
+            routine_easteregg(self);
         } else {
             self.emit(vec![
                 ZOP::Routine{name: "system_check_more".to_string(), count_variables: 1},

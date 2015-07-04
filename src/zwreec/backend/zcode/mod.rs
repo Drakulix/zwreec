@@ -4,6 +4,7 @@
 pub mod zbytes;
 pub mod zfile;
 pub mod ztext;
+pub mod ee;
 pub mod op;
 
 use self::zfile::{Zfile, Operand, Variable, ZOP, Type};
