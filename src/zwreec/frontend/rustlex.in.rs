@@ -18,6 +18,7 @@ rustlex! TweeLexer {
     property format_sub_open:bool = false;
     property format_sup_open:bool = false;
     property function_parens:usize = 0;
+    property heading_rank:u8 = 0;
 
     //=============================
     // regular expressions
@@ -59,6 +60,7 @@ rustlex! TweeLexer {
     let TEXT_CHAR_START = [^"!#"'\n'] | HTTP;
     let TEXT_CHAR = [^"/'_=~^{@<[" '\n'] | HTTP;
     let TEXT = TEXT_CHAR+ | ["/'_=~^{@<["];
+    let TEXT_HEADING = [^'\n']+;
 
     let VARIABLE_CHAR = LETTER | DIGIT | UNDERSCORE;
     let VARIABLE = '$' (LETTER | UNDERSCORE) VARIABLE_CHAR*;
@@ -69,7 +71,7 @@ rustlex! TweeLexer {
     let FORMAT_STRIKE = "==";
     let FORMAT_SUB = "~~";
     let FORMAT_SUP = "^^";
-    let FORMAT_HEADING = ("!" | "!!" | "!!!" | "!!!!" | "!!!!!") WHITESPACE*;
+    let FORMAT_HEADING = ("!" | "!!" | "!!!" | "!!!!" | "!!!!!" );
     let FORMAT_NUMB_LIST = "#" WHITESPACE*;
     let FORMAT_INDENT_BLOCK = "<<<" NEWLINE;
     let FORMAT_HORIZONTAL_LINE = "----" NEWLINE;
@@ -248,9 +250,11 @@ rustlex! TweeLexer {
             lexer.NON_NEWLINE();
             Some(TokFormatNumbList {location: lexer.yylloc()} )
         }
-        FORMAT_HEADING  =>  |lexer:&mut TweeLexer<R>| {
-            lexer.NON_NEWLINE();
-            Some(TokFormatHeading {location: lexer.yylloc(), rank: lexer.yystr().trim().len()} )
+
+        FORMAT_HEADING  =>  |lexer:&mut TweeLexer<R>| -> Option<Token>{
+            lexer.heading_rank = lexer.yystr().trim().len() as u8;
+            lexer.HEADING();
+            None
         }
 
         TEXT_CHAR_START => |lexer:&mut TweeLexer<R>| {
@@ -301,6 +305,19 @@ rustlex! TweeLexer {
         TAG_END => |lexer:&mut TweeLexer<R>| {
             if !lexer.ignore_passage { lexer.PASSAGE(); } else { lexer.INITIAL(); }
             Some(TokTagEnd {location: lexer.yylloc()})
+        }
+    }
+
+    HEADING {
+
+        TEXT_HEADING => |lexer:&mut TweeLexer<R>| -> Option<Token> {
+            Some(TokFormatHeading {location: lexer.yylloc(), text: lexer.yystr().trim().to_string(), rank: lexer.heading_rank} )
+        }
+
+        NEWLINE =>  |lexer:&mut TweeLexer<R>| -> Option<Token> {
+            lexer.heading_rank = 0;
+            lexer.NEWLINE();
+            Some(TokNewLine {location: lexer.yylloc()} )
         }
     }
 
