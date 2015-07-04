@@ -14,13 +14,21 @@ pub enum Type {
     String = 3,
 }
 
+///
 #[derive(Debug,Clone)]
 pub struct Variable { pub id: u8, pub vartype: Type}
+
+/// 
 #[derive(Debug,Clone)]
 pub struct Constant { pub value: u8 }
+
+///
 #[derive(Debug,Clone)]
 pub struct LargeConstant { pub value: i16 }
 
+/// There are three Operands in Zcode:
+/// Variables, SmallConsts, LargeConsts
+/// The other Operands are for a better code-readability
 #[derive(Debug,Clone)]
 pub enum Operand {
     Var(Variable),
@@ -152,6 +160,10 @@ pub enum ZOP {
   Quit,
 }
 
+/// Zcode has the jump-types:
+/// jumps (to a label)
+/// branches (to a label, from a compare-op like je, ...)
+/// routine (to a routine-address)
 #[derive(Debug, PartialEq, Clone)]
 pub enum JumpType {
     Jump,
@@ -209,6 +221,7 @@ pub struct Zlabel {
     pub name: String
 }
 
+/// zfile supports 4 formating possibilites: bold, mono, italic and inverted
 #[derive(Debug, Copy, Clone)]
 pub struct FormattingState {
     pub bold: bool,
@@ -1737,6 +1750,7 @@ impl Zfile {
     }
 }
 
+/// align the address to the given align-parameter
 fn align_address(address: u32, align: u32) -> u32 {
     address + (align - (address % align)) % align
 }

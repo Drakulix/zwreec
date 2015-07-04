@@ -26,6 +26,7 @@ pub struct ExpressionParser<'a> {
 }
 
 impl<'a> ExpressionParser<'a> {
+    /// gets node (with an expression) and starts the parsing
     pub fn parse(node: &mut NodeDefault, cfg: &'a Config) {
         let mut expr_parser = ExpressionParser {
             expr_stack: Vec::new(),
