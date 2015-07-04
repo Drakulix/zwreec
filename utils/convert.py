@@ -2,7 +2,9 @@
 import sys
 
 for line in sys.stdin.readlines():
-  if line.replace("\n", "") != "":
-    print ("file.write_zop(&" + line.replace("\n", "") + " false);")
+  theline = line.replace("\n", "")
+  if theline != "":
+    if theline != 'ZOP::PrintOps{text: "".to_string()},':
+      print ("file.write_zop(&" + theline + " false);")
   else:
     print
