@@ -148,31 +148,40 @@ pub fn gen_zcode<'a>(node: &'a ASTNode, mut out: &mut Zfile, mut manager: &mut C
                     }
                 },
                 &TokFormatHeading {ref rank, ref text, .. } => {
-                    if *rank <= 2 {
-                        let text_length = text.len();
-                        let mut line = "".to_string();
-                        for _ in 0..text_length {
-                            line.push_str( if *rank == 1 { "=" } else { "-" } );
-                        }
-                        
-                        vec![
-                            ZOP::Newline,
-                            ZOP::SetTextStyle{bold: true, reverse: state_copy.inverted, monospace: true, italic: state_copy.italic},
-                            ZOP::PrintOps{text: text.to_string()},
-                            ZOP::Newline,
-                            ZOP::PrintOps{text: line},
-                            ZOP::Newline,
-                            ZOP::SetTextStyle{bold: state_copy.bold, reverse: state_copy.inverted, monospace: state_copy.mono, italic: state_copy.italic}
-                        ]
-                    } else {
-                        let mut number_signs = "".to_string();
-                        for _ in 0..*rank {
-                            number_signs.push_str("#");
-                        }
+                    if !manager.is_silent && !manager.is_nobr {
+                        if *rank <= 2 {
+                            let text_length = text.len();
+                            let mut line = "".to_string();
+                            for _ in 0..text_length {
+                                line.push_str( if *rank == 1 { "=" } else { "-" } );
+                            }
+                            
+                            vec![
+                                ZOP::Newline,
+                                ZOP::SetTextStyle{bold: true, reverse: state_copy.inverted, monospace: true, italic: state_copy.italic},
+                                ZOP::PrintOps{text: text.to_string()},
+                                ZOP::Newline,
+                                ZOP::PrintOps{text: line},
+                                ZOP::Newline,
+                                ZOP::SetTextStyle{bold: state_copy.bold, reverse: state_copy.inverted, monospace: state_copy.mono, italic: state_copy.italic}
+                            ]
+                        } else {
+                            let mut number_signs = "".to_string();
+                            for _ in 0..*rank {
+                                number_signs.push_str("#");
+                            }
 
-                        vec![
-                            ZOP::PrintOps{text: number_signs+" "+&text.to_string()}
-                        ]
+                            vec![
+                                ZOP::PrintOps{text: number_signs+" "+&text.to_string()}
+                            ]
+                        }
+                    } else {
+                        // twee prints only the text if a heading is in a nobr
+                        if manager.is_nobr {
+                            vec![ZOP::PrintOps{text: text.to_string()}]
+                        } else {
+                            vec![]
+                        }
                     }
                 },
                 &TokFormatBoldStart { .. } => {
