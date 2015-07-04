@@ -1,0 +1,82 @@
+
+ZOP::Routine{name: "easter_egg_start".to_string(), count_variables: 1},
+ZOP::StoreVariable{variable: Variable::new(17), value: Operand::new_const(0)},
+ZOP::Label{name: "easter_egg_loop".to_string()},
+ZOP::Call1N{jump_to_label: "controll".to_string()},
+ZOP::Jump{jump_to_label: "easter_egg_loop".to_string()},
+
+ZOP::Routine{name: "controll".to_string(), count_variables: 2},
+ZOP::Label{name: "controll_loop".to_string()},
+ZOP::ReadCharTimer{local_var_id: 1, timer: 1, routine: "easter_anim".to_string()},
+ZOP::Jump{jump_to_label: "controll_loop".to_string()},
+
+ZOP::Routine{name: "easter_anim".to_string(), count_variables: 2},
+ZOP::Mod{operand1: Operand::new_var(17), operand2: Operand::new_const(11), save_variable: Variable::new(17)},
+ZOP::Inc{variable: 17},
+ZOP::EraseWindow{value: -1},
+ZOP::SetTextStyle{bold: true, reverse: false, monospace: true, italic: false},
+ZOP::SetCursor{line: 1, col: 1},
+ZOP::SetColor{foreground: 7, background: 6},
+ZOP::PrintNumVar{variable: Variable::new(17)},
+ZOP::JE{operand1: Operand::new_var(17), operand2: Operand::new_const(1), jump_to_label: "nyanp1".to_string()},
+ZOP::JE{operand1: Operand::new_var(17), operand2: Operand::new_const(2), jump_to_label: "nyanp2".to_string()},
+ZOP::JE{operand1: Operand::new_var(17), operand2: Operand::new_const(3), jump_to_label: "nyanp3".to_string()},
+ZOP::JE{operand1: Operand::new_var(17), operand2: Operand::new_const(4), jump_to_label: "nyanp4".to_string()},
+ZOP::JE{operand1: Operand::new_var(17), operand2: Operand::new_const(5), jump_to_label: "nyanp5".to_string()},
+ZOP::JE{operand1: Operand::new_var(17), operand2: Operand::new_const(6), jump_to_label: "nyanp6".to_string()},
+ZOP::JE{operand1: Operand::new_var(17), operand2: Operand::new_const(7), jump_to_label: "nyanp7".to_string()},
+ZOP::JE{operand1: Operand::new_var(17), operand2: Operand::new_const(8), jump_to_label: "nyanp8".to_string()},
+ZOP::JE{operand1: Operand::new_var(17), operand2: Operand::new_const(9), jump_to_label: "nyanp9".to_string()},
+ZOP::JE{operand1: Operand::new_var(17), operand2: Operand::new_const(10), jump_to_label: "nyanp10".to_string()},
+ZOP::JE{operand1: Operand::new_var(17), operand2: Operand::new_const(11), jump_to_label: "nyanp11".to_string()},
+ZOP::JE{operand1: Operand::new_var(17), operand2: Operand::new_const(12), jump_to_label: "nyanp12".to_string()},
+ZOP::Ret{value: Operand::new_const(0)},
+
+ZOP::Label{name: "nyanp1".to_string()},
+ZOP::Call1N{jump_to_label: "nyanpr1".to_string()},
+ZOP::Ret{value: Operand::new_const(0)},
+
+ZOP::Label{name: "nyanp2".to_string()},
+ZOP::Call1N{jump_to_label: "nyanpr2".to_string()},
+ZOP::Ret{value: Operand::new_const(0)},
+
+ZOP::Label{name: "nyanp3".to_string()},
+ZOP::Call1N{jump_to_label: "nyanpr3".to_string()},
+ZOP::Ret{value: Operand::new_const(0)},
+
+ZOP::Label{name: "nyanp4".to_string()},
+ZOP::Call1N{jump_to_label: "nyanpr4".to_string()},
+ZOP::Ret{value: Operand::new_const(0)},
+
+ZOP::Label{name: "nyanp5".to_string()},
+ZOP::Call1N{jump_to_label: "nyanpr5".to_string()},
+ZOP::Ret{value: Operand::new_const(0)},
+
+ZOP::Label{name: "nyanp6".to_string()},
+ZOP::Call1N{jump_to_label: "nyanpr6".to_string()},
+ZOP::Ret{value: Operand::new_const(0)},
+
+ZOP::Label{name: "nyanp7".to_string()},
+ZOP::Call1N{jump_to_label: "nyanpr7".to_string()},
+ZOP::Ret{value: Operand::new_const(0)},
+
+ZOP::Label{name: "nyanp8".to_string()},
+ZOP::Call1N{jump_to_label: "nyanpr8".to_string()},
+ZOP::Ret{value: Operand::new_const(0)},
+
+ZOP::Label{name: "nyanp9".to_string()},
+ZOP::Call1N{jump_to_label: "nyanpr9".to_string()},
+ZOP::Ret{value: Operand::new_const(0)},
+
+ZOP::Label{name: "nyanp10".to_string()},
+ZOP::Call1N{jump_to_label: "nyanpr10".to_string()},
+ZOP::Ret{value: Operand::new_const(0)},
+
+ZOP::Label{name: "nyanp11".to_string()},
+ZOP::Call1N{jump_to_label: "nyanpr11".to_string()},
+ZOP::Ret{value: Operand::new_const(0)},
+
+ZOP::Label{name: "nyanp12".to_string()},
+ZOP::Call1N{jump_to_label: "nyanpr12".to_string()},
+ZOP::Ret{value: Operand::new_const(0)},
+

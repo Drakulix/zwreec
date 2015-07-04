@@ -5,6 +5,7 @@ pub mod op;
 pub mod zbytes;
 pub mod zfile;
 pub mod ztext;
+pub mod ee;
 
 
 use std::error::Error;

@@ -152,6 +152,17 @@ pub fn op_set_text_style(bold: bool, reverse: bool, monospace: bool, italic: boo
 }
 
 
+pub fn op_set_cursor(line: u8, col: u8) -> Vec<u8> {
+    let args: Vec<ArgType> = vec![ArgType::SmallConst, ArgType::SmallConst, ArgType::Nothing, ArgType::Nothing];
+    let mut bytes = op_var(0xF, args);
+
+    // write argument values
+    bytes.push(line);
+    bytes.push(col);
+    bytes
+}
+
+
 /// Prints the value of a variable (only ints a possibe)
 pub fn op_print_num_var(variable: &Variable) -> Vec<u8> {
     let args: Vec<ArgType> = vec![ArgType::Variable, ArgType::Nothing, ArgType::Nothing, ArgType::Nothing];
