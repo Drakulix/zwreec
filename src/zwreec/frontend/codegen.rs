@@ -58,6 +58,7 @@ impl<'a> Codegen<'a> {
         }
     }
 
+    /// starts the code-generation
     pub fn start_codegen(&mut self) {
         self.zfile.start();
         //self.zfile.op_quit();
