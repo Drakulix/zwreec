@@ -273,6 +273,7 @@ impl<'a> Parser<'a> {
                 (PassageContent, TokMacroPrint      { .. } ) |
                 (PassageContent, TokVariable        { .. } ) |
                 (PassageContent, TokMacroSilently   { .. } ) |
+                (PassageContent, TokMacroNoBr   { .. } ) |
                 (PassageContent, TokMacroContentVar { .. } ) => {
                     stack.push(NonTerminal(PassageContent));
                     stack.push(NonTerminal(Macro));
@@ -286,10 +287,13 @@ impl<'a> Parser<'a> {
                     Some(UpChild(tok))
                 },
                 (PassageContent, TokFormatBoldEnd    { .. } ) |
-                (PassageContent, TokFormatItalicEnd  { .. } ) |
-                (PassageContent, TokMacroEndSilently { .. } ) => {
+                (PassageContent, TokFormatItalicEnd  { .. } ) => {
                     // jump one ast-level higher
                     Some(Up)
+                },
+                (PassageContent, tok @ TokMacroEndSilently { .. } ) |
+                (PassageContent, tok @ TokMacroEndNoBr     { .. } ) => {
+                    Some(ChildUp(tok))
                 },
                 (PassageContent, _) => {
                     // PassageContent -> ε
@@ -400,6 +404,15 @@ impl<'a> Parser<'a> {
                 (Macro, tok @ TokMacroSilently { .. } ) => {
                     stack.push(Terminal(TokMacroEnd {location: (0, 0)} ));
                     stack.push(Terminal(TokMacroEndSilently {location: (0, 0)}));
+                    stack.push(NonTerminal(PassageContent));
+                    stack.push(Terminal(TokMacroEnd {location: (0, 0)} ));
+                    stack.push(Terminal(tok.clone()));
+
+                    Some(ChildDown(tok))
+                }
+                (Macro, tok @ TokMacroNoBr { .. } ) => {
+                    stack.push(Terminal(TokMacroEnd {location: (0, 0)} ));
+                    stack.push(Terminal(TokMacroEndNoBr {location: (0, 0)}));
                     stack.push(NonTerminal(PassageContent));
                     stack.push(Terminal(TokMacroEnd {location: (0, 0)} ));
                     stack.push(Terminal(tok.clone()));

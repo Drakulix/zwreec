@@ -133,6 +133,7 @@ pub fn gen_zcode<'a>(node: &'a ASTNode, mut out: &mut Zfile, mut manager: &mut C
         &ASTNode::Default(ref t) => {
             let mut code: Vec<ZOP> = match &t.category {
                 &TokText {ref text, .. } => {
+
                     if !manager.is_silent {
                         vec![ZOP::PrintOps{text: text.to_string()}]
                     } else {
@@ -163,20 +164,32 @@ pub fn gen_zcode<'a>(node: &'a ASTNode, mut out: &mut Zfile, mut manager: &mut C
                 },
                 &TokMacroSilently { .. } => {
                     manager.is_silent = true;
-                    vec![]
+                    let mut code: Vec<ZOP> = vec![];
+                    for child in &t.childs {
+                        for instr in gen_zcode(child, out, manager) {
+                            code.push(instr);
+                        }
+                    }
+                    code
                 },
                 &TokMacroEndSilently { .. } => {
                     manager.is_silent = false;
                     vec![]
                 },
-                /*&TokMacroNoBr { .. } => {
+                &TokMacroNoBr { .. } => {
                     manager.is_nobr = true;
-                    vec![]
+                    let mut code: Vec<ZOP> = vec![];
+                    for child in &t.childs {
+                        for instr in gen_zcode(child, out, manager) {
+                            code.push(instr);
+                        }
+                    }
+                    code
                 },
                 &TokMacroEndNoBr { .. } => {
                     manager.is_nobr = false;
                     vec![]
-                },*/
+                },
                 &TokPassageLink {ref display_name, ref passage_name, .. } => {
                     if !manager.is_silent {
                         set_formatting = true;
