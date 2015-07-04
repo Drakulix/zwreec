@@ -267,28 +267,27 @@ impl<'a> Parser<'a> {
 
                     Some(AddChild(tok))
                 },
-                (PassageContent, TokMacroDisplay { .. } ) |
-                (PassageContent, TokMacroSet { .. } ) |
-                (PassageContent, TokMacroIf  { .. } ) |
-                (PassageContent, TokMacroPrint { .. } ) |
-                (PassageContent, TokVariable { .. } ) |
+                (PassageContent, TokMacroDisplay    { .. } ) |
+                (PassageContent, TokMacroSet        { .. } ) |
+                (PassageContent, TokMacroIf         { .. } ) |
+                (PassageContent, TokMacroPrint      { .. } ) |
+                (PassageContent, TokVariable        { .. } ) |
+                (PassageContent, TokMacroSilently   { .. } ) |
                 (PassageContent, TokMacroContentVar { .. } ) => {
                     stack.push(NonTerminal(PassageContent));
                     stack.push(NonTerminal(Macro));
 
                     None
                 },
-                (PassageContent, tok @ TokMacroEndIf { .. }) => {
+                (PassageContent, tok @ TokMacroEndIf { .. } ) => {
                     debug!("pop TokMacroEndIf Passage;");
 
                     // jump one ast-level higher
                     Some(UpChild(tok))
                 },
-                (PassageContent, TokFormatBoldEnd { .. } ) => {
-                    // jump one ast-level higher
-                    Some(Up)
-                },
-                (PassageContent, TokFormatItalicEnd { .. } ) => {
+                (PassageContent, TokFormatBoldEnd    { .. } ) |
+                (PassageContent, TokFormatItalicEnd  { .. } ) |
+                (PassageContent, TokMacroEndSilently { .. } ) => {
                     // jump one ast-level higher
                     Some(Up)
                 },
@@ -394,6 +393,15 @@ impl<'a> Parser<'a> {
                 (Macro, tok @ TokMacroPrint { .. } ) => {
                     stack.push(Terminal(TokMacroEnd {location: (0, 0)} ));
                     stack.push(NonTerminal(ExpressionList));
+                    stack.push(Terminal(tok.clone()));
+
+                    Some(ChildDown(tok))
+                }
+                (Macro, tok @ TokMacroSilently { .. } ) => {
+                    stack.push(Terminal(TokMacroEnd {location: (0, 0)} ));
+                    stack.push(Terminal(TokMacroEndSilently {location: (0, 0)}));
+                    stack.push(NonTerminal(PassageContent));
+                    stack.push(Terminal(TokMacroEnd {location: (0, 0)} ));
                     stack.push(Terminal(tok.clone()));
 
                     Some(ChildDown(tok))
