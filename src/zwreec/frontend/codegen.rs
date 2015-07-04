@@ -162,7 +162,7 @@ pub fn gen_zcode<'a>(node: &'a ASTNode, mut out: &mut Zfile, mut manager: &mut C
                         }
 
                         vec![
-                            ZOP::PrintOps{text: number_signs+&text.to_string()}
+                            ZOP::PrintOps{text: number_signs+" "+&text.to_string()}
                         ]
                     }
                 },
