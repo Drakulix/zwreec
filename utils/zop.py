@@ -134,7 +134,6 @@ def readFiles(fileName):
     print nc.replace('ZOP::PrintOps{text: "\n', '')
 
 
-# geht immer bis < last index
 for num in range(1,13):
     #print num
     print 'ZOP::Routine{name: "pr' + str(num) + '".to_string(), count_variables: 1},'
