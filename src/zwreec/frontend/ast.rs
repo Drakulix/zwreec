@@ -28,6 +28,7 @@ pub enum ASTOperation {
     AddPassage(Token),
     AddChild(Token),
     ChildDown(Token),
+    ChildUp(Token),
     Up,
     UpChild(Token),
     UpChildDown(Token),
@@ -62,6 +63,7 @@ impl<'a> ASTBuilder<'a> {
             AddPassage(passage) => self.add_passage(passage),
             AddChild(child) => self.add_child(child),
             ChildDown(child) => self.child_down(child),
+            ChildUp(child) => self.child_up(child),
             Up => self.up(),
             UpChild(child) => self.up_child(child),
             UpChildDown(child) => self.up_child_down(child),
@@ -129,6 +131,12 @@ impl<'a> ASTBuilder<'a> {
         } else {
             self.is_in_if_expression = false;
         }
+    }
+
+    /// adds a child and goes one lvl up
+    pub fn child_up(&mut self, token: Token) {
+        self.add_child(token);
+        self.up();
     }
 
     /// goes one lvl up and adds and child

@@ -379,6 +379,14 @@ rustlex! TweeLexer {
                     lexer.MACRO_CONTENT();
                     Some(TokMacroEndSilently {location: lexer.yylloc()} )
                 },
+                "nobr" => {
+                    lexer.MACRO_CONTENT();
+                    Some(TokMacroNoBr {location: lexer.yylloc()} )
+                },
+                "endnobr" => {
+                    lexer.MACRO_CONTENT();
+                    Some(TokMacroEndNoBr {location: lexer.yylloc()} )
+                },
                 _ => {
                     lexer.MACRO_CONTENT_SHORT_DISPLAY();
                     Some(TokMacroDisplay {location: lexer.yylloc(), passage_name: replaced_string.to_string()} )
