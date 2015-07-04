@@ -237,7 +237,7 @@ impl Zfile {
             global_addr: 0,
             object_addr: 0,
             static_addr: 0,
-            last_static_written: if half_memory { 0x4000 } else { 0x8000 },
+            last_static_written: if half_memory { 0x2000 } else { 0x8000 },
             heap_start: 0x600,
             type_store: 0x400,
             force_unicode: force_unicode,
