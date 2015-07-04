@@ -136,7 +136,7 @@ def readFiles(fileName):
 
 for num in range(1,13):
     #print num
-    print 'ZOP::Routine{name: "pr' + str(num) + '".to_string(), count_variables: 1},'
+    print 'ZOP::Routine{name: "nyanpr' + str(num) + '".to_string(), count_variables: 1},'
     #print "routine pr1 0\n"
     #readFiles("frames/frame1.txt")
     readFiles("frames/frame{}.txt".format(num))
