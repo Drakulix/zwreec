@@ -73,7 +73,7 @@ fn evaluate_expression_internal<'a>(node: &'a ASTNode, code: &mut Vec<ZOP>,
                 if n.childs.len() >= 1 {
                     return evaluate_expression_internal(&n.childs[0], code, temp_ids, manager, &mut out)
                 } else {
-                    return Operand::Const(Constant { value: 0 })
+                    return Operand::BoolConst(Constant { value: 0 })
                 }
             }
 
@@ -100,7 +100,7 @@ fn evaluate_expression_internal<'a>(node: &'a ASTNode, code: &mut Vec<ZOP>,
                     if n.childs.len() >= 1 {
                         return evaluate_expression_internal(&n.childs[0], code, temp_ids, manager, &mut out)
                     } else {
-                        return Operand::Const(Constant { value: 0 })
+                        return Operand::BoolConst(Constant { value: 0 })
                     }
                 }
             }
@@ -119,7 +119,7 @@ fn evaluate_expression_internal<'a>(node: &'a ASTNode, code: &mut Vec<ZOP>,
             Operand::new_string_ref(out.write_string(value) as i16)
         },
         TokVariable { ref name, .. } => {
-            Operand::Var(manager.symbol_table.get_symbol_id(name))
+            Operand::Var(manager.symbol_table.get_and_add_symbol_id(name))
         },
         TokFunction { ref name, ref location } => {
             match &**name {
@@ -167,51 +167,38 @@ fn eval_num_op<'a>(eval0: &Operand, eval1: &Operand, op_name: &str, location: (u
     let save_var = determine_save_var(eval0, eval1, temp_ids);
     match op_name {
         "+" => {
-            if save_var.vartype == Type::String {
-                let a1: Variable = match temp_ids.pop() {
-                    Some(var) => Variable::new(var),
-                    None      => error_force_panic!(EvaluateExpressionError::NoTempIdLeftOnStack)
-                };
-                let o1 = Operand::new_var(a1.id);
-                let a2: Variable = match temp_ids.pop() {
-                    Some(var) => Variable::new(var),
-                    None      => error_force_panic!(EvaluateExpressionError::NoTempIdLeftOnStack)
-                };
-                let o2 = Operand::new_var(a2.id);
-                let addr1 = match eval0 {
-                    &Operand::StringRef(_) => eval0,
-                    &Operand::Var(Variable{id: _, vartype: Type::String}) => eval0,
-                    _ => { code.push(ZOP::Call2S{jump_to_label: "itoa".to_string(), arg: eval0.clone(), result: a1.clone()}); &o1 }
-                };
-                let addr2 = match eval1 {
-                    &Operand::StringRef(_) => eval1,
-                    &Operand::Var(Variable{id: _, vartype: Type::String}) => eval1,
-                    _ => { code.push(ZOP::Call2S{jump_to_label: "itoa".to_string(), arg: eval1.clone(), result: a2.clone()}); &o2 }
-                };
-                code.push(ZOP::CallVSA2{jump_to_label: "strcat".to_string(), arg1: addr1.clone(), arg2: addr2.clone(), result: save_var.clone()});
-                free_var_if_temp(&Operand::new_var(a1.id), temp_ids);
-                free_var_if_temp(&Operand::new_var(a2.id), temp_ids);
-            } else {
-                code.push(ZOP::Add{operand1: eval0.clone(), operand2: eval1.clone(), save_variable: save_var.clone()});
-            }
+            let tmp1: Variable = match temp_ids.pop() {
+                Some(var) => Variable::new(var),
+                None      => error_force_panic!(EvaluateExpressionError::NoTempIdLeftOnStack)
+            };
+            let tmp2: Variable = match temp_ids.pop() {
+                Some(var) => Variable::new(var),
+                None      => error_force_panic!(EvaluateExpressionError::NoTempIdLeftOnStack)
+            };
+            code.push(ZOP::AddTypes{operand1: eval0.clone(), operand2: eval1.clone(), tmp1: tmp1.clone(), tmp2: tmp2.clone(), save_variable: save_var.clone()});
+            free_var_if_temp(&Operand::new_var(tmp1.id), temp_ids);
+            free_var_if_temp(&Operand::new_var(tmp2.id), temp_ids);
         },
         "-" => {
             code.push(ZOP::Sub{operand1: eval0.clone(), operand2: eval1.clone(), save_variable: save_var.clone()});
+            code.push(ZOP::SetVarType{variable: save_var.clone(), vartype: save_var.vartype.clone()});
         },
         "*" => {
             code.push(ZOP::Mul{operand1: eval0.clone(), operand2: eval1.clone(), save_variable: save_var.clone()});
+            code.push(ZOP::SetVarType{variable: save_var.clone(), vartype: save_var.vartype.clone()});
         },
         "/" => {
             code.push(ZOP::Div{operand1: eval0.clone(), operand2: eval1.clone(), save_variable: save_var.clone()});
+            code.push(ZOP::SetVarType{variable: save_var.clone(), vartype: save_var.vartype.clone()});
         },
         "%" => {
             code.push(ZOP::Mod{operand1: eval0.clone(), operand2: eval1.clone(), save_variable: save_var.clone()});
+            code.push(ZOP::SetVarType{variable: save_var.clone(), vartype: save_var.vartype.clone()});
         },
         _ => {
             error_panic!(manager.cfg => EvaluateExpressionError::UnsupportedOperator { op_name: op_name.to_string(), location: location.clone() })
         }
     };
-
     free_var_if_both_temp(eval0, eval1, temp_ids);
 
     Operand::Var(save_var)
@@ -261,7 +248,7 @@ fn eval_comp_op<'a>(eval0: &Operand, eval1: &Operand, op_name: &str, location: (
         return direct_eval_comp_op(eval0, eval1, op_name, location.clone(), manager);
     }
     let save_var: Variable = match temp_ids.pop() {
-        Some(var) => Variable::new(var),
+        Some(var) => Variable::new_bool(var),
         None      => error_force_panic!(EvaluateExpressionError::NoTempIdLeftOnStack)
     };
     let label = format!("expr_{}", manager.ids_expr.start_next());
@@ -349,6 +336,7 @@ fn eval_comp_op<'a>(eval0: &Operand, eval1: &Operand, op_name: &str, location: (
         };
     }
     code.push(ZOP::Label {name: label.to_string()});
+    code.push(ZOP::SetVarType{variable: save_var.clone(), vartype: Type::Bool});
     free_var_if_temp(eval0, temp_ids);
     free_var_if_temp(eval1, temp_ids);
     Operand::Var(save_var)
@@ -373,9 +361,9 @@ fn direct_eval_comp_op<'a>(eval0: &Operand, eval1: &Operand, op_name: &str, loca
         }
     };
     if result {
-        Operand::Const(Constant {value: 1})
+        Operand::BoolConst(Constant {value: 1})
     } else {
-        Operand::Const(Constant {value: 0})
+        Operand::BoolConst(Constant {value: 0})
     }
 }
 
@@ -383,21 +371,14 @@ fn direct_eval_comp_op<'a>(eval0: &Operand, eval1: &Operand, op_name: &str, loca
 fn eval_and_or(eval0: &Operand, eval1: &Operand, op_name: &str, code: &mut Vec<ZOP>,
         temp_ids: &mut Vec<u8>) -> Operand {
     if count_constants(&eval0, &eval1) == 2 {
-        let mut out_large = false;
         let val0 = eval0.const_value();
         let val1 = eval1.const_value();
-        match eval0 { &Operand::LargeConst(_) => {out_large = true; }, _ => {} };
-        match eval1 { &Operand::LargeConst(_) => {out_large = true; }, _ => {} };
         let result = if op_name == "or" || op_name == "||" {
                 val0 | val1
             } else {
                 val0 & val1
             };
-        if out_large {
-            return Operand::LargeConst(LargeConstant { value: result })
-        } else {
-            return Operand::Const(Constant { value: result as u8 })
-        }
+        return Operand::BoolConst(Constant { value: if result == 0 { 0 } else { 1 } });
     }
 
     let save_var = determine_save_var(eval0, eval1, temp_ids);
@@ -406,8 +387,9 @@ fn eval_and_or(eval0: &Operand, eval1: &Operand, op_name: &str, code: &mut Vec<Z
     } else {
         code.push(ZOP::And{operand1: eval0.clone(), operand2: eval1.clone(), save_variable: save_var.clone()});
     }
+    code.push(ZOP::SetVarType{variable: save_var.clone(), vartype: Type::Bool});
     free_var_if_both_temp(eval0, eval1, temp_ids);
-    Operand::Var(save_var)
+    Operand::new_var_bool(save_var.id)
 }
 
 
@@ -416,10 +398,10 @@ fn eval_not<'a>(eval: &Operand, code: &mut Vec<ZOP>,
     if eval.is_const() {
         let val = eval.const_value();
         let result: u8 = if val != 0 { 0 } else { 1 };
-        return Operand::Const(Constant { value: result });
+        return Operand::BoolConst(Constant { value: result });
     }
     let save_var: Variable = match temp_ids.pop() {
-        Some(var) => Variable::new(var),
+        Some(var) => Variable::new_bool(var),
         None      => error_force_panic!(EvaluateExpressionError::NoTempIdLeftOnStack)
     };
     let label = format!("expr_{}", manager.ids_expr.start_next());
@@ -427,6 +409,7 @@ fn eval_not<'a>(eval: &Operand, code: &mut Vec<ZOP>,
     code.push(ZOP::JNE{operand1: eval.clone(), operand2: Operand::new_const(0), jump_to_label: label.to_string()});
     code.push(ZOP::StoreVariable{ variable: save_var.clone(), value: Operand::new_const(1)});
     code.push(ZOP::Label {name: label.to_string()});
+    code.push(ZOP::SetVarType{variable: save_var.clone(), vartype: save_var.vartype.clone()});
     free_var_if_temp(eval, temp_ids);
     Operand::Var(save_var)
 }
@@ -463,6 +446,7 @@ fn eval_unary_minus<'a>(eval: &Operand, code: &mut Vec<ZOP>, temp_ids: &mut Vec<
     };
 
     code.push(ZOP::Sub {operand1: Operand::new_const(0), operand2: eval.clone(), save_variable: save_var.clone()});
+    code.push(ZOP::SetVarType{variable: save_var.clone(), vartype: Type::Integer});
 
     Operand::new_var(save_var.id)
 }
@@ -505,11 +489,13 @@ fn determine_save_var(operand1: &Operand, operand2: &Operand, temp_ids: &mut Vec
     let type1 = match operand1 {
         &Operand::Var(ref var) => var.vartype.clone(),
         &Operand::StringRef(_) => Type::String,
+        &Operand::BoolConst(_) => Type::Bool,
         _ => { Type::Integer }
     };
     let type2 = match operand2 {
         &Operand::Var(ref var) => var.vartype.clone(),
         &Operand::StringRef(_) => Type::String,
+        &Operand::BoolConst(_) => Type::Bool,
         _ => { Type::Integer }
     };
     let vartype = determine_result_type(type1, type2);
@@ -547,8 +533,8 @@ fn count_constants(operand1: &Operand, operand2: &Operand) -> u8 {
 
 fn boolstr_to_const(string: &str) -> Operand {
     match string {
-        "true" => Operand::Const(Constant { value: 1 }),
-        _ => Operand::Const(Constant { value: 0 })
+        "true" => Operand::BoolConst(Constant { value: 1 }),
+        _ => Operand::BoolConst(Constant { value: 0 })
     }
 }
 

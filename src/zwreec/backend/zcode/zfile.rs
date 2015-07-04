@@ -6,10 +6,12 @@ pub use super::op;
 use config::Config;
 
 #[derive(Clone, PartialEq, Debug)]
+#[allow(dead_code)]
 pub enum Type {
-    Bool,
-    Integer,
-    String,
+    None = 0,
+    Bool = 1,
+    Integer = 2,
+    String = 3,
 }
 
 #[derive(Debug,Clone)]
@@ -25,6 +27,7 @@ pub enum Operand {
     Const(Constant) ,
     LargeConst(LargeConstant),
     StringRef(LargeConstant),
+    BoolConst(Constant),
 }
 
 impl Operand {
@@ -48,17 +51,22 @@ impl Operand {
         Operand::Var(Variable::new_string(id))
     }
 
+    pub fn new_var_bool(id: u8) -> Operand {
+        Operand::Var(Variable::new_bool(id))
+    }
+
     pub fn const_value(&self) -> i16 {
         match self {
             &Operand::Const(ref constant) => constant.value as i16,
             &Operand::LargeConst(ref constant) => constant.value,
+            &Operand::BoolConst(ref constant) => constant.value as i16,
             _ => panic!("Operand must be a constant!")
         }
     }
 
     pub fn is_const(&self) -> bool {
         match self {
-            &Operand::Const(_) | &Operand::LargeConst(_) => true,
+            &Operand::Const(_) | &Operand::LargeConst(_) | &Operand::BoolConst(_) => true,
             _ => false
         }
     }
@@ -74,6 +82,9 @@ impl Variable {
     pub fn new_bool(id: u8) -> Variable {
         Variable { id: id, vartype: Type::Bool }
     }
+    pub fn new_type(id: u8, vartype: Type) -> Variable {
+        Variable { id: id, vartype: vartype }
+    }
 }
 
 #[derive(Debug)]
@@ -83,6 +94,7 @@ pub enum ZOP {
   PrintUnicodeStr{address: Operand},
   Print{text: String},
   PrintNumVar{variable: Variable},
+  PrintVar{variable: Variable},
   PrintPaddr{address: Operand},  // packed address
   PrintAddr{address: Operand},
   PrintOps{text: String},
@@ -95,6 +107,7 @@ pub enum ZOP {
   CallVNA3{jump_to_label: String, arg1: Operand, arg2: Operand, arg3: Operand},
   CallVSA2{jump_to_label: String, arg1: Operand, arg2: Operand, result: Variable},
   CallVSA3{jump_to_label: String, arg1: Operand, arg2: Operand, arg3: Operand, result: Variable},
+  CallVS2A5{jump_to_label: String, arg1: Operand, arg2: Operand, arg3: Operand, arg4: Operand, arg5: Operand, result: Variable},
   Routine{name: String, count_variables: u8},
   Label{name: String},
   Newline,
@@ -102,8 +115,13 @@ pub enum ZOP {
   SetColorVar{foreground: u8, background: u8},
   SetTextStyle{bold: bool, reverse: bool, monospace: bool, italic: bool},
   StoreVariable{variable: Variable, value: Operand},
+  StoreVariableID{variable: Variable, value: Operand},
   StoreW{array_address: Operand, index: Variable, variable: Variable},
   StoreB{array_address: Operand, index: Variable, variable: Variable},
+  StoreBOperand{array_address: Operand, index: Operand, operand: Operand},
+  LoadBOperand{array_address: Operand, index: Operand, variable: Variable},
+  PushVar{variable: Variable},
+  PullVar{variable: Variable},
   Inc{variable: u8},
   Ret{value: Operand},
   JE{operand1: Operand, operand2: Operand, jump_to_label: String},
@@ -115,6 +133,7 @@ pub enum ZOP {
   Random{range: Operand, variable: Variable},
   ReadChar{local_var_id: u8},
   ReadCharTimer{local_var_id: u8, timer: u8, routine: String},
+  AddTypes{operand1: Operand, operand2: Operand, tmp1: Variable, tmp2: Variable, save_variable: Variable},
   Add{operand1: Operand, operand2: Operand, save_variable: Variable},
   Sub{operand1: Operand, operand2: Operand, save_variable: Variable},
   Mul{operand1: Operand, operand2: Operand, save_variable: Variable},
@@ -127,6 +146,9 @@ pub enum ZOP {
   Dec{variable: u8},
   LoadW{array_address: Operand, index: Variable, variable: Variable},
   EraseWindow{value: i8},
+  SetVarType{variable: Variable, vartype: Type},
+  CopyVarType{variable: Variable, from: Operand},
+  GetVarType{variable: Variable, result: Variable},
   Quit,
 }
 
@@ -158,6 +180,7 @@ pub struct Zfile {
     static_addr: u16,
     pub object_addr: u16,
     last_static_written: u16,
+    pub type_store: u16,
     pub heap_start: u16,
     pub force_unicode: bool,
     pub easter_egg: bool,
@@ -214,7 +237,8 @@ impl Zfile {
             object_addr: 0,
             static_addr: 0,
             last_static_written: 0x8000,
-            heap_start: 0x800,
+            heap_start: 0x600,
+            type_store: 0x400,
             force_unicode: force_unicode,
             easter_egg: easter_egg,
         }
@@ -490,6 +514,7 @@ impl Zfile {
             &ZOP::Mod{ref operand1, ref operand2, ref save_variable} => op::op_mod(operand1, operand2, save_variable),
             &ZOP::Not{ref operand, ref result} => op::op_not(operand, result),
             &ZOP::StoreVariable{ref variable, ref value} => op::op_store_var(variable, value),
+            &ZOP::StoreVariableID{ref variable, ref value} => op::op_store_var_id(variable, value),
             &ZOP::Ret{ref value} => op::op_ret(value),
             &ZOP::PrintAddr{ref address} => op::op_print_addr(address),
             &ZOP::PrintPaddr{ref address} => op::op_print_paddr(address),
@@ -502,8 +527,12 @@ impl Zfile {
             &ZOP::LoadW{ref array_address, ref index, ref variable} => op::op_loadw(array_address, index, variable),
             &ZOP::StoreW{ref array_address, ref index, ref variable} => op::op_storew(array_address, index, variable),
             &ZOP::StoreB{ref array_address, ref index, ref variable} => op::op_storeb(array_address, index, variable),
+            &ZOP::StoreBOperand{ref array_address, ref index, ref operand} => op::op_storeboperand(array_address, index, operand),
+            &ZOP::LoadBOperand{ref array_address, ref index, ref variable} => op::op_loadb(array_address, index, variable),
             &ZOP::Call1NVar{variable} => op::op_call_1n_var(variable),
             &ZOP::EraseWindow{value} => op::op_erase_window(value),
+            &ZOP::PushVar{ref variable} => op::op_push_var(variable),
+            &ZOP::PullVar{ref variable} => op::op_pull(variable.id.clone()),
 
             _ => Vec::new()
         };
@@ -514,6 +543,8 @@ impl Zfile {
             &ZOP::PrintUnicodeStr{ref address} => self.op_print_unicode_str(address),
             &ZOP::Print{ref text} => self.op_print(text),
             &ZOP::PrintOps{ref text} => self.gen_print_ops(text),
+            &ZOP::PrintVar{ref variable} => self.print_var(variable),
+            &ZOP::AddTypes{ref operand1, ref operand2, ref tmp1, ref tmp2, ref save_variable} => self.add_types(operand1, operand2, tmp1, tmp2, save_variable),
             &ZOP::Routine{ref name, count_variables} => self.routine(name, count_variables),
             &ZOP::Label{ref name} => self.label(name),
             &ZOP::Jump{ref jump_to_label} => self.op_jump(jump_to_label),
@@ -532,6 +563,10 @@ impl Zfile {
             &ZOP::CallVNA3{ref jump_to_label, ref arg1, ref arg2, ref arg3} => self.op_call_vn_a3(jump_to_label, arg1, arg2, arg3),
             &ZOP::CallVSA2{ref jump_to_label, ref arg1, ref arg2, ref result} => self.op_call_vs_a2(jump_to_label, arg1, arg2, result),
             &ZOP::CallVSA3{ref jump_to_label, ref arg1, ref arg2, ref arg3, ref result} => self.op_call_vs_a3(jump_to_label, arg1, arg2, arg3, result),
+            &ZOP::CallVS2A5{ref jump_to_label, ref arg1, ref arg2, ref arg3, ref arg4, ref arg5, ref result} => self.op_call_vs2_a5(jump_to_label, arg1, arg2, arg3, arg4, arg5, result),
+            &ZOP::SetVarType{ref variable, ref vartype} => self.set_var_type(variable, vartype),
+            &ZOP::CopyVarType{ref variable, ref from} => self.copy_var_type(variable, from),
+            &ZOP::GetVarType{ref variable, ref result} => self.get_var_type(variable, result),
             _ => ()
         }
         let mut new_jumps: Vec<Zjump> = vec![];
@@ -676,6 +711,8 @@ impl Zfile {
         self.routine_malloc();
         self.routine_strcat();
         self.routine_itoa();
+        self.routine_print_var();
+        self.routine_add_types();
         self.write_jumps();
         self.write_strings();
     }
@@ -1146,6 +1183,7 @@ impl Zfile {
         let heap_start = self.heap_start;
         let static_addr = self.static_addr;
         let global_addr = self.global_addr;
+        let type_store = self.type_store;
         let pos = Variable::new(1);
         let zero = Variable::new(2);
         let c = Variable::new(3);
@@ -1209,6 +1247,12 @@ impl Zfile {
             ZOP::Add{operand1: Operand::new_var(pos.id), operand2: Operand::new_var(c.id), save_variable: pos.clone()},
             ZOP::Jump{jump_to_label: "mem_free_loop".to_string()},
             ZOP::Label{name: "mem_free_exit".to_string()},
+            // set type entries variables 0-15 of type_store to 0 for no type
+            ZOP::StoreVariable{variable: pos.clone(), value: Operand::new_large_const(0)},
+            ZOP::Label{name: "mem_free_uninit_local_var_types".to_string()},
+            ZOP::StoreB{array_address: Operand::new_large_const(type_store as i16), index: pos.clone(), variable: zero.clone()},
+            ZOP::Inc{variable: pos.id},
+            ZOP::JL{operand1: Operand::new_var(pos.id), operand2: Operand::new_large_const(16i16), jump_to_label: "mem_free_uninit_local_var_types".to_string()},
             ZOP::Ret{value: Operand::new_const(0)}
         ]);
     }
@@ -1257,6 +1301,161 @@ impl Zfile {
             // write length i at first position
             ZOP::StoreW{array_address: Operand::new_var(stra.id), index: zero.clone(), variable: i.clone()},
             ZOP::Ret{value: Operand::new_var(stra.id)}
+        ]);
+    }
+
+    /// helper function to print out the content of a variable according to the type of it
+    pub fn routine_print_var(&mut self) {
+        let varid = Variable::new(1);  // first argument
+        let varcontent = Variable::new(2);  // second argument
+        let vartype = Variable::new(3);
+        let type_store = self.type_store;
+        self.emit(vec![
+            ZOP::Routine{name: "print_var".to_string(), count_variables: 4},
+            // get vartype
+            ZOP::LoadBOperand{array_address: Operand::new_large_const(type_store as i16), index: Operand::new_var(varid.id), variable: vartype.clone()},
+            ZOP::JE{operand1: Operand::new_var(vartype.id), operand2: Operand::new_const(Type::String as u8), jump_to_label: "print_var_string".to_string()},
+            ZOP::JE{operand1: Operand::new_var(vartype.id), operand2: Operand::new_const(Type::Bool as u8), jump_to_label: "print_var_bool".to_string()},
+            // print number
+            ZOP::PrintNumVar{variable: varcontent.clone()},
+            ZOP::Ret{value: Operand::new_const(0)},
+            ZOP::Label{name: "print_var_bool".to_string()},
+            ZOP::JE{operand1: Operand::new_var(varcontent.id), operand2: Operand::new_const(0), jump_to_label: "print_var_boolfalse".to_string()},
+            ZOP::Print{text: "true".to_string()},
+            ZOP::Ret{value: Operand::new_const(0)},
+            ZOP::Label{name: "print_var_boolfalse".to_string()},
+            ZOP::Print{text: "false".to_string()},
+            ZOP::Ret{value: Operand::new_const(0)},
+            ZOP::Label{name: "print_var_string".to_string()},
+            // print var string
+            ZOP::PrintUnicodeStr{address: Operand::new_var(varcontent.id)},
+            ZOP::Ret{value: Operand::new_const(0)},
+        ]);
+    }
+
+    fn print_var(&mut self, variable: &Variable) {
+        self.emit(vec![
+            ZOP::CallVNA2{jump_to_label: "print_var".to_string(), arg1: Operand::new_const(variable.id), arg2: Operand::new_var(variable.id)},
+        ]);
+    }
+
+    fn set_var_type(&mut self, variable: &Variable, vartype: &Type) {
+        let type_store = self.type_store;
+        self.emit(vec![
+            ZOP::StoreBOperand{array_address: Operand::new_large_const(type_store as i16), index: Operand::new_const(variable.id), operand: Operand::new_const(vartype.clone() as u8)},
+        ]);
+    }
+
+    fn copy_var_type(&mut self, variable: &Variable, from: &Operand) {
+        let type_store = self.type_store;
+        match from {
+            &Operand::BoolConst(_) => {
+                self.emit(vec![ZOP::SetVarType{variable: variable.clone(), vartype: Type::Bool},]);
+                },
+            &Operand::StringRef(_) => {
+                self.emit(vec![ZOP::SetVarType{variable: variable.clone(), vartype: Type::String},]);
+                },
+            &Operand::Var(ref var) => {
+                self.emit(vec![
+                    ZOP::PushVar{variable: variable.clone()},
+                    ZOP::GetVarType{variable: var.clone(), result: variable.clone()},
+                    ZOP::StoreBOperand{array_address: Operand::new_large_const(type_store as i16), index: Operand::new_const(variable.id), operand: Operand::new_var(variable.id)},
+                    ZOP::PullVar{variable: variable.clone()},
+                    ]);
+                },
+            _ => {
+                self.emit(vec![ZOP::SetVarType{variable: variable.clone(), vartype: Type::Integer},]);
+                },
+        };
+    }
+
+    fn get_var_type(&mut self, variable: &Variable, result: &Variable) {
+        let type_store = self.type_store;
+        self.emit(vec![
+            ZOP::LoadBOperand{array_address: Operand::new_large_const(type_store as i16), index: Operand::new_const(variable.id), variable: result.clone()},
+        ]);
+    }
+
+    /// helper function to add two values according to the types of them and saves type of savevarid to the global type-store and returns the result
+    pub fn routine_add_types(&mut self) {
+        let type_store = self.type_store;
+        let val1 = Variable::new(1);  // first argument
+        let type1 = Variable::new(2);  // second argument
+        let val2 = Variable::new(3);  // third argument
+        let type2 = Variable::new(4);  // fourth argument
+        let savevarid = Variable::new(5);  // fifth argument
+        let result = Variable::new(6);
+        let falsestr = self.write_string("false");
+        let truestr = self.write_string("true");
+        self.emit(vec![
+            ZOP::Routine{name: "add_types".to_string(), count_variables: 10},
+            ZOP::JE{operand1: Operand::new_var(type1.id), operand2: Operand::new_const(Type::String as u8), jump_to_label: "add_types_resultstring".to_string()},
+            ZOP::JE{operand1: Operand::new_var(type2.id), operand2: Operand::new_const(Type::String as u8), jump_to_label: "add_types_resultstring".to_string()},
+            ZOP::Add{operand1: Operand::new_var(val1.id), operand2: Operand::new_var(val2.id), save_variable: result.clone()},
+            // store type integer for savevarid
+            ZOP::StoreBOperand{array_address: Operand::new_large_const(type_store as i16), index: Operand::new_var(savevarid.id), operand: Operand::new_const(Type::Integer as u8)},
+            ZOP::Ret{value: Operand::new_var(result.id)},
+            ZOP::Label{name: "add_types_resultstring".to_string()},
+            // if val1 is string jump to val1isstring
+            ZOP::JE{operand1: Operand::new_var(type1.id), operand2: Operand::new_const(Type::String as u8), jump_to_label: "add_types_val1isstring".to_string()},
+            // convert val1 to string
+            ZOP::JE{operand1: Operand::new_var(type1.id), operand2: Operand::new_const(Type::Bool as u8), jump_to_label: "add_types_val1isbool".to_string()},
+            ZOP::Call2S{jump_to_label: "itoa".to_string(), arg: Operand::new_var(val1.id), result: val1.clone()},
+            ZOP::Jump{jump_to_label: "add_types_val1isstring".to_string()},
+            ZOP::Label{name: "add_types_val1isbool".to_string()},
+            ZOP::JE{operand1: Operand::new_var(val1.id), operand2: Operand::new_const(0), jump_to_label: "add_types_val1isfalse".to_string()},
+            // set to "true"
+            ZOP::StoreVariable{variable: val1.clone(), value: Operand::new_large_const(truestr as i16)},
+            ZOP::Jump{jump_to_label: "add_types_val1isstring".to_string()},
+            ZOP::Label{name: "add_types_val1isfalse".to_string()},
+            ZOP::StoreVariable{variable: val1.clone(), value: Operand::new_large_const(falsestr as i16)},
+            ZOP::Label{name: "add_types_val1isstring".to_string()},
+            // if val2 is string jump to val2isstring
+            ZOP::JE{operand1: Operand::new_var(type2.id), operand2: Operand::new_const(Type::String as u8), jump_to_label: "add_types_val2isstring".to_string()},
+            // convert val2 to string
+            ZOP::JE{operand1: Operand::new_var(type2.id), operand2: Operand::new_const(Type::Bool as u8), jump_to_label: "add_types_val2isbool".to_string()},
+            ZOP::Call2S{jump_to_label: "itoa".to_string(), arg: Operand::new_var(val2.id), result: val2.clone()},
+            ZOP::Jump{jump_to_label: "add_types_val2isstring".to_string()},
+            ZOP::Label{name: "add_types_val2isbool".to_string()},
+            ZOP::JE{operand1: Operand::new_var(val2.id), operand2: Operand::new_const(0), jump_to_label: "add_types_val2isfalse".to_string()},
+            // set to "true"
+            ZOP::StoreVariable{variable: val2.clone(), value: Operand::new_large_const(truestr as i16)},
+            ZOP::Jump{jump_to_label: "add_types_val2isstring".to_string()},
+            ZOP::Label{name: "add_types_val2isfalse".to_string()},
+            ZOP::StoreVariable{variable: val2.clone(), value: Operand::new_large_const(falsestr as i16)},
+            ZOP::Label{name: "add_types_val2isstring".to_string()},
+            // add strings
+            ZOP::CallVSA2{jump_to_label: "strcat".to_string(), arg1: Operand::new_var(val1.id), arg2: Operand::new_var(val2.id), result: result.clone()},
+            // store type string for savevarid
+            ZOP::StoreBOperand{array_address: Operand::new_large_const(type_store as i16), index: Operand::new_var(savevarid.id), operand: Operand::new_const(Type::String as u8)},
+            ZOP::Ret{value: Operand::new_var(result.id)},
+        ]);
+    }
+
+    fn add_types(&mut self, operand1: &Operand, operand2: &Operand, tmp1: &Variable, tmp2: &Variable, save_variable: &Variable) {
+        let type1op = match operand1 {
+            &Operand::StringRef(_) => Operand::new_const(Type::String as u8),
+            &Operand::BoolConst(_) => Operand::new_const(Type::Bool as u8),
+            &Operand::LargeConst(_) => Operand::new_const(Type::Integer as u8),
+            &Operand::Const(_) => Operand::new_const(Type::Integer as u8),
+            &Operand::Var(ref var) => {
+                    self.emit(vec![ZOP::GetVarType{variable: var.clone(), result: tmp1.clone()}]);
+                    Operand::new_var(tmp1.id)
+                }
+        };
+        let type2op = match operand2 {
+            &Operand::StringRef(_) => Operand::new_const(Type::String as u8),
+            &Operand::BoolConst(_) => Operand::new_const(Type::Bool as u8),
+            &Operand::LargeConst(_) => Operand::new_const(Type::Integer as u8),
+            &Operand::Const(_) => Operand::new_const(Type::Integer as u8),
+            &Operand::Var(ref var) => {
+                    self.emit(vec![ZOP::GetVarType{variable: var.clone(), result: tmp2.clone()}]);
+                    Operand::new_var(tmp2.id)
+                }
+        };
+        self.emit(vec![
+            ZOP::CallVS2A5{jump_to_label: "add_types".to_string(),
+                arg1: operand1.clone(), arg2: type1op, arg3: operand2.clone(), arg4: type2op, arg5: Operand::new_const(save_variable.id), result: save_variable.clone()},
         ]);
     }
 
@@ -1371,7 +1570,7 @@ impl Zfile {
         self.data.append_byte(result.id);
     }
 
-    /// calls a routine with two arguments and stores return value in result
+    /// calls a routine with three arguments and stores return value in result
     /// call_vs is VAROP
     pub fn op_call_vs_a3(&mut self, jump_to_label: &str, arg1: &Operand, arg2: &Operand, arg3: &Operand, result: &Variable) {
         let args: Vec<ArgType> = vec![ArgType::LargeConst, op::arg_type(&arg1), op::arg_type(&arg2), op::arg_type(&arg3)];
@@ -1383,6 +1582,24 @@ impl Zfile {
         op::write_argument(arg1, &mut self.data.bytes);
         op::write_argument(arg2, &mut self.data.bytes);
         op::write_argument(arg3, &mut self.data.bytes);
+        self.data.append_byte(result.id);
+    }
+
+    /// calls a routine with five arguments and stores the return value
+    /// call_vs2 is VAROP with additional types-byte
+    pub fn op_call_vs2_a5(&mut self, jump_to_label: &str, arg1: &Operand, arg2: &Operand, arg3: &Operand, arg4: &Operand, arg5: &Operand, result: &Variable) {
+        let args1: Vec<ArgType> = vec![ArgType::LargeConst, op::arg_type(&arg1), op::arg_type(&arg2), op::arg_type(&arg3)];
+        let args2: Vec<ArgType> = vec![op::arg_type(&arg4), op::arg_type(&arg5), ArgType::Nothing, ArgType::Nothing];
+        self.op_var(0xC, args1);
+        self.data.append_byte(op::encode_variable_arguments(args2));
+        // the address of the jump_to_label
+        self.add_jump(jump_to_label.to_string(), JumpType::Routine);
+
+        op::write_argument(arg1, &mut self.data.bytes);
+        op::write_argument(arg2, &mut self.data.bytes);
+        op::write_argument(arg3, &mut self.data.bytes);
+        op::write_argument(arg4, &mut self.data.bytes);
+        op::write_argument(arg5, &mut self.data.bytes);
         self.data.append_byte(result.id);
     }
 

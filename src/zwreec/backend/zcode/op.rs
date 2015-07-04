@@ -61,6 +61,39 @@ pub fn op_storeb(array_address: &Operand, index: &Variable, variable: &Variable)
     bytes
 }
 
+/// stores a value to an array
+/// stores the value of operand to the address in: array_address + index
+pub fn op_storeboperand(array_address: &Operand, index: &Operand, operand: &Operand) -> Vec<u8> {
+    // assert!(array_address > 0, "not allowed array-address, becouse in _some_ interpreters (for example zoom) it crahs. -.-");
+    let args: Vec<ArgType> = vec![arg_type(&array_address), arg_type(&index), arg_type(&operand), ArgType::Nothing];
+    let mut bytes = op_var(0x02, args);
+
+    // array address
+    write_argument(array_address, &mut bytes);
+
+    // array index
+    write_argument(index, &mut bytes);
+
+    // value
+    write_argument(operand, &mut bytes);
+    bytes
+}
+
+/// loads a byte from an array in a variable
+/// loadb is an 2op, BUT with 3 ops -.-
+pub fn op_loadb(array_address: &Operand, index: &Operand, variable: &Variable) -> Vec<u8> {
+    let mut bytes = op_2(0x10, vec![arg_type(&array_address), arg_type(&index)]);
+
+    // array address
+    write_argument(array_address, &mut bytes);
+    // array index
+    write_argument(index, &mut bytes);
+
+    // variable
+    bytes.push(variable.id);
+    bytes
+}
+
 
 /// loads a word from an array in a variable
 /// loadw is an 2op, BUT with 3 ops -.-
@@ -126,8 +159,8 @@ pub fn op_print_num_var(variable: &Variable) -> Vec<u8> {
 }
 
 
-/// pulls an value off the stack to an variable
-/// SmallConst because pull takes an reference to an variable
+/// pulls an value off the stack to a variable
+/// SmallConst because pull takes an reference to a variable
 pub fn op_pull(variable: u8) -> Vec<u8> {
     let args: Vec<ArgType> = vec![ArgType::SmallConst, ArgType::Nothing, ArgType::Nothing, ArgType::Nothing];
     let mut bytes = op_var(0x09, args);
@@ -151,6 +184,14 @@ pub fn op_push_u16(value: u16) -> Vec<u8> {
     let args: Vec<ArgType> = vec![ArgType::LargeConst, ArgType::Nothing, ArgType::Nothing, ArgType::Nothing];
     let mut bytes = op_var(0x08, args);
     write_u16(value, &mut bytes);
+    bytes
+}
+
+/// pushs a variable on the stack
+pub fn op_push_var(variable: &Variable) -> Vec<u8> {
+    let args: Vec<ArgType> = vec![ArgType::Variable, ArgType::Nothing, ArgType::Nothing, ArgType::Nothing];
+    let mut bytes = op_var(0x08, args);
+    bytes.push(variable.id);
     bytes
 }
 
@@ -199,9 +240,18 @@ pub fn op_ret(value: &Operand) -> Vec<u8> {
 }
 
 
-// saves an u8 to the variable
+// saves an operand to the variable
 pub fn op_store_var(variable: &Variable, value: &Operand) -> Vec<u8> {
     let args: Vec<ArgType> = vec![ArgType::Reference, arg_type(&value)];
+    let mut bytes = op_2(0x0d, args);
+    bytes.push(variable.id);
+    write_argument(value, &mut bytes);
+    bytes
+}
+
+// saves an operand to the variable id which is given as operand
+pub fn op_store_var_id(variable: &Variable, value: &Operand) -> Vec<u8> {
+    let args: Vec<ArgType> = vec![ArgType::Variable, arg_type(&value)];
     let mut bytes = op_2(0x0d, args);
     bytes.push(variable.id);
     write_argument(value, &mut bytes);
@@ -410,6 +460,7 @@ pub fn arg_type(operand: &Operand) -> ArgType {
     match operand {
         &Operand::Var(_) => ArgType::Variable,
         &Operand::Const(_) => ArgType::SmallConst,
+        &Operand::BoolConst(_) => ArgType::SmallConst,
         &Operand::LargeConst(_) => ArgType::LargeConst,
         &Operand::StringRef(_) => ArgType::LargeConst,
     }
@@ -419,6 +470,7 @@ pub fn write_argument(operand: &Operand, v: &mut Vec<u8>){
     match operand {
         &Operand::Var(ref var)=> v.push(var.id),
         &Operand::Const(ref constant) => v.push(constant.value),
+        &Operand::BoolConst(ref constant) => v.push(constant.value),
         &Operand::LargeConst(ref constant) => write_i16(constant.value, v),
         &Operand::StringRef(ref constant) => write_i16(constant.value, v),
     };

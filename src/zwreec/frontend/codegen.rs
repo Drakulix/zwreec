@@ -160,7 +160,7 @@ pub fn gen_zcode<'a>(node: &'a ASTNode, mut out: &mut Zfile, mut manager: &mut C
                         vec![
                         ZOP::Call2NWithAddress{jump_to_label: "system_add_link".to_string(), address: passage_name.to_string()},
                         ZOP::SetColor{foreground: 8, background: 2},
-                        ZOP::Print{text: format!("{}[", display_name)},
+                        ZOP::PrintOps{text: format!("{}[", display_name)},
                         ZOP::PrintNumVar{variable: Variable::new(16)},
                         ZOP::Print{text: "]".to_string()},
                         ZOP::SetColor{foreground: 9, background: 2},
@@ -188,19 +188,33 @@ pub fn gen_zcode<'a>(node: &'a ASTNode, mut out: &mut Zfile, mut manager: &mut C
                         let vartype = match result {
                             Operand::StringRef(_) => Type::String,
                             Operand::Var(ref var) => var.vartype.clone(),
+                            Operand::BoolConst(_) => Type::Bool,
                             _ => Type::Integer
                         };
                         manager.symbol_table.insert_new_symbol(&var_name, vartype);
                     }
                     let symbol_id = manager.symbol_table.get_symbol_id(var_name);
                     match &**op_name {
-                        "=" | "to" => code.push(ZOP::StoreVariable{variable: symbol_id, value: result}),
-                        "+=" => code.push(ZOP::Add{operand1: Operand::new_var(symbol_id.id), operand2: result, save_variable: symbol_id}),
-                        "-=" => code.push(ZOP::Sub{operand1: Operand::new_var(symbol_id.id), operand2: result, save_variable: symbol_id}),
-                        "*=" => code.push(ZOP::Mul{operand1: Operand::new_var(symbol_id.id), operand2: result, save_variable: symbol_id}),
-                        "/=" => code.push(ZOP::Div{operand1: Operand::new_var(symbol_id.id), operand2: result, save_variable: symbol_id}),
+                        "=" | "to" => { code.push(ZOP::StoreVariable{variable: symbol_id.clone(), value: result.clone()});
+                                        code.push(ZOP::CopyVarType{variable: symbol_id.clone(), from: result});
+                                      },
+                        "+=" => {   // using temp local variables which are not the result's variable
+                                    let tmp1: u8 = match result {
+                                        Operand::Var(ref var) => if var.id < 3 { 15 } else { 2 },
+                                        _ => 15
+                                    };
+                                    let tmp2: u8 = tmp1-1;
+                                    code.push(ZOP::AddTypes{operand1: Operand::new_var(symbol_id.id), operand2: result, tmp1: Variable::new(tmp1), tmp2: Variable::new(tmp2), save_variable: symbol_id.clone()});
+                                    },
+                        "-=" => { code.push(ZOP::Sub{operand1: Operand::new_var(symbol_id.id), operand2: result, save_variable: symbol_id.clone()});
+                                  code.push(ZOP::SetVarType{variable: Variable::new(symbol_id.id), vartype: Type::Integer}); },
+                        "*=" => { code.push(ZOP::Mul{operand1: Operand::new_var(symbol_id.id), operand2: result, save_variable: symbol_id.clone()});
+                                  code.push(ZOP::SetVarType{variable: Variable::new(symbol_id.id), vartype: Type::Integer}); },
+                        "/=" =>  {code.push(ZOP::Div{operand1: Operand::new_var(symbol_id.id), operand2: result, save_variable: symbol_id.clone()});
+                                  code.push(ZOP::SetVarType{variable: Variable::new(symbol_id.id), vartype: Type::Integer}); },
                         _ => {}
                     };
+                    
                     code
                 },
                 &TokMacroIf { .. } => {
@@ -322,10 +336,11 @@ pub fn gen_zcode<'a>(node: &'a ASTNode, mut out: &mut Zfile, mut manager: &mut C
                         TokExpression => {
                             let eval = evaluate_expression(&child.childs[0], &mut code, manager, &mut out);
                             match eval {
-                                Operand::Var(var) => if var.vartype == Type::String { code.push(ZOP::PrintUnicodeStr{address: Operand::new_var_string(var.id)}); } else { code.push(ZOP::PrintNumVar{variable: var}); },
+                                Operand::Var(var) => code.push(ZOP::PrintVar{variable: var}),
                                 Operand::StringRef(addr) => code.push(ZOP::PrintUnicodeStr{address: Operand::new_large_const(addr.value)}),
                                 Operand::Const(c) => code.push(ZOP::Print{text: format!("{}", c.value)}),
-                                Operand::LargeConst(c) => code.push(ZOP::Print{text: format!("{}", c.value)})
+                                Operand::LargeConst(c) => code.push(ZOP::Print{text: format!("{}", c.value)}),
+                                Operand::BoolConst(c) => if c.value == 0 { code.push(ZOP::Print{text: "false".to_string()}); } else { code.push(ZOP::Print{text: "true".to_string()}); } ,
                             };
                         },
                         _ => {
@@ -335,18 +350,8 @@ pub fn gen_zcode<'a>(node: &'a ASTNode, mut out: &mut Zfile, mut manager: &mut C
                     code
                 },
                 &TokMacroContentVar {ref var_name, .. } => {
-                    let var_id = manager.symbol_table.get_symbol_id(&*var_name);
-                    match manager.symbol_table.get_symbol_type(&*var_name) {
-                        Type::Integer => {
-                            vec![ZOP::PrintNumVar{variable: var_id}]
-                        },
-                        Type::String => {
-                            vec![ZOP::PrintUnicodeStr{address: Operand::new_var(var_id.id)}]
-                        },
-                        Type::Bool => {
-                            vec![ZOP::PrintNumVar{variable: var_id}]
-                        }
-                    }
+                    let var_id = manager.symbol_table.get_and_add_symbol_id(&*var_name);
+                    vec![ZOP::PrintVar{variable: var_id}]
                 },
                 _ => {
                     error_panic!(cfg => CodeGenError::NoMatch { token: t.category.clone() } );
@@ -444,6 +449,7 @@ pub fn function_random(manager: &CodeGenManager, arg_from: &Operand, arg_to: &Op
         operand2: Operand::new_const(1), 
         save_variable: var.clone()
     });
+    code.push(ZOP::SetVarType{variable: var.clone(), vartype: Type::Integer});
     temp_ids.push(range_var.id);
     Operand::new_var(var.id)
 }
@@ -550,6 +556,18 @@ impl <'a> SymbolTable<'a> {
             return temp.0.clone()
         }
 
+        error_force_panic!(CodeGenError::SymbolMapEmpty)
+    }
+
+    // Returns the id for a given symbol
+    // (check if is_known_symbol, otherwise adds it silently as type None)
+    pub fn get_and_add_symbol_id(&mut self, symbol: &'a str) -> Variable {
+        if !self.symbol_map.contains_key(symbol) {
+            self.insert_new_symbol(symbol, Type::None);
+        }
+        if let Some(temp) = self.symbol_map.get(symbol) {
+            return temp.0.clone()
+        }
         error_force_panic!(CodeGenError::SymbolMapEmpty)
     }
 
