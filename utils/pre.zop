@@ -1,0 +1,8 @@
+//! The easter egg file is automatically generated, do not edit here!
+//!
+
+pub use super::zfile::{ Operand, Variable, Constant, LargeConstant, Zfile, ZOP };
+
+pub fn routine_easteregg(file: &mut Zfile) {
+
+

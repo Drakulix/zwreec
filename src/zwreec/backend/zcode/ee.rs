@@ -1,5998 +1,5969 @@
 //! The easter egg file is automatically generated, do not edit here!
-//! 
+//!
 
 pub use super::zfile::{ Operand, Variable, Constant, LargeConstant, Zfile, ZOP };
 
 pub fn routine_easteregg(file: &mut Zfile) {
-    file.emit(vec![
 
 
-ZOP::Routine{name: "easter_egg_start".to_string(), count_variables: 1},
-ZOP::StoreVariable{variable: Variable::new(17), value: Operand::new_const(0)},
-ZOP::Label{name: "easter_egg_loop".to_string()},
-ZOP::Call1N{jump_to_label: "controll".to_string()},
-ZOP::Jump{jump_to_label: "easter_egg_loop".to_string()},
+file.write_zop(&ZOP::Routine{name: "easter_egg_start".to_string(), count_variables: 1}, false);
+file.write_zop(&ZOP::StoreVariable{variable: Variable::new(17), value: Operand::new_const(0)}, false);
+file.write_zop(&ZOP::Label{name: "easter_egg_loop".to_string()}, false);
+file.write_zop(&ZOP::Call1N{jump_to_label: "controll".to_string()}, false);
+file.write_zop(&ZOP::Jump{jump_to_label: "easter_egg_loop".to_string()}, false);
+file.write_zop(&ZOP::Routine{name: "controll".to_string(), count_variables: 2}, false);
+file.write_zop(&ZOP::Label{name: "controll_loop".to_string()}, false);
+file.write_zop(&ZOP::ReadCharTimer{local_var_id: 1, timer: 1, routine: "easter_anim".to_string()}, false);
+file.write_zop(&ZOP::Jump{jump_to_label: "controll_loop".to_string()}, false);
+file.write_zop(&ZOP::Routine{name: "easter_anim".to_string(), count_variables: 2}, false);
+file.write_zop(&ZOP::Mod{operand1: Operand::new_var(17), operand2: Operand::new_const(11), save_variable: Variable::new(17)}, false);
+file.write_zop(&ZOP::Inc{variable: 17}, false);
+file.write_zop(&ZOP::EraseWindow{value: -1}, false);
+file.write_zop(&ZOP::SetTextStyle{bold: true, reverse: false, monospace: true, italic: false}, false);
+file.write_zop(&ZOP::SetCursor{line: 1, col: 1}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 6}, false);
+file.write_zop(&ZOP::PrintNumVar{variable: Variable::new(17)}, false);
+file.write_zop(&ZOP::JE{operand1: Operand::new_var(17), operand2: Operand::new_const(1), jump_to_label: "p1".to_string()}, false);
+file.write_zop(&ZOP::JE{operand1: Operand::new_var(17), operand2: Operand::new_const(2), jump_to_label: "p2".to_string()}, false);
+file.write_zop(&ZOP::JE{operand1: Operand::new_var(17), operand2: Operand::new_const(3), jump_to_label: "p3".to_string()}, false);
+file.write_zop(&ZOP::JE{operand1: Operand::new_var(17), operand2: Operand::new_const(4), jump_to_label: "p4".to_string()}, false);
+file.write_zop(&ZOP::JE{operand1: Operand::new_var(17), operand2: Operand::new_const(5), jump_to_label: "p5".to_string()}, false);
+file.write_zop(&ZOP::JE{operand1: Operand::new_var(17), operand2: Operand::new_const(6), jump_to_label: "p6".to_string()}, false);
+file.write_zop(&ZOP::JE{operand1: Operand::new_var(17), operand2: Operand::new_const(7), jump_to_label: "p7".to_string()}, false);
+file.write_zop(&ZOP::JE{operand1: Operand::new_var(17), operand2: Operand::new_const(8), jump_to_label: "p8".to_string()}, false);
+file.write_zop(&ZOP::JE{operand1: Operand::new_var(17), operand2: Operand::new_const(9), jump_to_label: "p9".to_string()}, false);
+file.write_zop(&ZOP::JE{operand1: Operand::new_var(17), operand2: Operand::new_const(10), jump_to_label: "p10".to_string()}, false);
+file.write_zop(&ZOP::JE{operand1: Operand::new_var(17), operand2: Operand::new_const(11), jump_to_label: "p11".to_string()}, false);
+file.write_zop(&ZOP::JE{operand1: Operand::new_var(17), operand2: Operand::new_const(12), jump_to_label: "p12".to_string()}, false);
+file.write_zop(&ZOP::Ret{value: Operand::new_const(0)}, false);
+file.write_zop(&ZOP::Label{name: "p1".to_string()}, false);
+file.write_zop(&ZOP::Call1N{jump_to_label: "pr1".to_string()}, false);
+file.write_zop(&ZOP::Ret{value: Operand::new_const(0)}, false);
+file.write_zop(&ZOP::Label{name: "p2".to_string()}, false);
+file.write_zop(&ZOP::Call1N{jump_to_label: "pr2".to_string()}, false);
+file.write_zop(&ZOP::Ret{value: Operand::new_const(0)}, false);
+file.write_zop(&ZOP::Label{name: "p3".to_string()}, false);
+file.write_zop(&ZOP::Call1N{jump_to_label: "pr3".to_string()}, false);
+file.write_zop(&ZOP::Ret{value: Operand::new_const(0)}, false);
+file.write_zop(&ZOP::Label{name: "p4".to_string()}, false);
+file.write_zop(&ZOP::Call1N{jump_to_label: "pr4".to_string()}, false);
+file.write_zop(&ZOP::Ret{value: Operand::new_const(0)}, false);
+file.write_zop(&ZOP::Label{name: "p5".to_string()}, false);
+file.write_zop(&ZOP::Call1N{jump_to_label: "pr5".to_string()}, false);
+file.write_zop(&ZOP::Ret{value: Operand::new_const(0)}, false);
+file.write_zop(&ZOP::Label{name: "p6".to_string()}, false);
+file.write_zop(&ZOP::Call1N{jump_to_label: "pr6".to_string()}, false);
+file.write_zop(&ZOP::Ret{value: Operand::new_const(0)}, false);
+file.write_zop(&ZOP::Label{name: "p7".to_string()}, false);
+file.write_zop(&ZOP::Call1N{jump_to_label: "pr7".to_string()}, false);
+file.write_zop(&ZOP::Ret{value: Operand::new_const(0)}, false);
+file.write_zop(&ZOP::Label{name: "p8".to_string()}, false);
+file.write_zop(&ZOP::Call1N{jump_to_label: "pr8".to_string()}, false);
+file.write_zop(&ZOP::Ret{value: Operand::new_const(0)}, false);
+file.write_zop(&ZOP::Label{name: "p9".to_string()}, false);
+file.write_zop(&ZOP::Call1N{jump_to_label: "pr9".to_string()}, false);
+file.write_zop(&ZOP::Ret{value: Operand::new_const(0)}, false);
+file.write_zop(&ZOP::Label{name: "p10".to_string()}, false);
+file.write_zop(&ZOP::Call1N{jump_to_label: "pr10".to_string()}, false);
+file.write_zop(&ZOP::Ret{value: Operand::new_const(0)}, false);
+file.write_zop(&ZOP::Label{name: "p11".to_string()}, false);
+file.write_zop(&ZOP::Call1N{jump_to_label: "pr11".to_string()}, false);
+file.write_zop(&ZOP::Ret{value: Operand::new_const(0)}, false);
+file.write_zop(&ZOP::Label{name: "p12".to_string()}, false);
+file.write_zop(&ZOP::Call1N{jump_to_label: "pr12".to_string()}, false);
+file.write_zop(&ZOP::Ret{value: Operand::new_const(0)}, false);
+file.write_zop(&ZOP::Routine{name: "pr1".to_string(), count_variables: 1}, false);
+file.write_zop(&ZOP::SetTextStyle{bold: true, reverse: false, monospace: true, italic: false}, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: ".".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: ".".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ",".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: ".".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ",,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: ">>>>>>>>".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: ">>>>>>".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@@@@@@@@@@@@@@@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: ">>>>>>>>>>>>>>>>>>>>>>>".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@@@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$$$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@@@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: ">>".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 5, background: 5}, false);
+file.write_zop(&ZOP::PrintOps{text: "&&&&&&&&".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: ">>>>>>>>".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 5, background: 5}, false);
+file.write_zop(&ZOP::PrintOps{text: "&&&&&".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: "-".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: "-".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 5, background: 5}, false);
+file.write_zop(&ZOP::PrintOps{text: "&&&&&&&&&&&&&&&&&&&&&&&".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: "-".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: "-".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 5, background: 5}, false);
+file.write_zop(&ZOP::PrintOps{text: "&&&&&&&&&&&&&&&&&&&&&&&".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "**".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "**".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 5, background: 5}, false);
+file.write_zop(&ZOP::PrintOps{text: "&&".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 4, background: 4}, false);
+file.write_zop(&ZOP::PrintOps{text: "++++++++".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 5, background: 5}, false);
+file.write_zop(&ZOP::PrintOps{text: "&&&&&&&&".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 4, background: 4}, false);
+file.write_zop(&ZOP::PrintOps{text: "++".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: "-".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "***".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "***".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 4, background: 4}, false);
+file.write_zop(&ZOP::PrintOps{text: "++++++++++++++++++".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "**".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 4, background: 4}, false);
+file.write_zop(&ZOP::PrintOps{text: "+".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "***".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "****".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 4, background: 4}, false);
+file.write_zop(&ZOP::PrintOps{text: "++++++++++++++++++".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "**".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "***********".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 4, background: 4}, false);
+file.write_zop(&ZOP::PrintOps{text: "++".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 8, background: 8}, false);
+file.write_zop(&ZOP::PrintOps{text: "oooooooo".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 4, background: 4}, false);
+file.write_zop(&ZOP::PrintOps{text: "++++++++".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "**".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: "-".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "*************".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 8, background: 8}, false);
+file.write_zop(&ZOP::PrintOps{text: "ooooooooooooooooooo".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "**".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: "-".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "***".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: ".".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "****".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: ".".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "**".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 8, background: 8}, false);
+file.write_zop(&ZOP::PrintOps{text: "oooooooooooooooooooo".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "***".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "**".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "*".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "**".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 8, background: 8}, false);
+file.write_zop(&ZOP::PrintOps{text: "oo========oooooooo====".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: "-".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "*".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "%%".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "********".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "%%".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 8, background: 8}, false);
+file.write_zop(&ZOP::PrintOps{text: "=======================".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@@@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "***".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'\'\'\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "**".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 8, background: 8}, false);
+file.write_zop(&ZOP::PrintOps{text: "==".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ";;;;;;;;".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: ".".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 8, background: 8}, false);
+file.write_zop(&ZOP::PrintOps{text: "=======".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ";;;;".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@@@@@@@@@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "*********".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ";;;;;;;;;;;;;;;;;;;;;".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "***".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ";;;;;;;;;;;;;;;;;;;;;".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "**".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "*".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "*".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "**".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ";;,,,,,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: ".".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,;;;".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: ".".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ";;;;,,,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: ".".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::Ret{value: Operand::new_const(0)}, false);
+file.write_zop(&ZOP::Routine{name: "pr2".to_string(), count_variables: 1}, false);
+file.write_zop(&ZOP::SetTextStyle{bold: true, reverse: false, monospace: true, italic: false}, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ",,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: ">>>>>>>>".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: ">>>>>>".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@@@@@@@@@@@@@@@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: ">>>>>>>>>>>>>>>>>>>>>>>".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@@@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$$$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@@@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: ">>".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 5, background: 5}, false);
+file.write_zop(&ZOP::PrintOps{text: "&&&&&&&&".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: ">>>>>>>>".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 5, background: 5}, false);
+file.write_zop(&ZOP::PrintOps{text: "&&&&&".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: "-".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: "-".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 5, background: 5}, false);
+file.write_zop(&ZOP::PrintOps{text: "&&&&&&&&&&&&&&&&&&&&&&&".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: "-".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: "-".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 5, background: 5}, false);
+file.write_zop(&ZOP::PrintOps{text: "&&&&&&&&&&&&&&&&&&&&&&&".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "**".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "**".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 5, background: 5}, false);
+file.write_zop(&ZOP::PrintOps{text: "&&".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 4, background: 4}, false);
+file.write_zop(&ZOP::PrintOps{text: "++++++++".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 5, background: 5}, false);
+file.write_zop(&ZOP::PrintOps{text: "&&&&&&&&".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 4, background: 4}, false);
+file.write_zop(&ZOP::PrintOps{text: "+++++".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: "-".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "***".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "***".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 4, background: 4}, false);
+file.write_zop(&ZOP::PrintOps{text: "+++++++++++++++++++".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 4, background: 4}, false);
+file.write_zop(&ZOP::PrintOps{text: "+++".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "***".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "****".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 4, background: 4}, false);
+file.write_zop(&ZOP::PrintOps{text: "++++++++++++++++++".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "*".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 4, background: 4}, false);
+file.write_zop(&ZOP::PrintOps{text: "++".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "***********".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 4, background: 4}, false);
+file.write_zop(&ZOP::PrintOps{text: "++".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 8, background: 8}, false);
+file.write_zop(&ZOP::PrintOps{text: "oooooooo".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 4, background: 4}, false);
+file.write_zop(&ZOP::PrintOps{text: "++++++++".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "*".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: "-".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "*************".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 8, background: 8}, false);
+file.write_zop(&ZOP::PrintOps{text: "ooooooooooooooooooo".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "****".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: "-".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "***".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: ".".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "****".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: ".".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "**".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 8, background: 8}, false);
+file.write_zop(&ZOP::PrintOps{text: "ooooooooooooooooooo".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "**".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "***".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "**".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "*".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "**".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 8, background: 8}, false);
+file.write_zop(&ZOP::PrintOps{text: "oo========oooooooo===".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: "-".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "*".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "%%".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "********".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "%%".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 8, background: 8}, false);
+file.write_zop(&ZOP::PrintOps{text: "=======================".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@@@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "***".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'\'\'\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "**".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 8, background: 8}, false);
+file.write_zop(&ZOP::PrintOps{text: "==".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ";;;;;;;;".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 8, background: 8}, false);
+file.write_zop(&ZOP::PrintOps{text: "========".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ";;;;;".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@@@@@@@@@@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "*********".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ";;;;;;;;;;;;;;;;;;;;;;".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "**".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ";;;;;;;;;;;;;;;;;;;;;;".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "**".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "*".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "**".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "**".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ";;,,,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: ".".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,;;;;;;;;,,,,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::Ret{value: Operand::new_const(0)}, false);
+file.write_zop(&ZOP::Routine{name: "pr3".to_string(), count_variables: 1}, false);
+file.write_zop(&ZOP::SetTextStyle{bold: true, reverse: false, monospace: true, italic: false}, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "..".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: ".".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: ".".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: ".".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: ">>".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: ">>>>>>>>".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: ">>>>>>>>>>>>>>>>>>>>>>>>".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@@@@@@@@@@@@@@@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 5, background: 5}, false);
+file.write_zop(&ZOP::PrintOps{text: "&&".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: ">>>>>>>".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 5, background: 5}, false);
+file.write_zop(&ZOP::PrintOps{text: "&&&&&&&&".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: ">>>>>>".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@@@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$$$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@@@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 5, background: 5}, false);
+file.write_zop(&ZOP::PrintOps{text: "&&&&&&&&&&&&&&&&&&&&&&&".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: "-".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: "-".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 5, background: 5}, false);
+file.write_zop(&ZOP::PrintOps{text: "&&&&&&&&&&&&&&&&&&&&&&&".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: "-".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: "-".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 4, background: 4}, false);
+file.write_zop(&ZOP::PrintOps{text: "++".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 5, background: 5}, false);
+file.write_zop(&ZOP::PrintOps{text: "&&&&&&&".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 4, background: 4}, false);
+file.write_zop(&ZOP::PrintOps{text: "++++++++".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 5, background: 5}, false);
+file.write_zop(&ZOP::PrintOps{text: "&&&&&&".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "**".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "**".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 4, background: 4}, false);
+file.write_zop(&ZOP::PrintOps{text: "+++++++++++++++++++++++".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: "-".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "***".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "***".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 4, background: 4}, false);
+file.write_zop(&ZOP::PrintOps{text: "+++++++++++++++++++++++".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "***".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "****".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 8, background: 8}, false);
+file.write_zop(&ZOP::PrintOps{text: "oo".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 4, background: 4}, false);
+file.write_zop(&ZOP::PrintOps{text: "+++++++".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 8, background: 8}, false);
+file.write_zop(&ZOP::PrintOps{text: "oooooooo".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 4, background: 4}, false);
+file.write_zop(&ZOP::PrintOps{text: "++++++".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "***********".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 8, background: 8}, false);
+file.write_zop(&ZOP::PrintOps{text: "oooooooooooooooooooooo".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: "-".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "*************".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 8, background: 8}, false);
+file.write_zop(&ZOP::PrintOps{text: "ooooooooooooooooooo".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'\'\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: "-".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "***".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: ".".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "****".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: ".".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "**".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 8, background: 8}, false);
+file.write_zop(&ZOP::PrintOps{text: "==ooooooo========o".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "****".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "***".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "**".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "*".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "**".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 8, background: 8}, false);
+file.write_zop(&ZOP::PrintOps{text: "===================".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 8, background: 8}, false);
+file.write_zop(&ZOP::PrintOps{text: "=".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: "-".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "*".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "%%".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "********".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "%%".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ";;".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 8, background: 8}, false);
+file.write_zop(&ZOP::PrintOps{text: "=======".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ";;;;;;;;".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 8, background: 8}, false);
+file.write_zop(&ZOP::PrintOps{text: "======".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@@@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "***".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'\'\'\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "**".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ";;;;;;;;;;;;;;;;;;;;;;;".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@@@@@@@@@@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "*********".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ";".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: ".".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ";;;;;;;;;;;;;;;;;;;;;".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "*".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: ".".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: ".".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ";;;;;;,,,,,,,,;;;;;;".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "**".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "**".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "**".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "**".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ",".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: ".".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::Ret{value: Operand::new_const(0)}, false);
+file.write_zop(&ZOP::Routine{name: "pr4".to_string(), count_variables: 1}, false);
+file.write_zop(&ZOP::SetTextStyle{bold: true, reverse: false, monospace: true, italic: false}, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: ".".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: ".".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: ".".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: ".".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: ".".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: ">>".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: ">>>>>>>>".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: ">>>>>>>>>>>>>>>>>>>>>>>>".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@@@@@@@@@@@@@@@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 5, background: 5}, false);
+file.write_zop(&ZOP::PrintOps{text: "&&".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: ">>>>>>>".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 5, background: 5}, false);
+file.write_zop(&ZOP::PrintOps{text: "&&&&&&&&".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: ">>>>>>".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@@@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$$$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@@@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 5, background: 5}, false);
+file.write_zop(&ZOP::PrintOps{text: "&&&&&&&&&&&&&&&&&&&&&&&".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: "-".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: "-".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 5, background: 5}, false);
+file.write_zop(&ZOP::PrintOps{text: "&&&&&&&&&&&&&&&&&&&&&&&".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: "-".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: "-".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 4, background: 4}, false);
+file.write_zop(&ZOP::PrintOps{text: "++".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 5, background: 5}, false);
+file.write_zop(&ZOP::PrintOps{text: "&&&&&&&".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 4, background: 4}, false);
+file.write_zop(&ZOP::PrintOps{text: "++++++++".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 5, background: 5}, false);
+file.write_zop(&ZOP::PrintOps{text: "&&&&&&".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "**".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "**".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 4, background: 4}, false);
+file.write_zop(&ZOP::PrintOps{text: "+++++++++++++++++++++++".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: "-".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "***".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "***".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 4, background: 4}, false);
+file.write_zop(&ZOP::PrintOps{text: "+++++++++++++++++++++++".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "***".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "****".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 8, background: 8}, false);
+file.write_zop(&ZOP::PrintOps{text: "oo".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 4, background: 4}, false);
+file.write_zop(&ZOP::PrintOps{text: "+++++++".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 8, background: 8}, false);
+file.write_zop(&ZOP::PrintOps{text: "oooooooo".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 4, background: 4}, false);
+file.write_zop(&ZOP::PrintOps{text: "++++++".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "***********".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 8, background: 8}, false);
+file.write_zop(&ZOP::PrintOps{text: "ooooooooooooooooooooo".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: "-".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "*************".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 8, background: 8}, false);
+file.write_zop(&ZOP::PrintOps{text: "ooooooooooooooooooo".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "**".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: "-".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "***".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: ".".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "****".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: ".".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "**".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 8, background: 8}, false);
+file.write_zop(&ZOP::PrintOps{text: "==ooooooo========oo".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "****".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "***".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "**".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "*".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "**".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 8, background: 8}, false);
+file.write_zop(&ZOP::PrintOps{text: "==================".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "*".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 8, background: 8}, false);
+file.write_zop(&ZOP::PrintOps{text: "==".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: "-".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "*".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "%%".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "********".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "%%".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ";;".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 8, background: 8}, false);
+file.write_zop(&ZOP::PrintOps{text: "=======".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ";;;;;;;;".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 8, background: 8}, false);
+file.write_zop(&ZOP::PrintOps{text: "==".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 8, background: 8}, false);
+file.write_zop(&ZOP::PrintOps{text: "===".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@@@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "***".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'\'\'\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "**".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ";;;;;;;;;;;;;;;;;;;;;;;".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@@@@@@@@@@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "*********".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ";;;;;;;;;;;;;;;;;;;;;;".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "**".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ",,;;;;;;;,,,,,,,,;;;;;".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "**".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "*".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "*".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "**".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::Ret{value: Operand::new_const(0)}, false);
+file.write_zop(&ZOP::Routine{name: "pr5".to_string(), count_variables: 1}, false);
+file.write_zop(&ZOP::SetTextStyle{bold: true, reverse: false, monospace: true, italic: false}, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: ".".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: ".".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: ".".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ",,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: ">>>>>>>>".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: ">>>>>>>".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: ">>>>>>>>>>>>>>>>>>>>>>>>".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@@@@@@@@@@@@@@@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: ">>".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 5, background: 5}, false);
+file.write_zop(&ZOP::PrintOps{text: "&&&&&&&&".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: ">>>>>>>>".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 5, background: 5}, false);
+file.write_zop(&ZOP::PrintOps{text: "&&&&&".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@@@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$$$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@@@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 5, background: 5}, false);
+file.write_zop(&ZOP::PrintOps{text: "&&&&&&&&&&&&&&&&&&&&&&&".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: "-".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: "-".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 5, background: 5}, false);
+file.write_zop(&ZOP::PrintOps{text: "&&&&&&&&&&&&&&&&&&&&&&&".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: "-".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: "-".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 5, background: 5}, false);
+file.write_zop(&ZOP::PrintOps{text: "&&".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 4, background: 4}, false);
+file.write_zop(&ZOP::PrintOps{text: "++++++++".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 5, background: 5}, false);
+file.write_zop(&ZOP::PrintOps{text: "&&&&&&&&".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 4, background: 4}, false);
+file.write_zop(&ZOP::PrintOps{text: "+++++".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "**".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "**".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 4, background: 4}, false);
+file.write_zop(&ZOP::PrintOps{text: "+++++++++++++++++++++++".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: "-".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "***".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "***".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 4, background: 4}, false);
+file.write_zop(&ZOP::PrintOps{text: "++++++++++++++++++".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 4, background: 4}, false);
+file.write_zop(&ZOP::PrintOps{text: "++".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "***".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "****".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 4, background: 4}, false);
+file.write_zop(&ZOP::PrintOps{text: "++".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 8, background: 8}, false);
+file.write_zop(&ZOP::PrintOps{text: "oooooooo".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 4, background: 4}, false);
+file.write_zop(&ZOP::PrintOps{text: "+++++++".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "**".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "***********".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 8, background: 8}, false);
+file.write_zop(&ZOP::PrintOps{text: "ooooooooooooooooo".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "****".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: "-".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "*************".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 8, background: 8}, false);
+file.write_zop(&ZOP::PrintOps{text: "oooooooooooooooooo".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "*".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: "-".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "***".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: ".".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "****".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: ".".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "**".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 8, background: 8}, false);
+file.write_zop(&ZOP::PrintOps{text: "oo========oooooooo===".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "***".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "**".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "*".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "**".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 8, background: 8}, false);
+file.write_zop(&ZOP::PrintOps{text: "=======================".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: "-".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "*".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "%%".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "********".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "%%".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 8, background: 8}, false);
+file.write_zop(&ZOP::PrintOps{text: "==".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ";;;;;;;;".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 8, background: 8}, false);
+file.write_zop(&ZOP::PrintOps{text: "========".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ";;;;".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@@@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "***".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'\'\'\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "**".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ";;;;;;;;;;;;;;;;;;;;;".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@@@@@@@@@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "*********".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ";;;;;;;;;;;;;;;;;;;;".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "***".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ";;,,,,,,,,;;;;;;;;,,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "**".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "**".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "**".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "**".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::Ret{value: Operand::new_const(0)}, false);
+file.write_zop(&ZOP::Routine{name: "pr6".to_string(), count_variables: 1}, false);
+file.write_zop(&ZOP::SetTextStyle{bold: true, reverse: false, monospace: true, italic: false}, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: ".".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ",,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: ">>>>>>>>".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: ">>>>>>>".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: ">>>>>>>>>>>>>>>>>>>>>>>>".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@@@@@@@@@@@@@@@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: ">>".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 5, background: 5}, false);
+file.write_zop(&ZOP::PrintOps{text: "&&&&&&&&".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: ">>>>>>>>".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 5, background: 5}, false);
+file.write_zop(&ZOP::PrintOps{text: "&&&&&".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@@@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$$$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@@@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 5, background: 5}, false);
+file.write_zop(&ZOP::PrintOps{text: "&&&&&&&&&&&&&&&&&&&&&&&".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: "-".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 5, background: 5}, false);
+file.write_zop(&ZOP::PrintOps{text: "&&&&&&&&&&&&&&&&&&&&&&&".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: "-".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "**".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: "-".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "**".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 5, background: 5}, false);
+file.write_zop(&ZOP::PrintOps{text: "&&".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 4, background: 4}, false);
+file.write_zop(&ZOP::PrintOps{text: "++++++++".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 5, background: 5}, false);
+file.write_zop(&ZOP::PrintOps{text: "&&&&&&&&".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 4, background: 4}, false);
+file.write_zop(&ZOP::PrintOps{text: "+++++".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "***".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "***".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 4, background: 4}, false);
+file.write_zop(&ZOP::PrintOps{text: "+++++++++++++++++++".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 4, background: 4}, false);
+file.write_zop(&ZOP::PrintOps{text: "+++".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: "-".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "***".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "****".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 4, background: 4}, false);
+file.write_zop(&ZOP::PrintOps{text: "++++++++++++++++++".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "*".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 4, background: 4}, false);
+file.write_zop(&ZOP::PrintOps{text: "++".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "***********".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 4, background: 4}, false);
+file.write_zop(&ZOP::PrintOps{text: "++".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 8, background: 8}, false);
+file.write_zop(&ZOP::PrintOps{text: "oooooooo".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 4, background: 4}, false);
+file.write_zop(&ZOP::PrintOps{text: "++++++++".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "*".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "*************".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 8, background: 8}, false);
+file.write_zop(&ZOP::PrintOps{text: "ooooooooooooooooooo".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "****".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: "-".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "***".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: ".".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "****".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: ".".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "**".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 8, background: 8}, false);
+file.write_zop(&ZOP::PrintOps{text: "ooooooooooooooooooo".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "**".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: "-".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "***".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "**".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "*".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "**".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 8, background: 8}, false);
+file.write_zop(&ZOP::PrintOps{text: "oo========oooooooo===".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "*".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "%%".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "********".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "%%".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 8, background: 8}, false);
+file.write_zop(&ZOP::PrintOps{text: "=======================".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: "-".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "***".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'\'\'\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "**".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 8, background: 8}, false);
+file.write_zop(&ZOP::PrintOps{text: "==".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ";;;;;;;;".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 8, background: 8}, false);
+file.write_zop(&ZOP::PrintOps{text: "========".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ";;;;".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@@@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "*********".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: ".".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ";;;;;;;;;;;;;;;;;;;;;".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "*".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@@@@@@@@@@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'\'\'\'\'\'\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: ".".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ";;;;;;;;;;;;;;;;;;;;".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "***".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "*".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ";;,,,,,,,,;;;;;;;;,,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "**".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "**".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "**".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "**".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "..".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: ".".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: ".".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: ".".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::Ret{value: Operand::new_const(0)}, false);
+file.write_zop(&ZOP::Routine{name: "pr7".to_string(), count_variables: 1}, false);
+file.write_zop(&ZOP::SetTextStyle{bold: true, reverse: false, monospace: true, italic: false}, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: ".".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: ".".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: ".".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: ">>".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: ">>>>>>>>".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@@@@@@@@@@@@@@@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: ">>>>>>>>>>>>>>>>>>>>>>>".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@@@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$$$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@@@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 5, background: 5}, false);
+file.write_zop(&ZOP::PrintOps{text: "&&".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: ">>>>>>>".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 5, background: 5}, false);
+file.write_zop(&ZOP::PrintOps{text: "&&&&&&&&".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: ">>>>>>".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: "-".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: "-".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 5, background: 5}, false);
+file.write_zop(&ZOP::PrintOps{text: "&&&&&&&&&&&&&&&&&&&&&&&".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: "-".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: "-".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 5, background: 5}, false);
+file.write_zop(&ZOP::PrintOps{text: "&&&&&&&&&&&&&&&&&&&&&&&".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "**".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "**".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 4, background: 4}, false);
+file.write_zop(&ZOP::PrintOps{text: "++".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 5, background: 5}, false);
+file.write_zop(&ZOP::PrintOps{text: "&&&&&&&".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 4, background: 4}, false);
+file.write_zop(&ZOP::PrintOps{text: "++++++++".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 5, background: 5}, false);
+file.write_zop(&ZOP::PrintOps{text: "&".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 5, background: 5}, false);
+file.write_zop(&ZOP::PrintOps{text: "&&".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: "-".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "***".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "***".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 4, background: 4}, false);
+file.write_zop(&ZOP::PrintOps{text: "++++++++++++++++++".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "*".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 4, background: 4}, false);
+file.write_zop(&ZOP::PrintOps{text: "+".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "***".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "****".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 4, background: 4}, false);
+file.write_zop(&ZOP::PrintOps{text: "++++++++++++++++++".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "**".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "***********".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 8, background: 8}, false);
+file.write_zop(&ZOP::PrintOps{text: "oo".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 4, background: 4}, false);
+file.write_zop(&ZOP::PrintOps{text: "+++++++".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 8, background: 8}, false);
+file.write_zop(&ZOP::PrintOps{text: "oooooooo".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 4, background: 4}, false);
+file.write_zop(&ZOP::PrintOps{text: "++".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "**".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: "-".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "*************".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 8, background: 8}, false);
+file.write_zop(&ZOP::PrintOps{text: "ooooooooooooooooooo".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "**".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: "-".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "***".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: ".".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "****".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: ".".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "**".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 8, background: 8}, false);
+file.write_zop(&ZOP::PrintOps{text: "oooooooooooooooooooo".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "***".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "**".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "*".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "**".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 8, background: 8}, false);
+file.write_zop(&ZOP::PrintOps{text: "==ooooooo========ooooo".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: "-".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "*".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "%%".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "********".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "%%".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 8, background: 8}, false);
+file.write_zop(&ZOP::PrintOps{text: "=======================".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@@@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "***".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'\'\'\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "**".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ";;".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 8, background: 8}, false);
+file.write_zop(&ZOP::PrintOps{text: "=======".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ";;;;;;;;".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 8, background: 8}, false);
+file.write_zop(&ZOP::PrintOps{text: "=====".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@@@@@@@@@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "*********".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: ".".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ";;;;;;;;;;;;;;;;;;;;;".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "***".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: ".".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: ".".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ";;;;;;;;;;;;;;;;;;;;;".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "**".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "*".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "**".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "**".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ",,;;;;;;;,,,,,,,,;;;;".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: ".".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: ".".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: ".".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: ".".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: ".".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::Ret{value: Operand::new_const(0)}, false);
+file.write_zop(&ZOP::Routine{name: "pr8".to_string(), count_variables: 1}, false);
+file.write_zop(&ZOP::SetTextStyle{bold: true, reverse: false, monospace: true, italic: false}, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "..".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "..".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: ".".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: ".".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: ">>".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: ">>>>>>>>".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@@@@@@@@@@@@@@@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: ">>>>>>>>>>>>>>>>>>>>>>>".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@@@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$$$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@@@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 5, background: 5}, false);
+file.write_zop(&ZOP::PrintOps{text: "&&".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: ">>>>>>>".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 5, background: 5}, false);
+file.write_zop(&ZOP::PrintOps{text: "&&&&&&&&".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: ">>>>>>".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: "-".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: "-".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 5, background: 5}, false);
+file.write_zop(&ZOP::PrintOps{text: "&&&&&&&&&&&&&&&&&&&&&&&".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: "-".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: "-".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 5, background: 5}, false);
+file.write_zop(&ZOP::PrintOps{text: "&&&&&&&&&&&&&&&&&&&&&&&".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "**".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "**".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 4, background: 4}, false);
+file.write_zop(&ZOP::PrintOps{text: "++".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 5, background: 5}, false);
+file.write_zop(&ZOP::PrintOps{text: "&&&&&&&".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 4, background: 4}, false);
+file.write_zop(&ZOP::PrintOps{text: "++++++++".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 5, background: 5}, false);
+file.write_zop(&ZOP::PrintOps{text: "&&&&&&".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: "-".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "***".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "***".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 4, background: 4}, false);
+file.write_zop(&ZOP::PrintOps{text: "+++++++++++++++++++".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 4, background: 4}, false);
+file.write_zop(&ZOP::PrintOps{text: "+++".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "***".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "****".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 4, background: 4}, false);
+file.write_zop(&ZOP::PrintOps{text: "++++++++++++++++++".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "*".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 4, background: 4}, false);
+file.write_zop(&ZOP::PrintOps{text: "++".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "***********".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 8, background: 8}, false);
+file.write_zop(&ZOP::PrintOps{text: "oo".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 4, background: 4}, false);
+file.write_zop(&ZOP::PrintOps{text: "+++++++".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 8, background: 8}, false);
+file.write_zop(&ZOP::PrintOps{text: "oooooooo".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 4, background: 4}, false);
+file.write_zop(&ZOP::PrintOps{text: "+".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "*".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: "-".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "*************".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 8, background: 8}, false);
+file.write_zop(&ZOP::PrintOps{text: "ooooooooooooooooooo".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "****".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: "-".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "***".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: ".".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "****".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: ".".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "**".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 8, background: 8}, false);
+file.write_zop(&ZOP::PrintOps{text: "ooooooooooooooooooo".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "**".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "***".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "**".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "*".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "**".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 8, background: 8}, false);
+file.write_zop(&ZOP::PrintOps{text: "==ooooooo========oooo".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: "-".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "*".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "%%".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "********".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "%%".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 8, background: 8}, false);
+file.write_zop(&ZOP::PrintOps{text: "=======================".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@@@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "***".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'\'\'\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "**".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ";;".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 8, background: 8}, false);
+file.write_zop(&ZOP::PrintOps{text: "=======".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ";;;;;;;;".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 8, background: 8}, false);
+file.write_zop(&ZOP::PrintOps{text: "======".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@@@@@@@@@@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "*********".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: ".".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ";;;;;;;;;;;;;;;;;;;;;;".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "**".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ";;;;;;;;;;;;;;;;;;;;;;".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "**".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "*".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "**".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "**".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ",,;;;;;;;,,,,,,,,;;;;;".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: ".".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: ".".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: ".".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::Ret{value: Operand::new_const(0)}, false);
+file.write_zop(&ZOP::Routine{name: "pr9".to_string(), count_variables: 1}, false);
+file.write_zop(&ZOP::SetTextStyle{bold: true, reverse: false, monospace: true, italic: false}, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "..".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "...".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: ".".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: ".".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ",,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: ">>>>>>>>".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: ">>>>>>>".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: ">>>>>>>>>>>>>>>>>>>>>>>>".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@@@@@@@@@@@@@@@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: ">>".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 5, background: 5}, false);
+file.write_zop(&ZOP::PrintOps{text: "&&&&&&&&".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: ">>>>>>>>".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 5, background: 5}, false);
+file.write_zop(&ZOP::PrintOps{text: "&&&&&".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@@@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$$$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@@@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 5, background: 5}, false);
+file.write_zop(&ZOP::PrintOps{text: "&&&&&&&&&&&&&&&&&&&&&&&".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: "-".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: "-".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 5, background: 5}, false);
+file.write_zop(&ZOP::PrintOps{text: "&&&&&&&&&&&&&&&&&&&&&&&".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: "-".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: "-".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 5, background: 5}, false);
+file.write_zop(&ZOP::PrintOps{text: "&&".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 4, background: 4}, false);
+file.write_zop(&ZOP::PrintOps{text: "++++++++".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 5, background: 5}, false);
+file.write_zop(&ZOP::PrintOps{text: "&&&&&&&&".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 4, background: 4}, false);
+file.write_zop(&ZOP::PrintOps{text: "+++++".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "**".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "**".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 4, background: 4}, false);
+file.write_zop(&ZOP::PrintOps{text: "+++++++++++++++++++++++".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: "-".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "***".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "***".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 4, background: 4}, false);
+file.write_zop(&ZOP::PrintOps{text: "+++++++++++++++++++++++".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "***".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "****".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 4, background: 4}, false);
+file.write_zop(&ZOP::PrintOps{text: "++".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 8, background: 8}, false);
+file.write_zop(&ZOP::PrintOps{text: "oooooooo".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 4, background: 4}, false);
+file.write_zop(&ZOP::PrintOps{text: "++++++++".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 8, background: 8}, false);
+file.write_zop(&ZOP::PrintOps{text: "ooooo".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "***********".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 8, background: 8}, false);
+file.write_zop(&ZOP::PrintOps{text: "oooooooooooooooooooooo".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: "-".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "*************".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 8, background: 8}, false);
+file.write_zop(&ZOP::PrintOps{text: "ooooooooooooooooooo".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'\'\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: "-".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "***".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: ".".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "****".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: ".".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "**".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 8, background: 8}, false);
+file.write_zop(&ZOP::PrintOps{text: "oo========oooooooo".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "****".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "***".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "**".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "*".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "**".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 8, background: 8}, false);
+file.write_zop(&ZOP::PrintOps{text: "===================".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 8, background: 8}, false);
+file.write_zop(&ZOP::PrintOps{text: "=".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: "-".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "*".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "%%".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "********".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "%%".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 8, background: 8}, false);
+file.write_zop(&ZOP::PrintOps{text: "==".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ";;;;;;;;".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 8, background: 8}, false);
+file.write_zop(&ZOP::PrintOps{text: "========".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ";;;;;".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@@@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "***".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'\'\'\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "**".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ";;;;;;;;;;;;;;;;;;;;;;;".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@@@@@@@@@@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "*********".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ";;;;;;;;;;;;;;;;;;;;;;;".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "*".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ";;,,,,,,,,;;;;;;;;,,,,,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "**".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "**".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "**".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: ".".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "**".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::Ret{value: Operand::new_const(0)}, false);
+file.write_zop(&ZOP::Routine{name: "pr10".to_string(), count_variables: 1}, false);
+file.write_zop(&ZOP::SetTextStyle{bold: true, reverse: false, monospace: true, italic: false}, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: ".".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: ".".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: ".".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: ".".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ",,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: ">>>>>>>>".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: ">>>>>>>".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: ">>>>>>>>>>>>>>>>>>>>>>>>".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@@@@@@@@@@@@@@@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: ">>".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 5, background: 5}, false);
+file.write_zop(&ZOP::PrintOps{text: "&&&&&&&&".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: ">>>>>>>>".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 5, background: 5}, false);
+file.write_zop(&ZOP::PrintOps{text: "&&&&&".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@@@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$$$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@@@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 5, background: 5}, false);
+file.write_zop(&ZOP::PrintOps{text: "&&&&&&&&&&&&&&&&&&&&&&&".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: "-".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: "-".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 5, background: 5}, false);
+file.write_zop(&ZOP::PrintOps{text: "&&&&&&&&&&&&&&&&&&&&&&&".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: "-".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: "-".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 5, background: 5}, false);
+file.write_zop(&ZOP::PrintOps{text: "&&".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 4, background: 4}, false);
+file.write_zop(&ZOP::PrintOps{text: "++++++++".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 5, background: 5}, false);
+file.write_zop(&ZOP::PrintOps{text: "&&&&&&&&".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 4, background: 4}, false);
+file.write_zop(&ZOP::PrintOps{text: "+++++".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "**".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "**".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 4, background: 4}, false);
+file.write_zop(&ZOP::PrintOps{text: "+++++++++++++++++++++++".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: "-".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "***".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "***".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 4, background: 4}, false);
+file.write_zop(&ZOP::PrintOps{text: "+++++++++++++++++++++++".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "***".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "****".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 4, background: 4}, false);
+file.write_zop(&ZOP::PrintOps{text: "++".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 8, background: 8}, false);
+file.write_zop(&ZOP::PrintOps{text: "oooooooo".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 4, background: 4}, false);
+file.write_zop(&ZOP::PrintOps{text: "++++++++".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 8, background: 8}, false);
+file.write_zop(&ZOP::PrintOps{text: "ooooo".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "***********".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 8, background: 8}, false);
+file.write_zop(&ZOP::PrintOps{text: "ooooooooooooooooooooo".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: "-".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "*************".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 8, background: 8}, false);
+file.write_zop(&ZOP::PrintOps{text: "ooooooooooooooooooo".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "**".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: "-".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "***".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: ".".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "****".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: ".".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "**".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 8, background: 8}, false);
+file.write_zop(&ZOP::PrintOps{text: "oo========oooooooo=".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "****".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "***".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "**".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "*".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "**".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 8, background: 8}, false);
+file.write_zop(&ZOP::PrintOps{text: "==================".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "*".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 8, background: 8}, false);
+file.write_zop(&ZOP::PrintOps{text: "==".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: "-".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "*".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "%%".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "********".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "%%".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 8, background: 8}, false);
+file.write_zop(&ZOP::PrintOps{text: "==".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ";;;;;;;;".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 8, background: 8}, false);
+file.write_zop(&ZOP::PrintOps{text: "========".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ";".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ";;;".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@@@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "***".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'\'\'\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "**".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ";;;;;;;;;;;;;;;;;;;;;;;".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@@@@@@@@@@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "*********".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ";;;;;;;;;;;;;;;;;;;;;;".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "**".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ";;,,,,,,,,;;;;;;;;,,,,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "**".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "*".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "..".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: ".".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "**".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "**".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: ".".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: ".".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::Ret{value: Operand::new_const(0)}, false);
+file.write_zop(&ZOP::Routine{name: "pr11".to_string(), count_variables: 1}, false);
+file.write_zop(&ZOP::SetTextStyle{bold: true, reverse: false, monospace: true, italic: false}, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: ".".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: ".".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: ".".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: ">>".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: ">>>>>>>>".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: ">>>>>>>>>>>>>>>>>>>>>>>>".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@@@@@@@@@@@@@@@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 5, background: 5}, false);
+file.write_zop(&ZOP::PrintOps{text: "&&".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: ">>>>>>>".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 5, background: 5}, false);
+file.write_zop(&ZOP::PrintOps{text: "&&&&&&&&".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: ">>>>>>".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@@@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$$$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@@@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 5, background: 5}, false);
+file.write_zop(&ZOP::PrintOps{text: "&&&&&&&&&&&&&&&&&&&&&&&".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: "-".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: "-".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 5, background: 5}, false);
+file.write_zop(&ZOP::PrintOps{text: "&&&&&&&&&&&&&&&&&&&&&&&".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: "-".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: "-".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 4, background: 4}, false);
+file.write_zop(&ZOP::PrintOps{text: "++".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 5, background: 5}, false);
+file.write_zop(&ZOP::PrintOps{text: "&&&&&&&".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 4, background: 4}, false);
+file.write_zop(&ZOP::PrintOps{text: "++++++++".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 5, background: 5}, false);
+file.write_zop(&ZOP::PrintOps{text: "&&&&&&".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "**".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "**".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 4, background: 4}, false);
+file.write_zop(&ZOP::PrintOps{text: "+++++++++++++++++++++++".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: "-".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "***".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "***".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 4, background: 4}, false);
+file.write_zop(&ZOP::PrintOps{text: "++++++++++++++++++".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 4, background: 4}, false);
+file.write_zop(&ZOP::PrintOps{text: "++".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "***".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "****".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 8, background: 8}, false);
+file.write_zop(&ZOP::PrintOps{text: "oo".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 4, background: 4}, false);
+file.write_zop(&ZOP::PrintOps{text: "+++++++".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 8, background: 8}, false);
+file.write_zop(&ZOP::PrintOps{text: "oooooooo".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "**".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "***********".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 8, background: 8}, false);
+file.write_zop(&ZOP::PrintOps{text: "ooooooooooooooooo".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "****".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: "-".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "*************".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 8, background: 8}, false);
+file.write_zop(&ZOP::PrintOps{text: "oooooooooooooooooo".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "*".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: "-".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "***".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: ".".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "****".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: ".".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "**".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 8, background: 8}, false);
+file.write_zop(&ZOP::PrintOps{text: "==ooooooo========oooo".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "***".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "**".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "*".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "**".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 8, background: 8}, false);
+file.write_zop(&ZOP::PrintOps{text: "=======================".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: "-".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "*".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "%%".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "********".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "%%".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ";;".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 8, background: 8}, false);
+file.write_zop(&ZOP::PrintOps{text: "=======".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ";;;;;;;;".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 8, background: 8}, false);
+file.write_zop(&ZOP::PrintOps{text: "=====".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@@@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "***".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'\'\'\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "**".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ";;;;;;;;;;;;;;;;;;;;;".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@@@@@@@@@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "*********".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ";;;;;;;;;;;;;;;;;;;;".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "***".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ",,;;;;;;;,,,,,,,,;;;".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "**".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: ".".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "**".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "..".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "**".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "**".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: ".".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: ".".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::Ret{value: Operand::new_const(0)}, false);
+file.write_zop(&ZOP::Routine{name: "pr12".to_string(), count_variables: 1}, false);
+file.write_zop(&ZOP::SetTextStyle{bold: true, reverse: false, monospace: true, italic: false}, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: ".".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: ">>".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: ">>>>>>>>".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: ">>>>>>>>>>>>>>>>>>>>>>>>".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@@@@@@@@@@@@@@@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 5, background: 5}, false);
+file.write_zop(&ZOP::PrintOps{text: "&&".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: ">>>>>>>".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 5, background: 5}, false);
+file.write_zop(&ZOP::PrintOps{text: "&&&&&&&&".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: ">>>>>>".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@@@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$$$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@@@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 5, background: 5}, false);
+file.write_zop(&ZOP::PrintOps{text: "&&&&&&&&&&&&&&&&&&&&&&&".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: "-".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 5, background: 5}, false);
+file.write_zop(&ZOP::PrintOps{text: "&&&&&&&&&&&&&&&&&&&&&&&".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: "-".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "**".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: "-".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "**".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 4, background: 4}, false);
+file.write_zop(&ZOP::PrintOps{text: "++".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 5, background: 5}, false);
+file.write_zop(&ZOP::PrintOps{text: "&&&&&&&".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 4, background: 4}, false);
+file.write_zop(&ZOP::PrintOps{text: "++++++++".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 5, background: 5}, false);
+file.write_zop(&ZOP::PrintOps{text: "&&&&&&".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "***".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "***".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 4, background: 4}, false);
+file.write_zop(&ZOP::PrintOps{text: "+++++++++++++++++++".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 4, background: 4}, false);
+file.write_zop(&ZOP::PrintOps{text: "+++".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: "-".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "***".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "****".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 4, background: 4}, false);
+file.write_zop(&ZOP::PrintOps{text: "++++++++++++++++++".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "*".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 4, background: 4}, false);
+file.write_zop(&ZOP::PrintOps{text: "++".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "***********".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 8, background: 8}, false);
+file.write_zop(&ZOP::PrintOps{text: "oo".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 4, background: 4}, false);
+file.write_zop(&ZOP::PrintOps{text: "+++++++".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 8, background: 8}, false);
+file.write_zop(&ZOP::PrintOps{text: "oooooooo".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 4, background: 4}, false);
+file.write_zop(&ZOP::PrintOps{text: "+".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "*".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "*************".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 8, background: 8}, false);
+file.write_zop(&ZOP::PrintOps{text: "ooooooooooooooooooo".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "****".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: "-".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "***".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: ".".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "****".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: ".".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "**".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 8, background: 8}, false);
+file.write_zop(&ZOP::PrintOps{text: "ooooooooooooooooooo".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "**".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: "-".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "***".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "**".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "*".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "**".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 8, background: 8}, false);
+file.write_zop(&ZOP::PrintOps{text: "==ooooooo========oooo".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "*".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "%%".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "********".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "%%".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: "".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 8, background: 8}, false);
+file.write_zop(&ZOP::PrintOps{text: "=======================".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 3, background: 3}, false);
+file.write_zop(&ZOP::PrintOps{text: "-".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "***".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'\'\'\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "**".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ";;".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 8, background: 8}, false);
+file.write_zop(&ZOP::PrintOps{text: "=======".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ";;;;;;;;".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 8, background: 8}, false);
+file.write_zop(&ZOP::PrintOps{text: "=".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: ".".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 8, background: 8}, false);
+file.write_zop(&ZOP::PrintOps{text: "===".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@@@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 7, background: 7}, false);
+file.write_zop(&ZOP::PrintOps{text: "$$$$$$$".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "*********".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ";;;;;;;;;;;;;;;;;;;;".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: ".".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "*".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: "@@@@@@@@@@".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'\'\'\'\'\'\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ";;;;;;;;;;;;;;;;;;;;".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "***".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "*".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ",,;;;;;;;,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: ".".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ";;;".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "**".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "**".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "**".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 10, background: 10}, false);
+file.write_zop(&ZOP::PrintOps{text: "**".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+file.write_zop(&ZOP::PrintOps{text: "\'\'\'".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: ".".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 9, background: 9}, false);
+file.write_zop(&ZOP::PrintOps{text: ".".to_string()}, false);
+file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()}, false);
+file.write_zop(&ZOP::Newline, false);
+file.write_zop(&ZOP::Ret{value: Operand::new_const(0)}, false);
 
-ZOP::Routine{name: "controll".to_string(), count_variables: 2},
-ZOP::Label{name: "controll_loop".to_string()},
-ZOP::ReadCharTimer{local_var_id: 1, timer: 1, routine: "easter_anim".to_string()},
-ZOP::Jump{jump_to_label: "controll_loop".to_string()},
-
-ZOP::Routine{name: "easter_anim".to_string(), count_variables: 2},
-ZOP::Mod{operand1: Operand::new_var(17), operand2: Operand::new_const(11), save_variable: Variable::new(17)},
-ZOP::Inc{variable: 17},
-ZOP::EraseWindow{value: -1},
-ZOP::SetTextStyle{bold: true, reverse: false, monospace: true, italic: false},
-ZOP::SetCursor{line: 1, col: 1},
-ZOP::SetColor{foreground: 7, background: 6},
-ZOP::PrintNumVar{variable: Variable::new(17)},
-ZOP::JE{operand1: Operand::new_var(17), operand2: Operand::new_const(1), jump_to_label: "p1".to_string()},
-ZOP::JE{operand1: Operand::new_var(17), operand2: Operand::new_const(2), jump_to_label: "p2".to_string()},
-ZOP::JE{operand1: Operand::new_var(17), operand2: Operand::new_const(3), jump_to_label: "p3".to_string()},
-ZOP::JE{operand1: Operand::new_var(17), operand2: Operand::new_const(4), jump_to_label: "p4".to_string()},
-ZOP::JE{operand1: Operand::new_var(17), operand2: Operand::new_const(5), jump_to_label: "p5".to_string()},
-ZOP::JE{operand1: Operand::new_var(17), operand2: Operand::new_const(6), jump_to_label: "p6".to_string()},
-ZOP::JE{operand1: Operand::new_var(17), operand2: Operand::new_const(7), jump_to_label: "p7".to_string()},
-ZOP::JE{operand1: Operand::new_var(17), operand2: Operand::new_const(8), jump_to_label: "p8".to_string()},
-ZOP::JE{operand1: Operand::new_var(17), operand2: Operand::new_const(9), jump_to_label: "p9".to_string()},
-ZOP::JE{operand1: Operand::new_var(17), operand2: Operand::new_const(10), jump_to_label: "p10".to_string()},
-ZOP::JE{operand1: Operand::new_var(17), operand2: Operand::new_const(11), jump_to_label: "p11".to_string()},
-ZOP::JE{operand1: Operand::new_var(17), operand2: Operand::new_const(12), jump_to_label: "p12".to_string()},
-ZOP::Ret{value: Operand::new_const(0)},
-
-ZOP::Label{name: "p1".to_string()},
-ZOP::Call1N{jump_to_label: "pr1".to_string()},
-ZOP::Ret{value: Operand::new_const(0)},
-
-ZOP::Label{name: "p2".to_string()},
-ZOP::Call1N{jump_to_label: "pr2".to_string()},
-ZOP::Ret{value: Operand::new_const(0)},
-
-ZOP::Label{name: "p3".to_string()},
-ZOP::Call1N{jump_to_label: "pr3".to_string()},
-ZOP::Ret{value: Operand::new_const(0)},
-
-ZOP::Label{name: "p4".to_string()},
-ZOP::Call1N{jump_to_label: "pr4".to_string()},
-ZOP::Ret{value: Operand::new_const(0)},
-
-ZOP::Label{name: "p5".to_string()},
-ZOP::Call1N{jump_to_label: "pr5".to_string()},
-ZOP::Ret{value: Operand::new_const(0)},
-
-ZOP::Label{name: "p6".to_string()},
-ZOP::Call1N{jump_to_label: "pr6".to_string()},
-ZOP::Ret{value: Operand::new_const(0)},
-
-ZOP::Label{name: "p7".to_string()},
-ZOP::Call1N{jump_to_label: "pr7".to_string()},
-ZOP::Ret{value: Operand::new_const(0)},
-
-ZOP::Label{name: "p8".to_string()},
-ZOP::Call1N{jump_to_label: "pr8".to_string()},
-ZOP::Ret{value: Operand::new_const(0)},
-
-ZOP::Label{name: "p9".to_string()},
-ZOP::Call1N{jump_to_label: "pr9".to_string()},
-ZOP::Ret{value: Operand::new_const(0)},
-
-ZOP::Label{name: "p10".to_string()},
-ZOP::Call1N{jump_to_label: "pr10".to_string()},
-ZOP::Ret{value: Operand::new_const(0)},
-
-ZOP::Label{name: "p11".to_string()},
-ZOP::Call1N{jump_to_label: "pr11".to_string()},
-ZOP::Ret{value: Operand::new_const(0)},
-
-ZOP::Label{name: "p12".to_string()},
-ZOP::Call1N{jump_to_label: "pr12".to_string()},
-ZOP::Ret{value: Operand::new_const(0)},
-
-ZOP::Routine{name: "pr1".to_string(), count_variables: 1},
-ZOP::SetTextStyle{bold: true, reverse: false, monospace: true, italic: false},
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: ".".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: ".".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ",".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: ".".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ",,".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: ">>>>>>>>".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: ">>>>>>".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@@@@@@@@@@@@@@@".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: ">>>>>>>>>>>>>>>>>>>>>>>".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@@@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$$$$$$$".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@@@".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: ">>".to_string()},
-ZOP::SetColor{foreground: 5, background: 5},
-ZOP::PrintOps{text: "&&&&&&&&".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: ">>>>>>>>".to_string()},
-ZOP::SetColor{foreground: 5, background: 5},
-ZOP::PrintOps{text: "&&&&&".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: "-".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: "-".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@@".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 5, background: 5},
-ZOP::PrintOps{text: "&&&&&&&&&&&&&&&&&&&&&&&".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: "-".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$$".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: "-".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 5, background: 5},
-ZOP::PrintOps{text: "&&&&&&&&&&&&&&&&&&&&&&&".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$$$$".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "**".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "**".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 5, background: 5},
-ZOP::PrintOps{text: "&&".to_string()},
-ZOP::SetColor{foreground: 4, background: 4},
-ZOP::PrintOps{text: "++++++++".to_string()},
-ZOP::SetColor{foreground: 5, background: 5},
-ZOP::PrintOps{text: "&&&&&&&&".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'\'".to_string()},
-ZOP::SetColor{foreground: 4, background: 4},
-ZOP::PrintOps{text: "++".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: "-".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "***".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "***".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 4, background: 4},
-ZOP::PrintOps{text: "++++++++++++++++++".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "**".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'".to_string()},
-ZOP::SetColor{foreground: 4, background: 4},
-ZOP::PrintOps{text: "+".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$$$$".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "***".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'\'\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "****".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 4, background: 4},
-ZOP::PrintOps{text: "++++++++++++++++++".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "**".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$$$$".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "***********".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 4, background: 4},
-ZOP::PrintOps{text: "++".to_string()},
-ZOP::SetColor{foreground: 8, background: 8},
-ZOP::PrintOps{text: "oooooooo".to_string()},
-ZOP::SetColor{foreground: 4, background: 4},
-ZOP::PrintOps{text: "++++++++".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "**".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$$".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: "-".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "*************".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 8, background: 8},
-ZOP::PrintOps{text: "ooooooooooooooooooo".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "**".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: "-".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "***".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: ".".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "****".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: ".".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "**".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 8, background: 8},
-ZOP::PrintOps{text: "oooooooooooooooooooo".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'\'\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$$$".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "***".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "**".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "*".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "**".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 8, background: 8},
-ZOP::PrintOps{text: "oo========oooooooo====".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: "-".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "*".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "%%".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "********".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "%%".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 8, background: 8},
-ZOP::PrintOps{text: "=======================".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@@@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$$".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "***".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'\'\'\'\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "**".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 8, background: 8},
-ZOP::PrintOps{text: "==".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ";;;;;;;;".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: ".".to_string()},
-ZOP::SetColor{foreground: 8, background: 8},
-ZOP::PrintOps{text: "=======".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ";;;;".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@@@@@@@@@".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "*********".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ";;;;;;;;;;;;;;;;;;;;;".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "***".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ";;;;;;;;;;;;;;;;;;;;;".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "**".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "*".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "*".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "**".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ";;,,,,,".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: ".".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,;;;".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: ".".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ";;;;,,,".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'\'\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ",,,,,,,,,,".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: ".".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-
-ZOP::Ret{value: Operand::new_const(0)},
-ZOP::Routine{name: "pr2".to_string(), count_variables: 1},
-ZOP::SetTextStyle{bold: true, reverse: false, monospace: true, italic: false},
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ",,".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: ">>>>>>>>".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: ">>>>>>".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@@@@@@@@@@@@@@@".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: ">>>>>>>>>>>>>>>>>>>>>>>".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@@@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$$$$$$$".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@@@".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: ">>".to_string()},
-ZOP::SetColor{foreground: 5, background: 5},
-ZOP::PrintOps{text: "&&&&&&&&".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: ">>>>>>>>".to_string()},
-ZOP::SetColor{foreground: 5, background: 5},
-ZOP::PrintOps{text: "&&&&&".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: "-".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: "-".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@@".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 5, background: 5},
-ZOP::PrintOps{text: "&&&&&&&&&&&&&&&&&&&&&&&".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: "-".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$$$".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: "-".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 5, background: 5},
-ZOP::PrintOps{text: "&&&&&&&&&&&&&&&&&&&&&&&".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$$$$$".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "**".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "**".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 5, background: 5},
-ZOP::PrintOps{text: "&&".to_string()},
-ZOP::SetColor{foreground: 4, background: 4},
-ZOP::PrintOps{text: "++++++++".to_string()},
-ZOP::SetColor{foreground: 5, background: 5},
-ZOP::PrintOps{text: "&&&&&&&&".to_string()},
-ZOP::SetColor{foreground: 4, background: 4},
-ZOP::PrintOps{text: "+++++".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: "-".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "***".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "***".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 4, background: 4},
-ZOP::PrintOps{text: "+++++++++++++++++++".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 4, background: 4},
-ZOP::PrintOps{text: "+++".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$$$$$".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "***".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'\'\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "****".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 4, background: 4},
-ZOP::PrintOps{text: "++++++++++++++++++".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "*".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 4, background: 4},
-ZOP::PrintOps{text: "++".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$$$$$".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "***********".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 4, background: 4},
-ZOP::PrintOps{text: "++".to_string()},
-ZOP::SetColor{foreground: 8, background: 8},
-ZOP::PrintOps{text: "oooooooo".to_string()},
-ZOP::SetColor{foreground: 4, background: 4},
-ZOP::PrintOps{text: "++++++++".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "*".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'\'\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$$".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: "-".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "*************".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 8, background: 8},
-ZOP::PrintOps{text: "ooooooooooooooooooo".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "****".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: "-".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$$".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "***".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: ".".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "****".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: ".".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "**".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 8, background: 8},
-ZOP::PrintOps{text: "ooooooooooooooooooo".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "**".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$$$$".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "***".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "**".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "*".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "**".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 8, background: 8},
-ZOP::PrintOps{text: "oo========oooooooo===".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: "-".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "*".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "%%".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "********".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "%%".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 8, background: 8},
-ZOP::PrintOps{text: "=======================".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@@@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$$$".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "***".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'\'\'\'\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "**".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 8, background: 8},
-ZOP::PrintOps{text: "==".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ";;;;;;;;".to_string()},
-ZOP::SetColor{foreground: 8, background: 8},
-ZOP::PrintOps{text: "========".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ";;;;;".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@@@@@@@@@@".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "*********".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ";;;;;;;;;;;;;;;;;;;;;;".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "**".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ";;;;;;;;;;;;;;;;;;;;;;".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "**".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "*".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "**".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "**".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ";;,,,".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: ".".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,;;;;;;;;,,,,".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-
-ZOP::Ret{value: Operand::new_const(0)},
-ZOP::Routine{name: "pr3".to_string(), count_variables: 1},
-ZOP::SetTextStyle{bold: true, reverse: false, monospace: true, italic: false},
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "..".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: ".".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: ".".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: ".".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: ">>".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: ">>>>>>>>".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: ">>>>>>>>>>>>>>>>>>>>>>>>".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@@@@@@@@@@@@@@@".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 5, background: 5},
-ZOP::PrintOps{text: "&&".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: ">>>>>>>".to_string()},
-ZOP::SetColor{foreground: 5, background: 5},
-ZOP::PrintOps{text: "&&&&&&&&".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: ">>>>>>".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@@@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$$$$$$$".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@@@".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 5, background: 5},
-ZOP::PrintOps{text: "&&&&&&&&&&&&&&&&&&&&&&&".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: "-".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: "-".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@@".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 5, background: 5},
-ZOP::PrintOps{text: "&&&&&&&&&&&&&&&&&&&&&&&".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: "-".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$$$".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: "-".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 4, background: 4},
-ZOP::PrintOps{text: "++".to_string()},
-ZOP::SetColor{foreground: 5, background: 5},
-ZOP::PrintOps{text: "&&&&&&&".to_string()},
-ZOP::SetColor{foreground: 4, background: 4},
-ZOP::PrintOps{text: "++++++++".to_string()},
-ZOP::SetColor{foreground: 5, background: 5},
-ZOP::PrintOps{text: "&&&&&&".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$$$$$".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "**".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "**".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 4, background: 4},
-ZOP::PrintOps{text: "+++++++++++++++++++++++".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: "-".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "***".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "***".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 4, background: 4},
-ZOP::PrintOps{text: "+++++++++++++++++++++++".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$$$$$".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "***".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'\'\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "****".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 8, background: 8},
-ZOP::PrintOps{text: "oo".to_string()},
-ZOP::SetColor{foreground: 4, background: 4},
-ZOP::PrintOps{text: "+++++++".to_string()},
-ZOP::SetColor{foreground: 8, background: 8},
-ZOP::PrintOps{text: "oooooooo".to_string()},
-ZOP::SetColor{foreground: 4, background: 4},
-ZOP::PrintOps{text: "++++++".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$$$$$".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "***********".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 8, background: 8},
-ZOP::PrintOps{text: "oooooooooooooooooooooo".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$$".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: "-".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "*************".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 8, background: 8},
-ZOP::PrintOps{text: "ooooooooooooooooooo".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'\'\'\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: "-".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$$".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "***".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: ".".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "****".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: ".".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "**".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 8, background: 8},
-ZOP::PrintOps{text: "==ooooooo========o".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "****".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$$$$".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "***".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "**".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "*".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "**".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 8, background: 8},
-ZOP::PrintOps{text: "===================".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'\'".to_string()},
-ZOP::SetColor{foreground: 8, background: 8},
-ZOP::PrintOps{text: "=".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: "-".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "*".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "%%".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "********".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "%%".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ";;".to_string()},
-ZOP::SetColor{foreground: 8, background: 8},
-ZOP::PrintOps{text: "=======".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ";;;;;;;;".to_string()},
-ZOP::SetColor{foreground: 8, background: 8},
-ZOP::PrintOps{text: "======".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@@@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$$$".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "***".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'\'\'\'\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "**".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ";;;;;;;;;;;;;;;;;;;;;;;".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@@@@@@@@@@".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "*********".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ";".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: ".".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ";;;;;;;;;;;;;;;;;;;;;".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "*".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: ".".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: ".".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ";;;;;;,,,,,,,,;;;;;;".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "**".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "**".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "**".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "**".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ",".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: ".".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-
-ZOP::Ret{value: Operand::new_const(0)},
-ZOP::Routine{name: "pr4".to_string(), count_variables: 1},
-ZOP::SetTextStyle{bold: true, reverse: false, monospace: true, italic: false},
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: ".".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: ".".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: ".".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: ".".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: ".".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: ">>".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: ">>>>>>>>".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: ">>>>>>>>>>>>>>>>>>>>>>>>".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@@@@@@@@@@@@@@@".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 5, background: 5},
-ZOP::PrintOps{text: "&&".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: ">>>>>>>".to_string()},
-ZOP::SetColor{foreground: 5, background: 5},
-ZOP::PrintOps{text: "&&&&&&&&".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: ">>>>>>".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@@@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$$$$$$$".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@@@".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 5, background: 5},
-ZOP::PrintOps{text: "&&&&&&&&&&&&&&&&&&&&&&&".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: "-".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: "-".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@@".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 5, background: 5},
-ZOP::PrintOps{text: "&&&&&&&&&&&&&&&&&&&&&&&".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: "-".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$$$".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: "-".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 4, background: 4},
-ZOP::PrintOps{text: "++".to_string()},
-ZOP::SetColor{foreground: 5, background: 5},
-ZOP::PrintOps{text: "&&&&&&&".to_string()},
-ZOP::SetColor{foreground: 4, background: 4},
-ZOP::PrintOps{text: "++++++++".to_string()},
-ZOP::SetColor{foreground: 5, background: 5},
-ZOP::PrintOps{text: "&&&&&&".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$$$$$".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "**".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "**".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 4, background: 4},
-ZOP::PrintOps{text: "+++++++++++++++++++++++".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: "-".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "***".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "***".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 4, background: 4},
-ZOP::PrintOps{text: "+++++++++++++++++++++++".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$$$$$".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "***".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'\'\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "****".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 8, background: 8},
-ZOP::PrintOps{text: "oo".to_string()},
-ZOP::SetColor{foreground: 4, background: 4},
-ZOP::PrintOps{text: "+++++++".to_string()},
-ZOP::SetColor{foreground: 8, background: 8},
-ZOP::PrintOps{text: "oooooooo".to_string()},
-ZOP::SetColor{foreground: 4, background: 4},
-ZOP::PrintOps{text: "++++++".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$$$$$".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "***********".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 8, background: 8},
-ZOP::PrintOps{text: "ooooooooooooooooooooo".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$$".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: "-".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "*************".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 8, background: 8},
-ZOP::PrintOps{text: "ooooooooooooooooooo".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "**".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: "-".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$$".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "***".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: ".".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "****".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: ".".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "**".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 8, background: 8},
-ZOP::PrintOps{text: "==ooooooo========oo".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "****".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$$$$".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "***".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "**".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "*".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "**".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 8, background: 8},
-ZOP::PrintOps{text: "==================".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "*".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 8, background: 8},
-ZOP::PrintOps{text: "==".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: "-".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "*".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "%%".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "********".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "%%".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ";;".to_string()},
-ZOP::SetColor{foreground: 8, background: 8},
-ZOP::PrintOps{text: "=======".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ";;;;;;;;".to_string()},
-ZOP::SetColor{foreground: 8, background: 8},
-ZOP::PrintOps{text: "==".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 8, background: 8},
-ZOP::PrintOps{text: "===".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@@@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$$$".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "***".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'\'\'\'\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "**".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ";;;;;;;;;;;;;;;;;;;;;;;".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@@@@@@@@@@".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "*********".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ";;;;;;;;;;;;;;;;;;;;;;".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "**".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ",,;;;;;;;,,,,,,,,;;;;;".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "**".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "*".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "*".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "**".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-
-ZOP::Ret{value: Operand::new_const(0)},
-ZOP::Routine{name: "pr5".to_string(), count_variables: 1},
-ZOP::SetTextStyle{bold: true, reverse: false, monospace: true, italic: false},
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: ".".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: ".".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: ".".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ",,".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: ">>>>>>>>".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: ">>>>>>>".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: ">>>>>>>>>>>>>>>>>>>>>>>>".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@@@@@@@@@@@@@@@".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: ">>".to_string()},
-ZOP::SetColor{foreground: 5, background: 5},
-ZOP::PrintOps{text: "&&&&&&&&".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: ">>>>>>>>".to_string()},
-ZOP::SetColor{foreground: 5, background: 5},
-ZOP::PrintOps{text: "&&&&&".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@@@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$$$$$$$".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@@@".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 5, background: 5},
-ZOP::PrintOps{text: "&&&&&&&&&&&&&&&&&&&&&&&".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: "-".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: "-".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@@".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 5, background: 5},
-ZOP::PrintOps{text: "&&&&&&&&&&&&&&&&&&&&&&&".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: "-".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$$".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: "-".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 5, background: 5},
-ZOP::PrintOps{text: "&&".to_string()},
-ZOP::SetColor{foreground: 4, background: 4},
-ZOP::PrintOps{text: "++++++++".to_string()},
-ZOP::SetColor{foreground: 5, background: 5},
-ZOP::PrintOps{text: "&&&&&&&&".to_string()},
-ZOP::SetColor{foreground: 4, background: 4},
-ZOP::PrintOps{text: "+++++".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$$$$".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "**".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "**".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 4, background: 4},
-ZOP::PrintOps{text: "+++++++++++++++++++++++".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: "-".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "***".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "***".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 4, background: 4},
-ZOP::PrintOps{text: "++++++++++++++++++".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'\'".to_string()},
-ZOP::SetColor{foreground: 4, background: 4},
-ZOP::PrintOps{text: "++".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$$$$".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "***".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'\'\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "****".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 4, background: 4},
-ZOP::PrintOps{text: "++".to_string()},
-ZOP::SetColor{foreground: 8, background: 8},
-ZOP::PrintOps{text: "oooooooo".to_string()},
-ZOP::SetColor{foreground: 4, background: 4},
-ZOP::PrintOps{text: "+++++++".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "**".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'\'\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$$$$".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "***********".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 8, background: 8},
-ZOP::PrintOps{text: "ooooooooooooooooo".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "****".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$$".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: "-".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "*************".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 8, background: 8},
-ZOP::PrintOps{text: "oooooooooooooooooo".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'\'\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "*".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: "-".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "***".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: ".".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "****".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: ".".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "**".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 8, background: 8},
-ZOP::PrintOps{text: "oo========oooooooo===".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$$$".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "***".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "**".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "*".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "**".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 8, background: 8},
-ZOP::PrintOps{text: "=======================".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: "-".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "*".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "%%".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "********".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "%%".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 8, background: 8},
-ZOP::PrintOps{text: "==".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ";;;;;;;;".to_string()},
-ZOP::SetColor{foreground: 8, background: 8},
-ZOP::PrintOps{text: "========".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ";;;;".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@@@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$$".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "***".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'\'\'\'\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "**".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ";;;;;;;;;;;;;;;;;;;;;".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'\'\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@@@@@@@@@".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "*********".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ";;;;;;;;;;;;;;;;;;;;".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "***".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ";;,,,,,,,,;;;;;;;;,,".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "**".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "**".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "**".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "**".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-
-ZOP::Ret{value: Operand::new_const(0)},
-ZOP::Routine{name: "pr6".to_string(), count_variables: 1},
-ZOP::SetTextStyle{bold: true, reverse: false, monospace: true, italic: false},
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: ".".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ",,".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: ">>>>>>>>".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: ">>>>>>>".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: ">>>>>>>>>>>>>>>>>>>>>>>>".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@@@@@@@@@@@@@@@".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: ">>".to_string()},
-ZOP::SetColor{foreground: 5, background: 5},
-ZOP::PrintOps{text: "&&&&&&&&".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: ">>>>>>>>".to_string()},
-ZOP::SetColor{foreground: 5, background: 5},
-ZOP::PrintOps{text: "&&&&&".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@@@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$$$$$$$".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@@@".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 5, background: 5},
-ZOP::PrintOps{text: "&&&&&&&&&&&&&&&&&&&&&&&".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: "-".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@@".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 5, background: 5},
-ZOP::PrintOps{text: "&&&&&&&&&&&&&&&&&&&&&&&".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: "-".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "**".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: "-".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "**".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 5, background: 5},
-ZOP::PrintOps{text: "&&".to_string()},
-ZOP::SetColor{foreground: 4, background: 4},
-ZOP::PrintOps{text: "++++++++".to_string()},
-ZOP::SetColor{foreground: 5, background: 5},
-ZOP::PrintOps{text: "&&&&&&&&".to_string()},
-ZOP::SetColor{foreground: 4, background: 4},
-ZOP::PrintOps{text: "+++++".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$$$$".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "***".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "***".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 4, background: 4},
-ZOP::PrintOps{text: "+++++++++++++++++++".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 4, background: 4},
-ZOP::PrintOps{text: "+++".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: "-".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "***".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'\'\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "****".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 4, background: 4},
-ZOP::PrintOps{text: "++++++++++++++++++".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "*".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 4, background: 4},
-ZOP::PrintOps{text: "++".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$$$$".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "***********".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 4, background: 4},
-ZOP::PrintOps{text: "++".to_string()},
-ZOP::SetColor{foreground: 8, background: 8},
-ZOP::PrintOps{text: "oooooooo".to_string()},
-ZOP::SetColor{foreground: 4, background: 4},
-ZOP::PrintOps{text: "++++++++".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "*".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'\'\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$$$".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "*************".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 8, background: 8},
-ZOP::PrintOps{text: "ooooooooooooooooooo".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "****".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$$".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: "-".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "***".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: ".".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "****".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: ".".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "**".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 8, background: 8},
-ZOP::PrintOps{text: "ooooooooooooooooooo".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "**".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: "-".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "***".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "**".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "*".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "**".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 8, background: 8},
-ZOP::PrintOps{text: "oo========oooooooo===".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$$$".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "*".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "%%".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "********".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "%%".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 8, background: 8},
-ZOP::PrintOps{text: "=======================".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: "-".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "***".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'\'\'\'\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "**".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 8, background: 8},
-ZOP::PrintOps{text: "==".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ";;;;;;;;".to_string()},
-ZOP::SetColor{foreground: 8, background: 8},
-ZOP::PrintOps{text: "========".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ";;;;".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@@@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$$$".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "*********".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: ".".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ";;;;;;;;;;;;;;;;;;;;;".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "*".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@@@@@@@@@@".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'\'\'\'\'\'\'\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: ".".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ";;;;;;;;;;;;;;;;;;;;".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "***".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "*".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ";;,,,,,,,,;;;;;;;;,,".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "**".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "**".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "**".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "**".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "..".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: ".".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: ".".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: ".".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-
-ZOP::Ret{value: Operand::new_const(0)},
-ZOP::Routine{name: "pr7".to_string(), count_variables: 1},
-ZOP::SetTextStyle{bold: true, reverse: false, monospace: true, italic: false},
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: ".".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: ".".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: ".".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: ">>".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: ">>>>>>>>".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@@@@@@@@@@@@@@@".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: ">>>>>>>>>>>>>>>>>>>>>>>".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@@@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$$$$$$$".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@@@".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 5, background: 5},
-ZOP::PrintOps{text: "&&".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: ">>>>>>>".to_string()},
-ZOP::SetColor{foreground: 5, background: 5},
-ZOP::PrintOps{text: "&&&&&&&&".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: ">>>>>>".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: "-".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: "-".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@@".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 5, background: 5},
-ZOP::PrintOps{text: "&&&&&&&&&&&&&&&&&&&&&&&".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: "-".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$$".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: "-".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 5, background: 5},
-ZOP::PrintOps{text: "&&&&&&&&&&&&&&&&&&&&&&&".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$$$$".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "**".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "**".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 4, background: 4},
-ZOP::PrintOps{text: "++".to_string()},
-ZOP::SetColor{foreground: 5, background: 5},
-ZOP::PrintOps{text: "&&&&&&&".to_string()},
-ZOP::SetColor{foreground: 4, background: 4},
-ZOP::PrintOps{text: "++++++++".to_string()},
-ZOP::SetColor{foreground: 5, background: 5},
-ZOP::PrintOps{text: "&".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'\'".to_string()},
-ZOP::SetColor{foreground: 5, background: 5},
-ZOP::PrintOps{text: "&&".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: "-".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "***".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "***".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 4, background: 4},
-ZOP::PrintOps{text: "++++++++++++++++++".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "*".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'".to_string()},
-ZOP::SetColor{foreground: 4, background: 4},
-ZOP::PrintOps{text: "+".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$$$$".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "***".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'\'\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "****".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 4, background: 4},
-ZOP::PrintOps{text: "++++++++++++++++++".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "**".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$$$$".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "***********".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 8, background: 8},
-ZOP::PrintOps{text: "oo".to_string()},
-ZOP::SetColor{foreground: 4, background: 4},
-ZOP::PrintOps{text: "+++++++".to_string()},
-ZOP::SetColor{foreground: 8, background: 8},
-ZOP::PrintOps{text: "oooooooo".to_string()},
-ZOP::SetColor{foreground: 4, background: 4},
-ZOP::PrintOps{text: "++".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "**".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$$".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: "-".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "*************".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 8, background: 8},
-ZOP::PrintOps{text: "ooooooooooooooooooo".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "**".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: "-".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "***".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: ".".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "****".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: ".".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "**".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 8, background: 8},
-ZOP::PrintOps{text: "oooooooooooooooooooo".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'\'\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$$$".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "***".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "**".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "*".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "**".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 8, background: 8},
-ZOP::PrintOps{text: "==ooooooo========ooooo".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: "-".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "*".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "%%".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "********".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "%%".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 8, background: 8},
-ZOP::PrintOps{text: "=======================".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@@@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$$".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "***".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'\'\'\'\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "**".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ";;".to_string()},
-ZOP::SetColor{foreground: 8, background: 8},
-ZOP::PrintOps{text: "=======".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ";;;;;;;;".to_string()},
-ZOP::SetColor{foreground: 8, background: 8},
-ZOP::PrintOps{text: "=====".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@@@@@@@@@".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "*********".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: ".".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ";;;;;;;;;;;;;;;;;;;;;".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "***".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: ".".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: ".".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ";;;;;;;;;;;;;;;;;;;;;".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "**".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "*".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "**".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "**".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ",,;;;;;;;,,,,,,,,;;;;".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'\'\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: ".".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: ".".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: ".".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: ".".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: ".".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-
-ZOP::Ret{value: Operand::new_const(0)},
-ZOP::Routine{name: "pr8".to_string(), count_variables: 1},
-ZOP::SetTextStyle{bold: true, reverse: false, monospace: true, italic: false},
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "..".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "..".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: ".".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: ".".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: ">>".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: ">>>>>>>>".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@@@@@@@@@@@@@@@".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: ">>>>>>>>>>>>>>>>>>>>>>>".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@@@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$$$$$$$".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@@@".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 5, background: 5},
-ZOP::PrintOps{text: "&&".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: ">>>>>>>".to_string()},
-ZOP::SetColor{foreground: 5, background: 5},
-ZOP::PrintOps{text: "&&&&&&&&".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: ">>>>>>".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: "-".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: "-".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@@".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 5, background: 5},
-ZOP::PrintOps{text: "&&&&&&&&&&&&&&&&&&&&&&&".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: "-".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$$$".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: "-".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 5, background: 5},
-ZOP::PrintOps{text: "&&&&&&&&&&&&&&&&&&&&&&&".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$$$$$".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "**".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "**".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 4, background: 4},
-ZOP::PrintOps{text: "++".to_string()},
-ZOP::SetColor{foreground: 5, background: 5},
-ZOP::PrintOps{text: "&&&&&&&".to_string()},
-ZOP::SetColor{foreground: 4, background: 4},
-ZOP::PrintOps{text: "++++++++".to_string()},
-ZOP::SetColor{foreground: 5, background: 5},
-ZOP::PrintOps{text: "&&&&&&".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: "-".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "***".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "***".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 4, background: 4},
-ZOP::PrintOps{text: "+++++++++++++++++++".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 4, background: 4},
-ZOP::PrintOps{text: "+++".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$$$$$".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "***".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'\'\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "****".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 4, background: 4},
-ZOP::PrintOps{text: "++++++++++++++++++".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "*".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 4, background: 4},
-ZOP::PrintOps{text: "++".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$$$$$".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "***********".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 8, background: 8},
-ZOP::PrintOps{text: "oo".to_string()},
-ZOP::SetColor{foreground: 4, background: 4},
-ZOP::PrintOps{text: "+++++++".to_string()},
-ZOP::SetColor{foreground: 8, background: 8},
-ZOP::PrintOps{text: "oooooooo".to_string()},
-ZOP::SetColor{foreground: 4, background: 4},
-ZOP::PrintOps{text: "+".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "*".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'\'\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$$".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: "-".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "*************".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 8, background: 8},
-ZOP::PrintOps{text: "ooooooooooooooooooo".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "****".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: "-".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$$".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "***".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: ".".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "****".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: ".".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "**".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 8, background: 8},
-ZOP::PrintOps{text: "ooooooooooooooooooo".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "**".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$$$$".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "***".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "**".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "*".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "**".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 8, background: 8},
-ZOP::PrintOps{text: "==ooooooo========oooo".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: "-".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "*".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "%%".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "********".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "%%".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 8, background: 8},
-ZOP::PrintOps{text: "=======================".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@@@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$$$".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "***".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'\'\'\'\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "**".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ";;".to_string()},
-ZOP::SetColor{foreground: 8, background: 8},
-ZOP::PrintOps{text: "=======".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ";;;;;;;;".to_string()},
-ZOP::SetColor{foreground: 8, background: 8},
-ZOP::PrintOps{text: "======".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@@@@@@@@@@".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "*********".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: ".".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ";;;;;;;;;;;;;;;;;;;;;;".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "**".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ";;;;;;;;;;;;;;;;;;;;;;".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "**".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "*".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "**".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "**".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ",,;;;;;;;,,,,,,,,;;;;;".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: ".".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: ".".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: ".".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-
-ZOP::Ret{value: Operand::new_const(0)},
-ZOP::Routine{name: "pr9".to_string(), count_variables: 1},
-ZOP::SetTextStyle{bold: true, reverse: false, monospace: true, italic: false},
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "..".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "...".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: ".".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: ".".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ",,".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: ">>>>>>>>".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: ">>>>>>>".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: ">>>>>>>>>>>>>>>>>>>>>>>>".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@@@@@@@@@@@@@@@".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: ">>".to_string()},
-ZOP::SetColor{foreground: 5, background: 5},
-ZOP::PrintOps{text: "&&&&&&&&".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: ">>>>>>>>".to_string()},
-ZOP::SetColor{foreground: 5, background: 5},
-ZOP::PrintOps{text: "&&&&&".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@@@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$$$$$$$".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@@@".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 5, background: 5},
-ZOP::PrintOps{text: "&&&&&&&&&&&&&&&&&&&&&&&".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: "-".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: "-".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@@".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 5, background: 5},
-ZOP::PrintOps{text: "&&&&&&&&&&&&&&&&&&&&&&&".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: "-".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$$$".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: "-".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 5, background: 5},
-ZOP::PrintOps{text: "&&".to_string()},
-ZOP::SetColor{foreground: 4, background: 4},
-ZOP::PrintOps{text: "++++++++".to_string()},
-ZOP::SetColor{foreground: 5, background: 5},
-ZOP::PrintOps{text: "&&&&&&&&".to_string()},
-ZOP::SetColor{foreground: 4, background: 4},
-ZOP::PrintOps{text: "+++++".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$$$$$".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "**".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "**".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 4, background: 4},
-ZOP::PrintOps{text: "+++++++++++++++++++++++".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: "-".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "***".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "***".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 4, background: 4},
-ZOP::PrintOps{text: "+++++++++++++++++++++++".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$$$$$".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "***".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'\'\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "****".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 4, background: 4},
-ZOP::PrintOps{text: "++".to_string()},
-ZOP::SetColor{foreground: 8, background: 8},
-ZOP::PrintOps{text: "oooooooo".to_string()},
-ZOP::SetColor{foreground: 4, background: 4},
-ZOP::PrintOps{text: "++++++++".to_string()},
-ZOP::SetColor{foreground: 8, background: 8},
-ZOP::PrintOps{text: "ooooo".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$$$$$".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "***********".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 8, background: 8},
-ZOP::PrintOps{text: "oooooooooooooooooooooo".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$$".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: "-".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "*************".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 8, background: 8},
-ZOP::PrintOps{text: "ooooooooooooooooooo".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'\'\'\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: "-".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$$".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "***".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: ".".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "****".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: ".".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "**".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 8, background: 8},
-ZOP::PrintOps{text: "oo========oooooooo".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "****".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$$$$".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "***".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "**".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "*".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "**".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 8, background: 8},
-ZOP::PrintOps{text: "===================".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'\'".to_string()},
-ZOP::SetColor{foreground: 8, background: 8},
-ZOP::PrintOps{text: "=".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: "-".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "*".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "%%".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "********".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "%%".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 8, background: 8},
-ZOP::PrintOps{text: "==".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ";;;;;;;;".to_string()},
-ZOP::SetColor{foreground: 8, background: 8},
-ZOP::PrintOps{text: "========".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ";;;;;".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@@@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$$$".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "***".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'\'\'\'\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "**".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ";;;;;;;;;;;;;;;;;;;;;;;".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@@@@@@@@@@".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "*********".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ";;;;;;;;;;;;;;;;;;;;;;;".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "*".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ";;,,,,,,,,;;;;;;;;,,,,,".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "**".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "**".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "**".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: ".".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "**".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-
-ZOP::Ret{value: Operand::new_const(0)},
-ZOP::Routine{name: "pr10".to_string(), count_variables: 1},
-ZOP::SetTextStyle{bold: true, reverse: false, monospace: true, italic: false},
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: ".".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: ".".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: ".".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: ".".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ",,".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: ">>>>>>>>".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: ">>>>>>>".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: ">>>>>>>>>>>>>>>>>>>>>>>>".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@@@@@@@@@@@@@@@".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: ">>".to_string()},
-ZOP::SetColor{foreground: 5, background: 5},
-ZOP::PrintOps{text: "&&&&&&&&".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: ">>>>>>>>".to_string()},
-ZOP::SetColor{foreground: 5, background: 5},
-ZOP::PrintOps{text: "&&&&&".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@@@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$$$$$$$".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@@@".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 5, background: 5},
-ZOP::PrintOps{text: "&&&&&&&&&&&&&&&&&&&&&&&".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: "-".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: "-".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@@".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 5, background: 5},
-ZOP::PrintOps{text: "&&&&&&&&&&&&&&&&&&&&&&&".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: "-".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$$$".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: "-".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 5, background: 5},
-ZOP::PrintOps{text: "&&".to_string()},
-ZOP::SetColor{foreground: 4, background: 4},
-ZOP::PrintOps{text: "++++++++".to_string()},
-ZOP::SetColor{foreground: 5, background: 5},
-ZOP::PrintOps{text: "&&&&&&&&".to_string()},
-ZOP::SetColor{foreground: 4, background: 4},
-ZOP::PrintOps{text: "+++++".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$$$$$".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "**".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "**".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 4, background: 4},
-ZOP::PrintOps{text: "+++++++++++++++++++++++".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: "-".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "***".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "***".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 4, background: 4},
-ZOP::PrintOps{text: "+++++++++++++++++++++++".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$$$$$".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "***".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'\'\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "****".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 4, background: 4},
-ZOP::PrintOps{text: "++".to_string()},
-ZOP::SetColor{foreground: 8, background: 8},
-ZOP::PrintOps{text: "oooooooo".to_string()},
-ZOP::SetColor{foreground: 4, background: 4},
-ZOP::PrintOps{text: "++++++++".to_string()},
-ZOP::SetColor{foreground: 8, background: 8},
-ZOP::PrintOps{text: "ooooo".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$$$$$".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "***********".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 8, background: 8},
-ZOP::PrintOps{text: "ooooooooooooooooooooo".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$$".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: "-".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "*************".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 8, background: 8},
-ZOP::PrintOps{text: "ooooooooooooooooooo".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "**".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: "-".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$$".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "***".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: ".".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "****".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: ".".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "**".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 8, background: 8},
-ZOP::PrintOps{text: "oo========oooooooo=".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "****".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$$$$".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "***".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "**".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "*".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "**".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 8, background: 8},
-ZOP::PrintOps{text: "==================".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "*".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 8, background: 8},
-ZOP::PrintOps{text: "==".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: "-".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "*".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "%%".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "********".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "%%".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 8, background: 8},
-ZOP::PrintOps{text: "==".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ";;;;;;;;".to_string()},
-ZOP::SetColor{foreground: 8, background: 8},
-ZOP::PrintOps{text: "========".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ";".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ";;;".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@@@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$$$".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "***".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'\'\'\'\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "**".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ";;;;;;;;;;;;;;;;;;;;;;;".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@@@@@@@@@@".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "*********".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ";;;;;;;;;;;;;;;;;;;;;;".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "**".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ";;,,,,,,,,;;;;;;;;,,,,".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "**".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "*".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "..".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: ".".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "**".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "**".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: ".".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: ".".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-
-ZOP::Ret{value: Operand::new_const(0)},
-ZOP::Routine{name: "pr11".to_string(), count_variables: 1},
-ZOP::SetTextStyle{bold: true, reverse: false, monospace: true, italic: false},
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: ".".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: ".".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ",,,,,,,,,,".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: ".".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: ">>".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: ">>>>>>>>".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: ">>>>>>>>>>>>>>>>>>>>>>>>".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@@@@@@@@@@@@@@@".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 5, background: 5},
-ZOP::PrintOps{text: "&&".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: ">>>>>>>".to_string()},
-ZOP::SetColor{foreground: 5, background: 5},
-ZOP::PrintOps{text: "&&&&&&&&".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: ">>>>>>".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@@@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$$$$$$$".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@@@".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 5, background: 5},
-ZOP::PrintOps{text: "&&&&&&&&&&&&&&&&&&&&&&&".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: "-".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: "-".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@@".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 5, background: 5},
-ZOP::PrintOps{text: "&&&&&&&&&&&&&&&&&&&&&&&".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: "-".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$$".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: "-".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 4, background: 4},
-ZOP::PrintOps{text: "++".to_string()},
-ZOP::SetColor{foreground: 5, background: 5},
-ZOP::PrintOps{text: "&&&&&&&".to_string()},
-ZOP::SetColor{foreground: 4, background: 4},
-ZOP::PrintOps{text: "++++++++".to_string()},
-ZOP::SetColor{foreground: 5, background: 5},
-ZOP::PrintOps{text: "&&&&&&".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$$$$".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "**".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "**".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 4, background: 4},
-ZOP::PrintOps{text: "+++++++++++++++++++++++".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: "-".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "***".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "***".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 4, background: 4},
-ZOP::PrintOps{text: "++++++++++++++++++".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'\'".to_string()},
-ZOP::SetColor{foreground: 4, background: 4},
-ZOP::PrintOps{text: "++".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$$$$".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "***".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'\'\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "****".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 8, background: 8},
-ZOP::PrintOps{text: "oo".to_string()},
-ZOP::SetColor{foreground: 4, background: 4},
-ZOP::PrintOps{text: "+++++++".to_string()},
-ZOP::SetColor{foreground: 8, background: 8},
-ZOP::PrintOps{text: "oooooooo".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "**".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'\'\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$$$$".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "***********".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 8, background: 8},
-ZOP::PrintOps{text: "ooooooooooooooooo".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "****".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$$".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: "-".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "*************".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 8, background: 8},
-ZOP::PrintOps{text: "oooooooooooooooooo".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'\'\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "*".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: "-".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "***".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: ".".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "****".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: ".".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "**".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 8, background: 8},
-ZOP::PrintOps{text: "==ooooooo========oooo".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$$$".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "***".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "**".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "*".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "**".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 8, background: 8},
-ZOP::PrintOps{text: "=======================".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: "-".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "*".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "%%".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "********".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "%%".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ";;".to_string()},
-ZOP::SetColor{foreground: 8, background: 8},
-ZOP::PrintOps{text: "=======".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ";;;;;;;;".to_string()},
-ZOP::SetColor{foreground: 8, background: 8},
-ZOP::PrintOps{text: "=====".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@@@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$$".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "***".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'\'\'\'\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "**".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ";;;;;;;;;;;;;;;;;;;;;".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'\'\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@@@@@@@@@".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "*********".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ";;;;;;;;;;;;;;;;;;;;".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "***".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ",,;;;;;;;,,,,,,,,;;;".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "**".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: ".".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "**".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "..".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "**".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "**".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: ".".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: ".".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-
-ZOP::Ret{value: Operand::new_const(0)},
-ZOP::Routine{name: "pr12".to_string(), count_variables: 1},
-ZOP::SetTextStyle{bold: true, reverse: false, monospace: true, italic: false},
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: ".".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: ">>".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: ">>>>>>>>".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: ">>>>>>>>>>>>>>>>>>>>>>>>".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@@@@@@@@@@@@@@@".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 5, background: 5},
-ZOP::PrintOps{text: "&&".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: ">>>>>>>".to_string()},
-ZOP::SetColor{foreground: 5, background: 5},
-ZOP::PrintOps{text: "&&&&&&&&".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: ">>>>>>".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@@@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$$$$$$$".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@@@".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 5, background: 5},
-ZOP::PrintOps{text: "&&&&&&&&&&&&&&&&&&&&&&&".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: "-".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@@".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 5, background: 5},
-ZOP::PrintOps{text: "&&&&&&&&&&&&&&&&&&&&&&&".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: "-".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "**".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: "-".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "**".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 4, background: 4},
-ZOP::PrintOps{text: "++".to_string()},
-ZOP::SetColor{foreground: 5, background: 5},
-ZOP::PrintOps{text: "&&&&&&&".to_string()},
-ZOP::SetColor{foreground: 4, background: 4},
-ZOP::PrintOps{text: "++++++++".to_string()},
-ZOP::SetColor{foreground: 5, background: 5},
-ZOP::PrintOps{text: "&&&&&&".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$$$$".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "***".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "***".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 4, background: 4},
-ZOP::PrintOps{text: "+++++++++++++++++++".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 4, background: 4},
-ZOP::PrintOps{text: "+++".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: "-".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "***".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'\'\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "****".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 4, background: 4},
-ZOP::PrintOps{text: "++++++++++++++++++".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "*".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 4, background: 4},
-ZOP::PrintOps{text: "++".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$$$$".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "***********".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 8, background: 8},
-ZOP::PrintOps{text: "oo".to_string()},
-ZOP::SetColor{foreground: 4, background: 4},
-ZOP::PrintOps{text: "+++++++".to_string()},
-ZOP::SetColor{foreground: 8, background: 8},
-ZOP::PrintOps{text: "oooooooo".to_string()},
-ZOP::SetColor{foreground: 4, background: 4},
-ZOP::PrintOps{text: "+".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "*".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'\'\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$$$".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "*************".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 8, background: 8},
-ZOP::PrintOps{text: "ooooooooooooooooooo".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "****".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$$".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: "-".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "***".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: ".".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "****".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: ".".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "**".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 8, background: 8},
-ZOP::PrintOps{text: "ooooooooooooooooooo".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "**".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: "-".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "***".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "**".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "*".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "**".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 8, background: 8},
-ZOP::PrintOps{text: "==ooooooo========oooo".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$$$".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "*".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "%%".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "********".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "%%".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: "".to_string()},
-ZOP::SetColor{foreground: 8, background: 8},
-ZOP::PrintOps{text: "=======================".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$".to_string()},
-ZOP::SetColor{foreground: 3, background: 3},
-ZOP::PrintOps{text: "-".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "***".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'\'\'\'\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "**".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ";;".to_string()},
-ZOP::SetColor{foreground: 8, background: 8},
-ZOP::PrintOps{text: "=======".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ";;;;;;;;".to_string()},
-ZOP::SetColor{foreground: 8, background: 8},
-ZOP::PrintOps{text: "=".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: ".".to_string()},
-ZOP::SetColor{foreground: 8, background: 8},
-ZOP::PrintOps{text: "===".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@@@".to_string()},
-ZOP::SetColor{foreground: 7, background: 7},
-ZOP::PrintOps{text: "$$$$$$$".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "*********".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ";;;;;;;;;;;;;;;;;;;;".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: ".".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "*".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: "@@@@@@@@@@".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'\'\'\'\'\'\'\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ";;;;;;;;;;;;;;;;;;;;".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "***".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "*".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ",,;;;;;;;,,,,,,,".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: ".".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ";;;".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "**".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "**".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "**".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'".to_string()},
-ZOP::SetColor{foreground: 10, background: 10},
-ZOP::PrintOps{text: "**".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,".to_string()},
-ZOP::SetColor{foreground: 2, background: 2},
-ZOP::PrintOps{text: "\'\'\'".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: ".".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::SetColor{foreground: 9, background: 9},
-ZOP::PrintOps{text: ".".to_string()},
-ZOP::SetColor{foreground: 6, background: 6},
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".to_string()},
-ZOP::Newline,
-
-ZOP::Ret{value: Operand::new_const(0)},
-
-]);
 }
 

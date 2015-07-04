@@ -380,8 +380,8 @@ pub fn zwreec_usage(verbose: bool, mut opts: getopts::Options, brief: &str) -> S
         character is encountered. This disables the generation of the unicode
         translation table
     no-colours (disabled)
-        Suppress generation of set_colour opcodes and disable the colour bit
-        in the second byte of the header
+        Suppress generation of set_colour and set_text_style opcodes and disable
+        the colour bit in the second byte of the header
     half-memory (disabled)
         Cut down space for static variable strings and heap in order to have
         binaries smaller than 64kB"

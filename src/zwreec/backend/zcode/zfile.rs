@@ -526,7 +526,7 @@ impl Zfile {
             &ZOP::SetColorVar{foreground, background} => if self.no_colours { Vec::new() } else {  op::op_set_color_var(foreground, background) },
             &ZOP::Random{ref range, ref variable} => op::op_random(range, variable),
             &ZOP::PrintNumVar{ref variable} => op::op_print_num_var(variable),
-            &ZOP::SetTextStyle{bold, reverse, monospace, italic} => op::op_set_text_style(bold, reverse, monospace, italic),
+            &ZOP::SetTextStyle{bold, reverse, monospace, italic} => if self.no_colours { Vec::new() } else { op::op_set_text_style(bold, reverse, monospace, italic) },
             &ZOP::ReadChar{local_var_id} => op::op_read_char(local_var_id),
             &ZOP::LoadW{ref array_address, ref index, ref variable} => op::op_loadw(array_address, index, variable),
             &ZOP::StoreW{ref array_address, ref index, ref variable} => op::op_storew(array_address, index, variable),
