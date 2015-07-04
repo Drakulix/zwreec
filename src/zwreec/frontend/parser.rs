@@ -257,9 +257,9 @@ impl<'a> Parser<'a> {
                 },
                 (PassageContent, tok @ TokFormatHeading { .. } ) => {
                     stack.push(NonTerminal(PassageContent));
-                    stack.push(Terminal(tok));
+                    stack.push(Terminal(tok.clone()));
 
-                    None
+                    Some(AddChild(tok))
                 },
                 (PassageContent, TokPassageLink { .. } ) => {
                     stack.push(NonTerminal(PassageContent));

@@ -18,7 +18,7 @@ rustlex! TweeLexer {
     property format_sub_open:bool = false;
     property format_sup_open:bool = false;
     property function_parens:usize = 0;
-    property heading_rank:usize = 0;
+    property heading_rank:u8 = 0;
 
     //=============================
     // regular expressions
@@ -252,7 +252,7 @@ rustlex! TweeLexer {
         }
 
         FORMAT_HEADING  =>  |lexer:&mut TweeLexer<R>| -> Option<Token>{
-            lexer.heading_rank = lexer.yystr().trim().len();
+            lexer.heading_rank = lexer.yystr().trim().len() as u8;
             lexer.HEADING();
             None
         }

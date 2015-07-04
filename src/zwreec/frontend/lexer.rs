@@ -146,7 +146,7 @@ pub enum Token {
     TokFormatNumbList         {location: (u64, u64)},
     TokFormatIndentBlock      {location: (u64, u64)},
     TokFormatHorizontalLine   {location: (u64, u64)},
-    TokFormatHeading          {location: (u64, u64), rank: usize, text: String},
+    TokFormatHeading          {location: (u64, u64), rank: u8, text: String},
     TokMacroStart             {location: (u64, u64)},
     TokMacroEnd               {location: (u64, u64)},
     TokMacroContentVar        {location: (u64, u64), var_name: String},
