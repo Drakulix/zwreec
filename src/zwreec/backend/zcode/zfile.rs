@@ -1917,7 +1917,7 @@ fn test_op_set_text_style() {
 
 #[test]
 fn test_op_read_char() {
-    assert_eq!(op::op_read_char(0x01),vec![0xF6,0x7F,0x00,0x01]);
+    assert_eq!(op::op_read_char(0x01),vec![0xF6,0x7F,0x01,0x01]);
 }
 
 #[test]
