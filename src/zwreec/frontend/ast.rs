@@ -23,7 +23,7 @@ pub struct AST {
     pub passages: Vec<ASTNode>,
 }
 
-/// the parser use theese ASTOperations to create the ast
+/// the parser use these ASTOperations to create the ast
 pub enum ASTOperation {
     AddPassage(Token),
     AddChild(Token),
