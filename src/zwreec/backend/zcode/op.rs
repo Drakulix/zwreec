@@ -118,7 +118,7 @@ pub fn op_read_char(local_var_id: u8) -> Vec<u8> {
     let mut bytes = op_var(0x16, args);
 
     // write argument value
-    bytes.push(0x00);
+    bytes.push(0x01);
 
     // write varible id
     bytes.push(local_var_id);

@@ -1675,7 +1675,7 @@ impl Zfile {
         self.op_var(0x16, args);
 
         // write argument value
-        self.data.append_byte(0x00);
+        self.data.append_byte(0x01);
 
         // write timer
         self.data.append_byte(timer);
