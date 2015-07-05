@@ -1,29 +1,12 @@
-diff --git a/src/zwreec/backend/zcode/ee.rs b/src/zwreec/backend/zcode/ee.rs
-index 90a33cb..b85ea73 100644
---- a/src/zwreec/backend/zcode/ee.rs
-+++ b/src/zwreec/backend/zcode/ee.rs
-@@ -4,8 +4,11 @@
- pub use super::zfile::{ Operand, Variable, Constant, LargeConstant, Zfile, ZOP };
- 
- pub fn routine_easteregg(file: &mut Zfile) {
-+  part_one(file);
-+  part_two(file);
-+}
- 
--
-+fn part_one(file: &mut Zfile) {
- file.write_zop(&ZOP::Routine{name: "easter_egg_start".to_string(), count_variables: 1}, false);
- file.write_zop(&ZOP::StoreVariable{variable: Variable::new(17), value: Operand::new_const(0)}, false);
- file.write_zop(&ZOP::Label{name: "easter_egg_loop".to_string()}, false);
-@@ -3173,6 +3176,11 @@ file.write_zop(&ZOP::PrintOps{text: "\'".to_string()}, false);
- file.write_zop(&ZOP::SetColor{foreground: 6, background: 6}, false);
- file.write_zop(&ZOP::PrintOps{text: ",,,,,,,,,,,,,,,,,,".to_string()}, false);
- file.write_zop(&ZOP::Newline, false);
-+
-+}
-+
-+fn part_two(file: &mut Zfile) {
-+
- file.write_zop(&ZOP::SetColor{foreground: 8, background: 8}, false);
- file.write_zop(&ZOP::PrintOps{text: "ooooooooooooooooooo".to_string()}, false);
- file.write_zop(&ZOP::SetColor{foreground: 2, background: 2}, false);
+16a17,19
+>     part_one(file);
+>     part_two(file);
+> }
+18c21
+< 
+---
+> fn part_one(file: &mut Zfile) {
+3185a3189,3191
+> }
+> 
+> fn part_two(file: &mut Zfile) {
