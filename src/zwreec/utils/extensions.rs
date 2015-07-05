@@ -98,13 +98,13 @@ impl<I: Sized+Iterator> FilteringScanExt for I {
     }
 }
 
+
 #[derive(Clone)]
 pub enum ParseResult {
     Continue,
     Halt,
     End,
 }
-
 
 /// An iterator to maintain state while iterating another iterator and allows more complex parsing
 // (allowing holding the current iterator value, continue if its goes empty and filter the output)
@@ -171,28 +171,30 @@ impl<A:Clone, I: Sized+Iterator<Item=A>>ParserExt for I {
 
 #[must_use = "iterator adaptors are lazy and do nothing unless consumed"]
 #[derive(Clone)]
-pub struct Wait<B, I, E, F>
+pub struct Constructor<I, B, F>
     where
     I: Iterator,
-    F: FnMut(&mut E, I::Item) -> Option<B> {
+    B: Clone,
+    F: FnMut(&mut Option<B>, I::Item) -> Option<B> {
         iter: I,
         f: F,
         current_elem: Option<B>,
 }
 
-impl<B, I, E, F> Iterator for Wait<B, I, E, F> where
+impl<I, B, F> Iterator for Constructor<I, B, F> where
     I: Iterator,
-    F: FnMut(&mut E, I::Item) -> Option<B>,
+    B: Clone,
+    F: FnMut(&mut Option<B>, I::Item) -> Option<B>,
 {
     type Item = B;
 
     #[inline]
     fn next(&mut self) -> Option<B> {
         while let Some(elem) =  self.iter.next() {
-            match self.f(self.current_elem, elem) {
+            match (self.f)(&mut self.current_elem, elem) {
                 Some(elem) => {
-                    let return_val = self.current_elem;
-                    self.current_elem = elem;
+                    let return_val = self.current_elem.clone();
+                    self.current_elem = Some(elem);
                     match return_val {
                         Some(value) => return Some(value),
                         None => continue,
@@ -201,13 +203,29 @@ impl<B, I, E, F> Iterator for Wait<B, I, E, F> where
                 None => continue,
             }
         }
-        None
+
+        let result = self.current_elem.clone();
+        self.current_elem = None;
+        result
     }
 
     #[inline]
     fn size_hint(&self) -> (usize, Option<usize>) {
         let (_, upper) = self.iter.size_hint();
         (0, upper) // can't know a lower bound, due to the waiting function
+    }
+}
+
+pub trait ConstructorExt {
+    fn construct<F, B>(self, f: F) -> Constructor<Self, B, F>
+        where Self: Sized+Iterator, B: Clone, F: Fn(&mut Option<B>, Self::Item) -> Option<B>;
+}
+
+impl<I: Sized+Iterator>ConstructorExt for I {
+    fn construct<F, B>(self, f: F) -> Constructor<Self, B, F>
+        where Self: Sized+Iterator, B: Clone, F: Fn(&mut Option<B>, I::Item) -> Option<B>,
+    {
+        Constructor{iter: self, f: f, current_elem: None}
     }
 }
 
@@ -305,4 +323,28 @@ fn parsing_test() {
     }
 
     assert_eq!(result, vec![1, 2, 3, 4, 5]);
+}
+
+#[test]
+fn construct_test() {
+    use std::cell::Cell;
+
+    let test: Vec<u8> = vec![3, 3, 3, 2, 4, 5, 2];
+
+    let result : Vec<u8> = test.into_iter().construct(|ref mut value, i| {
+        if value.is_none() {
+            return Some(Cell::new(i)); //first value
+        }
+
+        let old_val = value.as_ref().unwrap().get();
+        value.as_ref().unwrap().set(old_val + i);
+
+        if value.as_ref().unwrap().get() >= 5 {
+            Some(Cell::new(0)) //new value
+        } else {
+            None //continue constucting
+        }
+    }).map(|x| { x.get() % 5 }).collect();
+
+    assert_eq!(result, vec![1, 0, 4, 2]);
 }
