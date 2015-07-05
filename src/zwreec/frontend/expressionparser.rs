@@ -26,6 +26,7 @@ pub struct ExpressionParser<'a> {
 }
 
 impl<'a> ExpressionParser<'a> {
+    /// gets node (with an expression) and starts the parsing
     pub fn parse(node: &mut NodeDefault, cfg: &'a Config) {
         let mut expr_parser = ExpressionParser {
             expr_stack: Vec::new(),
@@ -72,7 +73,7 @@ impl<'a> ExpressionParser<'a> {
                         if self.is_ranking_not_higher(token.clone(), tok.clone()) {
                             self.new_operator_node();
                         }
-                        
+
                     }
 
                     self.oper_stack.push(tok.clone());
@@ -220,7 +221,7 @@ impl<'a> ExpressionParser<'a> {
         match op.as_ref() {
             "or" | "||"         => 1,
             "and" | "&&"        => 2,
-            "is" | "==" | "eq" | "neq" | ">" | "gt" | ">=" | "gte" | "<" | "lt" | "<=" | "lte"
+            "is" | "==" | "eq" | "!=" | "neq" | ">" | "gt" | ">=" | "gte" | "<" | "lt" | "<=" | "lte"
                                 => 3,
             "+" | "-"           => 4,
             "*" | "/" | "%"     => 5,

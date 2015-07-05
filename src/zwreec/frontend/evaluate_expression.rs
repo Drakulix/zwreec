@@ -1,14 +1,40 @@
-//! The `evaluate_expressions` module...
-
+//! The `evaluate_expressions` module evaluates expressions from
+//! the AST and compiles them into zCode.
+//!
+//! This module takes the root node of an expression and traverses
+//! the contained subtree. It analyses if a sub-expression only
+//! contains constants and if so, evaluates them while compiling.
+//! Otherwise it translates the expressions into zCode. The module uses
+//! a finite amount of local variables in zCode to evaluate the
+//! expressions. Hence only expressions with limited size are
+//! supported.
 
 use backend::zcode::zfile::{ZOP, Operand, Variable, Constant, LargeConstant, Zfile, Type};
 use frontend::ast::{ASTNode};
 use frontend::codegen;
 use frontend::codegen::{CodeGenManager};
+use frontend::lexer::Token;
 use frontend::lexer::Token::{TokNumOp, TokCompOp, TokLogOp, TokInt, TokBoolean, TokVariable, TokFunction, TokString, TokUnaryMinus};
+#[allow(unused_imports)] use config::Config;
 
+#[derive(Debug)]
+pub enum EvaluateExpressionError {
+    InvalidAST,
+    NumericOperatorNeedsTwoArguments { op_name: String, location: (u64, u64) },
+    UnhandledToken { token: Token },
+    UnsupportedOperator { op_name: String, location: (u64, u64) },
+    UnsupportedFunction { name: String, location: (u64, u64) },
+    UnsupportedFunctionArgsLen { name: String, location: (u64, u64), expected: u64 },
+    UnsupportedFunctionArgType { name: String, index: u64, location: (u64, u64) },
+    NoTempIdLeftOnStack,
+}
 
-
+/// This functions evaluates an expression from the AST and returns an `Operand` containing the result.
+/// # Arguments
+/// `node` is the root node of the expression. Mostly the child of `TokExpression` is what you want to give here.
+/// `code` is the vector where the zCode shall be written to.
+/// `manager` is the manager from `codegen`. It is required for the symbol table and label ids.
+/// `out` is the `ZFile` compiling to. It is required for storing strings.
 pub fn evaluate_expression<'a>(node: &'a ASTNode, code: &mut Vec<ZOP>, mut manager: &mut CodeGenManager<'a>, mut out: &mut Zfile) -> Operand {
     let mut temp_ids = CodeGenManager::new_temp_var_vec();
     evaluate_expression_internal(node, code, &mut temp_ids, manager, &mut out)
@@ -18,25 +44,44 @@ pub fn evaluate_expression<'a>(node: &'a ASTNode, code: &mut Vec<ZOP>, mut manag
 fn evaluate_expression_internal<'a>(node: &'a ASTNode, code: &mut Vec<ZOP>,
         temp_ids: &mut Vec<u8>, mut manager: &mut CodeGenManager<'a>, mut out: &mut Zfile) -> Operand {
     let n = node.as_default();
+    let cfg = manager.cfg;
 
     match n.category {
-        TokNumOp { ref op_name, .. } => {
+        TokNumOp { ref op_name, ref location } => {
             if n.childs.len() != 2 {
-                panic!("Numeric operators need two arguments!")
+                error_panic!(cfg => EvaluateExpressionError::NumericOperatorNeedsTwoArguments { op_name: op_name.clone(), location: location.clone() } );
+
+                // Try error recovery. Ignores operator.
+                warn!("Trying to fix expression. This will compile but probably not do what you want.");
+                if n.childs.len() >= 1 {
+                    return evaluate_expression_internal(&n.childs[0], code, temp_ids, manager, &mut out)
+                } else {
+                    return Operand::Const(Constant { value: 0 })
+                }
             }
+
             let eval0 = evaluate_expression_internal(&n.childs[0], code, temp_ids, manager, &mut out);
             let eval1 = evaluate_expression_internal(&n.childs[1], code, temp_ids, manager, &mut out);
-            eval_num_op(&eval0, &eval1, &**op_name, code, temp_ids)
+            eval_num_op(&eval0, &eval1, &**op_name, location.clone(), code, temp_ids, manager)
         },
-        TokCompOp { ref op_name, .. } => {
+        TokCompOp { ref op_name, ref location } => {
             if n.childs.len() != 2 {
-                panic!("Numeric operators need two arguments!")
+                error_panic!(cfg => EvaluateExpressionError::NumericOperatorNeedsTwoArguments { op_name: op_name.clone(), location: location.clone() } );
+
+                // Try error recovery. Ignores operator.
+                warn!("Trying to fix expression. This will compile but probably not do what you want.");
+                if n.childs.len() >= 1 {
+                    return evaluate_expression_internal(&n.childs[0], code, temp_ids, manager, &mut out)
+                } else {
+                    return Operand::BoolConst(Constant { value: 0 })
+                }
             }
+
             let eval0 = evaluate_expression_internal(&n.childs[0], code, temp_ids, manager, &mut out);
             let eval1 = evaluate_expression_internal(&n.childs[1], code, temp_ids, manager, &mut out);
-            eval_comp_op(&eval0, &eval1, &**op_name, code, temp_ids, manager)
+            eval_comp_op(&eval0, &eval1, &**op_name, location.clone(), code, temp_ids, manager)
         },
-        TokLogOp { ref op_name, .. } => {
+        TokLogOp { ref op_name, ref location } => {
             let eval0 = evaluate_expression_internal(&n.childs[0], code, temp_ids, manager, &mut out);
 
             match &**op_name {
@@ -47,7 +92,17 @@ fn evaluate_expression_internal<'a>(node: &'a ASTNode, code: &mut Vec<ZOP>,
                 "not" | "!" => {
                     eval_not(&eval0, code, temp_ids, manager)
                 },
-                _ => panic!("unhandled op")
+                _ => {
+                    error_panic!(cfg => EvaluateExpressionError::UnsupportedOperator { op_name: op_name.clone(), location: location.clone() } );
+
+                    // Try error recovery. Ignores operator.
+                    warn!("Trying to fix expression. This will compile but probably not do what you want.");
+                    if n.childs.len() >= 1 {
+                        return evaluate_expression_internal(&n.childs[0], code, temp_ids, manager, &mut out)
+                    } else {
+                        return Operand::BoolConst(Constant { value: 0 })
+                    }
+                }
             }
         },
         TokUnaryMinus { .. } => {
@@ -64,18 +119,25 @@ fn evaluate_expression_internal<'a>(node: &'a ASTNode, code: &mut Vec<ZOP>,
             Operand::new_string_ref(out.write_string(value) as i16)
         },
         TokVariable { ref name, .. } => {
-            Operand::Var(manager.symbol_table.get_symbol_id(name))
+            Operand::Var(manager.symbol_table.get_and_add_symbol_id(name))
         },
-        TokFunction { ref name, .. } => {
+        TokFunction { ref name, ref location } => {
             match &**name {
                 "random" => {
                     let args = &node.as_default().childs;
                     if args.len() != 2 {
-                        panic!("Function random only supports 2 args");
+                        let error = EvaluateExpressionError::UnsupportedFunctionArgsLen {
+                            name: "random".to_string(), location: location.clone(), expected: 2 };
+                        error_panic!(cfg => error);
+                        if args.len() <= 1 {
+                            return Operand::Const(Constant { value: 0 })
+                        } else {
+                            warn!("Ignoring the additional arguments.");
+                        }
                     }
 
                     if args[0].as_default().childs.len() != 1 || args[1].as_default().childs.len() != 1 {
-                        panic!("Unsupported Expression");
+                        error_force_panic!(EvaluateExpressionError::InvalidAST);
                     }
 
                     let from = &args[0].as_default().childs[0];
@@ -83,65 +145,60 @@ fn evaluate_expression_internal<'a>(node: &'a ASTNode, code: &mut Vec<ZOP>,
 
                     let from_value = evaluate_expression_internal(from, code, temp_ids, manager, &mut out);
                     let to_value = evaluate_expression_internal(to, code, temp_ids, manager, &mut out);
-                    codegen::function_random(&from_value, &to_value, code, temp_ids)
+                    codegen::function_random(manager, &from_value, &to_value, code, temp_ids, location.clone())
                 },
-                _ => { panic!("Unsupported function: {}", name)}
+                _ => {
+                    error_panic!(cfg => EvaluateExpressionError::UnsupportedFunction { name: name.clone(), location: location.clone() });
+                    Operand::Const(Constant { value: 0 })
+                }
             }
         },
-        _ => panic!("unhandled token {:?}", n.category)
+        _ => {
+            error_panic!(cfg => EvaluateExpressionError::UnhandledToken { token: n.category.clone() } );
+            Operand::Const(Constant { value: 0 })
+        }
     }
 }
 
-fn eval_num_op<'a>(eval0: &Operand, eval1: &Operand, op_name: &str, code: &mut Vec<ZOP>, temp_ids: &mut Vec<u8>) -> Operand {
+fn eval_num_op<'a>(eval0: &Operand, eval1: &Operand, op_name: &str, location: (u64, u64), code: &mut Vec<ZOP>, temp_ids: &mut Vec<u8>, manager: &CodeGenManager<'a>) -> Operand {
     if count_constants(eval0, eval1) == 2 {
-        return direct_eval_num_op(eval0, eval1, op_name);
+        return direct_eval_num_op(eval0, eval1, op_name, location, manager);
     }
     let save_var = determine_save_var(eval0, eval1, temp_ids);
     match op_name {
         "+" => {
-            if save_var.vartype == Type::String {
-                let a1: Variable = match temp_ids.pop() {
-                    Some(var) => Variable::new(var),
-                    None      => panic!{"Stack temp_ids is empty, pop wasn't possible."}
-                };
-                let o1 = Operand::new_var(a1.id);
-                let a2: Variable = match temp_ids.pop() {
-                    Some(var) => Variable::new(var),
-                    None      => panic!{"Stack temp_ids is empty, pop wasn't possible."}
-                };
-                let o2 = Operand::new_var(a2.id);
-                let addr1 = match eval0 {
-                    &Operand::StringRef(_) => eval0,
-                    &Operand::Var(Variable{id: _, vartype: Type::String}) => eval0,
-                    _ => { code.push(ZOP::Call2S{jump_to_label: "itoa".to_string(), arg: eval0.clone(), result: a1.clone()}); &o1 }
-                };
-                let addr2 = match eval1 {
-                    &Operand::StringRef(_) => eval1,
-                    &Operand::Var(Variable{id: _, vartype: Type::String}) => eval1,
-                    _ => { code.push(ZOP::Call2S{jump_to_label: "itoa".to_string(), arg: eval1.clone(), result: a2.clone()}); &o2 }
-                };
-                code.push(ZOP::CallVSA2{jump_to_label: "strcat".to_string(), arg1: addr1.clone(), arg2: addr2.clone(), result: save_var.clone()});
-                free_var_if_temp(&Operand::new_var(a1.id), temp_ids);
-                free_var_if_temp(&Operand::new_var(a2.id), temp_ids);
-            } else {
-                code.push(ZOP::Add{operand1: eval0.clone(), operand2: eval1.clone(), save_variable: save_var.clone()});
-            }
+            let tmp1: Variable = match temp_ids.pop() {
+                Some(var) => Variable::new(var),
+                None      => error_force_panic!(EvaluateExpressionError::NoTempIdLeftOnStack)
+            };
+            let tmp2: Variable = match temp_ids.pop() {
+                Some(var) => Variable::new(var),
+                None      => error_force_panic!(EvaluateExpressionError::NoTempIdLeftOnStack)
+            };
+            code.push(ZOP::AddTypes{operand1: eval0.clone(), operand2: eval1.clone(), tmp1: tmp1.clone(), tmp2: tmp2.clone(), save_variable: save_var.clone()});
+            free_var_if_temp(&Operand::new_var(tmp1.id), temp_ids);
+            free_var_if_temp(&Operand::new_var(tmp2.id), temp_ids);
         },
         "-" => {
             code.push(ZOP::Sub{operand1: eval0.clone(), operand2: eval1.clone(), save_variable: save_var.clone()});
+            code.push(ZOP::SetVarType{variable: save_var.clone(), vartype: save_var.vartype.clone()});
         },
         "*" => {
             code.push(ZOP::Mul{operand1: eval0.clone(), operand2: eval1.clone(), save_variable: save_var.clone()});
+            code.push(ZOP::SetVarType{variable: save_var.clone(), vartype: save_var.vartype.clone()});
         },
         "/" => {
             code.push(ZOP::Div{operand1: eval0.clone(), operand2: eval1.clone(), save_variable: save_var.clone()});
+            code.push(ZOP::SetVarType{variable: save_var.clone(), vartype: save_var.vartype.clone()});
         },
         "%" => {
             code.push(ZOP::Mod{operand1: eval0.clone(), operand2: eval1.clone(), save_variable: save_var.clone()});
+            code.push(ZOP::SetVarType{variable: save_var.clone(), vartype: save_var.vartype.clone()});
         },
-        _ => panic!("unhandled op")
+        _ => {
+            error_panic!(manager.cfg => EvaluateExpressionError::UnsupportedOperator { op_name: op_name.to_string(), location: location.clone() })
+        }
     };
-
     free_var_if_both_temp(eval0, eval1, temp_ids);
 
     Operand::Var(save_var)
@@ -149,7 +206,7 @@ fn eval_num_op<'a>(eval0: &Operand, eval1: &Operand, op_name: &str, code: &mut V
 
 
 
-fn direct_eval_num_op(eval0: &Operand, eval1: &Operand, op_name: &str) -> Operand {
+fn direct_eval_num_op<'a>(eval0: &Operand, eval1: &Operand, op_name: &str, location: (u64, u64), manager: &CodeGenManager<'a>) -> Operand {
     let mut out_large = false;
     let val0 = eval0.const_value();
     let val1 = eval1.const_value();
@@ -171,7 +228,11 @@ fn direct_eval_num_op(eval0: &Operand, eval1: &Operand, op_name: &str) -> Operan
         "%" => {
             val0 % val1
         },
-        _ => panic!("unhandled op")
+        _ => {
+            error_panic!(manager.cfg => EvaluateExpressionError::UnsupportedOperator { op_name: op_name.to_string(), location: location.clone() });
+            warn!("Returning the first argument of the expression");
+            val0
+        }
     };
     if out_large {
         Operand::LargeConst(LargeConstant { value: result })
@@ -180,52 +241,102 @@ fn direct_eval_num_op(eval0: &Operand, eval1: &Operand, op_name: &str) -> Operan
     }
 }
 
-fn eval_comp_op<'a>(eval0: &Operand, eval1: &Operand, op_name: &str, code: &mut Vec<ZOP>,
+
+fn eval_comp_op<'a>(eval0: &Operand, eval1: &Operand, op_name: &str, location: (u64, u64), code: &mut Vec<ZOP>,
         temp_ids: &mut Vec<u8>, mut manager: &mut CodeGenManager<'a>) -> Operand {
     if count_constants(eval0, eval1) == 2 {
-        return direct_eval_comp_op(eval0, eval1, op_name);
+        return direct_eval_comp_op(eval0, eval1, op_name, location.clone(), manager);
     }
     let save_var: Variable = match temp_ids.pop() {
-        Some(var) => Variable::new(var),
-        None      => panic!{"Stack temp_ids is empty, pop wasn't possible."}
+        Some(var) => Variable::new_bool(var),
+        None      => error_force_panic!(EvaluateExpressionError::NoTempIdLeftOnStack)
     };
     let label = format!("expr_{}", manager.ids_expr.start_next());
     let const_true = Operand::new_const(1);
     let const_false = Operand::new_const(0);
-    match op_name {
-        "is" | "==" | "eq" => {
-            code.push(ZOP::StoreVariable{ variable: save_var.clone(), value: const_true});
-            code.push(ZOP::JE{operand1: eval0.clone(), operand2: eval1.clone(), jump_to_label: label.to_string()});
-            code.push(ZOP::StoreVariable{ variable: save_var.clone(), value: const_false});
-        },
-        "neq" => {
-            code.push(ZOP::StoreVariable{ variable: save_var.clone(), value: const_false});
-            code.push(ZOP::JE{operand1: eval0.clone(), operand2: eval1.clone(), jump_to_label: label.to_string()});
-            code.push(ZOP::StoreVariable{ variable: save_var.clone(), value: const_true});
-        },
-        "<" | "lt" =>  {
-            code.push(ZOP::StoreVariable{ variable: save_var.clone(), value: const_true });
-            code.push(ZOP::JL{operand1: eval0.clone(), operand2: eval1.clone(), jump_to_label: label.to_string()});
-            code.push(ZOP::StoreVariable{ variable: save_var.clone(), value: const_false});
-        },
-        "<=" | "lte" => {
-            code.push(ZOP::StoreVariable{ variable: save_var.clone(), value: const_false});
-            code.push(ZOP::JG{operand1: eval0.clone(), operand2: eval1.clone(), jump_to_label: label.to_string()});
-            code.push(ZOP::StoreVariable{ variable: save_var.clone(), value: const_true});
-        },
-        ">=" | "gte" => {
-            code.push(ZOP::StoreVariable{ variable: save_var.clone(), value: const_false});
-            code.push(ZOP::JL{operand1: eval0.clone(), operand2: eval1.clone(), jump_to_label: label.to_string()});
-            code.push(ZOP::StoreVariable{ variable: save_var.clone(), value: const_true});
-        },
-        ">" | "gt" => {
-            code.push(ZOP::StoreVariable{ variable: save_var.clone(), value: const_true});
-            code.push(ZOP::JG{operand1: eval0.clone(), operand2: eval1.clone(), jump_to_label: label.to_string()});
-            code.push(ZOP::StoreVariable{ variable: save_var.clone(), value: const_false});
-        },
-        _ => panic!("unhandled op")
+    let mut strings = false;
+    match eval0 {
+        &Operand::StringRef(_) => {strings = true;},
+        &Operand::Var(Variable{id: _, vartype: Type::String}) => {strings = true;},
+        _ => {}
     };
+    match eval1 {
+        &Operand::StringRef(_) => {strings = strings && true;},
+        &Operand::Var(Variable{id: _, vartype: Type::String}) => {strings = strings && true;},
+        _ => {strings = false;}
+    };
+    if strings == false {
+        match op_name {
+            "is" | "==" | "eq" => {
+                code.push(ZOP::StoreVariable{ variable: save_var.clone(), value: const_true});
+                code.push(ZOP::JE{operand1: eval0.clone(), operand2: eval1.clone(), jump_to_label: label.to_string()});
+                code.push(ZOP::StoreVariable{ variable: save_var.clone(), value: const_false});
+            },
+            "!=" | "neq" => {
+                code.push(ZOP::StoreVariable{ variable: save_var.clone(), value: const_false});
+                code.push(ZOP::JE{operand1: eval0.clone(), operand2: eval1.clone(), jump_to_label: label.to_string()});
+                code.push(ZOP::StoreVariable{ variable: save_var.clone(), value: const_true});
+            },
+            "<" | "lt" =>  {
+                code.push(ZOP::StoreVariable{ variable: save_var.clone(), value: const_true });
+                code.push(ZOP::JL{operand1: eval0.clone(), operand2: eval1.clone(), jump_to_label: label.to_string()});
+                code.push(ZOP::StoreVariable{ variable: save_var.clone(), value: const_false});
+            },
+            "<=" | "lte" => {
+                code.push(ZOP::StoreVariable{ variable: save_var.clone(), value: const_false});
+                code.push(ZOP::JG{operand1: eval0.clone(), operand2: eval1.clone(), jump_to_label: label.to_string()});
+                code.push(ZOP::StoreVariable{ variable: save_var.clone(), value: const_true});
+            },
+            ">=" | "gte" => {
+                code.push(ZOP::StoreVariable{ variable: save_var.clone(), value: const_false});
+                code.push(ZOP::JL{operand1: eval0.clone(), operand2: eval1.clone(), jump_to_label: label.to_string()});
+                code.push(ZOP::StoreVariable{ variable: save_var.clone(), value: const_true});
+            },
+            ">" | "gt" => {
+                code.push(ZOP::StoreVariable{ variable: save_var.clone(), value: const_true});
+                code.push(ZOP::JG{operand1: eval0.clone(), operand2: eval1.clone(), jump_to_label: label.to_string()});
+                code.push(ZOP::StoreVariable{ variable: save_var.clone(), value: const_false});
+            },
+            _ => {
+                error_panic!(manager.cfg => EvaluateExpressionError::UnsupportedOperator { op_name: op_name.to_string(), location: location.clone() });
+                warn!("Assuming 'false' as the result");
+                code.push(ZOP::StoreVariable{ variable: save_var.clone(), value: const_false });
+            }
+        };
+    } else {
+        code.push(ZOP::CallVSA2{jump_to_label: "strcmp".to_string(), arg1: eval0.clone(), arg2: eval1.clone(), result: save_var.clone()},);
+        match op_name {
+            "is" | "==" | "eq" => { // we only want true if the result is not 0
+                // so first we make 0 to ffff while -1 and 1 will lose their last bit. and then we AND the last bit
+                code.push(ZOP::Not{operand: Operand::new_var(save_var.id), result: save_var.clone()});
+                code.push(ZOP::And{operand1: Operand::new_var(save_var.id), operand2: Operand::new_large_const(1i16), save_variable: save_var.clone()});
+            },
+            "!=" | "neq" => {},  // we can leave the result as it is
+            "<" | "lt" =>  {  // we want only true if the result was -1,
+                // so for 0 and 1 we AND with every bit on except the last bit off which is then gone
+                // and the result is 0. for -1 this does not make it 0 as there are more bits left
+                code.push(ZOP::And{operand1: Operand::new_var(save_var.id), operand2: Operand::new_large_const(-2i16), save_variable: save_var.clone()});
+            },
+            "<=" | "lte" => {  // we do not want true for 1, so we make 0 out of it by decreasing
+                code.push(ZOP::Dec{variable: save_var.id});
+            },
+            ">=" | "gte" => {  // we do not want true for -1, so we make 0 out of it by increasing
+                code.push(ZOP::Inc{variable: save_var.id});
+            },
+            ">" | "gt" => { // we want only true if the result was 1. so we increase it to 2 and AND with 2,
+                // so only the second bit survives
+                code.push(ZOP::Inc{variable: save_var.id});
+                code.push(ZOP::And{operand1: Operand::new_var(save_var.id), operand2: Operand::new_large_const(2), save_variable: save_var.clone()});
+            },
+            _ => {
+                error_panic!(manager.cfg => EvaluateExpressionError::UnsupportedOperator { op_name: op_name.to_string(), location: location.clone() });
+                warn!("Assuming 'false' as the result");
+                code.push(ZOP::StoreVariable{ variable: save_var.clone(), value: const_false });
+            }
+        };
+    }
     code.push(ZOP::Label {name: label.to_string()});
+    code.push(ZOP::SetVarType{variable: save_var.clone(), vartype: Type::Bool});
     free_var_if_temp(eval0, temp_ids);
     free_var_if_temp(eval1, temp_ids);
     Operand::Var(save_var)
@@ -233,43 +344,41 @@ fn eval_comp_op<'a>(eval0: &Operand, eval1: &Operand, op_name: &str, code: &mut 
 
 /// Directly evaluates the given compare operation.
 /// Both operands must be constants.
-fn direct_eval_comp_op(eval0: &Operand, eval1: &Operand, op_name: &str) -> Operand {
+fn direct_eval_comp_op<'a>(eval0: &Operand, eval1: &Operand, op_name: &str, location: (u64, u64), manager: &CodeGenManager<'a>) -> Operand {
     let val0 = eval0.const_value();
     let val1 = eval1.const_value();
     let result = match op_name {
         "is" | "==" | "eq" => { val0 == val1 },
-        "neq" => { val0 != val1 },
+        "!=" | "neq" => { val0 != val1 },
         "<" | "lt" =>  { val0 < val1 },
         "<=" | "lte" => { val0 <= val1 },
         ">=" | "gte" => { val0 >= val1 },
         ">" | "gt" => { val0 > val1 },
-        _ => panic!("unhandled op")
+        _ => {
+            error_panic!(manager.cfg => EvaluateExpressionError::UnsupportedOperator { op_name: op_name.to_string(), location: location.clone() });
+            warn!("Assuming 'false' as the result");
+            false
+        }
     };
     if result {
-        Operand::Const(Constant {value: 1})
+        Operand::BoolConst(Constant {value: 1})
     } else {
-        Operand::Const(Constant {value: 0})
+        Operand::BoolConst(Constant {value: 0})
     }
 }
+
 
 fn eval_and_or(eval0: &Operand, eval1: &Operand, op_name: &str, code: &mut Vec<ZOP>,
         temp_ids: &mut Vec<u8>) -> Operand {
     if count_constants(&eval0, &eval1) == 2 {
-        let mut out_large = false;
         let val0 = eval0.const_value();
         let val1 = eval1.const_value();
-        match eval0 { &Operand::LargeConst(_) => {out_large = true; }, _ => {} };
-        match eval1 { &Operand::LargeConst(_) => {out_large = true; }, _ => {} };
         let result = if op_name == "or" || op_name == "||" {
                 val0 | val1
             } else {
                 val0 & val1
             };
-        if out_large {
-            return Operand::LargeConst(LargeConstant { value: result })
-        } else {
-            return Operand::Const(Constant { value: result as u8 })
-        }
+        return Operand::BoolConst(Constant { value: if result == 0 { 0 } else { 1 } });
     }
 
     let save_var = determine_save_var(eval0, eval1, temp_ids);
@@ -278,31 +387,35 @@ fn eval_and_or(eval0: &Operand, eval1: &Operand, op_name: &str, code: &mut Vec<Z
     } else {
         code.push(ZOP::And{operand1: eval0.clone(), operand2: eval1.clone(), save_variable: save_var.clone()});
     }
+    code.push(ZOP::SetVarType{variable: save_var.clone(), vartype: Type::Bool});
     free_var_if_both_temp(eval0, eval1, temp_ids);
-    Operand::Var(save_var)
+    Operand::new_var_bool(save_var.id)
 }
+
 
 fn eval_not<'a>(eval: &Operand, code: &mut Vec<ZOP>,
         temp_ids: &mut Vec<u8>, mut manager: &mut CodeGenManager<'a>) -> Operand {
     if eval.is_const() {
         let val = eval.const_value();
-        let result: u8 = if val > 0 { 0 } else { 1 };
-        return Operand::Const(Constant { value: result });
+        let result: u8 = if val != 0 { 0 } else { 1 };
+        return Operand::BoolConst(Constant { value: result });
     }
     let save_var: Variable = match temp_ids.pop() {
-        Some(var) => Variable::new(var),
-        None      => panic!{"Stack temp_ids is empty, pop wasn't possible."}
+        Some(var) => Variable::new_bool(var),
+        None      => error_force_panic!(EvaluateExpressionError::NoTempIdLeftOnStack)
     };
     let label = format!("expr_{}", manager.ids_expr.start_next());
     code.push(ZOP::StoreVariable{ variable: save_var.clone(), value: Operand::new_const(0)});
-    code.push(ZOP::JG{operand1: eval.clone(), operand2: Operand::new_const(0), jump_to_label: label.to_string()});
+    code.push(ZOP::JNE{operand1: eval.clone(), operand2: Operand::new_const(0), jump_to_label: label.to_string()});
     code.push(ZOP::StoreVariable{ variable: save_var.clone(), value: Operand::new_const(1)});
     code.push(ZOP::Label {name: label.to_string()});
+    code.push(ZOP::SetVarType{variable: save_var.clone(), vartype: save_var.vartype.clone()});
     free_var_if_temp(eval, temp_ids);
     Operand::Var(save_var)
 }
 
-fn eval_unary_minus(eval: &Operand, code: &mut Vec<ZOP>, temp_ids: &mut Vec<u8>) -> Operand {
+
+fn eval_unary_minus<'a>(eval: &Operand, code: &mut Vec<ZOP>, temp_ids: &mut Vec<u8>) -> Operand {
     if eval.is_const() {
         let large = match eval { &Operand::LargeConst(_) => { true }, _ => { false } };
         if large {
@@ -320,19 +433,20 @@ fn eval_unary_minus(eval: &Operand, code: &mut Vec<ZOP>, temp_ids: &mut Vec<u8>)
                 if let Some(temp) = temp_ids.pop() {
                     Variable::new(temp)
                 } else {
-                    panic!{"Stack temp_ids is empty, pop wasn't possible."}
+                    error_force_panic!(EvaluateExpressionError::NoTempIdLeftOnStack)
                 }
             }
         }, _ => {
             if let Some(temp) = temp_ids.pop() {
                 Variable::new(temp)
             } else {
-                panic!{"Stack temp_ids is empty, pop wasn't possible."}
+                error_force_panic!(EvaluateExpressionError::NoTempIdLeftOnStack)
             }
         }
     };
 
     code.push(ZOP::Sub {operand1: Operand::new_const(0), operand2: eval.clone(), save_variable: save_var.clone()});
+    code.push(ZOP::SetVarType{variable: save_var.clone(), vartype: Type::Integer});
 
     Operand::new_var(save_var.id)
 }
@@ -375,11 +489,13 @@ fn determine_save_var(operand1: &Operand, operand2: &Operand, temp_ids: &mut Vec
     let type1 = match operand1 {
         &Operand::Var(ref var) => var.vartype.clone(),
         &Operand::StringRef(_) => Type::String,
+        &Operand::BoolConst(_) => Type::Bool,
         _ => { Type::Integer }
     };
     let type2 = match operand2 {
         &Operand::Var(ref var) => var.vartype.clone(),
         &Operand::StringRef(_) => Type::String,
+        &Operand::BoolConst(_) => Type::Bool,
         _ => { Type::Integer }
     };
     let vartype = determine_result_type(type1, type2);
@@ -400,7 +516,7 @@ fn determine_save_var(operand1: &Operand, operand2: &Operand, temp_ids: &mut Vec
     if let Some(temp) = temp_ids.pop() {
         return Variable{ id: temp, vartype: vartype };
     } else {
-        panic!{"Stack temp_ids is empty, pop wasn't possible."}
+        error_force_panic!(EvaluateExpressionError::NoTempIdLeftOnStack)
     }
 }
 
@@ -417,7 +533,115 @@ fn count_constants(operand1: &Operand, operand2: &Operand) -> u8 {
 
 fn boolstr_to_const(string: &str) -> Operand {
     match string {
-        "true" => Operand::Const(Constant { value: 1 }),
-        _ => Operand::Const(Constant { value: 0 })
+        "true" => Operand::BoolConst(Constant { value: 1 }),
+        _ => Operand::BoolConst(Constant { value: 0 })
     }
+}
+
+
+#[test]
+fn test_and_or(){
+    let mut vec2: Vec<ZOP> = Vec::new();
+    let mut vec: Vec<u8> = Vec::new();
+    vec.push(1);
+    vec.push(2);
+    vec.push(3);
+    vec.push(10);
+    assert_eq!(eval_and_or(&Operand::new_large_const(0), &Operand::new_large_const(1), "or", &mut vec2, &mut vec).const_value(),1 as i16);
+    assert_eq!(eval_and_or(&Operand::new_large_const(0), &Operand::new_large_const(1), "and", &mut vec2, &mut vec).const_value(),0 as i16);
+    assert_eq!(eval_and_or(&Operand::new_large_const(0), &Operand::new_large_const(0), "or", &mut vec2, &mut vec).const_value(),0 as i16);
+    assert_eq!(eval_and_or(&Operand::new_large_const(1), &Operand::new_large_const(1), "and", &mut vec2, &mut vec).const_value(),1 as i16);
+}
+
+#[test]
+fn test_eval_not(){
+    let cfg = Config::default_config();
+    let mut manager = CodeGenManager::new(&cfg);
+    let mut vec2: Vec<ZOP> = Vec::new();
+    let mut vec: Vec<u8> = Vec::new();
+    vec.push(1);
+    vec.push(2);
+    vec.push(3);
+    vec.push(10);
+    assert_eq!(eval_not(&Operand::new_large_const(10), &mut vec2, &mut vec, &mut manager).const_value(),0);
+    assert_eq!(eval_not(&Operand::new_const(0), &mut vec2, &mut vec, &mut manager).const_value(),1);
+}
+
+#[test]
+fn test_eval_unary_minus(){
+    let mut vec2: Vec<ZOP> = Vec::new();
+    let mut vec: Vec<u8> = Vec::new();
+    vec.push(1);
+    vec.push(2);
+    vec.push(3);
+    vec.push(10);
+    assert_eq!(eval_unary_minus(&Operand::new_large_const(10), &mut vec2, &mut vec).const_value(),-10);
+    assert_eq!(eval_unary_minus(&Operand::new_const(10), &mut vec2, &mut vec).const_value(),246);
+}
+
+#[test]
+fn test_determine_save_var (){
+    let mut vec: Vec<u8> = Vec::new();
+    vec.push(1);
+    vec.push(2);
+    vec.push(3);
+    vec.push(4);
+    let var = determine_save_var(&Operand::new_var(10), &Operand::new_var(10), &mut vec);
+    assert_eq!(var.id,10);
+    assert_eq!(var.vartype,Type::Integer);
+}
+
+#[test]
+fn test_count_constants(){
+    assert_eq!(count_constants(&Operand::new_large_const(10),&Operand::new_large_const(10)),2);
+    assert_eq!(count_constants(&Operand::new_var(10),&Operand::new_large_const(10)),1);
+    assert_eq!(count_constants(&Operand::new_large_const(10),&Operand::new_var(10)),1);
+    assert_eq!(count_constants(&Operand::new_var(10),&Operand::new_var(10)),0);
+}
+
+#[test]
+fn test_boolstr_to_const(){
+    assert_eq!(boolstr_to_const("true").const_value(),1);
+    assert_eq!(boolstr_to_const("false").const_value(),0);
+}
+
+#[test]
+fn test_direct_eval_num_op(){
+    let cfg = Config::default_config();
+    let manager = CodeGenManager::new(&cfg);
+    assert_eq!(direct_eval_num_op(&Operand::new_large_const(10), &Operand::new_large_const(20), "+", (0x0000000000000000, 0x0000000000000000), &manager).const_value(),30 as i16);
+    assert_eq!(direct_eval_num_op(&Operand::new_large_const(66), &Operand::new_large_const(74), "-", (0x0000000000000000, 0x0000000000000000), &manager).const_value(),-8 as i16);
+    assert_eq!(direct_eval_num_op(&Operand::new_large_const(45), &Operand::new_large_const(10), "*", (0x0000000000000000, 0x0000000000000000), &manager).const_value(),450 as i16);
+    assert_eq!(direct_eval_num_op(&Operand::new_large_const(99), &Operand::new_large_const(3), "/", (0x0000000000000000, 0x0000000000000000), &manager).const_value(),33 as i16);
+    assert_eq!(direct_eval_num_op(&Operand::new_large_const(90), &Operand::new_large_const(2), "%", (0x0000000000000000, 0x0000000000000000), &manager).const_value(),0 as i16);
+}
+
+#[test]
+fn test_direct_eval_comp_op(){
+    let cfg = Config::default_config();
+    let manager = CodeGenManager::new(&cfg);
+    assert_eq!(direct_eval_comp_op(&Operand::new_large_const(20), &Operand::new_large_const(20), "is", (0x0000000000000000, 0x0000000000000000), &manager).const_value(),1 as i16);
+    assert_eq!(direct_eval_comp_op(&Operand::new_large_const(15), &Operand::new_large_const(15), "==", (0x0000000000000000, 0x0000000000000000), &manager).const_value(),1 as i16);
+    assert_eq!(direct_eval_comp_op(&Operand::new_large_const(4), &Operand::new_large_const(4), "eq", (0x0000000000000000, 0x0000000000000000), &manager).const_value(),1 as i16);
+    assert_eq!(direct_eval_comp_op(&Operand::new_large_const(66), &Operand::new_large_const(74), "neq", (0x0000000000000000, 0x0000000000000000), &manager).const_value(),1 as i16);
+    assert_eq!(direct_eval_comp_op(&Operand::new_large_const(2), &Operand::new_large_const(10), "<", (0x0000000000000000, 0x0000000000000000), &manager).const_value(),1 as i16);
+    assert_eq!(direct_eval_comp_op(&Operand::new_large_const(5), &Operand::new_large_const(6), "lt", (0x0000000000000000, 0x0000000000000000), &manager).const_value(),1 as i16);
+    assert_eq!(direct_eval_comp_op(&Operand::new_large_const(5), &Operand::new_large_const(5), "<=", (0x0000000000000000, 0x0000000000000000), &manager).const_value(),1 as i16);
+    assert_eq!(direct_eval_comp_op(&Operand::new_large_const(2), &Operand::new_large_const(5), "lte", (0x0000000000000000, 0x0000000000000000), &manager).const_value(),1 as i16);
+    assert_eq!(direct_eval_comp_op(&Operand::new_large_const(6), &Operand::new_large_const(6), ">=", (0x0000000000000000, 0x0000000000000000), &manager).const_value(),1 as i16);
+    assert_eq!(direct_eval_comp_op(&Operand::new_large_const(6), &Operand::new_large_const(5), "gte", (0x0000000000000000, 0x0000000000000000), &manager).const_value(),1 as i16);
+    assert_eq!(direct_eval_comp_op(&Operand::new_large_const(4), &Operand::new_large_const(3), ">", (0x0000000000000000, 0x0000000000000000), &manager).const_value(),1 as i16);
+    assert_eq!(direct_eval_comp_op(&Operand::new_large_const(1), &Operand::new_large_const(0), "gt", (0x0000000000000000, 0x0000000000000000), &manager).const_value(),1 as i16);
+    assert_eq!(direct_eval_comp_op(&Operand::new_large_const(0), &Operand::new_large_const(20), "is", (0x0000000000000000, 0x0000000000000000), &manager).const_value(),0 as i16);
+    assert_eq!(direct_eval_comp_op(&Operand::new_large_const(1), &Operand::new_large_const(15), "==", (0x0000000000000000, 0x0000000000000000), &manager).const_value(),0 as i16);
+    assert_eq!(direct_eval_comp_op(&Operand::new_large_const(43), &Operand::new_large_const(4), "eq", (0x0000000000000000, 0x0000000000000000), &manager).const_value(),0 as i16);
+    assert_eq!(direct_eval_comp_op(&Operand::new_large_const(74), &Operand::new_large_const(74), "neq", (0x0000000000000000, 0x0000000000000000), &manager).const_value(),0 as i16);
+    assert_eq!(direct_eval_comp_op(&Operand::new_large_const(12), &Operand::new_large_const(10), "<", (0x0000000000000000, 0x0000000000000000), &manager).const_value(),0 as i16);
+    assert_eq!(direct_eval_comp_op(&Operand::new_large_const(15), &Operand::new_large_const(6), "lt", (0x0000000000000000, 0x0000000000000000), &manager).const_value(),0 as i16);
+    assert_eq!(direct_eval_comp_op(&Operand::new_large_const(6), &Operand::new_large_const(5), "<=", (0x0000000000000000, 0x0000000000000000), &manager).const_value(),0 as i16);
+    assert_eq!(direct_eval_comp_op(&Operand::new_large_const(7), &Operand::new_large_const(5), "lte", (0x0000000000000000, 0x0000000000000000), &manager).const_value(),0 as i16);
+    assert_eq!(direct_eval_comp_op(&Operand::new_large_const(5), &Operand::new_large_const(6), ">=", (0x0000000000000000, 0x0000000000000000), &manager).const_value(),0 as i16);
+    assert_eq!(direct_eval_comp_op(&Operand::new_large_const(3), &Operand::new_large_const(5), "gte", (0x0000000000000000, 0x0000000000000000), &manager).const_value(),0 as i16);
+    assert_eq!(direct_eval_comp_op(&Operand::new_large_const(2), &Operand::new_large_const(3), ">", (0x0000000000000000, 0x0000000000000000), &manager).const_value(),0 as i16);
+    assert_eq!(direct_eval_comp_op(&Operand::new_large_const(0), &Operand::new_large_const(0), "gt", (0x0000000000000000, 0x0000000000000000), &manager).const_value(),0 as i16);
 }

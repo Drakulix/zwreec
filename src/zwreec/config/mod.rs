@@ -160,12 +160,15 @@ use std::vec::Vec;
 ///     println!("Egg!");
 /// }
 /// ```
+#[derive(Clone)]
 pub struct Config {
     /// Force compilation despite errors
     pub force: bool,
     /// Add easter egg to compiler
     pub easter_egg: bool,
     pub force_unicode: bool,
+    pub no_colours: bool,
+    pub half_memory: bool,
     /// Instruct compiler to run these test-cases
     pub test_cases: Vec<TestCase>,
 }
@@ -184,6 +187,8 @@ impl Config {
             force: false,
             easter_egg: true,
             force_unicode: false,
+            no_colours: false,
+            half_memory: false,
             test_cases: Vec::new(),
         }
     }
@@ -231,6 +236,14 @@ impl Config {
                      cfg.force_unicode = true;
                      debug!("enabled force-unicode");
                 },
+                "no-colours" => {
+                     cfg.no_colours = true;
+                     debug!("enabled no-colours");
+                },
+                "half-memory" => {
+                     cfg.half_memory = true;
+                     debug!("enabled half-memory");
+                },
                 _ => {
                     error!("Cannot enable feature {} - feature not known.", s);
                 }
@@ -245,7 +258,15 @@ impl Config {
                 },
                 "force-unicode" => {
                      cfg.force_unicode = false;
-                     debug!("enabled force-unicode");
+                     debug!("disabled force-unicode");
+                },
+                "no-colours" => {
+                     cfg.no_colours = false;
+                     debug!("disabled no-colours");
+                },
+                "half-memory" => {
+                     cfg.half_memory = false;
+                     debug!("disabled half-memory");
                 },
                 _ => {
                     error!("Cannot disable feature {} - feature not known.", s);
@@ -259,7 +280,7 @@ impl Config {
 
 // TODO: If this stays only one Test Case, enum should be removed
 /// The Type used to define backend tests for the compiler
-#[derive(PartialEq)]
+#[derive(PartialEq,Clone)]
 pub enum TestCase {
     /// Skips the normal compiler chain and builds an example zcode file by 
     /// using every opcode.
@@ -336,11 +357,18 @@ pub fn zwreec_options(mut opts: getopts::Options) -> getopts::Options {
     opts
 }
 
-pub fn zwreec_usage(verbose: bool, opts: getopts::Options, brief: &str) -> String {
+/// Prints a usage
+///
+/// This takes your options and prints a usage for those options.
+/// It also includes zwreec_options and a feature list if a verbose usage was requested.
+pub fn zwreec_usage(verbose: bool, mut opts: getopts::Options, brief: &str) -> String {
     use std::fmt::format;
-    let options = zwreec_options(opts);
 
-    let options_usage = options.usage(brief);
+    if verbose {
+        opts = zwreec_options(opts);
+    }
+
+    let options_usage = opts.usage(brief);
 
     let features_usage = if verbose {
         "List of supported features (default value in parenthesis)
@@ -350,7 +378,14 @@ pub fn zwreec_usage(verbose: bool, opts: getopts::Options, brief: &str) -> Strin
     force-unicode (disabled)
         Force the generation of unicode print opcodes every time a unicode
         character is encountered. This disables the generation of the unicode
-        translation table"
+        translation table
+    no-colours (disabled)
+        Suppress generation of set_colour and set_text_style opcodes and disable the
+        colour bit in the second byte of the header - needed for DZIP on DOS/Atari
+    half-memory (disabled)
+        Cut down space for static variable strings and heap in order to have
+        binaries probably smaller than 64kB as only DZIP32.exe on DOS can handle
+        larger files, but DZIP.exe has a limit on 64kB"
     } else {
         "Additional help:
     --help -v           Print the full set of options zwreec accepts"

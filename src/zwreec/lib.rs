@@ -99,14 +99,14 @@
 
 extern crate rustlex_codegen as rustlex;
 #[macro_use] extern crate log;
-extern crate time;
-extern crate term;
 extern crate getopts;
+extern crate term;
+extern crate time;
 
 #[macro_use] pub mod utils;
+pub mod backend;
 pub mod config;
 pub mod frontend;
-pub mod backend;
 
 use config::{Config,TestCase};
 use std::io::{Read,Write};
@@ -137,8 +137,12 @@ use std::io::{Read,Write};
 /// ```
 #[allow(unused_variables)]
 pub fn compile<R: Read, W: Write>(cfg: Config, input: &mut R, output: &mut W) {
+
+    // check the data if it has a bom
+    let mut cursor = frontend::screener::handle_bom_encoding(input);
+
     // tokenize
-    let tokens = frontend::lexer::lex(&cfg, input);
+    let tokens = frontend::lexer::lex(&cfg, &mut cursor);
 
     // create parser
     let parser = frontend::parser::Parser::new(&cfg);
@@ -146,11 +150,11 @@ pub fn compile<R: Read, W: Write>(cfg: Config, input: &mut R, output: &mut W) {
     // create ast builder
     let ast_builder = frontend::ast::ASTBuilder::new(&cfg);
 
-    //build up ast from tokens
+    // build up ast from tokens
     let ast = ast_builder.build(parser.parse(tokens.inspect(|ref token| {
         debug!("{:?}", token);
     })));
-    ast.print(false);
+    debug!("{:?}", ast);
 
     // create code
     frontend::codegen::generate_zcode(&cfg, ast, output);

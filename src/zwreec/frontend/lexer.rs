@@ -32,7 +32,9 @@ use config::Config;
 
 use self::Token::*;
 
-pub struct LexerError;
+pub enum LexerError {
+    UnexpectedCharacter { character: char, location: (u64, u64) }
+}
 
 /// Stores the state for the custom iterator `scan_filter()`
 ///
@@ -66,7 +68,10 @@ pub struct ScanState<'a> {
 #[allow(unused_variables)]
 pub fn lex<'a, R: Read>(cfg: &'a Config, input: &'a mut R) -> FilteringScan<Peeking<TweeLexer<BufReader<&'a mut R>>, Token>, ScanState<'a>, fn(&mut ScanState, (Token, Option<Token>)) -> Option<Token>>  {
 
-    TweeLexer::new(BufReader::new(input)).peeking().scan_filter(
+    let mut lexer = TweeLexer::new(BufReader::new(input));
+    lexer.cfg = Some(cfg.clone());
+
+    lexer.peeking().scan_filter(
         ScanState {
             cfg: cfg,
             current_text: String::new(),
@@ -141,7 +146,7 @@ pub enum Token {
     TokFormatNumbList         {location: (u64, u64)},
     TokFormatIndentBlock      {location: (u64, u64)},
     TokFormatHorizontalLine   {location: (u64, u64)},
-    TokFormatHeading          {location: (u64, u64), rank: usize},
+    TokFormatHeading          {location: (u64, u64), rank: u8, text: String},
     TokMacroStart             {location: (u64, u64)},
     TokMacroEnd               {location: (u64, u64)},
     TokMacroContentVar        {location: (u64, u64), var_name: String},
@@ -154,6 +159,8 @@ pub enum Token {
     TokMacroDisplay           {location: (u64, u64), passage_name: String},
     TokMacroSilently          {location: (u64, u64)},
     TokMacroEndSilently       {location: (u64, u64)},
+    TokMacroNoBr              {location: (u64, u64)},
+    TokMacroEndNoBr           {location: (u64, u64)},
     TokParenOpen              {location: (u64, u64)},
     TokParenClose             {location: (u64, u64)},
     TokVariable               {location: (u64, u64), name: String},
@@ -220,6 +227,8 @@ impl Token {
             &TokMacroDisplay{location, ..} |
             &TokMacroSilently{location} |
             &TokMacroEndSilently{location} |
+            &TokMacroNoBr{location} |
+            &TokMacroEndNoBr{location} |
             &TokParenOpen{location} |
             &TokParenClose{location} |
             &TokVariable{location, ..} |
@@ -289,6 +298,8 @@ impl Token {
             (&TokMacroPrint{..}, &TokMacroPrint{..}) => true,
             (&TokMacroDisplay{..}, &TokMacroDisplay{..}) => true,
             (&TokMacroSilently{..}, &TokMacroSilently{..}) => true,
+            (&TokMacroEndNoBr{..}, &TokMacroEndNoBr{..}) => true,
+            (&TokMacroNoBr{..}, &TokMacroNoBr{..}) => true,
             (&TokMacroEndSilently{..}, &TokMacroEndSilently{..}) => true,
             (&TokParenOpen{..}, &TokParenOpen{..}) => true,
             (&TokParenClose{..}, &TokParenClose{..}) => true,
@@ -668,6 +679,87 @@ mod tests {
             TokInt {value: 100, location: (2, 19)},
             TokArgsEnd {location: (2, 22)},
             TokMacroEnd {location: (2, 23)}
+        ];
+
+        assert_tok_eq(expected, tokens);
+    }
+
+    #[test]
+    fn url_test() {
+        let tokens = test_lex("::Start\nhttp://foo.com/blah_blahhttp://foo.com/blah_blah/ http://foo.com/blah_blah_(wikipedia) http://foo.com/blah_blah_(wikipedia)_(again) http://www.example.com/wpstyle/?p=364 https://www.example.com/foo/?bar=baz&inga=42&quux http://✪df.ws/123 http://userid:password@example.com:8080 http://userid:password@example.com:8080/ http://userid@example.com http://userid@example.com/ http://userid@example.com:8080 http://userid@example.com:8080/ http://userid:password@example.com http://userid:password@example.com/ http://142.42.1.1/ http://142.42.1.1:8080/ http://➡.ws/䨹 http://⌘.ws http://⌘.ws/ http://foo.com/blah_(wikipedia)#cite-1 http://foo.com/blah_(wikipedia)_blah#cite-1 http://foo.com/unicode_(✪)_in_parens http://foo.com/(something)?after=parens http://☺.damowmow.com/ http://code.google.com/events/#&product=browser http://j.mp ftp://foo.bar/baz http://foo.bar/?q=Test%20URL-encoded%20stuff http://例子.测试 http://उदाहरण.परीक्षा http://-.~_!$&'()*+,;=:%40:80%2f::::::@example.com http://1337.net http://a.b-c.de http://223.255.255.254");
+        let expected = vec![
+            TokPassage {name: "Start".to_string(), location: (1, 3)},
+            TokText {text: "http://foo.com/blah_blahhttp://foo.com/blah_blah/ http://foo.com/blah_blah_(wikipedia) http://foo.com/blah_blah_(wikipedia)_(again) http://www.example.com/wpstyle/?p=364 https://www.example.com/foo/?bar=baz&inga=42&quux http://\u{272a}df.ws/123 http://userid:password@example.com:8080 http://userid:password@example.com:8080/ http://userid@example.com http://userid@example.com/ http://userid@example.com:8080 http://userid@example.com:8080/ http://userid:password@example.com http://userid:password@example.com/ http://142.42.1.1/ http://142.42.1.1:8080/ http://➡.ws/䨹 http://⌘.ws http://⌘.ws/ http://foo.com/blah_(wikipedia)#cite-1 http://foo.com/blah_(wikipedia)_blah#cite-1 http://foo.com/unicode_(\u{272a})_in_parens http://foo.com/(something)?after=parens http://\u{263a}.damowmow.com/ http://code.google.com/events/#&product=browser http://j.mp ftp://foo.bar/baz http://foo.bar/?q=Test%20URL-encoded%20stuff http://\u{4f8b}\u{5b50}.\u{6d4b}\u{8bd5} http://\u{909}\u{926}\u{93e}\u{939}\u{930}\u{923}.\u{92a}\u{930}\u{940}\u{915}\u{94d}\u{937}\u{93e} http://-.~_!$&\'()*+,;=:%40:80%2f::::::@example.com http://1337.net http://a.b-c.de http://223.255.255.254".to_string(), location: (2, 1)},
+        ];
+
+        assert_tok_eq(expected, tokens);
+    }
+
+    #[test]
+    fn html_filter_test() {
+        let tokens = test_lex("Text\n\n::Start\n<!DOCTYPE html>\n<html lang=\"de\">\n\n<head>\n  <meta charset=\"UTF-8\"/>\n  <title>Example</title>\n  <img src=\"smiley.gif\" alt=\"Smiley face\" height=\"42\" width=\"42\">\n  <style type=\"text/css\">\n    <a href=\"http://www.w3schools.com\">Visit W3Schools.com!</a>\n  </style>\n\n</head>\n<body>\n\n</body>\n</html>\n\n::Passage1 [stylesheet]\ntext shouldn't be displayed\n\n::Passage2\ntext <html><b>should</b></html> be displayed\n\n::Passage3 [script]\ntext shouldn't be displayed\n");
+        let expected = vec![
+            TokPassage {name: "Start".to_string(), location: (3, 3)},
+            TokNewLine { location: (4, 16) },
+            TokNewLine { location: (5, 17) },
+            TokNewLine { location: (6, 1) },
+            TokNewLine { location: (7, 7) },
+            TokText { location: (8, 1), text: "  ".to_string() },
+            TokNewLine { location: (8, 26) },
+            TokText { location: (9, 1), text: "  Example".to_string() },
+            TokNewLine { location: (9, 25) },
+            TokText { location: (10, 1), text: "  ".to_string() },
+            TokNewLine { location: (10, 66) },
+            TokText { location: (11, 1), text: "  ".to_string() },
+            TokNewLine { location: (11, 26) },
+            TokText { location: (12, 1), text: "    Visit W3Schools.com!".to_string() },
+            TokNewLine { location: (12, 64) },
+            TokText { location: (13, 1), text: "  ".to_string() },
+            TokNewLine { location: (13, 11) },
+            TokNewLine { location: (14, 1) },
+            TokNewLine { location: (15, 8) },
+            TokNewLine { location: (16, 7) },
+            TokNewLine { location: (17, 1) },
+            TokNewLine { location: (18, 8) },
+            TokNewLine { location: (19, 8) },
+            TokNewLine { location: (20, 1) },
+            TokPassage { location: (21, 3), name: "Passage1".to_string() },
+            TokTagStart { location: (21, 12) },
+            TokTag { location: (21, 13), tag_name: "stylesheet".to_string() },
+            TokTagEnd { location: (21, 23) },
+            TokPassage { location: (24, 3), name: "Passage2".to_string() },
+            TokText { location: (25, 1), text: "text should be displayed".to_string() },
+            TokNewLine { location: (25, 45) },
+            TokNewLine { location: (26, 1) },
+            TokPassage { location: (27, 3), name: "Passage3".to_string() },
+            TokTagStart { location: (27, 12) },
+            TokTag { location: (27, 13), tag_name: "script".to_string() },
+            TokTagEnd { location: (27, 19) },
+
+        ];
+
+        assert_tok_eq(expected, tokens);
+    }
+
+    #[test]
+    fn escape_line_break_test() {
+        let tokens = test_lex("::Start\nTest\\\n<<if true>>\\\nLi\\ne\n<<else>>\nBla\\\n<<endif>>\n\\\nTest");
+        let expected = vec![
+            TokPassage { name: "Start".to_string(), location: (1, 3) },
+            TokText { text: "Test".to_string(), location: (2, 1) },
+            TokMacroIf { location: (3, 3) },
+            TokBoolean { location: (3, 6), value: "true".to_string() },
+            TokMacroEnd { location: (3, 10) },
+            TokText { text: "Li\\ne".to_string(), location: (4, 1) },
+            TokNewLine { location: (4, 6) },
+            TokMacroElse { location: (5, 3) },
+            TokMacroEnd { location: (5, 7) },
+            TokNewLine { location: (5, 9) },
+            TokText { text: "Bla".to_string(), location: (6, 1) },
+            TokMacroEndIf { location: (7, 3) },
+            TokMacroEnd { location: (7, 8) },
+            TokNewLine { location: (7, 10) },
+            TokText { text: "Test".to_string(), location: (9, 1) },
         ];
 
         assert_tok_eq(expected, tokens);
