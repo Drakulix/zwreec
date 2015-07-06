@@ -147,6 +147,42 @@ fn evaluate_expression_internal<'a>(node: &'a ASTNode, code: &mut Vec<ZOP>,
                     let to_value = evaluate_expression_internal(to, code, temp_ids, manager, &mut out);
                     codegen::function_random(manager, &from_value, &to_value, code, temp_ids, location.clone())
                 },
+                "confirm" => {
+                    let args = &node.as_default().childs;
+                    if args.len() != 1 {
+                        let error = EvaluateExpressionError::UnsupportedFunctionArgsLen {
+                            name: "confirm".to_string(), location: location.clone(), expected: 2 };
+                        error_panic!(cfg => error);
+                    }
+                    if args[0].as_default().childs.len() != 1 {
+                        error_force_panic!(EvaluateExpressionError::InvalidAST);
+                    }
+                    let child = args[0].as_default().childs[0].as_default();
+                    let confirm_msg = match child.category {
+                        TokString {ref value, .. } => value,
+                        _ => error_force_panic!(EvaluateExpressionError::InvalidAST)
+                    };
+
+                    let has_confirmed: Variable = match temp_ids.pop() {
+                        Some(var) => Variable::new(var),
+                        None      => error_force_panic!(EvaluateExpressionError::NoTempIdLeftOnStack)
+                    };
+                    //let confirm_msg = &args[0].as_default().childs[0];
+                    println!("confirm_msg: {:?}", confirm_msg);
+                    code.push(ZOP::PrintOps{text: "----------".to_string()});
+                    code.push(ZOP::Newline);
+                    code.push(ZOP::PrintOps{text: confirm_msg.to_string()});
+                    code.push(ZOP::Newline);
+                    code.push(ZOP::PrintOps{text: "Confirm with the 1-key or cancel deny with the 0-key".to_string()});
+                    code.push(ZOP::Newline);
+                    code.push(ZOP::PrintOps{text: "----------".to_string()});
+                    code.push(ZOP::Newline);
+                    code.push(ZOP::ReadChar{local_var_id: has_confirmed.id});
+                    //code.push(ZOP::PrintNumVar{variable: has_confirmed.clone()});
+                    //code.push(ZOP::JE{operand1: has_confirmed, operand2: Operand::new_const(48), jump_to_label: "YES".to_string()},
+                    //code.push(ZOP::JE{operand1: has_confirmed, operand2: Operand::new_const(48), jump_to_label: "NO".to_string()},
+                    Operand::new_const(1)
+                },
                 _ => {
                     error_panic!(cfg => EvaluateExpressionError::UnsupportedFunction { name: name.clone(), location: location.clone() });
                     Operand::Const(Constant { value: 0 })
