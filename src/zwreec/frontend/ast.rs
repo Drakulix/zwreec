@@ -43,8 +43,10 @@ impl ASTBuilder {
         }
     }
 
+    ///constructs Iterator over all Passages
     pub fn build<I: Iterator<Item=ASTOperation>>(cfg: &Config, ops: I)
         -> Scan<Constructor<I, ASTBuilder, ASTNode, fn(&mut ASTBuilder, &mut Option<ASTNode>, ASTOperation) -> Option<ASTNode>>, &Config, fn(&mut &Config, ASTNode) -> Option<ASTNode>>
+        //concrete return type because of optimization reasons. Read and use it as "Iterator<ASTNode>"
     {
         ops.construct_state(ASTBuilder::new(),
         {
