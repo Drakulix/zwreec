@@ -6,7 +6,7 @@
 //!
 //! # Example
 //!
-//! This small example shows how the different submodules interact and can 
+//! This small example shows how the different submodules interact and can
 //! be used to parse a Twee-File.
 //!
 //! ```
@@ -21,10 +21,7 @@
 //!
 //! // Parse Tokens
 //! let p = zwreec::frontend::parser::Parser::new(&cfg);
-//! let ast_builder = zwreec::frontend::ast::ASTBuilder::new(&cfg);
-//! let ast = ast_builder.build(
-//!     p.parse(tokens)
-//! );
+//! let ast: Vec<zwreec::frontend::ast::ASTNode> = zwreec::frontend::ast::ASTBuilder::build(&cfg, p.parse(tokens)).collect();
 //! ```
 
 pub mod ast;
