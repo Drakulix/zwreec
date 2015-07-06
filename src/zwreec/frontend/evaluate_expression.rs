@@ -148,6 +148,7 @@ fn evaluate_expression_internal<'a>(node: &'a ASTNode, code: &mut Vec<ZOP>,
                     codegen::function_random(manager, &from_value, &to_value, code, temp_ids, location.clone())
                 },
                 "confirm" => {
+                    let state_copy = manager.format_state.clone();
                     let args = &node.as_default().childs;
                     if args.len() != 1 {
                         let error = EvaluateExpressionError::UnsupportedFunctionArgsLen {
@@ -167,21 +168,42 @@ fn evaluate_expression_internal<'a>(node: &'a ASTNode, code: &mut Vec<ZOP>,
                         Some(var) => Variable::new(var),
                         None      => error_force_panic!(EvaluateExpressionError::NoTempIdLeftOnStack)
                     };
+                    
                     //let confirm_msg = &args[0].as_default().childs[0];
-                    println!("confirm_msg: {:?}", confirm_msg);
-                    code.push(ZOP::PrintOps{text: "----------".to_string()});
+                    //println!("confirm_msg: {:?}", confirm_msg);
+                    let if_id = manager.ids_if.start_next();
+                    let true_label = format!("true_{}", if_id);
+                    let false_label = format!("false_{}", if_id);
+                    let repeat_label = format!("repeat_{}", if_id);
+                    let end_label = format!("end_{}", if_id);
+
+                    code.push(ZOP::SetTextStyle{bold: true, reverse: state_copy.inverted, monospace: true, italic: state_copy.italic});
+                    code.push(ZOP::Label{name: repeat_label.to_string()});
+                    code.push(ZOP::PrintOps{text: "------------------------------------------------------------".to_string()});
                     code.push(ZOP::Newline);
-                    code.push(ZOP::PrintOps{text: confirm_msg.to_string()});
+                    code.push(ZOP::PrintOps{text: "|  ".to_string()+&confirm_msg.to_string()});
                     code.push(ZOP::Newline);
-                    code.push(ZOP::PrintOps{text: "Confirm with the 1-key or cancel deny with the 0-key".to_string()});
+                    code.push(ZOP::PrintOps{text: "|  Confirm with the 1-key or deny with the 0-key".to_string()});
                     code.push(ZOP::Newline);
-                    code.push(ZOP::PrintOps{text: "----------".to_string()});
+                    code.push(ZOP::PrintOps{text: "------------------------------------------------------------".to_string()});
                     code.push(ZOP::Newline);
                     code.push(ZOP::ReadChar{local_var_id: has_confirmed.id});
+                    
                     //code.push(ZOP::PrintNumVar{variable: has_confirmed.clone()});
-                    //code.push(ZOP::JE{operand1: has_confirmed, operand2: Operand::new_const(48), jump_to_label: "YES".to_string()},
-                    //code.push(ZOP::JE{operand1: has_confirmed, operand2: Operand::new_const(48), jump_to_label: "NO".to_string()},
-                    Operand::new_const(1)
+                    code.push(ZOP::JE{operand1: Operand::new_var(has_confirmed.id), operand2: Operand::new_const(48), jump_to_label: false_label.to_string()});
+                    code.push(ZOP::JE{operand1: Operand::new_var(has_confirmed.id), operand2: Operand::new_const(49), jump_to_label: true_label.to_string()});
+                    code.push(ZOP::PrintOps{text: "Error, this key wasn't possible.".to_string()});
+                    code.push(ZOP::Newline);
+                    code.push(ZOP::Jump{jump_to_label: repeat_label.to_string()});
+                    code.push(ZOP::Label{name: true_label.to_string()});
+                    code.push(ZOP::StoreVariable{variable: has_confirmed.clone(), value: Operand::BoolConst(Constant {value: 1})});
+                    code.push(ZOP::Jump{jump_to_label: end_label.to_string()});
+                    code.push(ZOP::Label{name: false_label.to_string()});
+                    code.push(ZOP::StoreVariable{variable: has_confirmed.clone(), value: Operand::BoolConst(Constant {value: 0})});
+                    code.push(ZOP::Label{name: end_label.to_string()});
+                    code.push(ZOP::SetTextStyle{bold: state_copy.bold, reverse: state_copy.inverted, monospace: state_copy.mono, italic: state_copy.italic});
+                    
+                    Operand::new_var(has_confirmed.id)
                 },
                 _ => {
                     error_panic!(cfg => EvaluateExpressionError::UnsupportedFunction { name: name.clone(), location: location.clone() });
