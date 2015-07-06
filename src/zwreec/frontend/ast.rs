@@ -57,8 +57,9 @@ impl ASTBuilder {
             {
                 fn scan(cfg: &mut &Config, x: ASTNode) -> Option<ASTNode>
                 {
-                    x.clone().parse_expressions(*cfg);
-                    Some(x)
+                    let mut y = x.clone();
+                    y.parse_expressions(*cfg);
+                    Some(y)
                 }
                 scan
             }
