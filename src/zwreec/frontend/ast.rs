@@ -121,9 +121,16 @@ impl ASTBuilder {
 
     /// adds one child and goes down. adds snd child and goes down.
     pub fn two_childs_down(&mut self, current_passage: &mut Option<ASTNode>, child1: Token, child2: Token) -> Option<ASTNode> {
-        let result = self.child_down(current_passage, child1);
-        self.child_down(current_passage, child2);
-        result
+        match self.child_down(current_passage, child1) {
+            Some(new_passage) => {
+                self.child_down(&mut Some(new_passage.clone()), child2);
+                Some(new_passage)
+            },
+            None => {
+                self.child_down(current_passage, child2)
+            }
+        }
+
     }
 
     /// goes one lvl up
