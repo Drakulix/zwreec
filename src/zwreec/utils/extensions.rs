@@ -171,27 +171,28 @@ impl<A:Clone, I: Sized+Iterator<Item=A>>ParserExt for I {
 
 #[must_use = "iterator adaptors are lazy and do nothing unless consumed"]
 #[derive(Clone)]
-pub struct Constructor<I, B, F>
+pub struct Constructor<I, St, B, F>
     where
     I: Iterator,
     B: Clone,
-    F: FnMut(&mut Option<B>, I::Item) -> Option<B> {
+    F: FnMut(&mut St, &mut Option<B>, I::Item) -> Option<B> {
         iter: I,
+        state: St,
         f: F,
         current_elem: Option<B>,
 }
 
-impl<I, B, F> Iterator for Constructor<I, B, F> where
+impl<I, St, B, F> Iterator for Constructor<I, St, B, F> where
     I: Iterator,
     B: Clone,
-    F: FnMut(&mut Option<B>, I::Item) -> Option<B>,
+    F: FnMut(&mut St, &mut Option<B>, I::Item) -> Option<B>,
 {
     type Item = B;
 
     #[inline]
     fn next(&mut self) -> Option<B> {
         while let Some(elem) =  self.iter.next() {
-            match (self.f)(&mut self.current_elem, elem) {
+            match (self.f)(&mut self.state, &mut self.current_elem, elem) {
                 Some(elem) => {
                     let return_val = self.current_elem.clone();
                     self.current_elem = Some(elem);
@@ -217,15 +218,15 @@ impl<I, B, F> Iterator for Constructor<I, B, F> where
 }
 
 pub trait ConstructorExt {
-    fn construct<F, B>(self, f: F) -> Constructor<Self, B, F>
-        where Self: Sized+Iterator, B: Clone, F: Fn(&mut Option<B>, Self::Item) -> Option<B>;
+    fn construct_state<St, B, F>(self, state: St, f: F) -> Constructor<Self, St, B, F>
+        where Self: Sized+Iterator, B: Clone, F: Fn(&mut St, &mut Option<B>, Self::Item) -> Option<B>;
 }
 
 impl<I: Sized+Iterator>ConstructorExt for I {
-    fn construct<F, B>(self, f: F) -> Constructor<Self, B, F>
-        where Self: Sized+Iterator, B: Clone, F: Fn(&mut Option<B>, I::Item) -> Option<B>,
+    fn construct_state<St, B, F>(self, state: St, f: F) -> Constructor<Self, St, B, F>
+        where Self: Sized+Iterator, B: Clone, F: Fn(&mut St, &mut Option<B>, I::Item) -> Option<B>,
     {
-        Constructor{iter: self, f: f, current_elem: None}
+        Constructor{iter: self, state: state, f: f, current_elem: None}
     }
 }
 
@@ -331,7 +332,7 @@ fn construct_test() {
 
     let test: Vec<u8> = vec![3, 3, 3, 2, 4, 5, 2];
 
-    let result : Vec<u8> = test.into_iter().construct(|ref mut value, i| {
+    let result : Vec<u8> = test.into_iter().construct_state(0, |ref mut _state, ref mut value, i| {
         if value.is_none() {
             return Some(Cell::new(i)); //first value
         }
