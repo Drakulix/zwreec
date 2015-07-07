@@ -734,6 +734,7 @@ impl Zfile {
         self.routine_prompt();
         self.routine_print_unicode();
         self.routine_mem_free();
+        self.routine_manual_free();
         self.routine_malloc_init();
         self.routine_strcpy();
         self.routine_strcmp();
@@ -1010,7 +1011,7 @@ impl Zfile {
         let z_op = Operand::new_var(z.id);
         let a = Variable::new(6);  // tmp
         let a_op = Operand::new_var(a.id);
-        let cursor_pos = self.cursor_pos;
+        // let cursor_pos = self.cursor_pos;  see TODO at end of function
         self.emit(vec![
             ZOP::Routine{name: "rt_prompt".to_string(), count_variables: 6},
             // read length of default value to a and copy the default value so that we only work on the copy
@@ -1029,11 +1030,11 @@ impl Zfile {
             ZOP::PrintUnicodeStr{address: val_op.clone()},
             ZOP::Label{name: "rt_prompt_loop".to_string()},
             ZOP::ReadChar{local_var_id: c.id},
-            ZOP::PrintUnicodeVar{var: c.clone()},
-            // on enter:
-            ZOP::JE{operand1: c_op.clone(), operand2: Operand::new_const(13), jump_to_label: "rt_prompt_return".to_string()},
             // on backspace
             ZOP::JE{operand1: c_op.clone(), operand2: Operand::new_const(8), jump_to_label: "rt_prompt_del".to_string()},
+            // on enter:
+            ZOP::JE{operand1: c_op.clone(), operand2: Operand::new_const(13), jump_to_label: "rt_prompt_return".to_string()},
+            ZOP::PrintUnicodeVar{var: c.clone()},
             // add strings:
             // make string of length 1 for c
             ZOP::Call2S{jump_to_label: "malloc".to_string(), arg: Operand::new_const(1), result: t.clone()},
@@ -1041,12 +1042,12 @@ impl Zfile {
             ZOP::StoreVariable{variable: a.clone(), value: Operand::new_large_const(0)},
             ZOP::StoreW{array_address: t_op.clone(), index: a.clone(), variable: z.clone()},
             ZOP::StoreW{array_address: t_op.clone(), index: z.clone(), variable: c.clone()},
-            // read length to a
-            ZOP::StoreVariable{variable: a.clone(), value: Operand::new_large_const(0)},
-            ZOP::LoadW{array_address: val_op.clone(), index: a.clone(), variable: a.clone()},
-            ZOP::Inc{variable: a.id},
-            ZOP::Call2S{jump_to_label: "malloc".to_string(), arg: a_op.clone(), result: a.clone()},
+            ZOP::StoreVariable{variable: z.clone(), value: val_op.clone()},
+            // make new string and remeber strings to delete in z and t
             ZOP::CallVSA2{jump_to_label: "strcat".to_string(), arg1: val_op.clone(), arg2: t_op.clone(), result: val.clone()},
+            // free them manually as we can't wait for the garbage collector
+            ZOP::Call2NWithArg{jump_to_label: "manual_free".to_string(), arg: t_op.clone()},
+            ZOP::Call2NWithArg{jump_to_label: "manual_free".to_string(), arg: z_op.clone()},
             ZOP::Jump{jump_to_label: "rt_prompt_loop".to_string()},
             ZOP::Label{name: "rt_prompt_del".to_string()},
             ZOP::StoreVariable{variable: a.clone(), value: Operand::new_large_const(0)},
@@ -1060,14 +1061,18 @@ impl Zfile {
             // reduce length of string by 1
             ZOP::StoreVariable{variable: t.clone(), value: Operand::new_large_const(0)},
             ZOP::StoreW{array_address: val_op.clone(), index: t.clone(), variable: a.clone()},
-            ZOP::UpdateCursorPos,
+            // @TODO: these two commands should go to the beginning of the line and erase it before we print again,
+            // but rightnow it does not work and behaves strange. this is why we have a Newline here instead
+            // ZOP::UpdateCursorPos,
             // read current row
-            ZOP::LoadW{array_address: Operand::new_large_const(cursor_pos as i16), index: t.clone(), variable: a.clone()},
-            ZOP::SetCursorOperand{row: a_op.clone(), col: Operand::new_const(1)},
-            ZOP::EraseLine,
+            // ZOP::LoadW{array_address: Operand::new_large_const(cursor_pos as i16), index: t.clone(), variable: a.clone()},
+            // ZOP::SetCursorOperand{row: a_op.clone(), col: Operand::new_const(1)},
+            // ZOP::EraseLine,
+            ZOP::Newline,
             ZOP::PrintUnicodeStr{address: val_op.clone()},
             ZOP::Jump{jump_to_label: "rt_prompt_loop".to_string()},
             ZOP::Label{name: "rt_prompt_return".to_string()},
+            ZOP::Newline,
             ZOP::Ret{value: val_op},
         ]);
     }
@@ -1347,6 +1352,27 @@ impl Zfile {
             ZOP::Inc{variable: pos.id},
             ZOP::JL{operand1: Operand::new_var(pos.id), operand2: Operand::new_large_const(16i16), jump_to_label: "mem_free_uninit_local_var_types".to_string()},
             ZOP::Ret{value: Operand::new_const(0)}
+        ]);
+    }
+
+    /// manual free call to erase used heap memory if you can not wait for the GC
+    pub fn routine_manual_free(&mut self) {
+        let addr_op = Operand::new_var(1);
+        let index = Variable::new(2);
+        let index_op = Operand::new_var(index.id);
+        let length = Variable::new(3);
+        let length_op = Operand::new_var(length.id);
+        let del = Variable::new(4);
+        self.emit(vec![
+            ZOP::Routine{name: "manual_free".to_string(), count_variables: 4},
+            ZOP::StoreVariable{variable: del.clone(), value: Operand::new_large_const(-1i16)},
+            // load length
+            ZOP::LoadW{array_address: addr_op.clone(), index: index.clone(), variable: length.clone()},
+            ZOP::Label{name: "manual_free_loop".to_string()},
+            ZOP::StoreW{array_address: addr_op.clone(), index: index.clone(), variable: del.clone()},
+            ZOP::Inc{variable: index.id},
+            ZOP::JLE{operand1: index_op.clone(), operand2: length_op.clone(), jump_to_label: "manual_free_loop".to_string()},
+            ZOP::Ret{value: Operand::new_const(0)},
         ]);
     }
 
