@@ -1016,9 +1016,12 @@ impl Zfile {
             // read length of default value to a and copy the default value so that we only work on the copy
             ZOP::LoadW{array_address: val_op.clone(), index: a.clone(), variable: a.clone()},
             ZOP::StoreVariable{variable: t.clone(), value: val_op.clone()},
+            ZOP::Inc{variable: a.id},
             ZOP::Call2S{jump_to_label: "malloc".to_string(), arg: a_op.clone(), result: val.clone()},
+            ZOP::Dec{variable: a.id},
             ZOP::StoreW{array_address: val_op.clone(), index: z.clone(), variable: a.clone()},
             ZOP::StoreVariable{variable: z.clone(), value: val_op.clone()},
+            ZOP::Inc{variable: z.id},
             ZOP::Inc{variable: z.id},
             ZOP::CallVNA2{jump_to_label: "strcpy".to_string(), arg1: t_op.clone(), arg2: z_op.clone()},
             ZOP::PrintUnicodeStr{address: msg_op.clone()},
