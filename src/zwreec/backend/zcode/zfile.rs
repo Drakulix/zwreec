@@ -1037,7 +1037,7 @@ impl Zfile {
             ZOP::PrintUnicodeVar{var: c.clone()},
             // add strings:
             // make string of length 1 for c
-            ZOP::Call2S{jump_to_label: "malloc".to_string(), arg: Operand::new_const(1), result: t.clone()},
+            ZOP::Call2S{jump_to_label: "malloc".to_string(), arg: Operand::new_const(2), result: t.clone()},
             ZOP::StoreVariable{variable: z.clone(), value: Operand::new_large_const(1)},
             ZOP::StoreVariable{variable: a.clone(), value: Operand::new_large_const(0)},
             ZOP::StoreW{array_address: t_op.clone(), index: a.clone(), variable: z.clone()},
@@ -1101,8 +1101,6 @@ impl Zfile {
             // var6 contains the need_to_clean_up_to entry
             // var7 is used for temporary calculation of the pointer within the possible alloc block
             // init var4 with heap_start
-            // @INVESTIGATE: how can the JGE jumps replaced by JE to really make sure that we do not leave
-            // unutilised bytes between the blocks?
             ZOP::StoreVariable{variable: Variable::new(4), value: Operand::new_large_const(heap_start as i16)},
             // calc var5
             ZOP::StoreVariable{variable: Variable::new(5), value: Operand::new_large_const(static_addr as i16)},
@@ -1112,9 +1110,9 @@ impl Zfile {
             ZOP::LoadW{array_address: Operand::new_large_const(static_addr as i16), index: Variable::new(6), variable: Variable::new(6)},
             ZOP::Label{name: "malloc_loop".to_string()},
             // check if we have to give up and quit
-            ZOP::JGE{operand1: Operand::new_var(4), operand2: Operand::new_var(5), jump_to_label: "malloc_fail".to_string()},
+            ZOP::JE{operand1: Operand::new_var(4), operand2: Operand::new_var(5), jump_to_label: "malloc_fail".to_string()},
             // check if we are behind highest allocated block and do not need to check if it was freed
-            ZOP::JGE{operand1: Operand::new_var(4), operand2: Operand::new_var(6), jump_to_label: "malloc_return".to_string()},
+            ZOP::JE{operand1: Operand::new_var(4), operand2: Operand::new_var(6), jump_to_label: "malloc_return".to_string()},
             // set var3 index to 0
             ZOP::StoreVariable{variable: Variable::new(3), value: Operand::new_large_const(0)},
             // read the entry of var4 at pos var3 to var2
@@ -1133,13 +1131,13 @@ impl Zfile {
             ZOP::JE{operand1: Operand::new_var(4), operand2: Operand::new_var(6), jump_to_label: "malloc_return".to_string()},
             ZOP::Inc{variable: 3},  // increase index
             // check if we have to give up and quit
-            ZOP::JGE{operand1: Operand::new_var(4), operand2: Operand::new_var(5), jump_to_label: "malloc_fail".to_string()},
+            ZOP::JE{operand1: Operand::new_var(4), operand2: Operand::new_var(5), jump_to_label: "malloc_fail".to_string()},
             // load entry of var4 at pos var3 to var2
             ZOP::LoadW{array_address: Operand::new_var(4), index: Variable::new(3), variable: Variable::new(2)},
             // check if we reached last upper alloc bound by calculation var7 as the current position in possible alloc block
             ZOP::Add{operand1: Operand::new_var(4), operand2: Operand::new_var(3), save_variable: Variable::new(7)},
             ZOP::Add{operand1: Operand::new_var(7), operand2: Operand::new_var(3), save_variable: Variable::new(7)},
-            ZOP::JGE{operand1: Operand::new_var(7), operand2: Operand::new_var(6), jump_to_label: "malloc_return".to_string()},
+            ZOP::JE{operand1: Operand::new_var(7), operand2: Operand::new_var(6), jump_to_label: "malloc_return".to_string()},
             // continue testing for free memory if this one was free
             ZOP::JL{operand1: Operand::new_var(2), operand2: Operand::new_large_const(0), jump_to_label: "malloc_is_free".to_string()},
             // otherwise set var4 to the actual position (var4+2*var3) and start from beginning because we have to jump over this entry
@@ -1151,8 +1149,11 @@ impl Zfile {
             // add up allocation address and allocation length*2 (as it is amount of u16)
             ZOP::Add{operand1: Operand::new_var(4), operand2: Operand::new_var(1), save_variable: Variable::new(2)},
             ZOP::Add{operand1: Operand::new_var(2), operand2: Operand::new_var(1), save_variable: Variable::new(2)},
+            // only set need_to_clean_up_to entry if we allocated behind it
+            ZOP::JL{operand1: Operand::new_var(2), operand2: Operand::new_var(6), jump_to_label: "malloc_return_not_set_need_to_clean_up".to_string()},
             ZOP::StoreVariable{variable: Variable::new(3), value: Operand::new_const(0)},
             ZOP::StoreW{array_address: Operand::new_large_const(static_addr as i16), index: Variable::new(3), variable: Variable::new(2)},
+            ZOP::Label{name: "malloc_return_not_set_need_to_clean_up".to_string()},
             // return allocation addr
             ZOP::Ret{value: Operand::new_var(4)},
             ZOP::Label{name: "malloc_fail".to_string()},
