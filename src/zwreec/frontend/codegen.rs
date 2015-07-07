@@ -536,22 +536,6 @@ pub fn function_random(manager: &CodeGenManager, arg_from: &Operand, arg_to: &Op
 }
 
 
-/// twee function prompt(message, default) - imitates the JS browser input dialog
-pub fn function_prompt(manager: &CodeGenManager, message: &Operand, default: &Operand,
-        code: &mut Vec<ZOP>, temp_ids: &mut Vec<u8>) -> Operand {
-
-    let return_var: Variable = match temp_ids.pop() {
-        Some(var) => Variable::new(var),
-        None      => error_force_panic!(EvaluateExpressionError::NoTempIdLeftOnStack)
-    };
-
-    code.push(ZOP::CallVSA2{jump_to_label: "rt_prompt".to_string(), arg1: message.clone(), arg2: default.clone(), result: return_var.clone()});
-    code.push(ZOP::SetVarType{variable: return_var.clone(), vartype: Type::String});
-    Operand::new_var(return_var.id)
-}
-
-
-
 pub struct CodeGenManager<'a> {
     pub cfg: &'a Config,
     pub ids_if: IdentifierProvider,
