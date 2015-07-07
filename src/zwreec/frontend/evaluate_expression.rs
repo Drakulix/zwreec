@@ -202,7 +202,7 @@ fn evaluate_expression_internal<'a>(node: &'a ASTNode, code: &mut Vec<ZOP>,
                     code.push(ZOP::StoreVariable{variable: has_confirmed.clone(), value: Operand::BoolConst(Constant {value: 0})});
                     code.push(ZOP::Label{name: end_label.to_string()});
                     code.push(ZOP::SetTextStyle{bold: state_copy.bold, reverse: state_copy.inverted, monospace: state_copy.mono, italic: state_copy.italic});
-                    
+                    code.push(ZOP::SetVarType{variable: Variable::new(has_confirmed.id), vartype: Type::Bool});
                     Operand::new_var(has_confirmed.id)
                 },
                 _ => {
