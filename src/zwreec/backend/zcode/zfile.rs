@@ -99,7 +99,7 @@ impl Variable {
 #[derive(Debug)]
 pub enum ZOP {
   PrintUnicode{c: u16},
-  PrintUnicodeVar{var: Variable},
+  PrintUnicodeVar{var: Variable}, // var contains one character number
   PrintUnicodeStr{address: Operand},
   Print{text: String},
   PrintNumVar{variable: Variable},
@@ -155,7 +155,11 @@ pub enum ZOP {
   Dec{variable: u8},
   LoadW{array_address: Operand, index: Variable, variable: Variable},
   SetCursor{line: u8, col: u8},
+  SetCursorOperand{row: Operand, col: Operand},
+  UpdateCursorPos,
+  GetCursor{store_addr: Operand},
   EraseWindow{value: i8},
+  EraseLine,
   SetVarType{variable: Variable, vartype: Type},
   CopyVarType{variable: Variable, from: Operand},
   GetVarType{variable: Variable, result: Variable},
@@ -195,6 +199,7 @@ pub struct Zfile {
     pub object_addr: u16,
     last_static_written: u16,
     pub type_store: u16,
+    pub cursor_pos: u16,
     pub heap_start: u16,
     pub force_unicode: bool,
     pub easter_egg: bool,
@@ -254,6 +259,7 @@ impl Zfile {
             static_addr: 0,
             last_static_written: if half_memory { 0x2000 } else { 0x8000 },
             heap_start: 0x600,
+            cursor_pos: 0x502,  // set by UpdateCursorPos
             type_store: 0x400,
             force_unicode: force_unicode,
             easter_egg: easter_egg,
@@ -548,9 +554,12 @@ impl Zfile {
             &ZOP::LoadBOperand{ref array_address, ref index, ref variable} => op::op_loadb(array_address, index, variable),
             &ZOP::Call1NVar{variable} => op::op_call_1n_var(variable),
             &ZOP::EraseWindow{value} => op::op_erase_window(value),
+            &ZOP::EraseLine => op::op_erase_line(),
             &ZOP::SetCursor{line, col} => op::op_set_cursor(line, col),
+            &ZOP::SetCursorOperand{ref row, ref col} => op::op_set_cursor_operand(row, col),
             &ZOP::PushVar{ref variable} => op::op_push_var(variable),
             &ZOP::PullVar{ref variable} => op::op_pull(variable.id.clone()),
+            &ZOP::GetCursor{ref store_addr} => op::op_get_cursor(store_addr),
 
             _ => Vec::new()
         };
@@ -585,6 +594,7 @@ impl Zfile {
             &ZOP::SetVarType{ref variable, ref vartype} => self.set_var_type(variable, vartype),
             &ZOP::CopyVarType{ref variable, ref from} => self.copy_var_type(variable, from),
             &ZOP::GetVarType{ref variable, ref result} => self.get_var_type(variable, result),
+            &ZOP::UpdateCursorPos => self.update_cursor_pos(),
             _ => ()
         }
         let mut new_jumps: Vec<Zjump> = vec![];
@@ -721,6 +731,7 @@ impl Zfile {
         self.routine_check_links();
         self.routine_add_link();
         self.routine_check_more();
+        self.routine_prompt();
         self.routine_print_unicode();
         self.routine_mem_free();
         self.routine_malloc_init();
@@ -980,7 +991,92 @@ impl Zfile {
         ]);
     }
 
+    pub fn update_cursor_pos(&mut self) {
+        let cursor_pos = self.cursor_pos;
+        self.emit(vec![ZOP::GetCursor{store_addr: Operand::new_large_const(cursor_pos as i16)}]);
+    }
+
+    /// needed to simulate JS browser input dialog, receives prompt message and default value as string arguments
+    pub fn routine_prompt(&mut self) {
+        let msg = Variable::new(1); // arg1  displayed message
+        let msg_op = Operand::new_var(msg.id);
+        let val = Variable::new(2); // arg2  current input value
+        let val_op = Operand::new_var(val.id);
+        let c = Variable::new(3);  // read character
+        let c_op = Operand::new_var(c.id);
+        let t = Variable::new(4);  // tmp
+        let t_op = Operand::new_var(t.id);
+        let z = Variable::new(5);  // tmp
+        let z_op = Operand::new_var(z.id);
+        let a = Variable::new(6);  // tmp
+        let a_op = Operand::new_var(a.id);
+        let cursor_pos = self.cursor_pos;
+        self.emit(vec![
+            ZOP::Routine{name: "rt_prompt".to_string(), count_variables: 6},
+            // read length of default value to a and copy the default value so that we only work on the copy
+            ZOP::LoadW{array_address: val_op.clone(), index: a.clone(), variable: a.clone()},
+            ZOP::StoreVariable{variable: t.clone(), value: val_op.clone()},
+            ZOP::Call2S{jump_to_label: "malloc".to_string(), arg: a_op.clone(), result: val.clone()},
+            ZOP::StoreW{array_address: val_op.clone(), index: z.clone(), variable: a.clone()},
+            ZOP::StoreVariable{variable: z.clone(), value: val_op.clone()},
+            ZOP::Inc{variable: z.id},
+            ZOP::CallVNA2{jump_to_label: "strcpy".to_string(), arg1: t_op.clone(), arg2: z_op.clone()},
+            ZOP::PrintUnicodeStr{address: msg_op.clone()},
+            ZOP::Newline,
+            ZOP::PrintUnicodeStr{address: val_op.clone()},
+            ZOP::Label{name: "rt_prompt_loop".to_string()},
+            ZOP::ReadChar{local_var_id: c.id},
+            ZOP::PrintUnicodeVar{var: c.clone()},
+            // on enter:
+            ZOP::JE{operand1: c_op.clone(), operand2: Operand::new_const(13), jump_to_label: "rt_prompt_return".to_string()},
+            // on backspace
+            ZOP::JE{operand1: c_op.clone(), operand2: Operand::new_const(8), jump_to_label: "rt_prompt_del".to_string()},
+            // add strings:
+            // make string of length 1 for c
+            ZOP::Call2S{jump_to_label: "malloc".to_string(), arg: Operand::new_const(1), result: t.clone()},
+            ZOP::StoreVariable{variable: z.clone(), value: Operand::new_large_const(1)},
+            ZOP::StoreVariable{variable: a.clone(), value: Operand::new_large_const(0)},
+            ZOP::StoreW{array_address: t_op.clone(), index: a.clone(), variable: z.clone()},
+            ZOP::StoreW{array_address: t_op.clone(), index: z.clone(), variable: c.clone()},
+            // read length to a
+            ZOP::StoreVariable{variable: a.clone(), value: Operand::new_large_const(0)},
+            ZOP::LoadW{array_address: val_op.clone(), index: a.clone(), variable: a.clone()},
+            ZOP::Inc{variable: a.id},
+            ZOP::Call2S{jump_to_label: "malloc".to_string(), arg: a_op.clone(), result: a.clone()},
+            ZOP::CallVSA2{jump_to_label: "strcat".to_string(), arg1: val_op.clone(), arg2: t_op.clone(), result: val.clone()},
+            ZOP::Jump{jump_to_label: "rt_prompt_loop".to_string()},
+            ZOP::Label{name: "rt_prompt_del".to_string()},
+            ZOP::StoreVariable{variable: a.clone(), value: Operand::new_large_const(0)},
+            ZOP::LoadW{array_address: val_op.clone(), index: a.clone(), variable: a.clone()},
+            // jump back if length is 0
+            ZOP::JE{operand1: a_op.clone(), operand2: Operand::new_const(0), jump_to_label: "rt_prompt_loop".to_string()},
+            // otherwise set last u16 to -1 in order to free it
+            ZOP::StoreVariable{variable: t.clone(), value: Operand::new_large_const(-1i16)},
+            ZOP::StoreW{array_address: val_op.clone(), index: a.clone(), variable: t.clone()},
+            ZOP::Dec{variable: a.id},
+            // reduce length of string by 1
+            ZOP::StoreVariable{variable: t.clone(), value: Operand::new_large_const(0)},
+            ZOP::StoreW{array_address: val_op.clone(), index: t.clone(), variable: a.clone()},
+            ZOP::UpdateCursorPos,
+            // read current row
+            ZOP::LoadW{array_address: Operand::new_large_const(cursor_pos as i16), index: t.clone(), variable: a.clone()},
+            ZOP::SetCursorOperand{row: a_op.clone(), col: Operand::new_const(1)},
+            ZOP::EraseLine,
+            ZOP::PrintUnicodeStr{address: val_op.clone()},
+            ZOP::Jump{jump_to_label: "rt_prompt_loop".to_string()},
+            ZOP::Label{name: "rt_prompt_return".to_string()},
+            ZOP::Ret{value: val_op},
+        ]);
+    }
+
     /// malloc
+    /// argument: amount of u16 to allocate
+    /// after receiving the address you are requested to write down the
+    /// number of u16 you are actually using in the first u16 and then
+    /// if you ever want to decrease this, you have to write -1i16 at
+    /// the 'freed' u16s at the end. increasing it is not allowed.
+    /// memory will be freed after each passage if there is no global
+    /// variable pointing to it.
     pub fn routine_malloc(&mut self) {
         let heap_start = self.heap_start;
         let static_addr = self.static_addr;
@@ -1034,6 +1130,9 @@ impl Zfile {
     }
 
     /// strcpy
+    /// first argument is pointer to utf16 string containing length at first u16
+    /// second the the destination address in memory where the string is copied to,
+    /// while the first length u16 is not copied
     pub fn routine_strcpy(&mut self) {
         self.emit(vec![
             ZOP::Routine{name: "strcpy".to_string(), count_variables: 15},
