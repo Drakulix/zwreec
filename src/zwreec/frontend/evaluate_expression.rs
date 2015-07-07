@@ -14,7 +14,7 @@ use frontend::ast::{ASTNode};
 use frontend::codegen;
 use frontend::codegen::{CodeGenManager};
 use frontend::lexer::Token;
-use frontend::lexer::Token::{TokNumOp, TokCompOp, TokLogOp, TokInt, TokBoolean, TokVariable, TokFunction, TokString, TokUnaryMinus};
+use frontend::lexer::Token::{TokNumOp, TokCompOp, TokLogOp, TokInt, TokBoolean, TokVariable, TokArrayLength, TokArrayAccess, TokFunction, TokString, TokUnaryMinus};
 #[allow(unused_imports)] use config::Config;
 
 #[derive(Debug)]
@@ -120,6 +120,51 @@ fn evaluate_expression_internal<'a>(node: &'a ASTNode, code: &mut Vec<ZOP>,
         },
         TokVariable { ref name, .. } => {
             Operand::Var(manager.symbol_table.get_and_add_symbol_id(name))
+        },
+        TokArrayLength { ref name, .. } => {
+            let alen: Variable = match temp_ids.pop() {
+                Some(var) => Variable::new(var),
+                None      => error_force_panic!(EvaluateExpressionError::NoTempIdLeftOnStack)
+            };
+            let zero: Variable = match temp_ids.pop() {
+                Some(var) => Variable::new(var),
+                None      => error_force_panic!(EvaluateExpressionError::NoTempIdLeftOnStack)
+            };
+            let var = Operand::Var(manager.symbol_table.get_and_add_symbol_id(name));
+            code.push(ZOP::StoreVariable{variable: zero.clone(), value: Operand::new_large_const(0)},);
+            code.push(ZOP::LoadW{array_address: var, index: zero.clone(), variable: alen.clone()});
+            code.push(ZOP::SetVarType{variable: alen.clone(), vartype: Type::Integer});
+            temp_ids.push(zero.id);
+            Operand::new_var(alen.id)
+        },
+        TokArrayAccess { ref name, ref index, .. } => {
+            let val: Variable = match temp_ids.pop() {
+                Some(var) => Variable::new(var),
+                None      => error_force_panic!(EvaluateExpressionError::NoTempIdLeftOnStack)
+            };
+            let mem: Variable = match temp_ids.pop() {
+                Some(var) => Variable::new(var),
+                None      => error_force_panic!(EvaluateExpressionError::NoTempIdLeftOnStack)
+            };
+            let ind: Variable = match temp_ids.pop() {
+                Some(var) => Variable::new(var),
+                None      => error_force_panic!(EvaluateExpressionError::NoTempIdLeftOnStack)
+            };
+            let var = Operand::Var(manager.symbol_table.get_and_add_symbol_id(name));
+            let index = Operand::Var(manager.symbol_table.get_and_add_symbol_id(index));
+            code.push(ZOP::Call2S{jump_to_label: "malloc".to_string(), arg: Operand::new_const(2), result: mem.clone()});
+            code.push(ZOP::StoreVariable{variable: ind.clone(), value: Operand::new_large_const(0)});
+            code.push(ZOP::StoreVariable{variable: val.clone(), value: Operand::new_large_const(1)});
+            code.push(ZOP::StoreW{array_address: Operand::new_var(mem.id), index: ind.clone(), variable: val.clone()});
+            code.push(ZOP::StoreVariable{variable: val.clone(), value: index.clone()});
+            code.push(ZOP::Inc{variable: val.id.clone()});
+            code.push(ZOP::LoadW{array_address: var, index: val.clone(), variable: val.clone()});
+            code.push(ZOP::StoreVariable{variable: ind.clone(), value: Operand::new_large_const(1)});
+            code.push(ZOP::StoreW{array_address: Operand::new_var(mem.id), index: ind.clone(), variable: val.clone()});
+            code.push(ZOP::SetVarType{variable: val.clone(), vartype: Type::String});
+            temp_ids.push(mem.id);
+            temp_ids.push(ind.id);
+            Operand::new_var(val.id)
         },
         TokFunction { ref name, ref location } => {
             match &**name {
