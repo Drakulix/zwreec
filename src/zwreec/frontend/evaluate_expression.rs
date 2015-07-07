@@ -157,14 +157,14 @@ fn evaluate_expression_internal<'a>(node: &'a ASTNode, code: &mut Vec<ZOP>,
             code.push(ZOP::StoreVariable{variable: val.clone(), value: Operand::new_large_const(1)});
             code.push(ZOP::StoreW{array_address: Operand::new_var(mem.id), index: ind.clone(), variable: val.clone()});
             code.push(ZOP::StoreVariable{variable: val.clone(), value: index.clone()});
-            code.push(ZOP::Inc{variable: val.id.clone()});
+            code.push(ZOP::Inc{variable: val.id});
             code.push(ZOP::LoadW{array_address: var, index: val.clone(), variable: val.clone()});
             code.push(ZOP::StoreVariable{variable: ind.clone(), value: Operand::new_large_const(1)});
             code.push(ZOP::StoreW{array_address: Operand::new_var(mem.id), index: ind.clone(), variable: val.clone()});
-            code.push(ZOP::SetVarType{variable: val.clone(), vartype: Type::String});
-            temp_ids.push(mem.id);
+            code.push(ZOP::SetVarType{variable: mem.clone(), vartype: Type::String});
+            temp_ids.push(val.id);
             temp_ids.push(ind.id);
-            Operand::new_var(val.id)
+            Operand::new_var(mem.id)
         },
         TokFunction { ref name, ref location } => {
             match &**name {
