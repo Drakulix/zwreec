@@ -192,6 +192,36 @@ fn evaluate_expression_internal<'a>(node: &'a ASTNode, code: &mut Vec<ZOP>,
                     let to_value = evaluate_expression_internal(to, code, temp_ids, manager, &mut out);
                     codegen::function_random(manager, &from_value, &to_value, code, temp_ids, location.clone())
                 },
+                "prompt" => { // twee function prompt(message, default) - imitates the JS browser input dialog
+                    let args = &node.as_default().childs;
+                    if args.len() != 2 {
+                        let error = EvaluateExpressionError::UnsupportedFunctionArgsLen {
+                            name: "prompt".to_string(), location: location.clone(), expected: 2 };
+                        error_panic!(cfg => error);
+                        if args.len() <= 1 {
+                            return Operand::Const(Constant { value: 0 })
+                        } else {
+                            warn!("Ignoring the additional arguments.");
+                        }
+                    }
+
+                    if args[0].as_default().childs.len() != 1 || args[1].as_default().childs.len() != 1 {
+                        error_force_panic!(EvaluateExpressionError::InvalidAST);
+                    }
+
+                    let message_n = &args[0].as_default().childs[0];
+                    let default_n = &args[1].as_default().childs[0];
+
+                    let message = evaluate_expression_internal(message_n, code, temp_ids, manager, &mut out);
+                    let default = evaluate_expression_internal(default_n, code, temp_ids, manager, &mut out);
+                    let return_var: Variable = match temp_ids.pop() {
+                        Some(var) => Variable::new(var),
+                        None      => error_force_panic!(EvaluateExpressionError::NoTempIdLeftOnStack)
+                    };
+                    code.push(ZOP::CallVSA2{jump_to_label: "rt_prompt".to_string(), arg1: message.clone(), arg2: default.clone(), result: return_var.clone()});
+                    code.push(ZOP::SetVarType{variable: return_var.clone(), vartype: Type::String});
+                    Operand::new_var(return_var.id)
+                },
                 _ => {
                     error_panic!(cfg => EvaluateExpressionError::UnsupportedFunction { name: name.clone(), location: location.clone() });
                     Operand::Const(Constant { value: 0 })
