@@ -384,90 +384,132 @@ fn eval_comp_op<'a>(eval0: &Operand, eval1: &Operand, op_name: &str, location: (
         Some(var) => Variable::new_bool(var),
         None      => error_force_panic!(EvaluateExpressionError::NoTempIdLeftOnStack)
     };
-    let label = format!("expr_{}", manager.ids_expr.start_next());
+    let label_is_bool = format!("expr_{}", manager.ids_expr.start_next());
+    let label_is_string = format!("expr_{}", manager.ids_expr.start_next());
+    let label = format!("expr_{}", manager.ids_expr.start_next()); // label return
     let const_true = Operand::new_const(1);
     let const_false = Operand::new_const(0);
-    let mut strings = false;
+    // test for type bool and string
+    // we only take the first operand's type for this. if it is not a string, but the second, then count both as integers anyway as it make now sense, but does not harm
     match eval0 {
-        &Operand::StringRef(_) => {strings = true;},
-        &Operand::Var(Variable{id: _, vartype: Type::String}) => {strings = true;},
-        _ => {}
+        &Operand::StringRef(_) => { code.push(ZOP::StoreVariable{variable: save_var.clone(), value: Operand::new_const(Type::String as u8)}); },
+        &Operand::Var(ref var) => { code.push(ZOP::GetVarType{variable: var.clone(), result: save_var.clone()}); },
+        &Operand::BoolConst(_) => { code.push(ZOP::StoreVariable{variable: save_var.clone(), value: Operand::new_const(Type::Bool as u8)}); },
+        _ => { code.push(ZOP::StoreVariable{variable: save_var.clone(), value: Operand::new_const(Type::Integer as u8)}); }
     };
-    match eval1 {
-        &Operand::StringRef(_) => {strings = strings && true;},
-        &Operand::Var(Variable{id: _, vartype: Type::String}) => {strings = strings && true;},
-        _ => {strings = false;}
+    code.push(ZOP::JE{operand1: Operand::new_var(save_var.id), operand2: Operand::new_const(Type::String as u8), jump_to_label: label_is_string.to_string()});
+    code.push(ZOP::JE{operand1: Operand::new_var(save_var.id), operand2: Operand::new_const(Type::Bool as u8), jump_to_label: label_is_bool.to_string()});
+    // compare as numbers
+    match op_name {
+        "is" | "==" | "eq" => {
+            code.push(ZOP::StoreVariable{ variable: save_var.clone(), value: const_true.clone()});
+            code.push(ZOP::JE{operand1: eval0.clone(), operand2: eval1.clone(), jump_to_label: label.to_string()});
+            code.push(ZOP::StoreVariable{ variable: save_var.clone(), value: const_false.clone()});
+        },
+        "!=" | "neq" => {
+            code.push(ZOP::StoreVariable{ variable: save_var.clone(), value: const_false.clone()});
+            code.push(ZOP::JE{operand1: eval0.clone(), operand2: eval1.clone(), jump_to_label: label.to_string()});
+            code.push(ZOP::StoreVariable{ variable: save_var.clone(), value: const_true.clone()});
+        },
+        "<" | "lt" =>  {
+            code.push(ZOP::StoreVariable{ variable: save_var.clone(), value: const_true.clone() });
+            code.push(ZOP::JL{operand1: eval0.clone(), operand2: eval1.clone(), jump_to_label: label.to_string()});
+            code.push(ZOP::StoreVariable{ variable: save_var.clone(), value: const_false.clone()});
+        },
+        "<=" | "lte" => {
+            code.push(ZOP::StoreVariable{ variable: save_var.clone(), value: const_false.clone()});
+            code.push(ZOP::JG{operand1: eval0.clone(), operand2: eval1.clone(), jump_to_label: label.to_string()});
+            code.push(ZOP::StoreVariable{ variable: save_var.clone(), value: const_true.clone()});
+        },
+        ">=" | "gte" => {
+            code.push(ZOP::StoreVariable{ variable: save_var.clone(), value: const_false.clone()});
+            code.push(ZOP::JL{operand1: eval0.clone(), operand2: eval1.clone(), jump_to_label: label.to_string()});
+            code.push(ZOP::StoreVariable{ variable: save_var.clone(), value: const_true.clone()});
+        },
+        ">" | "gt" => {
+            code.push(ZOP::StoreVariable{ variable: save_var.clone(), value: const_true.clone()});
+            code.push(ZOP::JG{operand1: eval0.clone(), operand2: eval1.clone(), jump_to_label: label.to_string()});
+            code.push(ZOP::StoreVariable{ variable: save_var.clone(), value: const_false.clone()});
+        },
+        _ => {
+            error_panic!(manager.cfg => EvaluateExpressionError::UnsupportedOperator { op_name: op_name.to_string(), location: location.clone() });
+            warn!("Assuming 'false' as the result");
+            code.push(ZOP::StoreVariable{ variable: save_var.clone(), value: const_false.clone() });
+        }
     };
-    if strings == false {
-        match op_name {
-            "is" | "==" | "eq" => {
-                code.push(ZOP::StoreVariable{ variable: save_var.clone(), value: const_true});
-                code.push(ZOP::JE{operand1: eval0.clone(), operand2: eval1.clone(), jump_to_label: label.to_string()});
-                code.push(ZOP::StoreVariable{ variable: save_var.clone(), value: const_false});
-            },
-            "!=" | "neq" => {
-                code.push(ZOP::StoreVariable{ variable: save_var.clone(), value: const_false});
-                code.push(ZOP::JE{operand1: eval0.clone(), operand2: eval1.clone(), jump_to_label: label.to_string()});
-                code.push(ZOP::StoreVariable{ variable: save_var.clone(), value: const_true});
-            },
-            "<" | "lt" =>  {
-                code.push(ZOP::StoreVariable{ variable: save_var.clone(), value: const_true });
-                code.push(ZOP::JL{operand1: eval0.clone(), operand2: eval1.clone(), jump_to_label: label.to_string()});
-                code.push(ZOP::StoreVariable{ variable: save_var.clone(), value: const_false});
-            },
-            "<=" | "lte" => {
-                code.push(ZOP::StoreVariable{ variable: save_var.clone(), value: const_false});
-                code.push(ZOP::JG{operand1: eval0.clone(), operand2: eval1.clone(), jump_to_label: label.to_string()});
-                code.push(ZOP::StoreVariable{ variable: save_var.clone(), value: const_true});
-            },
-            ">=" | "gte" => {
-                code.push(ZOP::StoreVariable{ variable: save_var.clone(), value: const_false});
-                code.push(ZOP::JL{operand1: eval0.clone(), operand2: eval1.clone(), jump_to_label: label.to_string()});
-                code.push(ZOP::StoreVariable{ variable: save_var.clone(), value: const_true});
-            },
-            ">" | "gt" => {
-                code.push(ZOP::StoreVariable{ variable: save_var.clone(), value: const_true});
-                code.push(ZOP::JG{operand1: eval0.clone(), operand2: eval1.clone(), jump_to_label: label.to_string()});
-                code.push(ZOP::StoreVariable{ variable: save_var.clone(), value: const_false});
-            },
-            _ => {
-                error_panic!(manager.cfg => EvaluateExpressionError::UnsupportedOperator { op_name: op_name.to_string(), location: location.clone() });
-                warn!("Assuming 'false' as the result");
-                code.push(ZOP::StoreVariable{ variable: save_var.clone(), value: const_false });
-            }
-        };
-    } else {
-        code.push(ZOP::CallVSA2{jump_to_label: "strcmp".to_string(), arg1: eval0.clone(), arg2: eval1.clone(), result: save_var.clone()},);
-        match op_name {
-            "is" | "==" | "eq" => { // we only want true if the result is not 0
-                // so first we make 0 to ffff while -1 and 1 will lose their last bit. and then we AND the last bit
-                code.push(ZOP::Not{operand: Operand::new_var(save_var.id), result: save_var.clone()});
-                code.push(ZOP::And{operand1: Operand::new_var(save_var.id), operand2: Operand::new_large_const(1i16), save_variable: save_var.clone()});
-            },
-            "!=" | "neq" => {},  // we can leave the result as it is
-            "<" | "lt" =>  {  // we want only true if the result was -1,
-                // so for 0 and 1 we AND with every bit on except the last bit off which is then gone
-                // and the result is 0. for -1 this does not make it 0 as there are more bits left
-                code.push(ZOP::And{operand1: Operand::new_var(save_var.id), operand2: Operand::new_large_const(-2i16), save_variable: save_var.clone()});
-            },
-            "<=" | "lte" => {  // we do not want true for 1, so we make 0 out of it by decreasing
-                code.push(ZOP::Dec{variable: save_var.id});
-            },
-            ">=" | "gte" => {  // we do not want true for -1, so we make 0 out of it by increasing
-                code.push(ZOP::Inc{variable: save_var.id});
-            },
-            ">" | "gt" => { // we want only true if the result was 1. so we increase it to 2 and AND with 2,
-                // so only the second bit survives
-                code.push(ZOP::Inc{variable: save_var.id});
-                code.push(ZOP::And{operand1: Operand::new_var(save_var.id), operand2: Operand::new_large_const(2), save_variable: save_var.clone()});
-            },
-            _ => {
-                error_panic!(manager.cfg => EvaluateExpressionError::UnsupportedOperator { op_name: op_name.to_string(), location: location.clone() });
-                warn!("Assuming 'false' as the result");
-                code.push(ZOP::StoreVariable{ variable: save_var.clone(), value: const_false });
-            }
-        };
-    }
+    code.push(ZOP::Jump{jump_to_label: label.to_string()});
+    code.push(ZOP::Label {name: label_is_bool.to_string()});
+    // @TODO: compare as bool regarding that e.g. -31 should be seen as true
+    match op_name {
+        "is" | "==" | "eq" => {
+            code.push(ZOP::StoreVariable{ variable: save_var.clone(), value: const_true.clone()});
+            code.push(ZOP::JE{operand1: eval0.clone(), operand2: eval1.clone(), jump_to_label: label.to_string()});
+            code.push(ZOP::StoreVariable{ variable: save_var.clone(), value: const_false.clone()});
+        },
+        "!=" | "neq" => {
+            code.push(ZOP::StoreVariable{ variable: save_var.clone(), value: const_false.clone()});
+            code.push(ZOP::JE{operand1: eval0.clone(), operand2: eval1.clone(), jump_to_label: label.to_string()});
+            code.push(ZOP::StoreVariable{ variable: save_var.clone(), value: const_true.clone()});
+        },
+        "<" | "lt" =>  {
+            code.push(ZOP::StoreVariable{ variable: save_var.clone(), value: const_true.clone() });
+            code.push(ZOP::JL{operand1: eval0.clone(), operand2: eval1.clone(), jump_to_label: label.to_string()});
+            code.push(ZOP::StoreVariable{ variable: save_var.clone(), value: const_false.clone()});
+        },
+        "<=" | "lte" => {
+            code.push(ZOP::StoreVariable{ variable: save_var.clone(), value: const_false.clone()});
+            code.push(ZOP::JG{operand1: eval0.clone(), operand2: eval1.clone(), jump_to_label: label.to_string()});
+            code.push(ZOP::StoreVariable{ variable: save_var.clone(), value: const_true.clone()});
+        },
+        ">=" | "gte" => {
+            code.push(ZOP::StoreVariable{ variable: save_var.clone(), value: const_false.clone()});
+            code.push(ZOP::JL{operand1: eval0.clone(), operand2: eval1.clone(), jump_to_label: label.to_string()});
+            code.push(ZOP::StoreVariable{ variable: save_var.clone(), value: const_true.clone()});
+        },
+        ">" | "gt" => {
+            code.push(ZOP::StoreVariable{ variable: save_var.clone(), value: const_true.clone()});
+            code.push(ZOP::JG{operand1: eval0.clone(), operand2: eval1.clone(), jump_to_label: label.to_string()});
+            code.push(ZOP::StoreVariable{ variable: save_var.clone(), value: const_false.clone()});
+        },
+        _ => {
+            error_panic!(manager.cfg => EvaluateExpressionError::UnsupportedOperator { op_name: op_name.to_string(), location: location.clone() });
+            warn!("Assuming 'false' as the result");
+            code.push(ZOP::StoreVariable{ variable: save_var.clone(), value: const_false.clone() });
+        }
+    };
+    code.push(ZOP::Jump{jump_to_label: label.to_string()});
+    code.push(ZOP::Label {name: label_is_string.to_string()});
+    // compare as strings
+    code.push(ZOP::CallVSA2{jump_to_label: "strcmp".to_string(), arg1: eval0.clone(), arg2: eval1.clone(), result: save_var.clone()},);
+    match op_name {
+        "is" | "==" | "eq" => { // we only want true if the result is not 0
+            // so first we make 0 to ffff while -1 and 1 will lose their last bit. and then we AND the last bit
+            code.push(ZOP::Not{operand: Operand::new_var(save_var.id), result: save_var.clone()});
+            code.push(ZOP::And{operand1: Operand::new_var(save_var.id), operand2: Operand::new_large_const(1i16), save_variable: save_var.clone()});
+        },
+        "!=" | "neq" => {},  // we can leave the result as it is
+        "<" | "lt" =>  {  // we want only true if the result was -1,
+            // so for 0 and 1 we AND with every bit on except the last bit off which is then gone
+            // and the result is 0. for -1 this does not make it 0 as there are more bits left
+            code.push(ZOP::And{operand1: Operand::new_var(save_var.id), operand2: Operand::new_large_const(-2i16), save_variable: save_var.clone()});
+        },
+        "<=" | "lte" => {  // we do not want true for 1, so we make 0 out of it by decreasing
+            code.push(ZOP::Dec{variable: save_var.id});
+        },
+        ">=" | "gte" => {  // we do not want true for -1, so we make 0 out of it by increasing
+            code.push(ZOP::Inc{variable: save_var.id});
+        },
+        ">" | "gt" => { // we want only true if the result was 1. so we increase it to 2 and AND with 2,
+            // so only the second bit survives
+            code.push(ZOP::Inc{variable: save_var.id});
+            code.push(ZOP::And{operand1: Operand::new_var(save_var.id), operand2: Operand::new_large_const(2), save_variable: save_var.clone()});
+        },
+        _ => {
+            error_panic!(manager.cfg => EvaluateExpressionError::UnsupportedOperator { op_name: op_name.to_string(), location: location.clone() });
+            warn!("Assuming 'false' as the result");
+            code.push(ZOP::StoreVariable{ variable: save_var.clone(), value: const_false });
+        }
+    };
     code.push(ZOP::Label {name: label.to_string()});
     code.push(ZOP::SetVarType{variable: save_var.clone(), vartype: Type::Bool});
     free_var_if_temp(eval0, temp_ids);
