@@ -199,6 +199,7 @@ pub struct Zfile {
     pub force_unicode: bool,
     pub easter_egg: bool,
     pub no_colours: bool,
+    pub no_unicode: bool,
 }
 
 #[derive(Debug, PartialEq, Clone)]
@@ -237,10 +238,10 @@ impl Zfile {
 
     /// creates a new zfile
     pub fn new() -> Zfile {
-        Zfile::new_with_options(false, false, false, false)
+        Zfile::new_with_options(false, false, false, false, false)
     }
 
-    pub fn new_with_options(force_unicode: bool, easter_egg: bool, no_colours: bool, half_memory: bool) -> Zfile {
+    pub fn new_with_options(force_unicode: bool, easter_egg: bool, no_colours: bool, half_memory: bool, no_unicode: bool) -> Zfile {
         Zfile {
             data: Bytes{bytes: Vec::new()},
             unicode_table: Vec::new(),
@@ -258,11 +259,12 @@ impl Zfile {
             force_unicode: force_unicode,
             easter_egg: easter_egg,
             no_colours: no_colours,
+            no_unicode: no_unicode,
         }
     }
 
     pub fn new_with_cfg(cfg: &Config) -> Zfile {
-        Zfile::new_with_options(cfg.force_unicode, cfg.easter_egg, cfg.no_colours, cfg.half_memory)
+        Zfile::new_with_options(cfg.force_unicode, cfg.easter_egg, cfg.no_colours, cfg.half_memory, cfg.no_unicode)
     }
 
     /// creates the header of a zfile
@@ -557,7 +559,7 @@ impl Zfile {
         self.data.append_bytes(&bytes);
         match instr {
             &ZOP::PrintUnicode{c} => self.op_print_unicode_char(c),
-            &ZOP::PrintUnicodeVar{ref var} => self.op_print_unicode_var(var),
+            &ZOP::PrintUnicodeVar{ref var} => if self.no_unicode == false { self.op_print_unicode_var(var) } else { self.emit(vec![ZOP::Call2NWithArg{jump_to_label: "print_char".to_string(), arg: Operand::new_var(var.id.clone())}]) },
             &ZOP::PrintUnicodeStr{ref address} => self.op_print_unicode_str(address),
             &ZOP::Print{ref text} => self.op_print(text),
             &ZOP::PrintOps{ref text} => self.gen_print_ops(text),
@@ -731,6 +733,7 @@ impl Zfile {
         self.routine_itoa();
         self.routine_print_var();
         self.routine_add_types();
+        self.routine_print_char();
         self.write_jumps();
         self.write_strings();
     }
@@ -1481,6 +1484,23 @@ impl Zfile {
         ]);
     }
 
+    /// print one zscii character given as argument
+    pub fn routine_print_char(&mut self) {
+        self.emit(vec![
+            ZOP::Routine{name: "print_char".to_string(), count_variables: 2},
+            ZOP::JL{operand1: Operand::new_var(1), operand2: Operand::new_large_const(32), jump_to_label: "print_char_?".to_string()},
+            ZOP::JG{operand1: Operand::new_var(1), operand2: Operand::new_large_const(126), jump_to_label: "print_char_?".to_string()},
+            ZOP::Jump{jump_to_label: "print_char_normal".to_string()},
+            ZOP::Label{name: "print_char_?".to_string()},
+            ZOP::StoreVariable{variable: Variable::new(1), value: Operand::new_large_const('?' as i16)},
+            ZOP::Label{name: "print_char_normal".to_string()},
+        ]);
+        self.op_print_char(&Variable::new(1));
+        self.emit(vec![
+            ZOP::Ret{value: Operand::new_const(0)}
+        ]);
+    }
+
     // ================================
     // specific ops
 
@@ -1732,6 +1752,13 @@ impl Zfile {
 
     pub fn op_print_unicode_str(&mut self, address: &Operand) {
         self.emit(vec![ZOP::Call2NWithArg{jump_to_label: "print_unicode".to_string(), arg: address.clone()}]);
+    }
+
+    // print zscii character
+    pub fn op_print_char(&mut self, variable: &Variable) {
+        let args: Vec<ArgType> = vec![ArgType::Variable, ArgType::Nothing, ArgType::Nothing, ArgType::Nothing];
+        self.op_var(0x5, args);
+        self.data.append_byte(variable.id);
     }
 
     // ================================

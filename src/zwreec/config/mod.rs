@@ -169,6 +169,7 @@ pub struct Config {
     pub force_unicode: bool,
     pub no_colours: bool,
     pub half_memory: bool,
+    pub no_unicode: bool,
     /// Instruct compiler to run these test-cases
     pub test_cases: Vec<TestCase>,
 }
@@ -189,6 +190,7 @@ impl Config {
             force_unicode: false,
             no_colours: false,
             half_memory: false,
+            no_unicode: false,
             test_cases: Vec::new(),
         }
     }
@@ -244,6 +246,10 @@ impl Config {
                      cfg.half_memory = true;
                      debug!("enabled half-memory");
                 },
+                "no-unicode" => {
+                     cfg.no_unicode = true;
+                     debug!("enabled no-unicode");
+                },
                 _ => {
                     error!("Cannot enable feature {} - feature not known.", s);
                 }
@@ -267,6 +273,10 @@ impl Config {
                 "half-memory" => {
                      cfg.half_memory = false;
                      debug!("disabled half-memory");
+                },
+                "no-unicode" => {
+                     cfg.no_unicode = false;
+                     debug!("disabled no-unicode");
                 },
                 _ => {
                     error!("Cannot disable feature {} - feature not known.", s);
@@ -385,7 +395,9 @@ pub fn zwreec_usage(verbose: bool, mut opts: getopts::Options, brief: &str) -> S
     half-memory (disabled)
         Cut down space for static variable strings and heap in order to have
         binaries probably smaller than 64kB as only DZIP32.exe on DOS can handle
-        larger files, but DZIP.exe has a limit on 64kB"
+        larger files, but DZIP.exe has a limit on 64kB
+    no-unicode (disabled)
+        Replaces opcode print_unicode with print_char to let it run on JZIP"
     } else {
         "Additional help:
     --help -v           Print the full set of options zwreec accepts"
