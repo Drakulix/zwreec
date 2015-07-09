@@ -98,6 +98,7 @@ impl<I: Sized+Iterator> FilteringScanExt for I {
     }
 }
 
+
 #[derive(Clone)]
 pub enum ParseResult {
     Continue,
@@ -166,6 +167,69 @@ impl<A:Clone, I: Sized+Iterator<Item=A>>ParserExt for I {
         Parser{iter: self, f: f, state: initial_state, iter_state: ParseResult::Continue, current_elem: None}
     }
 }
+
+
+#[must_use = "iterator adaptors are lazy and do nothing unless consumed"]
+#[derive(Clone)]
+pub struct Constructor<I, St, B, F>
+    where
+    I: Iterator,
+    B: Clone,
+    F: FnMut(&mut St, &mut Option<B>, I::Item) -> Option<B> {
+        iter: I,
+        state: St,
+        f: F,
+        current_elem: Option<B>,
+}
+
+impl<I, St, B, F> Iterator for Constructor<I, St, B, F> where
+    I: Iterator,
+    B: Clone,
+    F: FnMut(&mut St, &mut Option<B>, I::Item) -> Option<B>,
+{
+    type Item = B;
+
+    #[inline]
+    fn next(&mut self) -> Option<B> {
+        while let Some(elem) =  self.iter.next() {
+            match (self.f)(&mut self.state, &mut self.current_elem, elem) {
+                Some(elem) => {
+                    let return_val = self.current_elem.clone();
+                    self.current_elem = Some(elem);
+                    match return_val {
+                        Some(value) => return Some(value),
+                        None => continue,
+                    }
+                },
+                None => continue,
+            }
+        }
+
+        let result = self.current_elem.clone();
+        self.current_elem = None;
+        result
+    }
+
+    #[inline]
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        let (_, upper) = self.iter.size_hint();
+        (0, upper) // can't know a lower bound, due to the waiting function
+    }
+}
+
+pub trait ConstructorExt {
+    fn construct_state<St, B, F>(self, state: St, f: F) -> Constructor<Self, St, B, F>
+        where Self: Sized+Iterator, B: Clone, F: Fn(&mut St, &mut Option<B>, Self::Item) -> Option<B>;
+}
+
+impl<I: Sized+Iterator>ConstructorExt for I {
+    fn construct_state<St, B, F>(self, state: St, f: F) -> Constructor<Self, St, B, F>
+        where Self: Sized+Iterator, B: Clone, F: Fn(&mut St, &mut Option<B>, I::Item) -> Option<B>,
+    {
+        Constructor{iter: self, state: state, f: f, current_elem: None}
+    }
+}
+
 
 #[test]
 fn peeking_test() {
@@ -260,4 +324,28 @@ fn parsing_test() {
     }
 
     assert_eq!(result, vec![1, 2, 3, 4, 5]);
+}
+
+#[test]
+fn construct_test() {
+    use std::cell::Cell;
+
+    let test: Vec<u8> = vec![3, 3, 3, 2, 4, 5, 2];
+
+    let result : Vec<u8> = test.into_iter().construct_state(0, |ref mut _state, ref mut value, i| {
+        if value.is_none() {
+            return Some(Cell::new(i)); //first value
+        }
+
+        let old_val = value.as_ref().unwrap().get();
+        value.as_ref().unwrap().set(old_val + i);
+
+        if value.as_ref().unwrap().get() >= 5 {
+            Some(Cell::new(0)) //new value
+        } else {
+            None //continue constucting
+        }
+    }).map(|x| { x.get() % 5 }).collect();
+
+    assert_eq!(result, vec![1, 0, 4, 2]);
 }
