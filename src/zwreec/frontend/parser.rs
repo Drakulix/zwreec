@@ -100,28 +100,28 @@ pub enum Elem {
 ///
 /// The `zwreec::utils::extensions` module defines a new iterator `Parser`.
 /// This struct stores the state for this iterator.
-pub struct ParseState<'a> {
+pub struct ParseState {
     stack: Vec<Elem>,
     grammar_func: Box<Fn(&Config, NonTerminalType, Option<Token>, &mut Vec<Elem>) -> Option<ASTOperation>>,
-    cfg: &'a Config
+    cfg: Config
 }
 
 //==============================
 // parser
 
 #[allow(dead_code)]
-pub struct Parser<'a> {
-    cfg: &'a Config
+pub struct Parser {
+    cfg: Config
 }
 
-impl<'a> Parser<'a> {
-    pub fn new(cfg: &Config) -> Parser {
+impl Parser {
+    pub fn new(cfg: Config) -> Parser {
         Parser {
             cfg: cfg
         }
     }
 
-    pub fn parse<I: Iterator<Item=Token>>(&self, tokens: I) ->
+    pub fn parse<I: Iterator<Item=Token>>(self, tokens: I) ->
        ::utils::extensions::Parser<I, Token, ParseState, fn(&mut ParseState, Option<Token>) -> (ParseResult, Option<ASTOperation>)> {
 
         // prepare stack
@@ -140,7 +140,7 @@ impl<'a> Parser<'a> {
                 fn parse(state: &mut ParseState, token: Option<Token>) -> (ParseResult, Option<ASTOperation>) {
                     match token {
                         Some(token) => match state.stack.pop() {
-                            Some(Elem::NonTerminal(non_terminal)) => (ParseResult::Halt, (state.grammar_func)(state.cfg, non_terminal, Some(token), &mut state.stack)),
+                            Some(Elem::NonTerminal(non_terminal)) => (ParseResult::Halt, (state.grammar_func)(&state.cfg, non_terminal, Some(token), &mut state.stack)),
                             Some(Elem::Terminal(stack_token)) => {
                                 if stack_token.is_same_token(&token) {
                                     (ParseResult::Continue, None)
@@ -156,7 +156,7 @@ impl<'a> Parser<'a> {
                             },
                         },
                         None => match state.stack.pop() {
-                            Some(Elem::NonTerminal(non_terminal)) => (ParseResult::Continue, (state.grammar_func)(state.cfg, non_terminal, None, &mut state.stack)),
+                            Some(Elem::NonTerminal(non_terminal)) => (ParseResult::Continue, (state.grammar_func)(&state.cfg, non_terminal, None, &mut state.stack)),
                             Some(Elem::Terminal(stack_token)) => {
                                 error_panic!(state.cfg => ParserError::TokenDoNotMatch{token: token, stack: stack_token});
                                 (ParseResult::Continue, None)

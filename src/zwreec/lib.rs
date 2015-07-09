@@ -110,6 +110,7 @@ pub mod frontend;
 
 use config::{Config,TestCase};
 use std::io::{Read,Write};
+use utils::extensions::cached;
 
 
 /// Compiles a Twee Input to Zcode
@@ -139,26 +140,49 @@ use std::io::{Read,Write};
 pub fn compile<R: Read, W: Write>(cfg: Config, input: &mut R, output: &mut W) {
 
     // check the data if it has a bom
-    let mut cursor = frontend::screener::handle_bom_encoding(input);
+    let cursor = frontend::screener::handle_bom_encoding(input);
 
     // tokenize
-    let tokens = frontend::lexer::lex(&cfg, &mut cursor);
+    let cfg_tokens = cfg.clone();
+    let (tokens, join_tokens) = cached(move || {
+        frontend::lexer::lex(cfg_tokens, cursor)
+    });
 
     // create parser
-    let parser = frontend::parser::Parser::new(&cfg);
-
-    // create ast builder
-    //let ast_builder = frontend::ast::ASTBuilder::new(&cfg);
+    let cfg_parser = cfg.clone();
+    let (ast_ops, join_ops) = cached(move || {
+        frontend::parser::Parser::new(cfg_parser).parse(
+            tokens.inspect(|ref token| {
+                debug!("{:?}", token);
+            })
+        )
+    });
 
     // build up ast from tokens
-    let ast = frontend::ast::ASTBuilder::build(&cfg, parser.parse(tokens.inspect(|ref token| {
-        debug!("{:?}", token);
-    })));
+    let cfg_ast = cfg.clone();
+    let (ast, join_ast) = cached( move || {
+        frontend::ast::ASTBuilder::build(cfg_ast, ast_ops)
+    });
 
     // create code
     backend::codegen::generate_zcode(&cfg, ast.inspect(|ref passage| {
         debug!("{:?}", passage);
     }), output);
+
+    match join_tokens.join() {
+        Err(x) => panic!(x),
+        _ => {}
+    }
+
+    match join_ops.join() {
+        Err(x) => panic!(x),
+        _ => {}
+    }
+
+    match join_ast.join() {
+        Err(x) => panic!(x),
+        _ => {}
+    }
 }
 
 /// Run internal library tests.
