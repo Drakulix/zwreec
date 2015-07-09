@@ -464,6 +464,8 @@ fn eval_unary_minus<'a>(eval: &Operand, code: &mut Vec<ZOP>, temp_ids: &mut Vec<
     Operand::new_var(save_var.id)
 }
 
+/// Checks if both operands are temporary variables. If so, the id of the second
+/// variable is pushed onto the temp_ids stack for reuse.
 fn free_var_if_both_temp (eval0: &Operand, eval1: &Operand, temp_ids: &mut Vec<u8>) {
     match eval0 {
         &Operand::Var(ref var1) => {
@@ -480,6 +482,8 @@ fn free_var_if_both_temp (eval0: &Operand, eval1: &Operand, temp_ids: &mut Vec<u
     };
 }
 
+/// Checks if the given operand is a temporary variable and if so,
+/// pushes the id onto the temp_ids stack for reuse.
 fn free_var_if_temp (operand: &Operand, temp_ids: &mut Vec<u8>) {
     match operand {
         &Operand::Var(ref var) => {
@@ -490,6 +494,8 @@ fn free_var_if_temp (operand: &Operand, temp_ids: &mut Vec<u8>) {
     }
 }
 
+/// Determine what type an expression becomes considering
+/// the operand types a and b.
 fn determine_result_type(a: Type, b: Type) -> Type {
     if a == Type::String || b == Type::String {
         Type::String
@@ -498,6 +504,9 @@ fn determine_result_type(a: Type, b: Type) -> Type {
     }
 }
 
+/// Determines a variable where the result of an operation on operand1 and operand2 should
+/// be saved. if for example both operands are temporary ids, then one of them can be used
+/// to store the result. Otherwise a new temp_id will be popped from the stack.
 fn determine_save_var(operand1: &Operand, operand2: &Operand, temp_ids: &mut Vec<u8>) -> Variable {
     let type1 = match operand1 {
         &Operand::Var(ref var) => var.vartype.clone(),
@@ -531,6 +540,7 @@ fn determine_save_var(operand1: &Operand, operand2: &Operand, temp_ids: &mut Vec
     }
 }
 
+/// Returns the number of constants, checking operand1 and operand2.
 fn count_constants(operand1: &Operand, operand2: &Operand) -> u8 {
     let mut const_count: u8 = 0;
     if operand1.is_const() {
@@ -542,6 +552,7 @@ fn count_constants(operand1: &Operand, operand2: &Operand) -> u8 {
     const_count
 }
 
+/// Converts a boolean string to an integer constant operand
 fn boolstr_to_const(string: &str) -> Operand {
     match string {
         "true" => Operand::Const(Constant { value: 1 }),
