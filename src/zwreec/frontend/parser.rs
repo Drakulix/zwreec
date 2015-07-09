@@ -191,7 +191,7 @@ impl<'a> Parser<'a> {
 
                     None
                 },
-                (Sf, _ ) => {                    
+                (Sf, _ ) => {
                     // Sf -> ε
 
                     None
@@ -221,7 +221,7 @@ impl<'a> Parser<'a> {
                 },
 
                 // Tags
-                (Tags, tok @ TokTag { .. } ) => {                    
+                (Tags, tok @ TokTag { .. } ) => {
                     stack.push(NonTerminal(Tagsf));
                     stack.push(Terminal(tok));
 
@@ -229,12 +229,12 @@ impl<'a> Parser<'a> {
                 },
 
                 // tagsf
-                (Tagsf, TokTag { .. } ) => {                    
+                (Tagsf, TokTag { .. } ) => {
                     stack.push(NonTerminal(Tags));
 
                     None
                 },
-                (Tagsf, _ ) => {                    
+                (Tagsf, _ ) => {
                     // Tagsf -> ε
 
                     None
@@ -255,6 +255,12 @@ impl<'a> Parser<'a> {
 
                     None
                 },
+                (PassageContent, tok @ TokFormatHeading { .. } ) => {
+                    stack.push(NonTerminal(PassageContent));
+                    stack.push(Terminal(tok.clone()));
+
+                    Some(AddChild(tok))
+                },
                 (PassageContent, TokPassageLink { .. } ) => {
                     stack.push(NonTerminal(PassageContent));
                     stack.push(NonTerminal(Link));
@@ -267,30 +273,35 @@ impl<'a> Parser<'a> {
 
                     Some(AddChild(tok))
                 },
-                (PassageContent, TokMacroDisplay { .. } ) |
-                (PassageContent, TokMacroSet { .. } ) |
-                (PassageContent, TokMacroIf  { .. } ) |
-                (PassageContent, TokMacroPrint { .. } ) |
-                (PassageContent, TokVariable { .. } ) |
+                (PassageContent, TokMacroDisplay    { .. } ) |
+                (PassageContent, TokMacroSet        { .. } ) |
+                (PassageContent, TokMacroIf         { .. } ) |
+                (PassageContent, TokMacroPrint      { .. } ) |
+                (PassageContent, TokVariable        { .. } ) |
+                (PassageContent, TokArrayLength     { .. } ) |
+                (PassageContent, TokArrayAccess     { .. } ) |
+                (PassageContent, TokMacroSilently   { .. } ) |
+                (PassageContent, TokMacroNoBr   { .. } ) |
                 (PassageContent, TokMacroContentVar { .. } ) => {
                     stack.push(NonTerminal(PassageContent));
                     stack.push(NonTerminal(Macro));
 
                     None
                 },
-                (PassageContent, tok @ TokMacroEndIf { .. }) => {
+                (PassageContent, tok @ TokMacroEndIf { .. } ) => {
                     debug!("pop TokMacroEndIf Passage;");
 
                     // jump one ast-level higher
                     Some(UpChild(tok))
                 },
-                (PassageContent, TokFormatBoldEnd { .. } ) => {
+                (PassageContent, TokFormatBoldEnd    { .. } ) |
+                (PassageContent, TokFormatItalicEnd  { .. } ) => {
                     // jump one ast-level higher
                     Some(Up)
                 },
-                (PassageContent, TokFormatItalicEnd { .. } ) => {
-                    // jump one ast-level higher
-                    Some(Up)
+                (PassageContent, tok @ TokMacroEndSilently { .. } ) |
+                (PassageContent, tok @ TokMacroEndNoBr     { .. } ) => {
+                    Some(ChildUp(tok))
                 },
                 (PassageContent, _) => {
                     // PassageContent -> ε
@@ -398,6 +409,24 @@ impl<'a> Parser<'a> {
 
                     Some(ChildDown(tok))
                 }
+                (Macro, tok @ TokMacroSilently { .. } ) => {
+                    stack.push(Terminal(TokMacroEnd {location: (0, 0)} ));
+                    stack.push(Terminal(TokMacroEndSilently {location: (0, 0)}));
+                    stack.push(NonTerminal(PassageContent));
+                    stack.push(Terminal(TokMacroEnd {location: (0, 0)} ));
+                    stack.push(Terminal(tok.clone()));
+
+                    Some(ChildDown(tok))
+                }
+                (Macro, tok @ TokMacroNoBr { .. } ) => {
+                    stack.push(Terminal(TokMacroEnd {location: (0, 0)} ));
+                    stack.push(Terminal(TokMacroEndNoBr {location: (0, 0)}));
+                    stack.push(NonTerminal(PassageContent));
+                    stack.push(Terminal(TokMacroEnd {location: (0, 0)} ));
+                    stack.push(Terminal(tok.clone()));
+
+                    Some(ChildDown(tok))
+                }
 
                 // means <<$var>>
                 (Macro, tok @ TokMacroContentVar { .. }) => {
@@ -440,13 +469,15 @@ impl<'a> Parser<'a> {
                 },
 
                 // ExpressionList
-                (ExpressionList, TokVariable { .. } ) |
-                (ExpressionList, TokInt      { .. } ) |
-                (ExpressionList, TokString   { .. } ) |
-                (ExpressionList, TokBoolean  { .. } ) |
-                (ExpressionList, TokAssign   { .. } ) |
-                (ExpressionList, TokFunction { .. } ) |
-                (ExpressionList, TokParenOpen{ .. } ) => {
+                (ExpressionList, TokVariable    { .. } ) |
+                (ExpressionList, TokArrayLength { .. } ) |
+                (ExpressionList, TokArrayAccess { .. } ) |
+                (ExpressionList, TokInt         { .. } ) |
+                (ExpressionList, TokString      { .. } ) |
+                (ExpressionList, TokBoolean     { .. } ) |
+                (ExpressionList, TokAssign      { .. } ) |
+                (ExpressionList, TokFunction    { .. } ) |
+                (ExpressionList, TokParenOpen   { .. } ) => {
                     stack.push(NonTerminal(ExpressionListf));
                     stack.push(NonTerminal(Expression));
 
@@ -485,6 +516,8 @@ impl<'a> Parser<'a> {
 
                 // Expression
                 (Expression, TokVariable { .. } ) |
+                (Expression, TokArrayLength { .. } ) |
+                (Expression, TokArrayAccess { .. } ) |
                 (Expression, TokInt      { .. } ) |
                 (Expression, TokString   { .. } ) |
                 (Expression, TokBoolean  { .. } ) |
@@ -519,6 +552,8 @@ impl<'a> Parser<'a> {
 
                 // E
                 (E, TokVariable { .. } ) |
+                (E, TokArrayAccess { .. } ) |
+                (E, TokArrayLength { .. } ) |
                 (E, TokInt      { .. } ) |
                 (E, TokString   { .. } ) |
                 (E, TokBoolean  { .. } ) |
@@ -568,6 +603,8 @@ impl<'a> Parser<'a> {
 
                 // T
                 (T, TokVariable { .. } ) |
+                (T, TokArrayAccess { .. } ) |
+                (T, TokArrayLength { .. } ) |
                 (T, TokInt      { .. } ) |
                 (T, TokString   { .. } ) |
                 (T, TokBoolean  { .. } ) |
@@ -615,6 +652,8 @@ impl<'a> Parser<'a> {
 
                 // B
                 (B, TokVariable { .. } ) |
+                (B, TokArrayAccess { .. } ) |
+                (B, TokArrayLength { .. } ) |
                 (B, TokInt      { .. } ) |
                 (B, TokString   { .. } ) |
                 (B, TokBoolean  { .. } ) |
@@ -646,7 +685,7 @@ impl<'a> Parser<'a> {
 
                 // B2
                 (B2, TokCompOp { location, op_name: op }) => match &*op {
-                    "is" | "==" | "eq" | "neq" | ">" | "gt" | ">=" | "gte" | "<" | "lt" | "<=" | "lte" => {
+                    "is" | "==" | "eq" | "!=" | "neq" | ">" | "gt" | ">=" | "gte" | "<" | "lt" | "<=" | "lte" => {
                         stack.push(NonTerminal(B2));
                         stack.push(NonTerminal(F));
                         stack.push(Terminal(TokCompOp{location: location.clone(), op_name: op.clone()}));
@@ -662,6 +701,8 @@ impl<'a> Parser<'a> {
 
                 // F
                 (F, TokVariable { .. } ) |
+                (F, TokArrayAccess { .. } ) |
+                (F, TokArrayLength { .. } ) |
                 (F, TokInt      { .. } ) |
                 (F, TokString   { .. } ) |
                 (F, TokBoolean  { .. } ) |
@@ -709,6 +750,8 @@ impl<'a> Parser<'a> {
 
                 // G
                 (G, TokVariable { .. } ) |
+                (G, TokArrayAccess { .. } ) |
+                (G, TokArrayLength { .. } ) |
                 (G, TokInt      { .. } ) |
                 (G, TokString   { .. } ) |
                 (G, TokBoolean  { .. } ) |
@@ -802,6 +845,16 @@ impl<'a> Parser<'a> {
 
                     Some(AddChild(tok))
                 },
+                (H, tok @ TokArrayAccess { .. } ) => {
+                    stack.push(Terminal(tok.clone()));
+
+                    Some(AddChild(tok))
+                },
+                (H, tok @ TokArrayLength { .. } ) => {
+                    stack.push(Terminal(tok.clone()));
+
+                    Some(AddChild(tok))
+                },
                 (H, TokFunction { .. } ) => {
                     stack.push(NonTerminal(Function));
 
@@ -830,6 +883,8 @@ impl<'a> Parser<'a> {
                     None
                 },
                 (Functionf, TokVariable { .. } ) |
+                (Functionf, TokArrayLength { .. } ) |
+                (Functionf, TokArrayAccess { .. } ) |
                 (Functionf, TokInt      { .. } ) |
                 (Functionf, TokString   { .. } ) |
                 (Functionf, TokBoolean  { .. } ) |
@@ -842,6 +897,8 @@ impl<'a> Parser<'a> {
 
                 // Arguments
                 (Arguments, TokVariable { .. } ) |
+                (Arguments, TokArrayAccess { .. } ) |
+                (Arguments, TokArrayLength { .. } ) |
                 (Arguments, TokInt      { .. } ) |
                 (Arguments, TokString   { .. } ) |
                 (Arguments, TokBoolean  { .. } ) |

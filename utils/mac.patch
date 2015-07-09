@@ -1,0 +1,12 @@
+16a17,19
+>     part_one(file);
+>     part_two(file);
+> }
+18c21
+< 
+---
+> fn part_one(file: &mut Zfile) {
+3185a3189,3191
+> }
+> 
+> fn part_two(file: &mut Zfile) {

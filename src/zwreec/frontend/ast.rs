@@ -3,151 +3,183 @@
 
 use std::fmt::{Debug, Display, Formatter, Result, Write};
 use std::collections::HashSet;
+use std::iter::Scan;
 
 use config::Config;
 use frontend::expressionparser;
 use frontend::lexer::Token;
 use frontend::lexer::Token::{TokMacroIf, TokMacroElseIf, TokExpression, TokPassage};
 
+use ::utils::extensions::{Constructor, ConstructorExt};
 //==============================
 // ast
 
-pub struct ASTBuilder<'a> {
+pub struct ASTBuilder {
     path: Vec<usize>,
-    is_in_if_expression: bool,
-    cfg: &'a Config,
-    ast: AST,
+    is_in_if_expression: bool
 }
 
 pub struct AST {
     pub passages: Vec<ASTNode>,
 }
 
+/// the parser use these ASTOperations to create the ast
 pub enum ASTOperation {
     AddPassage(Token),
     AddChild(Token),
     ChildDown(Token),
+    ChildUp(Token),
     Up,
     UpChild(Token),
     UpChildDown(Token),
     UpSpecial,
 }
 
-impl<'a> ASTBuilder<'a> {
-    pub fn new(cfg: &'a Config) -> ASTBuilder {
+impl ASTBuilder {
+    fn new() -> ASTBuilder {
         ASTBuilder {
             path: Vec::new(),
-            is_in_if_expression: false,
-            cfg: cfg,
-            ast: AST {
-                passages: Vec::new()
+            is_in_if_expression: false
+        }
+    }
+
+    ///constructs Iterator over all Passages
+    pub fn build<I: Iterator<Item=ASTOperation>>(cfg: &Config, ops: I)
+        -> Scan<Constructor<I, ASTBuilder, ASTNode, fn(&mut ASTBuilder, &mut Option<ASTNode>, ASTOperation) -> Option<ASTNode>>, &Config, fn(&mut &Config, ASTNode) -> Option<ASTNode>>
+        //concrete return type because of optimization reasons. Read and use it as "Iterator<ASTNode>"
+    {
+        ops.construct_state(ASTBuilder::new(),
+        {
+            fn construct(builder: &mut ASTBuilder, passage: &mut Option<ASTNode>, op: ASTOperation) -> Option<ASTNode>
+            {
+                builder.operation(passage, op)
             }
-        }
+            construct as fn(&mut ASTBuilder, &mut Option<ASTNode>, ASTOperation) -> Option<ASTNode> //necessary cast is a known bug
+        }).scan(cfg,
+            {
+                fn scan(cfg: &mut &Config, x: ASTNode) -> Option<ASTNode>
+                {
+                    let mut y = x.clone();
+                    y.parse_expressions(*cfg);
+                    Some(y)
+                }
+                scan
+            }
+        )
     }
 
-    pub fn build<I: Iterator<Item=ASTOperation>>(mut self, ops: I) -> AST {
-        for op in ops {
-            self.operation(op);
-        }
-
-        self.parse_expressions();
-        self.ast
-    }
-
-    pub fn operation(&mut self, op: ASTOperation) {
+    /// calls the matching function to a given ASTOperation
+    pub fn operation(&mut self, current_passage: &mut Option<ASTNode>, op: ASTOperation) -> Option<ASTNode> {
         use self::ASTOperation::*;
         match op {
             AddPassage(passage) => self.add_passage(passage),
-            AddChild(child) => self.add_child(child),
-            ChildDown(child) => self.child_down(child),
+            AddChild(child) => self.add_child(current_passage, child),
+            ChildDown(child) => self.child_down(current_passage, child),
+            ChildUp(child) => self.child_up(current_passage, child),
             Up => self.up(),
-            UpChild(child) => self.up_child(child),
-            UpChildDown(child) => self.up_child_down(child),
+            UpChild(child) => self.up_child(current_passage, child),
+            UpChildDown(child) => self.up_child_down(current_passage, child),
             UpSpecial => self.up_special(),
         }
     }
 
-    /// goes through the whole tree and parse the expressions
-    fn parse_expressions(&mut self) {
-        for child in &mut self.ast.passages {
-            child.parse_expressions(&self.cfg);
+    /// counts the childs of the path in the asts
+    pub fn count_childs(&self, current_passage: &mut Option<ASTNode>, path: Vec<usize>) -> usize {
+        if let Some(_) = path.first() {
+            current_passage.as_ref().unwrap().count_childs(path.to_vec())
+        } else {
+            0
         }
     }
 
     /// adds a passage to the path in the ast
-    pub fn add_passage(&mut self, token: Token) {
+    pub fn add_passage(&mut self, token: Token) -> Option<ASTNode> {
         self.path.clear();
-        let ast_count_passages = self.ast.count_childs(self.path.to_vec());
-
-        let node = ASTNode::Passage(NodePassage { category: token, childs: Vec::new() });
-        self.ast.passages.push(node);
-
-        self.path.push(ast_count_passages);
+        Some(ASTNode::Passage(NodePassage { category: token, childs: Vec::new() }))
     }
 
     /// adds a child to the path in the ast
-    pub fn add_child(&mut self, token: Token) {
-        if let Some(index) = self.path.first() {
-            let mut new_path: Vec<usize> = self.path.to_vec();
-            new_path.remove(0);
-            self.ast.passages[*index].add_child(new_path, token);
+    pub fn add_child(&mut self, current_passage_opt: &mut Option<ASTNode>, token: Token) -> Option<ASTNode> {
+        if let Some(ref mut current_passage) = current_passage_opt.as_mut() {
+            current_passage.add_child(self.path.to_vec(), token);
+            None
         } else {
-            self.ast.passages.push(ASTNode::Default(NodeDefault { category: token, childs: Vec::new() }));
+            Some(ASTNode::Default(NodeDefault { category: token, childs: Vec::new() }))
         }
     }
 
     /// adds a child an goees one child down
-    pub fn child_down(&mut self, token: Token) {
+    pub fn child_down(&mut self, current_passage: &mut Option<ASTNode>, token: Token) -> Option<ASTNode> {
         //
         if token.clone().is_same_token(&TokMacroIf { location: (0, 0) }) ||
            token.clone().is_same_token(&TokMacroElseIf { location: (0, 0) }) {
             self.is_in_if_expression = true;
         }
 
-        let ast_count_childs = self.ast.count_childs(self.path.to_vec());
-        self.add_child(token);
+        let ast_count_childs = current_passage.as_ref().unwrap().count_childs(self.path.to_vec());
+        let result = self.add_child(current_passage, token);
         self.path.push(ast_count_childs);
+        result
     }
 
     /// adds one child and goes down. adds snd child and goes down.
-    pub fn two_childs_down(&mut self, child1: Token, child2: Token) {
-        self.child_down(child1);
-        self.child_down(child2);
+    pub fn two_childs_down(&mut self, current_passage: &mut Option<ASTNode>, child1: Token, child2: Token) -> Option<ASTNode> {
+        match self.child_down(current_passage, child1) {
+            Some(new_passage) => {
+                self.child_down(&mut Some(new_passage.clone()), child2);
+                Some(new_passage)
+            },
+            None => {
+                self.child_down(current_passage, child2)
+            }
+        }
+
     }
 
     /// goes one lvl up
-    pub fn up(&mut self) {
+    pub fn up(&mut self) -> Option<ASTNode> {
         self.path.pop();
+        None
     }
 
     /// special up of the if-expression
-    pub fn up_special(&mut self) {
+    pub fn up_special(&mut self) -> Option<ASTNode> {
         if !self.is_in_if_expression {
             self.path.pop();
         } else {
             self.is_in_if_expression = false;
         }
+        None
+    }
+
+    /// adds a child and goes one lvl up
+    pub fn child_up(&mut self, current_passage: &mut Option<ASTNode>, token: Token) -> Option<ASTNode> {
+        let result = self.add_child(current_passage, token);
+        self.up();
+        result
     }
 
     /// goes one lvl up and adds and child
-    pub fn up_child(&mut self, token: Token) {
+    pub fn up_child(&mut self, current_passage: &mut Option<ASTNode>, token: Token) -> Option<ASTNode> {
         self.up();
-        self.add_child(token);
+        self.add_child(current_passage, token)
     }
 
     /// goes one lvl up, adds an child and goes one lvl down
-    pub fn up_child_down(&mut self, token: Token) {
+    pub fn up_child_down(&mut self, current_passage: &mut Option<ASTNode>, token: Token) -> Option<ASTNode> {
         self.up();
-        self.child_down(token);
+        self.child_down(current_passage, token)
     }
 
     /// goes two lvl up
-    pub fn two_up(&mut self) {
+    pub fn two_up(&mut self) -> Option<ASTNode> {
         self.up();
         self.up();
+        None
     }
 }
 
+/// ast-implementation
 impl AST {
     /// counts the childs of the path in the asts
     pub fn count_childs(&self, path: Vec<usize>) -> usize {
@@ -220,6 +252,7 @@ pub struct NodeDefault {
     pub childs: Vec<ASTNode>
 }
 
+/// the implementation of a node
 impl ASTNode {
     /// adds an child to the path in the ast
     pub fn add_child(&mut self, path: Vec<usize>, token: Token) {
@@ -279,6 +312,7 @@ impl ASTNode {
         }
     }
 
+    /// returns the current category of a node
     pub fn category(&self) -> Token {
         match self {
             &ASTNode::Passage(ref t) => {
@@ -290,6 +324,7 @@ impl ASTNode {
         }
     }
 
+    /// returns all childs of a node
     pub fn childs(&self) -> &Vec<ASTNode> {
         match self {
             &ASTNode::Passage(ref t) => {
@@ -301,6 +336,7 @@ impl ASTNode {
         }
     }
 
+    /// for nice ast-printing
     fn fmt_node(&self, f: &mut Formatter, indent: usize) -> Result {
         let mut spaces = "".to_string();
         for _ in 0..indent {
@@ -315,15 +351,7 @@ impl ASTNode {
         Ok(())
     }
 
-    /// prints an node of an ast
-    pub fn print(&self, force_print: bool) {
-        if force_print {
-            println!("{:?}", self);
-        } else {
-            debug!("{:?}", self);
-        }
-    }
-
+    /// wraps the ASTNode to NodeDefault
     pub fn as_default(&self) -> &NodeDefault {
         match self {
             &ASTNode::Default(ref def) => def,
@@ -383,8 +411,7 @@ mod tests {
             println!("{:?}", token);
         }));
 
-        let ast_builder = ASTBuilder::new(&cfg);
-        ast_builder.build(ast_ops)
+        AST { passages: ASTBuilder::build(&cfg, ast_ops).collect() }
     }
 
     /// checks expected
@@ -392,7 +419,6 @@ mod tests {
         for item in expected.iter() {
             let b = ast.is_specific_token(item.1.clone(), item.0.to_vec());
             if b == false {
-                //ast.print(true);
                 println!("FAILED WITH TOKEN {:?} at {:?}", item.0, item.1);
             }
             assert!(ast.is_specific_token(item.1.clone(), item.0.to_vec()));
@@ -758,7 +784,7 @@ mod tests {
 
     #[test]
     fn comp_expressions_test() {
-        let ast = test_ast("::Start\n<<print 5==5>>\n<<print 12345==1234>>\n<<print 5is5>>\n<<print 12345is1234>>\n<<print 10>=10>>\n<<print 15>=10>>\n<<print 8>=10>>\n<<print 10gte10>>\n<<print 15gte10>>\n<<print 8gte10>>\n<<print 10<=10>>\n<<print 15<=10>>\n<<print 8<=10>>\n<<print 10lte10>>\n<<print 8lte10>>\n<<print 15<10>>\n<<print 8<10>>\n<<print 10lt10>>\n<<print 15lt10>>\n<<print 8lt10>>\n<<print 10>10>>\n<<print 15>10>>\n<<print 8>10>>\n<<print 10gt10>>\n<<print 15gt10>>\n<<print 8gt10>>\n<<print 5neq5>>\n<<print 12345neq1234>>\n<<print \"hallo\"==\"hallo\">>\n<<print \"hallo\"==\"hallo2\">>\n");
+        let ast = test_ast("::Start\n<<print 5==5>>\n<<print 12345==1234>>\n<<print 5is5>>\n<<print 12345is1234>>\n<<print 10>=10>>\n<<print 15>=10>>\n<<print 8>=10>>\n<<print 10gte10>>\n<<print 15gte10>>\n<<print 8gte10>>\n<<print 10<=10>>\n<<print 15<=10>>\n<<print 8<=10>>\n<<print 10lte10>>\n<<print 8lte10>>\n<<print 15<10>>\n<<print 8<10>>\n<<print 10lt10>>\n<<print 15lt10>>\n<<print 8lt10>>\n<<print 10>10>>\n<<print 15>10>>\n<<print 8>10>>\n<<print 10gt10>>\n<<print 15gt10>>\n<<print 8gt10>>\n<<print 5neq5>>\n<<print 12345neq1234>>\n<<print 5!=5>>\n<<print 12345 != 1234>>\n<<print \"hallo\"==\"hallo\">>\n<<print \"hallo\"==\"hallo2\">>\n");
 
         let expected = vec!(
             (vec![0]                  , TokPassage { location: (1, 3), name: "Start".to_string() }),
@@ -932,16 +958,28 @@ mod tests {
             (vec![0,55]               , TokNewLine { location: (29, 23) }),
             (vec![0,56]               , TokMacroPrint { location: (30, 3) }),
             (vec![0,56,0]             , TokExpression),
-            (vec![0,56,0,0]           , TokCompOp { location: (30, 16), op_name: "==".to_string() }),
-            (vec![0,56,0,0,0]         , TokString { location: (30, 9), value: "hallo".to_string() }),
-            (vec![0,56,0,0,1]         , TokString { location: (30, 18), value: "hallo".to_string() }),
-            (vec![0,57]               , TokNewLine { location: (30, 27) }),
+            (vec![0,56,0,0]           , TokCompOp { location: (30, 10), op_name: "!=".to_string() }),
+            (vec![0,56,0,0,0]         , TokInt { location: (30, 9), value: 5 }),
+            (vec![0,56,0,0,1]         , TokInt { location: (30, 12), value: 5 }),
+            (vec![0,57]               , TokNewLine { location: (30, 15) }),
             (vec![0,58]               , TokMacroPrint { location: (31, 3) }),
             (vec![0,58,0]             , TokExpression),
-            (vec![0,58,0,0]           , TokCompOp { location: (31, 16), op_name: "==".to_string() }),
-            (vec![0,58,0,0,0]         , TokString { location: (31, 9), value: "hallo".to_string() }),
-            (vec![0,58,0,0,1]         , TokString { location: (31, 18), value: "hallo2".to_string() }),
-            (vec![0,59]               , TokNewLine { location: (31, 28) }),
+            (vec![0,58,0,0]           , TokCompOp { location: (31, 15), op_name: "!=".to_string() }),
+            (vec![0,58,0,0,0]         , TokInt { location: (31, 9), value: 12345 }),
+            (vec![0,58,0,0,1]         , TokInt { location: (31, 18), value: 1234 }),
+            (vec![0,59]               , TokNewLine { location: (31, 24) }),
+            (vec![0,60]               , TokMacroPrint { location: (32, 3) }),
+            (vec![0,60,0]             , TokExpression),
+            (vec![0,60,0,0]           , TokCompOp { location: (32, 16), op_name: "==".to_string() }),
+            (vec![0,60,0,0,0]         , TokString { location: (32, 9), value: "hallo".to_string() }),
+            (vec![0,60,0,0,1]         , TokString { location: (32, 18), value: "hallo".to_string() }),
+            (vec![0,61]               , TokNewLine { location: (32, 27) }),
+            (vec![0,62]               , TokMacroPrint { location: (33, 3) }),
+            (vec![0,62,0]             , TokExpression),
+            (vec![0,62,0,0]           , TokCompOp { location: (33, 16), op_name: "==".to_string() }),
+            (vec![0,62,0,0,0]         , TokString { location: (33, 9), value: "hallo".to_string() }),
+            (vec![0,62,0,0,1]         , TokString { location: (33, 18), value: "hallo2".to_string() }),
+            (vec![0,63]               , TokNewLine { location: (33, 28) }),
         );
 
         test_expected(expected, ast);

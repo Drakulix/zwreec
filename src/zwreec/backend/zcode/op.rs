@@ -1,3 +1,6 @@
+//! contains most of the op-codes (only the opcode who usees jumps or labels)
+//! are still in zfile
+
 pub use super::zfile::ArgType;
 pub use super::zfile::JumpType;
 pub use super::zfile::Zjump;
@@ -14,11 +17,18 @@ pub fn op_erase_window(value: i8) -> Vec<u8> {
     bytes
 }
 
+/// stores row and column as two u16 words to the given addr
+pub fn op_get_cursor(store_addr: &Operand) -> Vec<u8> {
+    let args: Vec<ArgType> = vec![arg_type(&store_addr), ArgType::Nothing, ArgType::Nothing, ArgType::Nothing];
+    let mut bytes = op_var(0x10, args);
+    // array address
+    write_argument(store_addr, &mut bytes);
+    bytes
+}
 
 /// calls a routine (the address is stored in a variable)
 pub fn op_call_1n_var(variable: u8) -> Vec<u8> {
     let mut bytes = op_1(0x0f, ArgType::Variable);
-    //self.add_jump(jump_to_label.to_string(), JumpType::Routine);
     bytes.push(variable);
     bytes
 }
@@ -61,6 +71,39 @@ pub fn op_storeb(array_address: &Operand, index: &Variable, variable: &Variable)
     bytes
 }
 
+/// stores a value to an array
+/// stores the value of operand to the address in: array_address + index
+pub fn op_storeboperand(array_address: &Operand, index: &Operand, operand: &Operand) -> Vec<u8> {
+    // assert!(array_address > 0, "not allowed array-address, becouse in _some_ interpreters (for example zoom) it crahs. -.-");
+    let args: Vec<ArgType> = vec![arg_type(&array_address), arg_type(&index), arg_type(&operand), ArgType::Nothing];
+    let mut bytes = op_var(0x02, args);
+
+    // array address
+    write_argument(array_address, &mut bytes);
+
+    // array index
+    write_argument(index, &mut bytes);
+
+    // value
+    write_argument(operand, &mut bytes);
+    bytes
+}
+
+/// loads a byte from an array in a variable
+/// loadb is an 2op, BUT with 3 ops -.-
+pub fn op_loadb(array_address: &Operand, index: &Operand, variable: &Variable) -> Vec<u8> {
+    let mut bytes = op_2(0x10, vec![arg_type(&array_address), arg_type(&index)]);
+
+    // array address
+    write_argument(array_address, &mut bytes);
+    // array index
+    write_argument(index, &mut bytes);
+
+    // variable
+    bytes.push(variable.id);
+    bytes
+}
+
 
 /// loads a word from an array in a variable
 /// loadw is an 2op, BUT with 3 ops -.-
@@ -85,7 +128,7 @@ pub fn op_read_char(local_var_id: u8) -> Vec<u8> {
     let mut bytes = op_var(0x16, args);
 
     // write argument value
-    bytes.push(0x00);
+    bytes.push(0x01);
 
     // write varible id
     bytes.push(local_var_id);
@@ -117,6 +160,33 @@ pub fn op_set_text_style(bold: bool, reverse: bool, monospace: bool, italic: boo
 }
 
 
+pub fn op_set_cursor(line: u8, col: u8) -> Vec<u8> {
+    let args: Vec<ArgType> = vec![ArgType::SmallConst, ArgType::SmallConst, ArgType::Nothing, ArgType::Nothing];
+    let mut bytes = op_var(0xF, args);
+
+    // write argument values
+    bytes.push(line);
+    bytes.push(col);
+    bytes
+}
+
+pub fn op_set_cursor_operand(row: &Operand, col: &Operand) -> Vec<u8> {
+    let args: Vec<ArgType> = vec![arg_type(&row), arg_type(&col), ArgType::Nothing, ArgType::Nothing];
+    let mut bytes = op_var(0xF, args);
+    // write argument values
+    write_argument(row, &mut bytes);
+    write_argument(col, &mut bytes);
+    bytes
+}
+
+pub fn op_erase_line() -> Vec<u8> {
+    let args: Vec<ArgType> = vec![ArgType::SmallConst, ArgType::Nothing, ArgType::Nothing, ArgType::Nothing];
+    let mut bytes = op_var(0xE, args);
+    // erase current line from cursor going
+    bytes.push(1);
+    bytes
+}
+
 /// Prints the value of a variable (only ints a possibe)
 pub fn op_print_num_var(variable: &Variable) -> Vec<u8> {
     let args: Vec<ArgType> = vec![ArgType::Variable, ArgType::Nothing, ArgType::Nothing, ArgType::Nothing];
@@ -126,8 +196,8 @@ pub fn op_print_num_var(variable: &Variable) -> Vec<u8> {
 }
 
 
-/// pulls an value off the stack to an variable
-/// SmallConst because pull takes an reference to an variable
+/// pulls an value off the stack to a variable
+/// SmallConst because pull takes an reference to a variable
 pub fn op_pull(variable: u8) -> Vec<u8> {
     let args: Vec<ArgType> = vec![ArgType::SmallConst, ArgType::Nothing, ArgType::Nothing, ArgType::Nothing];
     let mut bytes = op_var(0x09, args);
@@ -151,6 +221,14 @@ pub fn op_push_u16(value: u16) -> Vec<u8> {
     let args: Vec<ArgType> = vec![ArgType::LargeConst, ArgType::Nothing, ArgType::Nothing, ArgType::Nothing];
     let mut bytes = op_var(0x08, args);
     write_u16(value, &mut bytes);
+    bytes
+}
+
+/// pushs a variable on the stack
+pub fn op_push_var(variable: &Variable) -> Vec<u8> {
+    let args: Vec<ArgType> = vec![ArgType::Variable, ArgType::Nothing, ArgType::Nothing, ArgType::Nothing];
+    let mut bytes = op_var(0x08, args);
+    bytes.push(variable.id);
     bytes
 }
 
@@ -182,14 +260,12 @@ pub fn op_print_paddr(address: &Operand) -> Vec<u8> {
    bytes
 }
 
-
 /// prints string at given adress
 pub fn op_print_addr(address: &Operand) -> Vec<u8> {
    let mut bytes = op_1(0x07, arg_type(&address));
    write_argument(address, &mut bytes);
    bytes
 }
-
 
 /// returns a LargeConst
 pub fn op_ret(value: &Operand) -> Vec<u8> {
@@ -198,10 +274,18 @@ pub fn op_ret(value: &Operand) -> Vec<u8> {
     bytes
 }
 
-
-// saves an u8 to the variable
+/// saves an operand to the variable
 pub fn op_store_var(variable: &Variable, value: &Operand) -> Vec<u8> {
     let args: Vec<ArgType> = vec![ArgType::Reference, arg_type(&value)];
+    let mut bytes = op_2(0x0d, args);
+    bytes.push(variable.id);
+    write_argument(value, &mut bytes);
+    bytes
+}
+
+/// saves an operand to the variable id which is given as operand
+pub fn op_store_var_id(variable: &Variable, value: &Operand) -> Vec<u8> {
+    let args: Vec<ArgType> = vec![ArgType::Variable, arg_type(&value)];
     let mut bytes = op_2(0x0d, args);
     bytes.push(variable.id);
     write_argument(value, &mut bytes);
@@ -309,10 +393,12 @@ pub fn op_inc( variable: u8) -> Vec<u8> {
     bytes
 }
 
+/// adds a newline
 pub fn op_newline() -> Vec<u8> {
     op_0(0x0b)
 }
 
+/// quits the zcode programm immediately
 pub fn quit() -> Vec<u8> {
     op_0(0x0a)
 }
@@ -410,6 +496,7 @@ pub fn arg_type(operand: &Operand) -> ArgType {
     match operand {
         &Operand::Var(_) => ArgType::Variable,
         &Operand::Const(_) => ArgType::SmallConst,
+        &Operand::BoolConst(_) => ArgType::SmallConst,
         &Operand::LargeConst(_) => ArgType::LargeConst,
         &Operand::StringRef(_) => ArgType::LargeConst,
     }
@@ -419,6 +506,7 @@ pub fn write_argument(operand: &Operand, v: &mut Vec<u8>){
     match operand {
         &Operand::Var(ref var)=> v.push(var.id),
         &Operand::Const(ref constant) => v.push(constant.value),
+        &Operand::BoolConst(ref constant) => v.push(constant.value),
         &Operand::LargeConst(ref constant) => write_i16(constant.value, v),
         &Operand::StringRef(ref constant) => write_i16(constant.value, v),
     };

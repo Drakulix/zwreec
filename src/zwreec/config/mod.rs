@@ -167,6 +167,9 @@ pub struct Config {
     /// Add easter egg to compiler
     pub easter_egg: bool,
     pub force_unicode: bool,
+    pub no_colours: bool,
+    pub half_memory: bool,
+    pub no_unicode: bool,
     /// Instruct compiler to run these test-cases
     pub test_cases: Vec<TestCase>,
 }
@@ -185,6 +188,9 @@ impl Config {
             force: false,
             easter_egg: true,
             force_unicode: false,
+            no_colours: false,
+            half_memory: false,
+            no_unicode: false,
             test_cases: Vec::new(),
         }
     }
@@ -232,6 +238,18 @@ impl Config {
                      cfg.force_unicode = true;
                      debug!("enabled force-unicode");
                 },
+                "no-colours" => {
+                     cfg.no_colours = true;
+                     debug!("enabled no-colours");
+                },
+                "half-memory" => {
+                     cfg.half_memory = true;
+                     debug!("enabled half-memory");
+                },
+                "no-unicode" => {
+                     cfg.no_unicode = true;
+                     debug!("enabled no-unicode");
+                },
                 _ => {
                     error!("Cannot enable feature {} - feature not known.", s);
                 }
@@ -246,7 +264,19 @@ impl Config {
                 },
                 "force-unicode" => {
                      cfg.force_unicode = false;
-                     debug!("enabled force-unicode");
+                     debug!("disabled force-unicode");
+                },
+                "no-colours" => {
+                     cfg.no_colours = false;
+                     debug!("disabled no-colours");
+                },
+                "half-memory" => {
+                     cfg.half_memory = false;
+                     debug!("disabled half-memory");
+                },
+                "no-unicode" => {
+                     cfg.no_unicode = false;
+                     debug!("disabled no-unicode");
                 },
                 _ => {
                     error!("Cannot disable feature {} - feature not known.", s);
@@ -358,7 +388,16 @@ pub fn zwreec_usage(verbose: bool, mut opts: getopts::Options, brief: &str) -> S
     force-unicode (disabled)
         Force the generation of unicode print opcodes every time a unicode
         character is encountered. This disables the generation of the unicode
-        translation table"
+        translation table
+    no-colours (disabled)
+        Suppress generation of set_colour and set_text_style opcodes and disable the
+        colour bit in the second byte of the header - needed for DZIP on DOS/Atari
+    half-memory (disabled)
+        Cut down space for static variable strings and heap in order to have
+        binaries probably smaller than 64kB as only DZIP32.exe on DOS can handle
+        larger files, but DZIP.exe has a limit on 64kB
+    no-unicode (disabled)
+        Replaces opcode print_unicode with print_char to let it run on JZIP"
     } else {
         "Additional help:
     --help -v           Print the full set of options zwreec accepts"

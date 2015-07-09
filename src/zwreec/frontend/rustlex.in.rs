@@ -18,6 +18,7 @@ rustlex! TweeLexer {
     property format_sub_open:bool = false;
     property format_sup_open:bool = false;
     property function_parens:usize = 0;
+    property heading_rank:u8 = 0;
 
     //=============================
     // regular expressions
@@ -56,12 +57,15 @@ rustlex! TweeLexer {
     let TAG = ['a'-'z''A'-'Z''0'-'9''.''_']+;
 
     // If for example // is at a beginning of a line, then // is matched and not just /
-    let TEXT_CHAR_START = [^"!>#"'\n'] | HTTP;
-    let TEXT_CHAR = [^"/'_=~^{@<[" '\n'] | HTTP;
+    let TEXT_CHAR_START = [^"!#"'\n''\\'] | '\\'[^'\n'] | HTTP;
+    let TEXT_CHAR = [^"/'_=~^{@<[" '\n''\\'] | '\\'[^'\n'] | HTTP;
     let TEXT = TEXT_CHAR+ | ["/'_=~^{@<["];
+    let TEXT_HEADING = [^'\n']+;
 
     let VARIABLE_CHAR = LETTER | DIGIT | UNDERSCORE;
     let VARIABLE = '$' (LETTER | UNDERSCORE) VARIABLE_CHAR*;
+    let ARRAY_LENGTH = '$' (LETTER | UNDERSCORE) VARIABLE_CHAR* ".length";
+    let ARRAY_ACCESS = VARIABLE '[' WHITESPACE* VARIABLE WHITESPACE* ']';
 
     let FORMAT_ITALIC = "//";
     let FORMAT_BOLD = "''";
@@ -69,10 +73,11 @@ rustlex! TweeLexer {
     let FORMAT_STRIKE = "==";
     let FORMAT_SUB = "~~";
     let FORMAT_SUP = "^^";
-    let FORMAT_HEADING = ("!" | "!!" | "!!!" | "!!!!" | "!!!!!") WHITESPACE*;
+    let FORMAT_HEADING = ("!" | "!!" | "!!!" | "!!!!" | "!!!!!" );
     let FORMAT_NUMB_LIST = "#" WHITESPACE*;
     let FORMAT_INDENT_BLOCK = "<<<" NEWLINE;
     let FORMAT_HORIZONTAL_LINE = "----" NEWLINE;
+    let FORMAT_ESCAPE_NEWLINE = '\\' NEWLINE;
     let FORMAT_INLINE = "@@"; //TODO ignore content
 
     let FORMAT_MONO_START = "{{{";
@@ -98,7 +103,7 @@ rustlex! TweeLexer {
 
     let ASSIGN = "=" | "to" | "+=" | "-=" | "*=" | "/=";
     let NUM_OP = ["+-*/%"];
-    let COMP_OP = "is" | "==" | "eq" | "neq" | ">" | "gt" | ">=" | "gte" | "<" | "lt" | "<=" | "lte";
+    let COMP_OP = "is" | "==" | "eq" | "!=" | "neq" | ">" | "gt" | ">=" | "gte" | "<" | "lt" | "<=" | "lte";
     let LOG_OP = "and" | "&&" | "or" | "||" | "not" | "!";
 
     let FUNCTION_NAME = (LETTER | UNDERSCORE) VARIABLE_CHAR*;
@@ -126,7 +131,13 @@ rustlex! TweeLexer {
         COLON =>      |lexer:&mut TweeLexer<R>| Some(TokColon     {location: lexer.yylloc()} )
     }
 
+    I_ALLOW_NEWLINE_ESCAPE {
+        FORMAT_ESCAPE_NEWLINE => |_:&mut TweeLexer<R>| -> Option<Token> { None }
+    }
+
     I_PASSAGE_CONTENT {
+        :I_ALLOW_NEWLINE_ESCAPE
+
         MACRO_START => |lexer:&mut TweeLexer<R>| -> Option<Token>{
             lexer.MACRO();
             None
@@ -221,6 +232,8 @@ rustlex! TweeLexer {
 
     I_EXPRESSION {
         VARIABLE => |lexer:&mut TweeLexer<R>| Some(TokVariable{location: lexer.yylloc(), name: lexer.yystr()} )
+        ARRAY_ACCESS => |lexer:&mut TweeLexer<R>| Some(TokArrayAccess{location: lexer.yylloc(), name: lexer.yystr()[..].split('[').next().unwrap().to_string(), index: lexer.yystr()[..].split('[').nth(1).unwrap().split(']').next().unwrap().trim().to_string() } )
+        ARRAY_LENGTH => |lexer:&mut TweeLexer<R>| Some(TokArrayLength{location: lexer.yylloc(), name: lexer.yystr()[..].split('.').next().unwrap().to_string()} )
         STRING =>   |lexer:&mut TweeLexer<R>| Some(TokString  {location: lexer.yylloc(), value: unescape(lexer.yystr())} )
         FLOAT =>    |lexer:&mut TweeLexer<R>| Some(TokFloat   {location: lexer.yylloc(), value: lexer.yystr()[..].parse().unwrap()} )
         INT =>      |lexer:&mut TweeLexer<R>| Some(TokInt     {location: lexer.yylloc(), value: lexer.yystr()[..].parse().unwrap()} )
@@ -248,9 +261,11 @@ rustlex! TweeLexer {
             lexer.NON_NEWLINE();
             Some(TokFormatNumbList {location: lexer.yylloc()} )
         }
-        FORMAT_HEADING  =>  |lexer:&mut TweeLexer<R>| {
-            lexer.NON_NEWLINE();
-            Some(TokFormatHeading {location: lexer.yylloc(), rank: lexer.yystr().trim().len()} )
+
+        FORMAT_HEADING  =>  |lexer:&mut TweeLexer<R>| -> Option<Token>{
+            lexer.heading_rank = lexer.yystr().trim().len() as u8;
+            lexer.HEADING();
+            None
         }
 
         TEXT_CHAR_START => |lexer:&mut TweeLexer<R>| {
@@ -301,6 +316,19 @@ rustlex! TweeLexer {
         TAG_END => |lexer:&mut TweeLexer<R>| {
             if !lexer.ignore_passage { lexer.PASSAGE(); } else { lexer.INITIAL(); }
             Some(TokTagEnd {location: lexer.yylloc()})
+        }
+    }
+
+    HEADING {
+
+        TEXT_HEADING => |lexer:&mut TweeLexer<R>| -> Option<Token> {
+            Some(TokFormatHeading {location: lexer.yylloc(), text: lexer.yystr().trim().to_string(), rank: lexer.heading_rank} )
+        }
+
+        NEWLINE =>  |lexer:&mut TweeLexer<R>| -> Option<Token> {
+            lexer.heading_rank = 0;
+            lexer.NEWLINE();
+            Some(TokNewLine {location: lexer.yylloc()} )
         }
     }
 
@@ -361,6 +389,14 @@ rustlex! TweeLexer {
                 "endsilently" => {
                     lexer.MACRO_CONTENT();
                     Some(TokMacroEndSilently {location: lexer.yylloc()} )
+                },
+                "nobr" => {
+                    lexer.MACRO_CONTENT();
+                    Some(TokMacroNoBr {location: lexer.yylloc()} )
+                },
+                "endnobr" => {
+                    lexer.MACRO_CONTENT();
+                    Some(TokMacroEndNoBr {location: lexer.yylloc()} )
                 },
                 _ => {
                     lexer.MACRO_CONTENT_SHORT_DISPLAY();

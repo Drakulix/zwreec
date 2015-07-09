@@ -70,7 +70,7 @@ pub fn lex<'a, R: Read>(cfg: &'a Config, input: &'a mut R) -> FilteringScan<Peek
 
     let mut lexer = TweeLexer::new(BufReader::new(input));
     lexer.cfg = Some(cfg.clone());
-    
+
     lexer.peeking().scan_filter(
         ScanState {
             cfg: cfg,
@@ -146,7 +146,7 @@ pub enum Token {
     TokFormatNumbList         {location: (u64, u64)},
     TokFormatIndentBlock      {location: (u64, u64)},
     TokFormatHorizontalLine   {location: (u64, u64)},
-    TokFormatHeading          {location: (u64, u64), rank: usize},
+    TokFormatHeading          {location: (u64, u64), rank: u8, text: String},
     TokMacroStart             {location: (u64, u64)},
     TokMacroEnd               {location: (u64, u64)},
     TokMacroContentVar        {location: (u64, u64), var_name: String},
@@ -159,9 +159,13 @@ pub enum Token {
     TokMacroDisplay           {location: (u64, u64), passage_name: String},
     TokMacroSilently          {location: (u64, u64)},
     TokMacroEndSilently       {location: (u64, u64)},
+    TokMacroNoBr              {location: (u64, u64)},
+    TokMacroEndNoBr           {location: (u64, u64)},
     TokParenOpen              {location: (u64, u64)},
     TokParenClose             {location: (u64, u64)},
     TokVariable               {location: (u64, u64), name: String},
+    TokArrayAccess            {location: (u64, u64), name: String, index: String},
+    TokArrayLength            {location: (u64, u64), name: String},
     TokInt                    {location: (u64, u64), value: i32},
     TokFloat                  {location: (u64, u64), value: f32},
     TokString                 {location: (u64, u64), value: String},
@@ -225,9 +229,13 @@ impl Token {
             &TokMacroDisplay{location, ..} |
             &TokMacroSilently{location} |
             &TokMacroEndSilently{location} |
+            &TokMacroNoBr{location} |
+            &TokMacroEndNoBr{location} |
             &TokParenOpen{location} |
             &TokParenClose{location} |
             &TokVariable{location, ..} |
+            &TokArrayLength{location, ..} |
+            &TokArrayAccess{location, ..} |
             &TokInt{location, ..} |
             &TokFloat{location, ..} |
             &TokString{location, ..} |
@@ -294,10 +302,14 @@ impl Token {
             (&TokMacroPrint{..}, &TokMacroPrint{..}) => true,
             (&TokMacroDisplay{..}, &TokMacroDisplay{..}) => true,
             (&TokMacroSilently{..}, &TokMacroSilently{..}) => true,
+            (&TokMacroEndNoBr{..}, &TokMacroEndNoBr{..}) => true,
+            (&TokMacroNoBr{..}, &TokMacroNoBr{..}) => true,
             (&TokMacroEndSilently{..}, &TokMacroEndSilently{..}) => true,
             (&TokParenOpen{..}, &TokParenOpen{..}) => true,
             (&TokParenClose{..}, &TokParenClose{..}) => true,
             (&TokVariable{..}, &TokVariable{..}) => true,
+            (&TokArrayLength{..}, &TokArrayLength{..}) => true,
+            (&TokArrayAccess{..}, &TokArrayAccess{..}) => true,
             (&TokInt{..}, &TokInt{..}) => true,
             (&TokFloat{..}, &TokFloat{..}) => true,
             (&TokString{..}, &TokString{..}) => true,
@@ -730,6 +742,30 @@ mod tests {
             TokTag { location: (27, 13), tag_name: "script".to_string() },
             TokTagEnd { location: (27, 19) },
 
+        ];
+
+        assert_tok_eq(expected, tokens);
+    }
+
+    #[test]
+    fn escape_line_break_test() {
+        let tokens = test_lex("::Start\nTest\\\n<<if true>>\\\nLi\\ne\n<<else>>\nBla\\\n<<endif>>\n\\\nTest");
+        let expected = vec![
+            TokPassage { name: "Start".to_string(), location: (1, 3) },
+            TokText { text: "Test".to_string(), location: (2, 1) },
+            TokMacroIf { location: (3, 3) },
+            TokBoolean { location: (3, 6), value: "true".to_string() },
+            TokMacroEnd { location: (3, 10) },
+            TokText { text: "Li\\ne".to_string(), location: (4, 1) },
+            TokNewLine { location: (4, 6) },
+            TokMacroElse { location: (5, 3) },
+            TokMacroEnd { location: (5, 7) },
+            TokNewLine { location: (5, 9) },
+            TokText { text: "Bla".to_string(), location: (6, 1) },
+            TokMacroEndIf { location: (7, 3) },
+            TokMacroEnd { location: (7, 8) },
+            TokNewLine { location: (7, 10) },
+            TokText { text: "Test".to_string(), location: (9, 1) },
         ];
 
         assert_tok_eq(expected, tokens);
