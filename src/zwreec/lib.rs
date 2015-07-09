@@ -153,11 +153,12 @@ pub fn compile<R: Read, W: Write>(cfg: Config, input: &mut R, output: &mut W) {
     // build up ast from tokens
     let ast = frontend::ast::ASTBuilder::build(&cfg, parser.parse(tokens.inspect(|ref token| {
         debug!("{:?}", token);
-    }))).collect();
-    debug!("{:?}", ast);
+    })));
 
     // create code
-    frontend::codegen::generate_zcode(&cfg, frontend::ast::AST { passages: ast }, output);
+    backend::codegen::generate_zcode(&cfg, ast.inspect(|ref passage| {
+        debug!("{:?}", passage);
+    }), output);
 }
 
 /// Run internal library tests.
