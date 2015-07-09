@@ -295,9 +295,9 @@ impl ASTNode {
     }
 
     /// wraps the ASTNode to NodeDefault
-    pub fn as_default(&self) -> &NodeDefault {
+    pub fn as_default(self) -> NodeDefault {
         match self {
-            &ASTNode::Default(ref def) => def,
+            ASTNode::Default(def) => def,
             _ => panic!("Node cannot be unwrapped as NodeDefault!")
         }
     }

@@ -10,9 +10,9 @@
 //! supported.
 
 use backend::zcode::zfile::{ZOP, Operand, Variable, Constant, LargeConstant, Zfile, Type};
+use backend::codegen;
+use backend::codegen::{CodeGenManager};
 use frontend::ast::{ASTNode};
-use frontend::codegen;
-use frontend::codegen::{CodeGenManager};
 use frontend::lexer::Token;
 use frontend::lexer::Token::{TokNumOp, TokCompOp, TokLogOp, TokInt, TokBoolean, TokVariable, TokFunction, TokString, TokUnaryMinus};
 #[allow(unused_imports)] use config::Config;
@@ -35,15 +35,15 @@ pub enum EvaluateExpressionError {
 /// `code` is the vector where the zCode shall be written to.
 /// `manager` is the manager from `codegen`. It is required for the symbol table and label ids.
 /// `out` is the `ZFile` compiling to. It is required for storing strings.
-pub fn evaluate_expression<'a>(node: &'a ASTNode, code: &mut Vec<ZOP>, mut manager: &mut CodeGenManager<'a>, mut out: &mut Zfile) -> Operand {
+pub fn evaluate_expression(node: ASTNode, code: &mut Vec<ZOP>, mut manager: &mut CodeGenManager, mut out: &mut Zfile) -> Operand {
     let mut temp_ids = CodeGenManager::new_temp_var_vec();
     evaluate_expression_internal(node, code, &mut temp_ids, manager, &mut out)
 }
 
 /// Evaluates an expression node to zCode.
-fn evaluate_expression_internal<'a>(node: &'a ASTNode, code: &mut Vec<ZOP>,
-        temp_ids: &mut Vec<u8>, mut manager: &mut CodeGenManager<'a>, mut out: &mut Zfile) -> Operand {
-    let n = node.as_default();
+fn evaluate_expression_internal(node: ASTNode, code: &mut Vec<ZOP>,
+        temp_ids: &mut Vec<u8>, mut manager: &mut CodeGenManager, mut out: &mut Zfile) -> Operand {
+    let n = node.clone().as_default();
     let cfg = manager.cfg;
 
     match n.category {
@@ -54,14 +54,14 @@ fn evaluate_expression_internal<'a>(node: &'a ASTNode, code: &mut Vec<ZOP>,
                 // Try error recovery. Ignores operator.
                 warn!("Trying to fix expression. This will compile but probably not do what you want.");
                 if n.childs.len() >= 1 {
-                    return evaluate_expression_internal(&n.childs[0], code, temp_ids, manager, &mut out)
+                    return evaluate_expression_internal(n.childs[0].clone(), code, temp_ids, manager, &mut out)
                 } else {
                     return Operand::Const(Constant { value: 0 })
                 }
             }
 
-            let eval0 = evaluate_expression_internal(&n.childs[0], code, temp_ids, manager, &mut out);
-            let eval1 = evaluate_expression_internal(&n.childs[1], code, temp_ids, manager, &mut out);
+            let eval0 = evaluate_expression_internal(n.childs[0].clone(), code, temp_ids, manager, &mut out);
+            let eval1 = evaluate_expression_internal(n.childs[1].clone(), code, temp_ids, manager, &mut out);
             eval_num_op(&eval0, &eval1, &**op_name, location.clone(), code, temp_ids, manager)
         },
         TokCompOp { ref op_name, ref location } => {
@@ -71,22 +71,22 @@ fn evaluate_expression_internal<'a>(node: &'a ASTNode, code: &mut Vec<ZOP>,
                 // Try error recovery. Ignores operator.
                 warn!("Trying to fix expression. This will compile but probably not do what you want.");
                 if n.childs.len() >= 1 {
-                    return evaluate_expression_internal(&n.childs[0], code, temp_ids, manager, &mut out)
+                    return evaluate_expression_internal(n.childs[0].clone(), code, temp_ids, manager, &mut out)
                 } else {
                     return Operand::BoolConst(Constant { value: 0 })
                 }
             }
 
-            let eval0 = evaluate_expression_internal(&n.childs[0], code, temp_ids, manager, &mut out);
-            let eval1 = evaluate_expression_internal(&n.childs[1], code, temp_ids, manager, &mut out);
+            let eval0 = evaluate_expression_internal(n.childs[0].clone(), code, temp_ids, manager, &mut out);
+            let eval1 = evaluate_expression_internal(n.childs[1].clone(), code, temp_ids, manager, &mut out);
             eval_comp_op(&eval0, &eval1, &**op_name, location.clone(), code, temp_ids, manager)
         },
         TokLogOp { ref op_name, ref location } => {
-            let eval0 = evaluate_expression_internal(&n.childs[0], code, temp_ids, manager, &mut out);
+            let eval0 = evaluate_expression_internal(n.childs[0].clone(), code, temp_ids, manager, &mut out);
 
             match &**op_name {
                 "and" | "&&" | "or" | "||" => {
-                    let eval1 = evaluate_expression_internal(&n.childs[1], code, temp_ids, manager, &mut out);
+                    let eval1 = evaluate_expression_internal(n.childs[1].clone(), code, temp_ids, manager, &mut out);
                     eval_and_or(&eval0, &eval1, &**op_name, code, temp_ids)
                 },
                 "not" | "!" => {
@@ -98,7 +98,7 @@ fn evaluate_expression_internal<'a>(node: &'a ASTNode, code: &mut Vec<ZOP>,
                     // Try error recovery. Ignores operator.
                     warn!("Trying to fix expression. This will compile but probably not do what you want.");
                     if n.childs.len() >= 1 {
-                        return evaluate_expression_internal(&n.childs[0], code, temp_ids, manager, &mut out)
+                        return evaluate_expression_internal(n.childs[0].clone(), code, temp_ids, manager, &mut out)
                     } else {
                         return Operand::BoolConst(Constant { value: 0 })
                     }
@@ -106,7 +106,7 @@ fn evaluate_expression_internal<'a>(node: &'a ASTNode, code: &mut Vec<ZOP>,
             }
         },
         TokUnaryMinus { .. } => {
-            let eval = evaluate_expression_internal(&n.childs[0], code, temp_ids, manager, &mut out);
+            let eval = evaluate_expression_internal(n.childs[0].clone(), code, temp_ids, manager, &mut out);
             eval_unary_minus(&eval, code, temp_ids)
         },
         TokInt { ref value, .. } => {
@@ -118,13 +118,13 @@ fn evaluate_expression_internal<'a>(node: &'a ASTNode, code: &mut Vec<ZOP>,
         TokString {ref value, .. } => {
             Operand::new_string_ref(out.write_string(value) as i16)
         },
-        TokVariable { ref name, .. } => {
+        TokVariable { name, .. } => {
             Operand::Var(manager.symbol_table.get_and_add_symbol_id(name))
         },
         TokFunction { ref name, ref location } => {
             match &**name {
                 "random" => {
-                    let args = &node.as_default().childs;
+                    let args = node.clone().as_default().childs;
                     if args.len() != 2 {
                         let error = EvaluateExpressionError::UnsupportedFunctionArgsLen {
                             name: "random".to_string(), location: location.clone(), expected: 2 };
@@ -136,12 +136,12 @@ fn evaluate_expression_internal<'a>(node: &'a ASTNode, code: &mut Vec<ZOP>,
                         }
                     }
 
-                    if args[0].as_default().childs.len() != 1 || args[1].as_default().childs.len() != 1 {
+                    if args[0].clone().as_default().childs.len() != 1 || args[1].clone().as_default().childs.len() != 1 {
                         error_force_panic!(EvaluateExpressionError::InvalidAST);
                     }
 
-                    let from = &args[0].as_default().childs[0];
-                    let to = &args[1].as_default().childs[0];
+                    let from = args[0].clone().as_default().childs[0].clone();
+                    let to = args[1].clone().as_default().childs[0].clone();
 
                     let from_value = evaluate_expression_internal(from, code, temp_ids, manager, &mut out);
                     let to_value = evaluate_expression_internal(to, code, temp_ids, manager, &mut out);
@@ -160,7 +160,7 @@ fn evaluate_expression_internal<'a>(node: &'a ASTNode, code: &mut Vec<ZOP>,
     }
 }
 
-fn eval_num_op<'a>(eval0: &Operand, eval1: &Operand, op_name: &str, location: (u64, u64), code: &mut Vec<ZOP>, temp_ids: &mut Vec<u8>, manager: &CodeGenManager<'a>) -> Operand {
+fn eval_num_op(eval0: &Operand, eval1: &Operand, op_name: &str, location: (u64, u64), code: &mut Vec<ZOP>, temp_ids: &mut Vec<u8>, manager: &CodeGenManager) -> Operand {
     if count_constants(eval0, eval1) == 2 {
         return direct_eval_num_op(eval0, eval1, op_name, location, manager);
     }
@@ -206,7 +206,7 @@ fn eval_num_op<'a>(eval0: &Operand, eval1: &Operand, op_name: &str, location: (u
 
 
 
-fn direct_eval_num_op<'a>(eval0: &Operand, eval1: &Operand, op_name: &str, location: (u64, u64), manager: &CodeGenManager<'a>) -> Operand {
+fn direct_eval_num_op(eval0: &Operand, eval1: &Operand, op_name: &str, location: (u64, u64), manager: &CodeGenManager) -> Operand {
     let mut out_large = false;
     let val0 = eval0.const_value();
     let val1 = eval1.const_value();
@@ -242,8 +242,8 @@ fn direct_eval_num_op<'a>(eval0: &Operand, eval1: &Operand, op_name: &str, locat
 }
 
 
-fn eval_comp_op<'a>(eval0: &Operand, eval1: &Operand, op_name: &str, location: (u64, u64), code: &mut Vec<ZOP>,
-        temp_ids: &mut Vec<u8>, mut manager: &mut CodeGenManager<'a>) -> Operand {
+fn eval_comp_op(eval0: &Operand, eval1: &Operand, op_name: &str, location: (u64, u64), code: &mut Vec<ZOP>,
+        temp_ids: &mut Vec<u8>, mut manager: &mut CodeGenManager) -> Operand {
     if count_constants(eval0, eval1) == 2 {
         return direct_eval_comp_op(eval0, eval1, op_name, location.clone(), manager);
     }
@@ -344,7 +344,7 @@ fn eval_comp_op<'a>(eval0: &Operand, eval1: &Operand, op_name: &str, location: (
 
 /// Directly evaluates the given compare operation.
 /// Both operands must be constants.
-fn direct_eval_comp_op<'a>(eval0: &Operand, eval1: &Operand, op_name: &str, location: (u64, u64), manager: &CodeGenManager<'a>) -> Operand {
+fn direct_eval_comp_op(eval0: &Operand, eval1: &Operand, op_name: &str, location: (u64, u64), manager: &CodeGenManager) -> Operand {
     let val0 = eval0.const_value();
     let val1 = eval1.const_value();
     let result = match op_name {
@@ -393,8 +393,8 @@ fn eval_and_or(eval0: &Operand, eval1: &Operand, op_name: &str, code: &mut Vec<Z
 }
 
 
-fn eval_not<'a>(eval: &Operand, code: &mut Vec<ZOP>,
-        temp_ids: &mut Vec<u8>, mut manager: &mut CodeGenManager<'a>) -> Operand {
+fn eval_not(eval: &Operand, code: &mut Vec<ZOP>,
+        temp_ids: &mut Vec<u8>, mut manager: &mut CodeGenManager) -> Operand {
     if eval.is_const() {
         let val = eval.const_value();
         let result: u8 = if val != 0 { 0 } else { 1 };
@@ -415,7 +415,7 @@ fn eval_not<'a>(eval: &Operand, code: &mut Vec<ZOP>,
 }
 
 
-fn eval_unary_minus<'a>(eval: &Operand, code: &mut Vec<ZOP>, temp_ids: &mut Vec<u8>) -> Operand {
+fn eval_unary_minus(eval: &Operand, code: &mut Vec<ZOP>, temp_ids: &mut Vec<u8>) -> Operand {
     if eval.is_const() {
         let large = match eval { &Operand::LargeConst(_) => { true }, _ => { false } };
         if large {

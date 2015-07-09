@@ -25,7 +25,6 @@
 //! ```
 
 pub mod ast;
-pub mod codegen;
 pub mod evaluate_expression;
 pub mod expressionparser;
 pub mod lexer;
