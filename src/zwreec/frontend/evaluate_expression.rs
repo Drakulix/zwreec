@@ -121,7 +121,7 @@ fn evaluate_expression_internal(node: ASTNode, code: &mut Vec<ZOP>,
         TokVariable { name, .. } => {
             Operand::Var(manager.symbol_table.get_and_add_symbol_id(name))
         },
-        TokArrayLength { ref name, .. } => {
+        TokArrayLength { name, .. } => {
             let alen: Variable = match temp_ids.pop() {
                 Some(var) => Variable::new(var),
                 None      => error_force_panic!(EvaluateExpressionError::NoTempIdLeftOnStack)
@@ -137,7 +137,7 @@ fn evaluate_expression_internal(node: ASTNode, code: &mut Vec<ZOP>,
             temp_ids.push(zero.id);
             Operand::new_var(alen.id)
         },
-        TokArrayAccess { ref name, ref index, .. } => {
+        TokArrayAccess { name, index, .. } => {
             let val: Variable = match temp_ids.pop() {
                 Some(var) => Variable::new(var),
                 None      => error_force_panic!(EvaluateExpressionError::NoTempIdLeftOnStack)
@@ -205,12 +205,12 @@ fn evaluate_expression_internal(node: ASTNode, code: &mut Vec<ZOP>,
                         }
                     }
 
-                    if args[0].as_default().childs.len() != 1 || args[1].as_default().childs.len() != 1 {
+                    if args[0].clone().as_default().childs.len() != 1 || args[1].clone().as_default().childs.len() != 1 {
                         error_force_panic!(EvaluateExpressionError::InvalidAST);
                     }
 
-                    let message_n = &args[0].as_default().childs[0];
-                    let default_n = &args[1].as_default().childs[0];
+                    let message_n = args[0].clone().as_default().childs[0].clone();
+                    let default_n = args[1].clone().as_default().childs[0].clone();
 
                     let message = evaluate_expression_internal(message_n, code, temp_ids, manager, &mut out);
                     let default = evaluate_expression_internal(default_n, code, temp_ids, manager, &mut out);
@@ -230,10 +230,10 @@ fn evaluate_expression_internal(node: ASTNode, code: &mut Vec<ZOP>,
                             name: "confirm".to_string(), location: location.clone(), expected: 2 };
                         error_panic!(cfg => error);
                     }
-                    if args[0].as_default().childs.len() != 1 {
+                    if args[0].clone().as_default().childs.len() != 1 {
                         error_force_panic!(EvaluateExpressionError::InvalidAST);
                     }
-                    let child = args[0].as_default().childs[0].as_default();
+                    let child = args[0].clone().as_default().childs[0].clone().as_default();
                     let confirm_msg = match child.category {
                         TokString {ref value, .. } => value,
                         _ => error_force_panic!(EvaluateExpressionError::InvalidAST)
@@ -243,8 +243,8 @@ fn evaluate_expression_internal(node: ASTNode, code: &mut Vec<ZOP>,
                         Some(var) => Variable::new(var),
                         None      => error_force_panic!(EvaluateExpressionError::NoTempIdLeftOnStack)
                     };
-                    
-                    //let confirm_msg = &args[0].as_default().childs[0];
+
+                    //let confirm_msg = &args[0].clone().as_default().childs[0].clone();
                     //println!("confirm_msg: {:?}", confirm_msg);
                     let if_id = manager.ids_if.start_next();
                     let true_label = format!("true_{}", if_id);
@@ -263,7 +263,7 @@ fn evaluate_expression_internal(node: ASTNode, code: &mut Vec<ZOP>,
                     code.push(ZOP::PrintOps{text: "------------------------------------------------------------".to_string()});
                     code.push(ZOP::Newline);
                     code.push(ZOP::ReadChar{local_var_id: has_confirmed.id});
-                    
+
                     //code.push(ZOP::PrintNumVar{variable: has_confirmed.clone()});
                     code.push(ZOP::JE{operand1: Operand::new_var(has_confirmed.id), operand2: Operand::new_const(48), jump_to_label: false_label.to_string()});
                     code.push(ZOP::JE{operand1: Operand::new_var(has_confirmed.id), operand2: Operand::new_const(49), jump_to_label: true_label.to_string()});
