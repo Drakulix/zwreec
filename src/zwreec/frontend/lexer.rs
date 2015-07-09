@@ -164,6 +164,8 @@ pub enum Token {
     TokParenOpen              {location: (u64, u64)},
     TokParenClose             {location: (u64, u64)},
     TokVariable               {location: (u64, u64), name: String},
+    TokArrayAccess            {location: (u64, u64), name: String, index: String},
+    TokArrayLength            {location: (u64, u64), name: String},
     TokInt                    {location: (u64, u64), value: i32},
     TokFloat                  {location: (u64, u64), value: f32},
     TokString                 {location: (u64, u64), value: String},
@@ -232,6 +234,8 @@ impl Token {
             &TokParenOpen{location} |
             &TokParenClose{location} |
             &TokVariable{location, ..} |
+            &TokArrayLength{location, ..} |
+            &TokArrayAccess{location, ..} |
             &TokInt{location, ..} |
             &TokFloat{location, ..} |
             &TokString{location, ..} |
@@ -304,6 +308,8 @@ impl Token {
             (&TokParenOpen{..}, &TokParenOpen{..}) => true,
             (&TokParenClose{..}, &TokParenClose{..}) => true,
             (&TokVariable{..}, &TokVariable{..}) => true,
+            (&TokArrayLength{..}, &TokArrayLength{..}) => true,
+            (&TokArrayAccess{..}, &TokArrayAccess{..}) => true,
             (&TokInt{..}, &TokInt{..}) => true,
             (&TokFloat{..}, &TokFloat{..}) => true,
             (&TokString{..}, &TokString{..}) => true,

@@ -45,6 +45,8 @@ impl<'a> ExpressionParser<'a> {
                 tok @ TokInt      { .. } |
                 tok @ TokString   { .. } |
                 tok @ TokFunction { .. } |
+                tok @ TokArrayLength { .. } |
+                tok @ TokArrayAccess { .. } |
                 tok @ TokVariable { .. } => {
                     let childs_copy = top.as_default().childs.to_vec();
                     self.expr_stack.push( ASTNode::Default(NodeDefault { category: tok.clone(), childs: childs_copy }) );

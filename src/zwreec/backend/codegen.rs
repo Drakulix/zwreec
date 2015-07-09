@@ -114,7 +114,6 @@ pub fn gen_zcode(node: ASTNode, mut out: &mut Zfile, mut manager: &mut CodeGenMa
                 }
             }
 
-            code.push(ZOP::Newline);
             code.push(ZOP::Call1N{jump_to_label: "mem_free".to_string()});
             code.push(ZOP::Ret{value: Operand::new_const(0)});
             code
@@ -520,6 +519,7 @@ pub fn function_random(manager: &CodeGenManager, arg_from: &Operand, arg_to: &Op
     temp_ids.push(range_var.id);
     Operand::new_var(var.id)
 }
+
 
 pub struct CodeGenManager<'a> {
     pub cfg: &'a Config,
