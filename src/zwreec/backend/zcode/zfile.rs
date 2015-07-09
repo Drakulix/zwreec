@@ -2157,3 +2157,18 @@ fn test_op_0() {
 fn test_op_not() {
         assert_eq!(op::op_not(&Operand::new_var(1),&Variable::new(2)),vec![0xf8,0xbf,0x01,0x02]);
 }
+
+#[test]
+fn test_op_get_cursor() {
+        assert_eq!(op::op_get_cursor(&Operand::new_var(1)),vec![0xf0,0xbf,0x01]);
+}
+
+#[test]
+fn test_op_set_cursor_operand() {
+        assert_eq!(op::op_set_cursor_operand(&Operand::new_var(1), &Operand::new_var(2)),vec![0xef,0xaf,0x01,0x02]);
+}
+
+#[test]
+fn test_op_erase_line() {
+        assert_eq!(op::op_erase_line(),vec![0xee,0x7f,0x01]);
+}
