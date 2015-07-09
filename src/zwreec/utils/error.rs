@@ -4,8 +4,8 @@ use frontend::lexer::Token;
 use frontend::lexer::LexerError;
 use frontend::parser::ParserError;
 use frontend::expressionparser::ExpressionParserError;
-use frontend::codegen::CodeGenError;
 use frontend::evaluate_expression::EvaluateExpressionError;
+use backend::codegen::CodeGenError;
 
 macro_rules! error_panic(
     ($cfg:expr => $($arg:tt)+) => (
@@ -123,8 +123,8 @@ impl Display for CodeGenError {
             &CodeGenError::NoMatch { ref token } => {
                 try!(f.write_fmt(format_args!("Can't find any AST operation for token: {}", token)))
             },
-            &CodeGenError::PassageDoesNotExist { ref name, ref token } => {
-                try!(f.write_fmt(format_args!("Referenced passage '{}' at {}:{} but the passage does not exist", name, token.location().0, token.location().1)))
+            &CodeGenError::PassageDoesNotExist { ref name } => {
+                try!(f.write_fmt(format_args!("Referenced passage '{}' but the passage does not exist", name)))
             },
             &CodeGenError::InvalidAST => {
                 try!(f.write_str("Internal error: Unexpected AST node. This should not happen. Report a bug please."))
@@ -178,8 +178,3 @@ impl Display for EvaluateExpressionError {
         Ok(())
     }
 }
-
-
-
-
-
