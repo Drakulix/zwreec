@@ -232,14 +232,19 @@ pub fn gen_zcode<'a>(node: &'a ASTNode, mut out: &mut Zfile, mut manager: &mut C
                         set_formatting = true;
 
                         if manager.passages.contains(passage_name) {
-                            vec![
-                            ZOP::Call2NWithAddress{jump_to_label: "system_add_link".to_string(), address: passage_name.to_string()},
-                            ZOP::SetColor{foreground: 8, background: 2},
-                            ZOP::PrintOps{text: format!("{}[", display_name)},
-                            ZOP::PrintNumVar{variable: Variable::new(16)},
-                            ZOP::Print{text: "]".to_string()},
-                            ZOP::SetColor{foreground: 9, background: 2},
-                            ]
+                            let mut code: Vec<ZOP> = vec![];
+                            for child in &t.childs {
+                                for zop in gen_zcode(child, out, manager).into_iter() {
+                                    code.push(zop);
+                                }
+                            }
+                            code.push(ZOP::Call2NWithAddress{jump_to_label: "system_add_link".to_string(), address: passage_name.to_string()});
+                            code.push(ZOP::SetColor{foreground: 8, background: 2});
+                            code.push(ZOP::PrintOps{text: format!("{}[", display_name)});
+                            code.push(ZOP::PrintNumVar{variable: Variable::new(16)});
+                            code.push(ZOP::Print{text: "]".to_string()});
+                            code.push(ZOP::SetColor{foreground: 9, background: 2});
+                            code
                         } else {
                             error_panic!(cfg => CodeGenError::PassageDoesNotExist { name: passage_name.clone(), token: t.category.clone() });
                             vec![]
