@@ -24,6 +24,7 @@ pub enum ASTOperation {
     AddChild(Token),
     ChildDown(Token),
     ChildUp(Token),
+    TwoUp,
     Up,
     UpChild(Token),
     UpChildDown(Token),
@@ -75,6 +76,7 @@ impl ASTBuilder {
             UpChild(child) => self.up_child(current_passage, child),
             UpChildDown(child) => self.up_child_down(current_passage, child),
             UpSpecial => self.up_special(),
+            TwoUp => self.two_up(),
         }
     }
 

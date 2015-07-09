@@ -93,6 +93,7 @@ impl<'a> Codegen<'a> {
 pub fn gen_zcode(node: ASTNode, mut out: &mut Zfile, mut manager: &mut CodeGenManager) -> Vec<ZOP> {
     let mut state_copy = manager.format_state.clone();
     let mut set_formatting = false;
+    let mut force_skip_childs = false;
     let cfg = manager.cfg;
 
     match node {
@@ -221,14 +222,36 @@ pub fn gen_zcode(node: ASTNode, mut out: &mut Zfile, mut manager: &mut CodeGenMa
 
                         manager.required_passages.push(passage_name.clone());
 
-                        vec![
-                        ZOP::Call2NWithAddress{jump_to_label: "system_add_link".to_string(), address: passage_name.to_string()},
-                        ZOP::SetColor{foreground: 8, background: 2},
-                        ZOP::PrintOps{text: format!("{}[", display_name)},
-                        ZOP::PrintNumVar{variable: Variable::new(16)},
-                        ZOP::Print{text: "]".to_string()},
-                        ZOP::SetColor{foreground: 9, background: 2},
-                        ]
+                        let mut code: Vec<ZOP> = vec![];
+                        if t.childs.len() > 0 {
+                            let id = manager.ids_link_var_set.start_next();
+                            let routine_name = format!("passage_set_link{}", id);
+                            let continue_label = format!("passage_continue{}", id);
+                            code.push(ZOP::Jump{jump_to_label: continue_label.to_string()});
+                            code.push(ZOP::Routine{name: routine_name.to_string(), count_variables: 15});
+                            for child in t.childs.clone().into_iter() {
+                                for zop in gen_zcode(child, out, manager).into_iter() {
+                                    code.push(zop);
+                                }
+                            }
+                            code.push(ZOP::Call1N{jump_to_label: "mem_free".to_string()});
+                            code.push(ZOP::Call1N{jump_to_label: passage_name.to_string()});
+                            code.push(ZOP::Ret{value: Operand::new_const(0)});
+                            code.push(ZOP::Label{name: continue_label.to_string()});
+
+                            code.push(ZOP::Call2NWithAddress{jump_to_label: "system_add_link".to_string(), address: routine_name.to_string()});
+                            force_skip_childs = true;
+                        } else {
+                            code.push(ZOP::Call2NWithAddress{jump_to_label: "system_add_link".to_string(), address: passage_name.to_string()});
+                        }
+
+                        code.push(ZOP::SetColor{foreground: 8, background: 2});
+                        code.push(ZOP::PrintOps{text: format!("{}[", display_name)});
+                        code.push(ZOP::PrintNumVar{variable: Variable::new(16)});
+                        code.push(ZOP::Print{text: "]".to_string()});
+                        code.push(ZOP::SetColor{foreground: 9, background: 2});
+
+                        code
                     } else {
                         vec![]
                     }
@@ -425,9 +448,11 @@ pub fn gen_zcode(node: ASTNode, mut out: &mut Zfile, mut manager: &mut CodeGenMa
                 },
             };
             if set_formatting {
-                for child in t.childs.clone().into_iter() {
-                    for instr in gen_zcode(child, out, manager) {
-                        code.push(instr);
+                if !force_skip_childs {
+                    for child in t.childs.clone().into_iter() {
+                        for instr in gen_zcode(child, out, manager) {
+                            code.push(instr);
+                        }
                     }
                 }
                 code.push(ZOP::SetTextStyle{bold: false, reverse: false, monospace: false, italic: false});
@@ -525,6 +550,7 @@ pub struct CodeGenManager<'a> {
     pub cfg: &'a Config,
     pub ids_if: IdentifierProvider,
     pub ids_expr: IdentifierProvider,
+    pub ids_link_var_set: IdentifierProvider,
     pub visited_passages: HashSet<String>,
     pub required_passages: Vec<String>,
     pub symbol_table: SymbolTable,
@@ -549,6 +575,7 @@ impl <'a> CodeGenManager<'a> {
             cfg: cfg,
             ids_if: IdentifierProvider::new(),
             ids_expr: IdentifierProvider::new(),
+            ids_link_var_set: IdentifierProvider::new(),
             visited_passages: HashSet::new(),
             required_passages: Vec::new(),
             symbol_table: SymbolTable::new(),

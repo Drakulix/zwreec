@@ -58,6 +58,7 @@ pub enum NonTerminalType {
     MonoFormatting,
     MonoContent,
     Link,
+    Linkf,
     Macro,
     ElseIf,
     EndIf,
@@ -261,7 +262,8 @@ impl<'a> Parser<'a> {
 
                     Some(AddChild(tok))
                 },
-                (PassageContent, TokPassageLink { .. } ) => {
+                (PassageContent, TokPassageLink { .. } ) |
+                (PassageContent, TokVarSetStart { .. } ) => {
                     stack.push(NonTerminal(PassageContent));
                     stack.push(NonTerminal(Link));
 
@@ -373,10 +375,24 @@ impl<'a> Parser<'a> {
 
                 // Link
                 (Link, tok @ TokPassageLink { .. } ) => {
+                    stack.push(NonTerminal( Linkf ));
                     stack.push(Terminal(tok.clone()));
 
-                    Some(AddChild(tok))
+                    Some(ChildDown(tok))
                 },
+                (Linkf, tok @ TokVarSetStart { .. } ) => {
+                    stack.push(Terminal(TokVarSetEnd { location: (0, 0) } ));
+                    stack.push(NonTerminal(ExpressionList));
+                    stack.push(Terminal(tok.clone()));
+
+                    None
+                },
+                (Linkf, _ ) => {
+                    // epsilon
+
+                    Some(Up)
+                }
+
 
                 // Macro
                 (Macro, tok @ TokMacroDisplay { .. } ) => {
@@ -507,6 +523,10 @@ impl<'a> Parser<'a> {
                     debug!("pop TokMacroEnd");
 
                     Some(UpSpecial)
+                },
+                (ExpressionListf, TokVarSetEnd { .. }) => {
+                    debug!("pop ExpressionListf -> TokVarSetEnd");
+                    Some(TwoUp)
                 },
                 (ExpressionListf, _) => {
                     // ExpressionListf -> ε
@@ -962,7 +982,7 @@ impl<'a> Parser<'a> {
             // Sf, PassageContent, Linkf,
 
             match top {
-                Sf | PassageContent => {
+                Sf | PassageContent | Linkf => {
                     // ... -> ε
                     None
                 },
