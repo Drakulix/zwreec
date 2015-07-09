@@ -101,6 +101,7 @@ pub enum ZOP {
   PrintUnicode{c: u16},
   PrintUnicodeVar{var: Variable}, // var contains one character number
   PrintUnicodeStr{address: Operand},
+  PrintChar{var: Variable},
   Print{text: String},
   PrintNumVar{variable: Variable},
   PrintVar{variable: Variable},
@@ -568,7 +569,8 @@ impl Zfile {
         self.data.append_bytes(&bytes);
         match instr {
             &ZOP::PrintUnicode{c} => self.op_print_unicode_char(c),
-            &ZOP::PrintUnicodeVar{ref var} => if self.no_unicode == false { self.op_print_unicode_var(var) } else { self.emit(vec![ZOP::Call2NWithArg{jump_to_label: "print_char".to_string(), arg: Operand::new_var(var.id.clone())}]) },
+            &ZOP::PrintUnicodeVar{ref var} => if self.no_unicode == false { self.op_print_unicode_var(var) } else { self.op_call_2n_with_arg("print_char", &Operand::new_var(var.id.clone())) },
+            &ZOP::PrintChar{ref var} => self.op_print_char(var),
             &ZOP::PrintUnicodeStr{ref address} => self.op_print_unicode_str(address),
             &ZOP::Print{ref text} => self.op_print(text),
             &ZOP::PrintOps{ref text} => self.gen_print_ops(text),
@@ -744,8 +746,8 @@ impl Zfile {
         self.routine_strcat();
         self.routine_itoa();
         self.routine_print_var();
-        self.routine_add_types();
         self.routine_print_char();
+        self.routine_add_types();
         self.write_jumps();
         self.write_strings();
     }
@@ -1618,16 +1620,14 @@ impl Zfile {
     /// print one zscii character given as argument
     pub fn routine_print_char(&mut self) {
         self.emit(vec![
-            ZOP::Routine{name: "print_char".to_string(), count_variables: 2},
-            ZOP::JL{operand1: Operand::new_var(1), operand2: Operand::new_large_const(32), jump_to_label: "print_char_?".to_string()},
-            ZOP::JG{operand1: Operand::new_var(1), operand2: Operand::new_large_const(126), jump_to_label: "print_char_?".to_string()},
+            ZOP::Routine{name: "print_char".to_string(), count_variables: 3},
+            ZOP::JL{operand1: Operand::new_var(1), operand2: Operand::new_const(32), jump_to_label: "print_char_?".to_string()},
+            ZOP::JG{operand1: Operand::new_var(1), operand2: Operand::new_const(126), jump_to_label: "print_char_?".to_string()},
             ZOP::Jump{jump_to_label: "print_char_normal".to_string()},
             ZOP::Label{name: "print_char_?".to_string()},
-            ZOP::StoreVariable{variable: Variable::new(1), value: Operand::new_large_const('?' as i16)},
+            ZOP::StoreVariable{variable: Variable::new(1), value: Operand::new_const('?' as u8)},
             ZOP::Label{name: "print_char_normal".to_string()},
-        ]);
-        self.op_print_char(&Variable::new(1));
-        self.emit(vec![
+            ZOP::PrintChar{var: Variable::new(1)},
             ZOP::Ret{value: Operand::new_const(0)}
         ]);
     }
