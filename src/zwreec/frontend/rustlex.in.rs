@@ -460,9 +460,10 @@ rustlex! TweeLexer {
 
     // This state recognizes a macro. It is entered when matching a MACRO_START
     // regex and left when matching a MACRONAME, VARIABLE or WHITESPACE regex.
-    //       There are several built-in macros. Any matched not built-in macro indicates a short diplay macro.
-    //       A matching variable indicates a short print.
-    // Whitespace after an opening `<<` aborts. Unmatched characters will lead to a callback.
+    // A matched macroname that doesn't correspond to a built-in macro indicates a
+    // short display macro. A matched variable indicates a short print macro.
+    // Whitespace after an opening `<<` aborts. Unmatched characters will lead
+    // to a callback.
     PASSAGE_CONTENT_MACRO {
         MACRONAME   => |lexer:&mut TweeLexer<R>| -> Option<Token> {
             let replaced_string = str::replace(lexer.yystr().trim(),  " ", "");
