@@ -234,6 +234,7 @@ pub fn gen_zcode(node: ASTNode, mut out: &mut Zfile, mut manager: &mut CodeGenMa
                                     code.push(zop);
                                 }
                             }
+                            code.push(ZOP::Call1N{jump_to_label: "mem_free".to_string()});
                             code.push(ZOP::Call1N{jump_to_label: passage_name.to_string()});
                             code.push(ZOP::Ret{value: Operand::new_const(0)});
                             code.push(ZOP::Label{name: continue_label.to_string()});
