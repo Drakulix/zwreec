@@ -17,6 +17,14 @@ pub fn op_erase_window(value: i8) -> Vec<u8> {
     bytes
 }
 
+/// stores row and column as two u16 words to the given addr
+pub fn op_get_cursor(store_addr: &Operand) -> Vec<u8> {
+    let args: Vec<ArgType> = vec![arg_type(&store_addr), ArgType::Nothing, ArgType::Nothing, ArgType::Nothing];
+    let mut bytes = op_var(0x10, args);
+    // array address
+    write_argument(store_addr, &mut bytes);
+    bytes
+}
 
 /// calls a routine (the address is stored in a variable)
 pub fn op_call_1n_var(variable: u8) -> Vec<u8> {
@@ -162,6 +170,22 @@ pub fn op_set_cursor(line: u8, col: u8) -> Vec<u8> {
     bytes
 }
 
+pub fn op_set_cursor_operand(row: &Operand, col: &Operand) -> Vec<u8> {
+    let args: Vec<ArgType> = vec![arg_type(&row), arg_type(&col), ArgType::Nothing, ArgType::Nothing];
+    let mut bytes = op_var(0xF, args);
+    // write argument values
+    write_argument(row, &mut bytes);
+    write_argument(col, &mut bytes);
+    bytes
+}
+
+pub fn op_erase_line() -> Vec<u8> {
+    let args: Vec<ArgType> = vec![ArgType::SmallConst, ArgType::Nothing, ArgType::Nothing, ArgType::Nothing];
+    let mut bytes = op_var(0xE, args);
+    // erase current line from cursor going
+    bytes.push(1);
+    bytes
+}
 
 /// Prints the value of a variable (only ints a possibe)
 pub fn op_print_num_var(variable: &Variable) -> Vec<u8> {

@@ -64,6 +64,8 @@ rustlex! TweeLexer {
 
     let VARIABLE_CHAR = LETTER | DIGIT | UNDERSCORE;
     let VARIABLE = '$' (LETTER | UNDERSCORE) VARIABLE_CHAR*;
+    let ARRAY_LENGTH = '$' (LETTER | UNDERSCORE) VARIABLE_CHAR* ".length";
+    let ARRAY_ACCESS = VARIABLE '[' WHITESPACE* VARIABLE WHITESPACE* ']';
 
     let FORMAT_ITALIC = "//";
     let FORMAT_BOLD = "''";
@@ -230,6 +232,8 @@ rustlex! TweeLexer {
 
     I_EXPRESSION {
         VARIABLE => |lexer:&mut TweeLexer<R>| Some(TokVariable{location: lexer.yylloc(), name: lexer.yystr()} )
+        ARRAY_ACCESS => |lexer:&mut TweeLexer<R>| Some(TokArrayAccess{location: lexer.yylloc(), name: lexer.yystr()[..].split('[').next().unwrap().to_string(), index: lexer.yystr()[..].split('[').nth(1).unwrap().split(']').next().unwrap().trim().to_string() } )
+        ARRAY_LENGTH => |lexer:&mut TweeLexer<R>| Some(TokArrayLength{location: lexer.yylloc(), name: lexer.yystr()[..].split('.').next().unwrap().to_string()} )
         STRING =>   |lexer:&mut TweeLexer<R>| Some(TokString  {location: lexer.yylloc(), value: unescape(lexer.yystr())} )
         FLOAT =>    |lexer:&mut TweeLexer<R>| Some(TokFloat   {location: lexer.yylloc(), value: lexer.yystr()[..].parse().unwrap()} )
         INT =>      |lexer:&mut TweeLexer<R>| Some(TokInt     {location: lexer.yylloc(), value: lexer.yystr()[..].parse().unwrap()} )

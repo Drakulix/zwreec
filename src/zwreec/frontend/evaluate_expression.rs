@@ -14,7 +14,7 @@ use frontend::ast::{ASTNode};
 use frontend::codegen;
 use frontend::codegen::{CodeGenManager};
 use frontend::lexer::Token;
-use frontend::lexer::Token::{TokNumOp, TokCompOp, TokLogOp, TokInt, TokBoolean, TokVariable, TokFunction, TokString, TokUnaryMinus};
+use frontend::lexer::Token::{TokNumOp, TokCompOp, TokLogOp, TokInt, TokBoolean, TokVariable, TokArrayLength, TokArrayAccess, TokFunction, TokString, TokUnaryMinus};
 #[allow(unused_imports)] use config::Config;
 
 #[derive(Debug)]
@@ -121,6 +121,51 @@ fn evaluate_expression_internal<'a>(node: &'a ASTNode, code: &mut Vec<ZOP>,
         TokVariable { ref name, .. } => {
             Operand::Var(manager.symbol_table.get_and_add_symbol_id(name))
         },
+        TokArrayLength { ref name, .. } => {
+            let alen: Variable = match temp_ids.pop() {
+                Some(var) => Variable::new(var),
+                None      => error_force_panic!(EvaluateExpressionError::NoTempIdLeftOnStack)
+            };
+            let zero: Variable = match temp_ids.pop() {
+                Some(var) => Variable::new(var),
+                None      => error_force_panic!(EvaluateExpressionError::NoTempIdLeftOnStack)
+            };
+            let var = Operand::Var(manager.symbol_table.get_and_add_symbol_id(name));
+            code.push(ZOP::StoreVariable{variable: zero.clone(), value: Operand::new_large_const(0)},);
+            code.push(ZOP::LoadW{array_address: var, index: zero.clone(), variable: alen.clone()});
+            code.push(ZOP::SetVarType{variable: alen.clone(), vartype: Type::Integer});
+            temp_ids.push(zero.id);
+            Operand::new_var(alen.id)
+        },
+        TokArrayAccess { ref name, ref index, .. } => {
+            let val: Variable = match temp_ids.pop() {
+                Some(var) => Variable::new(var),
+                None      => error_force_panic!(EvaluateExpressionError::NoTempIdLeftOnStack)
+            };
+            let mem: Variable = match temp_ids.pop() {
+                Some(var) => Variable::new(var),
+                None      => error_force_panic!(EvaluateExpressionError::NoTempIdLeftOnStack)
+            };
+            let ind: Variable = match temp_ids.pop() {
+                Some(var) => Variable::new(var),
+                None      => error_force_panic!(EvaluateExpressionError::NoTempIdLeftOnStack)
+            };
+            let var = Operand::Var(manager.symbol_table.get_and_add_symbol_id(name));
+            let index = Operand::Var(manager.symbol_table.get_and_add_symbol_id(index));
+            code.push(ZOP::Call2S{jump_to_label: "malloc".to_string(), arg: Operand::new_const(2), result: mem.clone()});
+            code.push(ZOP::StoreVariable{variable: ind.clone(), value: Operand::new_large_const(0)});
+            code.push(ZOP::StoreVariable{variable: val.clone(), value: Operand::new_large_const(1)});
+            code.push(ZOP::StoreW{array_address: Operand::new_var(mem.id), index: ind.clone(), variable: val.clone()});
+            code.push(ZOP::StoreVariable{variable: val.clone(), value: index.clone()});
+            code.push(ZOP::Inc{variable: val.id});
+            code.push(ZOP::LoadW{array_address: var, index: val.clone(), variable: val.clone()});
+            code.push(ZOP::StoreVariable{variable: ind.clone(), value: Operand::new_large_const(1)});
+            code.push(ZOP::StoreW{array_address: Operand::new_var(mem.id), index: ind.clone(), variable: val.clone()});
+            code.push(ZOP::SetVarType{variable: mem.clone(), vartype: Type::String});
+            temp_ids.push(val.id);
+            temp_ids.push(ind.id);
+            Operand::new_var(mem.id)
+        },
         TokFunction { ref name, ref location } => {
             match &**name {
                 "random" => {
@@ -146,6 +191,36 @@ fn evaluate_expression_internal<'a>(node: &'a ASTNode, code: &mut Vec<ZOP>,
                     let from_value = evaluate_expression_internal(from, code, temp_ids, manager, &mut out);
                     let to_value = evaluate_expression_internal(to, code, temp_ids, manager, &mut out);
                     codegen::function_random(manager, &from_value, &to_value, code, temp_ids, location.clone())
+                },
+                "prompt" => { // twee function prompt(message, default) - imitates the JS browser input dialog
+                    let args = &node.as_default().childs;
+                    if args.len() != 2 {
+                        let error = EvaluateExpressionError::UnsupportedFunctionArgsLen {
+                            name: "prompt".to_string(), location: location.clone(), expected: 2 };
+                        error_panic!(cfg => error);
+                        if args.len() <= 1 {
+                            return Operand::Const(Constant { value: 0 })
+                        } else {
+                            warn!("Ignoring the additional arguments.");
+                        }
+                    }
+
+                    if args[0].as_default().childs.len() != 1 || args[1].as_default().childs.len() != 1 {
+                        error_force_panic!(EvaluateExpressionError::InvalidAST);
+                    }
+
+                    let message_n = &args[0].as_default().childs[0];
+                    let default_n = &args[1].as_default().childs[0];
+
+                    let message = evaluate_expression_internal(message_n, code, temp_ids, manager, &mut out);
+                    let default = evaluate_expression_internal(default_n, code, temp_ids, manager, &mut out);
+                    let return_var: Variable = match temp_ids.pop() {
+                        Some(var) => Variable::new(var),
+                        None      => error_force_panic!(EvaluateExpressionError::NoTempIdLeftOnStack)
+                    };
+                    code.push(ZOP::CallVSA2{jump_to_label: "rt_prompt".to_string(), arg1: message.clone(), arg2: default.clone(), result: return_var.clone()});
+                    code.push(ZOP::SetVarType{variable: return_var.clone(), vartype: Type::String});
+                    Operand::new_var(return_var.id)
                 },
                 "confirm" => {
                     let state_copy = manager.format_state.clone();

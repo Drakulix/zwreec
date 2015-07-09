@@ -535,6 +535,7 @@ pub fn function_random(manager: &CodeGenManager, arg_from: &Operand, arg_to: &Op
     Operand::new_var(var.id)
 }
 
+
 pub struct CodeGenManager<'a> {
     pub cfg: &'a Config,
     pub ids_if: IdentifierProvider,
