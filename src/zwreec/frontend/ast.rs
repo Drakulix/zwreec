@@ -1,14 +1,13 @@
 //! The `ast` module contains a lot of useful functionality
 //! to create and walk through the ast (abstract syntaxtree)
 
-use std::fmt::{Debug, Display, Formatter, Result, Write};
-use std::collections::HashSet;
+use std::fmt::{Debug, Formatter, Result, Write};
 use std::iter::Scan;
 
 use config::Config;
 use frontend::expressionparser;
 use frontend::lexer::Token;
-use frontend::lexer::Token::{TokMacroIf, TokMacroElseIf, TokExpression, TokPassage};
+use frontend::lexer::Token::{TokMacroIf, TokMacroElseIf, TokExpression};
 
 use ::utils::extensions::{Constructor, ConstructorExt};
 //==============================
@@ -17,10 +16,6 @@ use ::utils::extensions::{Constructor, ConstructorExt};
 pub struct ASTBuilder {
     path: Vec<usize>,
     is_in_if_expression: bool
-}
-
-pub struct AST {
-    pub passages: Vec<ASTNode>,
 }
 
 /// the parser use these ASTOperations to create the ast
@@ -179,58 +174,6 @@ impl ASTBuilder {
     }
 }
 
-/// ast-implementation
-impl AST {
-    /// counts the childs of the path in the asts
-    pub fn count_childs(&self, path: Vec<usize>) -> usize {
-        if let Some(index) = path.first() {
-            let mut new_path: Vec<usize> = path.to_vec();
-            new_path.remove(0);
-
-            self.passages[*index].count_childs(new_path)
-        } else {
-            self.passages.len()
-        }
-    }
-
-    /// checks in the ast if there is the token "token"
-    pub fn is_specific_token(&self, token: Token, path: Vec<usize>) -> bool {
-        if let Some(index) = path.first() {
-            let mut new_path: Vec<usize> = path.to_vec();
-            new_path.remove(0);
-
-            self.passages[*index].is_specific_token(token, new_path)
-        } else {
-            false
-        }
-    }
-
-    /// cycle through all passages an returns a vector with all passage-titles
-    pub fn passage_nodes_to_string(&self) -> HashSet<String> {
-        let mut passages: HashSet<String> = HashSet::with_capacity(self.passages.len());
-        for child in &self.passages {
-            match child.category() {
-                TokPassage {ref name, .. } => {
-                    passages.insert(name.clone());
-                }
-                _ => ()
-            }
-        }
-
-        passages
-    }
-}
-
-impl Debug for AST {
-    fn fmt(&self, f: &mut Formatter) -> Result {
-        try!(f.write_str("Abstract Syntax Tree: \n"));
-        for child in &self.passages {
-            try!(child.fmt(f));
-        }
-        Ok(())
-    }
-}
-
 // ================================
 // node types
 #[derive(Clone)]
@@ -352,9 +295,9 @@ impl ASTNode {
     }
 
     /// wraps the ASTNode to NodeDefault
-    pub fn as_default(&self) -> &NodeDefault {
+    pub fn as_default(self) -> NodeDefault {
         match self {
-            &ASTNode::Default(ref def) => def,
+            ASTNode::Default(def) => def,
             _ => panic!("Node cannot be unwrapped as NodeDefault!")
         }
     }
@@ -402,7 +345,7 @@ mod tests {
     use config::Config;
 
     /// creates an ast from the inputs str
-    fn test_ast(input: &str) -> AST {
+    fn test_ast(input: &str) -> Vec<ASTNode> {
         let cfg = Config::default_config();
         let mut cursor: Cursor<Vec<u8>> = Cursor::new(input.to_string().into_bytes());
         let tokens = lexer::lex(&cfg, &mut cursor);
@@ -411,17 +354,29 @@ mod tests {
             println!("{:?}", token);
         }));
 
-        AST { passages: ASTBuilder::build(&cfg, ast_ops).collect() }
+        let ast = ASTBuilder::build(&cfg, ast_ops);
+        ast.collect()
     }
 
     /// checks expected
-    fn test_expected(expected: Vec<(Vec<usize>, Token)>, ast: AST) {
+    fn test_expected(expected: Vec<(Vec<usize>, Token)>, ast: Vec<ASTNode>) {
         for item in expected.iter() {
-            let b = ast.is_specific_token(item.1.clone(), item.0.to_vec());
+            /// checks in the ast if there is the token "token"
+            fn is_specific_token(ast: Vec<ASTNode>, token: Token, path: Vec<usize>) -> bool {
+                if let Some(index) = path.first() {
+                    let mut new_path: Vec<usize> = path.to_vec();
+                    new_path.remove(0);
+                    ast[*index].is_specific_token(token, new_path)
+                } else {
+                    false
+                }
+            }
+
+            let b = is_specific_token(ast.clone(), item.1.clone(), item.0.to_vec());
             if b == false {
                 println!("FAILED WITH TOKEN {:?} at {:?}", item.0, item.1);
             }
-            assert!(ast.is_specific_token(item.1.clone(), item.0.to_vec()));
+            assert!(b);
         }
     }
 
