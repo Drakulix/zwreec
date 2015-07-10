@@ -807,8 +807,8 @@ impl Zfile {
     pub fn routine_check_links(&mut self) {
         let save_at_addr: u16 = 1 + self.object_addr;
         self.emit(vec![
-            ZOP::Newline,
             ZOP::Routine{name: "system_check_links".to_string(), count_variables: 3},
+            ZOP::Newline,
 
             // jumps to the end, if this passage was called as <<display>>
             ZOP::JE{operand1: Operand::new_var(17), operand2: Operand::new_const(0x01), jump_to_label: "system_check_links_end_ret".to_string()},
