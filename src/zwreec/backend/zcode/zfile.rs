@@ -202,6 +202,7 @@ pub struct Zfile {
     pub type_store: u16,
     pub cursor_pos: u16,
     pub heap_start: u16,
+    pub bright_mode: bool,
     pub force_unicode: bool,
     pub easter_egg: bool,
     pub no_colours: bool,
@@ -244,10 +245,10 @@ impl Zfile {
 
     /// creates a new zfile
     pub fn new() -> Zfile {
-        Zfile::new_with_options(false, false, false, false, false)
+        Zfile::new_with_options(false, false, false, false, false, false)
     }
 
-    pub fn new_with_options(force_unicode: bool, easter_egg: bool, no_colours: bool, half_memory: bool, no_unicode: bool) -> Zfile {
+    pub fn new_with_options(bright_mode: bool, force_unicode: bool, easter_egg: bool, no_colours: bool, half_memory: bool, no_unicode: bool) -> Zfile {
         Zfile {
             data: Bytes{bytes: Vec::new()},
             unicode_table: Vec::new(),
@@ -263,6 +264,7 @@ impl Zfile {
             heap_start: 0x600,
             cursor_pos: 0x502,  // set by UpdateCursorPos
             type_store: 0x400,
+            bright_mode: bright_mode,
             force_unicode: force_unicode,
             easter_egg: easter_egg,
             no_colours: no_colours,
@@ -271,7 +273,7 @@ impl Zfile {
     }
 
     pub fn new_with_cfg(cfg: &Config) -> Zfile {
-        Zfile::new_with_options(cfg.force_unicode, cfg.easter_egg, cfg.no_colours, cfg.half_memory, cfg.no_unicode)
+        Zfile::new_with_options(cfg.bright_mode, cfg.force_unicode, cfg.easter_egg, cfg.no_colours, cfg.half_memory, cfg.no_unicode)
     }
 
     /// creates the header of a zfile
@@ -716,9 +718,12 @@ impl Zfile {
         self.create_header();
         self.data.write_zero_until(self.program_addr as usize);
 
+        let foreground: u8 = if self.bright_mode { 2 } else { 9 };
+        let background: u8 = if self.bright_mode { 9 } else { 2 };
+
         // default theme and erase_window to fore the color
         self.emit(vec![
-            ZOP::SetColor{foreground: 9, background: 2},
+            ZOP::SetColor{foreground: foreground, background: background},
             ZOP::EraseWindow{value: -1},
             ZOP::Call1N{jump_to_label: "malloc_init".to_string()},
             ZOP::Call1N{jump_to_label: "Start".to_string()},
@@ -802,6 +807,7 @@ impl Zfile {
     pub fn routine_check_links(&mut self) {
         let save_at_addr: u16 = 1 + self.object_addr;
         self.emit(vec![
+            ZOP::Newline,
             ZOP::Routine{name: "system_check_links".to_string(), count_variables: 3},
 
             // jumps to the end, if this passage was called as <<display>>

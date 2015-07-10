@@ -162,14 +162,17 @@ use std::vec::Vec;
 /// ```
 #[derive(Clone)]
 pub struct Config {
-    /// Force compilation despite errors
-    pub force: bool,
+    /// force a bright background and dark text
+    pub bright_mode: bool,
     /// Add easter egg to compiler
     pub easter_egg: bool,
+    /// Force compilation despite errors
+    pub force: bool,
     pub force_unicode: bool,
-    pub no_colours: bool,
     pub half_memory: bool,
+    pub no_colours: bool,
     pub no_unicode: bool,
+
     /// Instruct compiler to run these test-cases
     pub test_cases: Vec<TestCase>,
 }
@@ -185,11 +188,12 @@ impl Config {
     /// ```
     pub fn default_config() -> Config {
         Config{
-            force: false,
+            bright_mode: false,
             easter_egg: true,
+            force: false,
             force_unicode: false,
-            no_colours: false,
             half_memory: false,
+            no_colours: false,
             no_unicode: false,
             test_cases: Vec::new(),
         }
@@ -230,6 +234,10 @@ impl Config {
         // TODO: Find a way to make these two loops somewhat less.. repetitive
         for s in matches.opt_strs("F") {
             match s.as_ref() {
+                "bright-mode" => {
+                     cfg.bright_mode = true;
+                     debug!("enabled bright-mode");
+                },
                 "easter-egg" => {
                      cfg.easter_egg = true;
                      debug!("enabled easter-egg");
@@ -258,6 +266,10 @@ impl Config {
 
         for s in matches.opt_strs("N") {
             match s.as_ref() {
+                "bright-mode" => {
+                     cfg.bright_mode = false;
+                     debug!("disabled bright-mode");
+                },
                 "easter-egg" => {
                     cfg.easter_egg = false;
                     debug!("disabled easter-egg");
@@ -382,6 +394,8 @@ pub fn zwreec_usage(verbose: bool, mut opts: getopts::Options, brief: &str) -> S
 
     let features_usage = if verbose {
         "List of supported features (default value in parenthesis)
+    bright-mode (enabled)
+        Enables a bright background and a dark textcolor
     easter-egg (enabled) 
         Enables the generation of easter egg code. Enter the secret combination
         in your Z-Machine interpreter to activate the easter egg
@@ -443,6 +457,20 @@ mod tests {
                                    "easter-egg".to_string()]);
 
         assert_eq!(cfg.easter_egg, false);
+    }
+
+    #[test]
+    fn test_feature_bright_mode_true() {
+        let cfg = config_from_args(vec!["-F".to_string(), "bright-mode".to_string()]);
+
+        assert_eq!(cfg.bright_mode, true);
+    }
+
+    #[test]
+    fn test_feature_bright_mode_false() {
+        let cfg = config_from_args(vec!["-N".to_string(), "bright-mode".to_string()]);
+
+        assert_eq!(cfg.bright_mode, false);
     }
 
     #[test]
