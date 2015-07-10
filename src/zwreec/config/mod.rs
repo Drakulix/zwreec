@@ -394,7 +394,7 @@ pub fn zwreec_usage(verbose: bool, mut opts: getopts::Options, brief: &str) -> S
 
     let features_usage = if verbose {
         "List of supported features (default value in parenthesis)
-    bright-mode (enabled)
+    bright-mode (disabled)
         Enables a bright background and a dark textcolor
     easter-egg (enabled) 
         Enables the generation of easter egg code. Enter the secret combination
