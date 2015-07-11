@@ -245,11 +245,15 @@ pub fn gen_zcode(node: ASTNode, mut out: &mut Zfile, mut manager: &mut CodeGenMa
                             code.push(ZOP::Call2NWithAddress{jump_to_label: "system_add_link".to_string(), address: passage_name.to_string()});
                         }
 
-                        code.push(ZOP::SetColor{foreground: 8, background: 2});
+                        let foreground: u8 = if manager.cfg.bright_mode { 2 } else { 9 };
+                        let background: u8 = if manager.cfg.bright_mode { 9 } else { 2 };
+                        let link_color: u8 = if manager.cfg.bright_mode { 6 } else { 8 };
+
+                        code.push(ZOP::SetColor{foreground: link_color, background: background});
                         code.push(ZOP::PrintOps{text: format!("{}[", display_name)});
                         code.push(ZOP::PrintNumVar{variable: Variable::new(16)});
                         code.push(ZOP::Print{text: "]".to_string()});
-                        code.push(ZOP::SetColor{foreground: 9, background: 2});
+                        code.push(ZOP::SetColor{foreground: foreground, background: background});
 
                         code
                     } else {
