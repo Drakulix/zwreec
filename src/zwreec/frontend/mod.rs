@@ -17,11 +17,11 @@
 //! let mut twee = Cursor::new("::Start\nHello World".to_string().into_bytes());
 //!
 //! // Generate Token Stream
-//! let tokens = zwreec::frontend::lexer::lex(&cfg, &mut twee);
+//! let tokens = zwreec::frontend::lexer::lex(cfg.clone(), &mut twee);
 //!
 //! // Parse Tokens
-//! let p = zwreec::frontend::parser::Parser::new(&cfg);
-//! let ast: Vec<zwreec::frontend::ast::ASTNode> = zwreec::frontend::ast::ASTBuilder::build(&cfg, p.parse(tokens)).collect();
+//! let p = zwreec::frontend::parser::Parser::new(cfg.clone());
+//! let ast: Vec<zwreec::frontend::ast::ASTNode> = zwreec::frontend::ast::ASTBuilder::build(cfg, p.parse(tokens)).collect();
 //! ```
 
 pub mod ast;

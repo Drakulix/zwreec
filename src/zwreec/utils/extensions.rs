@@ -1,4 +1,6 @@
 use std::iter::Peekable;
+use std::sync::mpsc;
+use std::thread;
 
 /// An iterator that performs a lookahead of 1, utilizing the existing Peakable Iterator
 /// Can be stacked to perform an even greater lookahead
@@ -230,6 +232,27 @@ impl<I: Sized+Iterator>ConstructorExt for I {
     }
 }
 
+// An iterator that performs all iteration in a seperate therad and caches them
+pub struct Cached<A: Send> {
+    rx: mpsc::Receiver<A>
+}
+
+impl<A: Send> Iterator for Cached<A> {
+    type Item = A;
+
+    fn next(&mut self) -> Option<A> { self.rx.recv().ok() }
+}
+
+pub fn cached<A: Send + 'static, I: Sized + Iterator<Item=A>, F: FnOnce() -> I + Send + 'static>(constructor: F) -> (Cached<A>, thread::JoinHandle<()>)
+{
+    let (tx, rx) = mpsc::channel();
+    let handle = thread::spawn(move || {
+        for item in constructor() {
+            let _ = tx.send(item);
+        }
+    });
+    (Cached { rx: rx }, handle)
+}
 
 #[test]
 fn peeking_test() {

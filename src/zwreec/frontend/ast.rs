@@ -40,8 +40,8 @@ impl ASTBuilder {
     }
 
     ///constructs Iterator over all Passages
-    pub fn build<I: Iterator<Item=ASTOperation>>(cfg: &Config, ops: I)
-        -> Scan<Constructor<I, ASTBuilder, ASTNode, fn(&mut ASTBuilder, &mut Option<ASTNode>, ASTOperation) -> Option<ASTNode>>, &Config, fn(&mut &Config, ASTNode) -> Option<ASTNode>>
+    pub fn build<I: Iterator<Item=ASTOperation>>(cfg: Config, ops: I)
+        -> Scan<Constructor<I, ASTBuilder, ASTNode, fn(&mut ASTBuilder, &mut Option<ASTNode>, ASTOperation) -> Option<ASTNode>>, Config, fn(&mut Config, ASTNode) -> Option<ASTNode>>
         //concrete return type because of optimization reasons. Read and use it as "Iterator<ASTNode>"
     {
         ops.construct_state(ASTBuilder::new(),
@@ -53,10 +53,10 @@ impl ASTBuilder {
             construct as fn(&mut ASTBuilder, &mut Option<ASTNode>, ASTOperation) -> Option<ASTNode> //necessary cast is a known bug
         }).scan(cfg,
             {
-                fn scan(cfg: &mut &Config, x: ASTNode) -> Option<ASTNode>
+                fn scan(cfg: &mut Config, x: ASTNode) -> Option<ASTNode>
                 {
                     let mut y = x.clone();
-                    y.parse_expressions(*cfg);
+                    y.parse_expressions(cfg);
                     Some(y)
                 }
                 scan
@@ -350,13 +350,13 @@ mod tests {
     fn test_ast(input: &str) -> Vec<ASTNode> {
         let cfg = Config::default_config();
         let mut cursor: Cursor<Vec<u8>> = Cursor::new(input.to_string().into_bytes());
-        let tokens = lexer::lex(&cfg, &mut cursor);
-        let parser = parser::Parser::new(&cfg);
+        let tokens = lexer::lex(cfg.clone(), &mut cursor);
+        let parser = parser::Parser::new(cfg.clone());
         let ast_ops = parser.parse(tokens.inspect(|ref token| {
             println!("{:?}", token);
         }));
 
-        let ast = ASTBuilder::build(&cfg, ast_ops);
+        let ast = ASTBuilder::build(cfg, ast_ops);
         ast.collect()
     }
 

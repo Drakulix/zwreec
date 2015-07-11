@@ -40,8 +40,8 @@ pub enum LexerError {
 ///
 /// The `zwreec::utils::extensions` module defines a new iterator `FilteringScan`.
 /// This struct stores the state for this iterator.
-pub struct ScanState<'a> {
-    cfg: &'a Config,
+pub struct ScanState {
+    cfg: Config,
     current_text: String,
     current_text_location: (u64, u64),
     skip_next: bool,
@@ -63,10 +63,10 @@ pub struct ScanState<'a> {
 /// let cfg = zwreec::config::Config::default_config();
 /// let mut input = Cursor::new("::Start\nHello World".to_string().into_bytes());
 ///
-/// let tokens = zwreec::frontend::lexer::lex(&cfg, &mut input);
+/// let tokens = zwreec::frontend::lexer::lex(cfg, &mut input);
 /// ```
 #[allow(unused_variables)]
-pub fn lex<'a, R: Read>(cfg: &'a Config, input: &'a mut R) -> FilteringScan<Peeking<TweeLexer<BufReader<&'a mut R>>, Token>, ScanState<'a>, fn(&mut ScanState, (Token, Option<Token>)) -> Option<Token>>  {
+pub fn lex<R: Read>(cfg: Config, input: R) -> FilteringScan<Peeking<TweeLexer<BufReader<R>>, Token>, ScanState, fn(&mut ScanState, (Token, Option<Token>)) -> Option<Token>>  {
 
     let mut lexer = TweeLexer::new(BufReader::new(input));
     lexer.cfg = Some(cfg.clone());
@@ -372,7 +372,7 @@ mod tests {
     fn test_lex(input: &str) -> Vec<Token> {
         let cfg = Config::default_config();
         let mut cursor: Cursor<Vec<u8>> = Cursor::new(input.to_string().into_bytes());
-        lex(&cfg, &mut cursor).collect()
+        lex(cfg, &mut cursor).collect()
     }
 
     fn assert_tok_eq(expected: Vec<Token>, tokens: Vec<Token>) {
