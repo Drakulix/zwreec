@@ -1,0 +1,87 @@
+::Start
+<<set $location to "street">>
+<<set $book to "hammock">>
+<<set $pen to "item">>
+<<display useraction>>
+
+:: Quit
+
+:: showItems
+luggage: <<if $book == "item">> book <<endif>> <<if $pen == "item">> pen <<endif>>
+:: useraction
+<<display showItems>>
+<<if $location == "garden">>
+The garden looks a bit neglected.
+<<else>>You are here: <<print $location>> <<endif>>
+<<set $list to prompt("What are you going to do?", "")>>
+<<nobr>>
+<<display takeFirst>>
+<<if $head == "look">>
+  <<if $book == $location>>
+There is a book.
+  <<elseif $pen == $location>>
+The pen is here.
+  <<elseif $location == "street">>
+Cars are parking vast apart, between the quaint houses there is a door leading to a garden of a ruined house.
+  <<elseif $location == "garden">>
+Some trees, shrubbery, a hammock and grass with formidable height.
+  <<else>>
+Nothing special.
+  <<endif>>
+<<elseif $head == "take">>
+  <<if $tail == "book">>
+    <<set $book to "item">>
+  <<elseif $tail == "pen">>
+    <<set $pen to "item">>
+  <<else>>
+    There is no <<print $tail>>
+  <<endif>>
+<<elseif $head == "drop">>
+  <<if $tail == "book">>
+    <<set $book to $location>>
+  <<elseif $tail == "pen">>
+    <<set $pen to $location>>
+  <<else>>
+    You have no <<print $tail>>
+  <<endif>>
+<<elseif $head == "go">>
+  <<set $list to $tail>>
+  <<display takeFirst>>
+  <<if $head == "to">>
+    <<set $location = $tail>>
+  <<else>>
+    <<set $location = $head>>
+  <<endif>>
+<<elseif $head == "enter">>
+  <<set $location = $tail>>
+<<elseif $head == "quit">>
+[[Quit]]
+<<else>>
+Could not parse input. Try things like "take, drop, go to, enter, look"
+<<endif>>
+<<endnobr>>
+
+[[continue|useraction]]
+
+:: takeFirst
+<<silently>><<nobr>> /% set $head and $tail for $list which is separated by space. internal variables are $ti and $tt %/
+<<if $ti == 0>>
+  <<set $head = "">>
+  <<set $tail = "">>
+  <<set $tt = false>>
+<<endif>>
+
+<<if $ti < $list.length>>
+  <<if $tt>>
+    <<set $tail += $list[$ti]>>
+  <<elseif $list[$ti] == " ">>
+    <<set $tt = true>>
+  <<else>>
+    <<set $head += $list[$ti]>>
+  <<endif>>
+  <<set $ti += 1>>
+  <<display takeFirst>>
+<<else>>
+  <<set $ti = 0>>
+<<endif>>
+<<endnobr>><<endsilently>>\

@@ -92,6 +92,11 @@ fn current_status_test() {
 }
 
 #[test]
+fn prompt_and_string_index_access_test() {
+    test_compile(TESTFOLDER_PASS.to_string() + "textadventure.twee");
+}
+
+#[test]
 #[should_panic]
 fn expression_double_operators_test() {
     test_compile(TESTFOLDER_FAIL.to_string() + "ExpressionDoubleOperators.twee");
