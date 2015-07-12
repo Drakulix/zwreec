@@ -14,7 +14,6 @@
 <<set $win to 0>>
 <<set $draw to false>>
 <<endnobr>><<display Game>>
-
 :: Game
 <<display Board>>
 <<nobr>>
@@ -51,7 +50,6 @@ Welches Feld möchtest du markieren?
 <<if $tl is 0>>[[Oben links|Game][$tl to $current]]  <<else>>               <<endif>><<if $tm is 0>>[[Oben mitte|Game][$tm to $current]]  <<else>>               <<endif>><<if $tr is 0>>[[Oben rechts|Game][$tr to $current]]<<endif>>
 <<if $ml is 0>>[[Mitte links|Game][$ml to $current]] <<else>>               <<endif>><<if $mm is 0>>[[Mitte mitte|Game][$mm to $current]] <<else>>               <<endif>><<if $mr is 0>>[[Mitte rechts|Game][$mr to $current]]<<endif>>
 <<if $bl is 0>>[[Unten links|Game][$bl to $current]] <<else>>               <<endif>><<if $bm is 0>>[[Unten mitte|Game][$bm to $current]] <<else>>               <<endif>><<if $br is 0>>[[Unten rechts|Game][$br to $current]]<<endif>><<endif>>
-
 :: Board
 <<nobr>>
 <<set $l to $tl>><<set $m to $tm>><<set $r to $tr>>
