@@ -97,6 +97,11 @@ fn prompt_and_string_index_access_test() {
 }
 
 #[test]
+fn tic_tac_toe_test() {
+    test_compile(TESTFOLDER_PASS.to_string() + "Tic-Tac-Toe.twee");
+}
+
+#[test]
 #[should_panic]
 fn expression_double_operators_test() {
     test_compile(TESTFOLDER_FAIL.to_string() + "ExpressionDoubleOperators.twee");
