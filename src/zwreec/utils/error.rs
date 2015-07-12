@@ -1,3 +1,8 @@
+//! Implementation of Error Logging thrown in the compiler
+//!
+//! This Module contains Display Implementations for the Errors defined in the core modules (frontend/backend),
+//! allowing to log them easily. Also contains macros to log and panic - depending on the Config module - because of an error,
+//! making the actual Error Handling Code in the other modules much shorter and easier to use.
 use std::fmt::{Display, Formatter, Result, Write};
 
 use frontend::lexer::Token;
