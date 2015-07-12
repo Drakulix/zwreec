@@ -1,0 +1,100 @@
+:: Start
+<<set $p1 to prompt("Name des 1. Spielers: ", "")>>
+<<set $p2 to prompt("Name des 2. Spielers: ", "")>>
+<<set $initial_turn to 2>>
+[[Spiel starten!|New_Game]]
+
+:: New_Game
+<<nobr>>
+<<set $tl to 0>><<set $tm to 0>><<set $tr to 0>>
+<<set $ml to 0>><<set $mm to 0>><<set $mr to 0>>
+<<set $bl to 0>><<set $bm to 0>><<set $br to 0>>
+<<set $initial_turn to ($initial_turn % 2) + 1>>
+<<set $turn to $initial_turn>>
+<<set $win to 0>>
+<<set $draw to false>>
+<<endnobr>><<display Game>>
+:: Game
+<<display Board>>
+<<nobr>>
+<<set $current to $turn>>
+<<set $turn to ($turn % 2) + 1>>
+<<if $tl is $tm and $tm is $tr>>
+<<set $win to $tl>>
+<<else if $ml is $mm and $mm is $mr>>
+<<set $win to $ml>>
+<<else if $bl is $bm and $bm is $br>>
+<<set $win to $bl>>
+<<else if $tl is $ml and $ml is $bl>>
+<<set $win to $tl>>
+<<else if $tm is $mm and $mm is $bm>>
+<<set $win to $tm>>
+<<else if $tr is $mr and $mr is $br>>
+<<set $win to $tr>>
+<<else if $tl is $mm and $mm is $br>>
+<<set $win to $tl>>
+<<else if $tr is $mm and $mm is $bl>>
+<<set $win to $tr>>
+<<else if $tl > 0 and $tm > 0 and $tr > 0 and $ml > 0 and $mm > 0 and $mr > 0 and $bl > 0 and $bm > 0 and $br > 0>>
+<<set $draw to true>>
+<<endif>>
+<<endnobr>><<if $win != 0>>
+''<<if $win is 1>><<$p1>> hat gewonnen. Glückwunsch!<<else>><<$p2>> hat gewonnen. Glückwunsch!<<endif>>''
+
+[[Nochmal spielen!|New_Game]]<<else if $draw>>
+''Unentschieden!''
+
+[[Nochmal spielen!|New_Game]]
+<<else>><<if $current is 1>><<$p1>> ist an der Reihe.<<else>><<$p2>> ist an der Reihe.<<endif>>
+Welches Feld möchtest du markieren?
+<<if $tl is 0>>[[Oben links|Game][$tl to $current]]  <<else>>               <<endif>><<if $tm is 0>>[[Oben mitte|Game][$tm to $current]]  <<else>>               <<endif>><<if $tr is 0>>[[Oben rechts|Game][$tr to $current]]<<endif>>
+<<if $ml is 0>>[[Mitte links|Game][$ml to $current]] <<else>>               <<endif>><<if $mm is 0>>[[Mitte mitte|Game][$mm to $current]] <<else>>               <<endif>><<if $mr is 0>>[[Mitte rechts|Game][$mr to $current]]<<endif>>
+<<if $bl is 0>>[[Unten links|Game][$bl to $current]] <<else>>               <<endif>><<if $bm is 0>>[[Unten mitte|Game][$bm to $current]] <<else>>               <<endif>><<if $br is 0>>[[Unten rechts|Game][$br to $current]]<<endif>><<endif>>
+:: Board
+<<nobr>>
+<<set $l to $tl>><<set $m to $tm>><<set $r to $tr>>
+<<display Row>>
+<<endnobr>>
+{{{_____________|____________|_______________}}}
+<<nobr>>
+<<set $l to $ml>><<set $m to $mm>><<set $r to $mr>>
+<<display Row>>
+<<endnobr>>
+{{{_____________|____________|_______________}}}
+<<nobr>>
+<<set $l to $bl>><<set $m to $bm>><<set $r to $br>>
+<<display Row>>
+<<endnobr>>
+{{{             |            |             }}}
+
+:: Row
+<<nobr>>
+<<if $l is 0>>{{{             }}}<<else if $l is 1>>{{{    .____,   }}}<<else>>{{{     ____    }}}<<endif>>{{{|}}}
+<<if $m is 0>>{{{            }}}<<else if $m is 1>>{{{   .____,   }}}<<else>>{{{    ____    }}}<<endif>>{{{|}}}
+<<if $r is 0>>{{{            }}}<<else if $r is 1>>{{{   .____,   }}}<<else>>{{{    ____    }}}<<endif>>
+<<endnobr>>
+<<nobr>>
+<<if $l is 0>>{{{             }}}<<else if $l is 1>>{{{   . \  / ,  }}}<<else>>{{{   ,' __ `.  }}}<<endif>>{{{|}}}
+<<if $m is 0>>{{{            }}}<<else if $m is 1>>{{{  . \  / ,  }}}<<else>>{{{  ,' __ `.  }}}<<endif>>{{{|}}}
+<<if $r is 0>>{{{            }}}<<else if $r is 1>>{{{  . \  / ,  }}}<<else>>{{{  ,' __ `.  }}}<<endif>>
+<<endnobr>>
+<<nobr>>
+<<if $l is 0>>{{{             }}}<<else if $l is 1>>{{{   |`-  -'|  }}}<<else>>{{{  / ,'  `. \ }}}<<endif>>{{{|}}}
+<<if $m is 0>>{{{            }}}<<else if $m is 1>>{{{  |`-  -'|  }}}<<else>>{{{ / ,'  `. \ }}}<<endif>>{{{|}}}
+<<if $r is 0>>{{{            }}}<<else if $r is 1>>{{{  |`-  -'|  }}}<<else>>{{{ / ,'  `. \ }}}<<endif>>
+<<endnobr>>
+<<nobr>>
+<<if $l is 0>>{{{             }}}<<else if $l is 1>>{{{   |,-  -.|  }}}<<else>>{{{  | | () | | }}}<<endif>>{{{|}}}
+<<if $m is 0>>{{{            }}}<<else if $m is 1>>{{{  |,-  -.|  }}}<<else>>{{{ | | () | | }}}<<endif>>{{{|}}}
+<<if $r is 0>>{{{            }}}<<else if $r is 1>>{{{  |,-  -.|  }}}<<else>>{{{ | | () | | }}}<<endif>>
+<<endnobr>>
+<<nobr>>
+<<if $l is 0>>{{{             }}}<<else if $l is 1>>{{{   ' /__\ `  }}}<<else>>{{{  \ `.__,' / }}}<<endif>>{{{|}}}
+<<if $m is 0>>{{{            }}}<<else if $m is 1>>{{{  ' /__\ `  }}}<<else>>{{{ \ `.__,' / }}}<<endif>>{{{|}}}
+<<if $r is 0>>{{{            }}}<<else if $r is 1>>{{{  ' /__\ `  }}}<<else>>{{{ \ `.__,' / }}}<<endif>>
+<<endnobr>>
+<<nobr>>
+<<if $l is 0>>{{{             }}}<<else if $l is 1>>{{{    '    `   }}}<<else>>{{{   `.____,'  }}}<<endif>>{{{|}}}
+<<if $m is 0>>{{{            }}}<<else if $m is 1>>{{{   '    `   }}}<<else>>{{{  `.____,'  }}}<<endif>>{{{|}}}
+<<if $r is 0>>{{{            }}}<<else if $r is 1>>{{{   '    `   }}}<<else>>{{{  `.____,'  }}}<<endif>>
+<<endnobr>>
