@@ -16,8 +16,11 @@
 //! let cfg = zwreec::config::Config::default_config();
 //! let mut twee = Cursor::new("::Start\nHello World".to_string().into_bytes());
 //!
+//! // Clean Input
+//! let mut cursor = zwreec::frontend::screener::handle_bom_encoding(&mut twee);
+//!
 //! // Generate Token Stream
-//! let tokens = zwreec::frontend::lexer::lex(cfg.clone(), &mut twee);
+//! let tokens = zwreec::frontend::lexer::lex(cfg.clone(), &mut cursor);
 //!
 //! // Parse Tokens
 //! let p = zwreec::frontend::parser::Parser::new(cfg.clone());
