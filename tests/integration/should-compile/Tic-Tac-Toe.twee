@@ -39,29 +39,18 @@
 <<else if $tl > 0 and $tm > 0 and $tr > 0 and $ml > 0 and $mm > 0 and $mr > 0 and $bl > 0 and $bm > 0 and $br > 0>>
 <<set $draw to true>>
 <<endif>>
-<<endnobr>>
-
-<<if $win != 0>>
+<<endnobr>><<if $win != 0>>
 ''<<if $win is 1>><<$p1>> hat gewonnen. Glückwunsch!<<else>><<$p2>> hat gewonnen. Glückwunsch!<<endif>>''
 
-[[Nochmal spielen!|New_Game]]
-<<else if $draw>>
+[[Nochmal spielen!|New_Game]]<<else if $draw>>
 ''Unentschieden!''
 
 [[Nochmal spielen!|New_Game]]
-<<else>>
-<<if $current is 1>><<$p1>> ist an der Reihe.<<else>><<$p2>> ist an der Reihe.<<endif>>
+<<else>><<if $current is 1>><<$p1>> ist an der Reihe.<<else>><<$p2>> ist an der Reihe.<<endif>>
 Welches Feld möchtest du markieren?
-<<if $tl is 0>>[[Oben links|Game][$tl to $current]]<<endif>>
-<<if $tm is 0>>[[Oben mitte|Game][$tm to $current]]<<endif>>
-<<if $tr is 0>>[[Oben rechts|Game][$tr to $current]]<<endif>>
-<<if $ml is 0>>[[Mitte links|Game][$ml to $current]]<<endif>>
-<<if $mm is 0>>[[Mitte mitte|Game][$mm to $current]]<<endif>>
-<<if $mr is 0>>[[Mitte rechts|Game][$mr to $current]]<<endif>>
-<<if $bl is 0>>[[Unten links|Game][$bl to $current]]<<endif>>
-<<if $bm is 0>>[[Unten mitte|Game][$bm to $current]]<<endif>>
-<<if $br is 0>>[[Unten rechts|Game][$br to $current]]<<endif>>
-<<endif>>
+<<if $tl is 0>>[[Oben links|Game][$tl to $current]]  <<else>>               <<endif>><<if $tm is 0>>[[Oben mitte|Game][$tm to $current]]  <<else>>               <<endif>><<if $tr is 0>>[[Oben rechts|Game][$tr to $current]]<<endif>>
+<<if $ml is 0>>[[Mitte links|Game][$ml to $current]] <<else>>               <<endif>><<if $mm is 0>>[[Mitte mitte|Game][$mm to $current]] <<else>>               <<endif>><<if $mr is 0>>[[Mitte rechts|Game][$mr to $current]]<<endif>>
+<<if $bl is 0>>[[Unten links|Game][$bl to $current]] <<else>>               <<endif>><<if $bm is 0>>[[Unten mitte|Game][$bm to $current]] <<else>>               <<endif>><<if $br is 0>>[[Unten rechts|Game][$br to $current]]<<endif>><<endif>>
 
 :: Board
 <<nobr>>
