@@ -1,3 +1,9 @@
+//! Extensions to existing Types used in the Zwreec Compiler
+//!
+//! Currently this contains only Extensions to the Iterator Trait yielding new Iterator Types
+//! that wrap certain functionality, that is used to filter/construct/lookahead all objects
+//! passed and iterated upon in the compiler, making it possible to have most of the compiler
+//! chain to be lazy_evaluated and even multi-threaded
 use std::iter::Peekable;
 use std::sync::mpsc;
 use std::thread;
@@ -171,6 +177,8 @@ impl<A:Clone, I: Sized+Iterator<Item=A>>ParserExt for I {
 }
 
 
+/// An iterator to maintain state while iterating another iterator and allows to hold the currently active
+/// object to modify it (/construct it), until the next element is created
 #[must_use = "iterator adaptors are lazy and do nothing unless consumed"]
 #[derive(Clone)]
 pub struct Constructor<I, St, B, F>
@@ -243,6 +251,8 @@ impl<A: Send> Iterator for Cached<A> {
     fn next(&mut self) -> Option<A> { self.rx.recv().ok() }
 }
 
+/// A function to create a cached Iterator by passing the old Iterator by closure.
+/// If the underlying iterator does not support Send you can construct it in the closure
 pub fn cached<A: Send + 'static, I: Sized + Iterator<Item=A>, F: FnOnce() -> I + Send + 'static>(constructor: F) -> (Cached<A>, thread::JoinHandle<()>)
 {
     let (tx, rx) = mpsc::channel();
