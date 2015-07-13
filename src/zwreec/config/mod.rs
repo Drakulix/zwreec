@@ -395,23 +395,27 @@ pub fn zwreec_usage(verbose: bool, mut opts: getopts::Options, brief: &str) -> S
     let features_usage = if verbose {
         "List of supported features (default value in parenthesis)
     bright-mode (disabled)
-        Enables a bright background and a dark textcolor
+        Enables a bright background and a dark text color
     easter-egg (enabled) 
         Enables the generation of easter egg code. Enter the secret combination
-        in your Z-Machine interpreter to activate the easter egg
+        in your Z-Machine interpreter to activate the easter egg. This requires
+        some extra space - disable this if your output file is getting too large
     force-unicode (disabled)
-        Force the generation of unicode print opcodes every time a unicode
+        Force the generation of print_unicode opcodes every time a unicode
         character is encountered. This disables the generation of the unicode
         translation table
-    no-colours (disabled)
-        Suppress generation of set_colour and set_text_style opcodes and disable the
-        colour bit in the second byte of the header - needed for DZIP on DOS/Atari
     half-memory (disabled)
         Cut down space for static variable strings and heap in order to have
         binaries probably smaller than 64kB as only DZIP32.exe on DOS can handle
-        larger files, but DZIP.exe has a limit on 64kB
+        larger files, but DZIP.exe has a limit on 64kB. If your file is still
+        large, consider disabling the easter-egg flag
+    no-colours (disabled)
+        Suppress generation of set_colour and set_text_style opcodes and disable
+        the colour bit in the second byte of the header - this is required for
+        some old interpreters like for DZIP on DOS/Atari
     no-unicode (disabled)
-        Replaces opcode print_unicode with print_char to let it run on JZIP"
+        Replaces opcode print_unicode with print_char to let it run on
+        interpreters without unicode support like JZIP"
     } else {
         "Additional help:
     --help -v           Print the full set of options zwreec accepts"
