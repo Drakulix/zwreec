@@ -1,9 +1,9 @@
-//! The `screener` module checks the inputstream before the lexer will get it
+//! Sanitizes the input stream
 
 use std::error::Error;
 use std::io::{BufReader,Cursor,Read};
 
-/// checks the input if there is an BOM, if true it will delete it
+/// Checks for and removes a BOM from input
 pub fn handle_bom_encoding<'a, R: Read>(input: &'a mut R) -> Cursor<Vec<u8>> {
     let mut reader = BufReader::new(input);
     let mut content = String::new();
