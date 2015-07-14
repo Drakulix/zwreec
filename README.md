@@ -11,7 +11,7 @@ This project is build using the [Rust](http://www.rust-lang.org) language and [C
 
 ### Downloads
 
-You can [download](https://github.com/Drakulix/zwreec/releases) a prebuilt version of our reference implementation for 64bit Linux and OS X.
+You can [download](https://github.com/Drakulix/zwreec/releases) a prebuilt version of our reference implementation for 64-bit Linux and OS X.
 
 ### Compiling from Source
 
@@ -63,6 +63,8 @@ $ ./target/release/zwreec -o CurrentStatus.z8 ./tests/integration/should-compile
 _Edit the above line to compile different twee adventures._
 
 Then you can run `./CurrentStatus.z8` with your favorite Z-Code interpreter.
+
+For more information on supported Twee functions see [this wiki site](https://github.com/Drakulix/zwreec/wiki/Supported-Twee-Features).
 
 ## Using zwreec as a library
 
