@@ -360,8 +360,10 @@ rustlex! TweeLexer {
                     => |lexer:&mut TweeLexer<R>| Some(TokFormatIndentBlock {location: lexer.yylloc()})
         FORMAT_NUMB_LIST
                     => |lexer:&mut TweeLexer<R>| {
-            lexer.NON_NEWLINE_PASSAGE_CONTENT();
-            Some(TokFormatNumbList {location: lexer.yylloc()})
+            // deactivates the lists
+            /*lexer.NON_NEWLINE_PASSAGE_CONTENT();
+            Some(TokFormatNumbList {location: lexer.yylloc()})*/
+            Some(TokText {location: lexer.yylloc(), text: lexer.yystr()})
         }
         FORMAT_HEADING
                     => |lexer:&mut TweeLexer<R>| -> Option<Token>{
