@@ -166,7 +166,7 @@ Nothing special.
         <<display personappearing>>
         <<set $continue to false>>
       <<else>>
-        You don't have these with you rightnow.
+        You don't have these with you right now.
       <<endif>>
     <<else>>
       Can't do it.
