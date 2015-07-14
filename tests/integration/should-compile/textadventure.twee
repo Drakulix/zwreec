@@ -1,9 +1,111 @@
+:: Of course, let's play tic tac toe!
+<<set $p1 to "p" + random(1,10)>><<set $p2 to "p" + random(1,10)>>
+<<set $p1 to prompt("Name of first player: ", $p1)>>
+<<set $p2 to prompt("Name of second player: ", $p2)>>
+<<set $initial_turn to 2>>
+[[Start the game!|New_Game]]
+
+:: New_Game
+<<nobr>>
+<<set $tl to 0>><<set $tm to 0>><<set $tr to 0>>
+<<set $ml to 0>><<set $mm to 0>><<set $mr to 0>>
+<<set $bl to 0>><<set $bm to 0>><<set $br to 0>>
+<<set $initial_turn to ($initial_turn % 2) + 1>>
+<<set $turn to $initial_turn>>
+<<set $win to 0>>
+<<set $draw to false>>
+<<endnobr>><<display Game>>
+:: Game
+<<display Board>>
+<<nobr>>
+<<set $current to $turn>>
+<<set $turn to ($turn % 2) + 1>>
+<<if $tl is $tm and $tm is $tr>>
+<<set $win to $tl>>
+<<else if $ml is $mm and $mm is $mr>>
+<<set $win to $ml>>
+<<else if $bl is $bm and $bm is $br>>
+<<set $win to $bl>>
+<<else if $tl is $ml and $ml is $bl>>
+<<set $win to $tl>>
+<<else if $tm is $mm and $mm is $bm>>
+<<set $win to $tm>>
+<<else if $tr is $mr and $mr is $br>>
+<<set $win to $tr>>
+<<else if $tl is $mm and $mm is $br>>
+<<set $win to $tl>>
+<<else if $tr is $mm and $mm is $bl>>
+<<set $win to $tr>>
+<<else if $tl > 0 and $tm > 0 and $tr > 0 and $ml > 0 and $mm > 0 and $mr > 0 and $bl > 0 and $bm > 0 and $br > 0>>
+<<set $draw to true>>
+<<endif>>
+<<endnobr>><<if $win != 0>>
+''<<if $win is 1>><<$p1>> has won. Congratulation!<<else>><<$p2>> has won. Congratulation!<<endif>>''
+
+[[Play again!|New_Game]]<<else if $draw>>
+''Draw!''
+
+[[Play again!|New_Game]]
+<<else>><<if $current is 1>><<$p1>>'s turn.<<else>><<$p2>>'s turn.<<endif>>
+Which field are you going to mark?
+<<if $tl is 0>>[[upper left|Game][$tl to $current]]  <<else>>               <<endif>><<if $tm is 0>>[[upper middle|Game][$tm to $current]]  <<else>>               <<endif>><<if $tr is 0>>[[upper right|Game][$tr to $current]]<<endif>>
+<<if $ml is 0>>[[middle left|Game][$ml to $current]] <<else>>               <<endif>><<if $mm is 0>>[[middle center|Game][$mm to $current]] <<else>>               <<endif>><<if $mr is 0>>[[middle right|Game][$mr to $current]]<<endif>>
+<<if $bl is 0>>[[bottom left|Game][$bl to $current]] <<else>>               <<endif>><<if $bm is 0>>[[bottom middle|Game][$bm to $current]] <<else>>               <<endif>><<if $br is 0>>[[bottom right|Game][$br to $current]]<<endif>><<endif>>
+:: Board
+<<nobr>>
+<<set $l to $tl>><<set $m to $tm>><<set $r to $tr>>
+<<display Row>>
+<<endnobr>>{{{_____________|____________|_______________}}}
+<<nobr>>
+<<set $l to $ml>><<set $m to $mm>><<set $r to $mr>>
+<<display Row>>
+<<endnobr>>{{{_____________|____________|_______________}}}
+<<nobr>>
+<<set $l to $bl>><<set $m to $bm>><<set $r to $br>>
+<<display Row>>
+<<endnobr>>{{{             |            |             }}}
+
+:: Row
+<<nobr>>
+<<if $l is 0>>{{{             }}}<<else if $l is 1>>{{{    .____,   }}}<<else>>{{{     ____    }}}<<endif>>{{{|}}}
+<<if $m is 0>>{{{            }}}<<else if $m is 1>>{{{   .____,   }}}<<else>>{{{    ____    }}}<<endif>>{{{|}}}
+<<if $r is 0>>{{{            }}}<<else if $r is 1>>{{{   .____,   }}}<<else>>{{{    ____    }}}<<endif>>
+<<endnobr>>
+<<nobr>>
+<<if $l is 0>>{{{             }}}<<else if $l is 1>>{{{   . \  / ,  }}}<<else>>{{{   ,' __ `.  }}}<<endif>>{{{|}}}
+<<if $m is 0>>{{{            }}}<<else if $m is 1>>{{{  . \  / ,  }}}<<else>>{{{  ,' __ `.  }}}<<endif>>{{{|}}}
+<<if $r is 0>>{{{            }}}<<else if $r is 1>>{{{  . \  / ,  }}}<<else>>{{{  ,' __ `.  }}}<<endif>>
+<<endnobr>>
+<<nobr>>
+<<if $l is 0>>{{{             }}}<<else if $l is 1>>{{{   |`-  -'|  }}}<<else>>{{{  / ,'  `. \ }}}<<endif>>{{{|}}}
+<<if $m is 0>>{{{            }}}<<else if $m is 1>>{{{  |`-  -'|  }}}<<else>>{{{ / ,'  `. \ }}}<<endif>>{{{|}}}
+<<if $r is 0>>{{{            }}}<<else if $r is 1>>{{{  |`-  -'|  }}}<<else>>{{{ / ,'  `. \ }}}<<endif>>
+<<endnobr>>
+<<nobr>>
+<<if $l is 0>>{{{             }}}<<else if $l is 1>>{{{   |,-  -.|  }}}<<else>>{{{  | | () | | }}}<<endif>>{{{|}}}
+<<if $m is 0>>{{{            }}}<<else if $m is 1>>{{{  |,-  -.|  }}}<<else>>{{{ | | () | | }}}<<endif>>{{{|}}}
+<<if $r is 0>>{{{            }}}<<else if $r is 1>>{{{  |,-  -.|  }}}<<else>>{{{ | | () | | }}}<<endif>>
+<<endnobr>>
+<<nobr>>
+<<if $l is 0>>{{{             }}}<<else if $l is 1>>{{{   ' /__\ `  }}}<<else>>{{{  \ `.__,' / }}}<<endif>>{{{|}}}
+<<if $m is 0>>{{{            }}}<<else if $m is 1>>{{{  ' /__\ `  }}}<<else>>{{{ \ `.__,' / }}}<<endif>>{{{|}}}
+<<if $r is 0>>{{{            }}}<<else if $r is 1>>{{{  ' /__\ `  }}}<<else>>{{{ \ `.__,' / }}}<<endif>>
+<<endnobr>>
+<<nobr>>
+<<if $l is 0>>{{{             }}}<<else if $l is 1>>{{{    '    `   }}}<<else>>{{{   `.____,'  }}}<<endif>>{{{|}}}
+<<if $m is 0>>{{{            }}}<<else if $m is 1>>{{{   '    `   }}}<<else>>{{{  `.____,'  }}}<<endif>>{{{|}}}
+<<if $r is 0>>{{{            }}}<<else if $r is 1>>{{{   '    `   }}}<<else>>{{{  `.____,'  }}}<<endif>>
+<<endnobr>>
 ::Start
+<<set $continue to true>>
 <<set $location to "street">>
 <<set $book to "hammock">>
 <<set $pen to "item">>
-<<display useraction>>
+''//Demo Textadventure//''
 
+<<if confirm("Start game?")>>
+<<display useraction>>
+<<endif>>
 :: Quit
 
 :: showItems
@@ -28,8 +130,16 @@ Some trees, shrubbery, a hammock and grass with formidable height.
   <<else>>
 Nothing special.
   <<endif>>
-<<elseif $head == "take">>
+<<elseif $head == "read">>
   <<if $tail == "book">>
+  It's empty. Strange...
+  <<else>>
+  Nothing to read.
+  <<endif>>
+<<elseif $head == "take">>
+  <<if $tail == "">>
+    take. Take what?
+  <<elseif $tail == "book">>
     <<set $book to "item">>
   <<elseif $tail == "pen">>
     <<set $pen to "item">>
@@ -37,18 +147,39 @@ Nothing special.
     There is no <<print $tail>>
   <<endif>>
 <<elseif $head == "drop">>
-  <<if $tail == "book">>
+  <<if $tail == "">>
+    drop, drop, drop. Sounds like rain.
+  <<elseif $tail == "book">>
     <<set $book to $location>>
   <<elseif $tail == "pen">>
     <<set $pen to $location>>
   <<else>>
     You have no <<print $tail>>
   <<endif>>
+<<elseif $head == "use">>
+  <<set $list to $tail>><<display takeFirst>>
+  <<set $item to $head>>
+  <<set $list to $tail>><<display takeFirst>>
+  <<if $head == "with" and $tail != "">>
+    <<if ($item == "book" and $tail == "pen") or ($item == "pen" and $tail == "book")>>
+      <<if $book == "item" and $pen == "item">>
+        <<display personappearing>>
+        <<set $continue to false>>
+      <<else>>
+        You don't have these with you right now.
+      <<endif>>
+    <<else>>
+      Can't do it.
+    <<endif>>
+  <<else>>
+    didn't get it
+  <<endif>>
 <<elseif $head == "go">>
-  <<set $list to $tail>>
-  <<display takeFirst>>
+  <<set $list to $tail>><<display takeFirst>>
   <<if $head == "to">>
     <<set $location = $tail>>
+  <<elseif $head == "" or $head == "west">>
+    West, Life is peaceful there. Go West, aehm, go to where?
   <<else>>
     <<set $location = $head>>
   <<endif>>
@@ -57,12 +188,34 @@ Nothing special.
 <<elseif $head == "quit">>
 [[Quit]]
 <<else>>
-Could not parse input. Try things like "take, drop, go to, enter, look"
+Could not parse input. Try things like "take, drop, go to, enter, look, use .. with ..."
 <<endif>>
 <<endnobr>>
-
+<<if $continue>>
 [[continue|useraction]]
+<<else>>
+<<set $continue to true>>
+<<endif>>
+:: personappearing
 
+You are about to draw thoughtlessly into the book when someone appears from behind.
+[[talk to the person]]
+[[run away]]
+:: talk to the person
+Person: //Hey, you got some space for a little game? The paper is so empty.//
+
+You:
+//[[Of course, let's play tic tac toe!]]//
+//[[Nah, not now.]]//
+:: Nah, not now.
+Person: //Well, then see you next time.// (leaves)
+<<display useraction>>
+:: run away
+
+You run and run till you are on a field.
+Oops, you also lost your stuff during the sprint.
+<<set $book to "garden">> <<set $pen to "street">> <<set $location to "field">>
+<<display useraction>>
 :: takeFirst
 <<silently>><<nobr>> /% set $head and $tail for $list which is separated by space. internal variables are $ti and $tt %/
 <<if $ti == 0>>
