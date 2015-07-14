@@ -81,6 +81,8 @@ pub fn lex<R: Read>(cfg: Config, input: R) -> FilteringScan<Peeking<TweeLexer<Bu
     let mut lexer = TweeLexer::new(BufReader::new(input));
     lexer.cfg = Some(cfg.clone());
 
+    info!("Started lexing input");
+
     lexer.peeking().scan_filter(
         ScanState {
             cfg: cfg,
@@ -95,7 +97,9 @@ pub fn lex<R: Read>(cfg: Config, input: R) -> FilteringScan<Peeking<TweeLexer<Bu
                     return None;
                 }
 
-                match elem {
+                let last_element = elem.1.is_none();
+
+                let ret = match elem {
                     (x @ TokError {..}, _) => {
                         error_panic!(state.cfg => x);
                         None
@@ -123,7 +127,13 @@ pub fn lex<R: Read>(cfg: Config, input: R) -> FilteringScan<Peeking<TweeLexer<Bu
                         Some(TokAssign {location: location, var_name: var, op_name: op} )
                     },
                     (x, _) => Some(x),
+                };
+
+                if last_element {
+                    info!("Finished lexing input");
                 }
+
+                ret
             }
             scan_fn
         }

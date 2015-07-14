@@ -66,6 +66,8 @@ pub enum CodeGenError {
 /// It also panics even when that option is set for invalid expressions, missing passages and other
 /// unrecoverable errors.
 pub fn generate_zcode<W: Write, I: Iterator<Item=ASTNode>>(cfg: &Config, ast: I, output: &mut W) {
+    info!("Started code generation");
+
     let mut codegenerator = Codegen::new(cfg);
     codegenerator.start_codegen(ast);
     match output.write_all(&(*codegenerator.zfile_bytes())) {
@@ -73,7 +75,7 @@ pub fn generate_zcode<W: Write, I: Iterator<Item=ASTNode>>(cfg: &Config, ast: I,
             error_panic!(cfg => CodeGenError::CouldNotWriteToOutput { why: Error::description(&why).to_string() } );
         },
         Ok(_) => {
-            info!("Wrote zcode to output");
+            info!("Wrote Z-Code to output");
         }
     };
 }
