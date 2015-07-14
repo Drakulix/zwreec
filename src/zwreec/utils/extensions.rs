@@ -116,13 +116,13 @@ impl<I: Sized+Iterator> FilteringScanExt for I {
 /// The result of a parsing operation
 #[derive(Clone)]
 pub enum ParseResult {
-    /// Continue parsing
+    /// Continue with the next underlying Iterator Element (or None, if it is empty)
     Continue,
 
-    /// Halt parsing because an error occured
+    /// Do not advance the underlying Iterator, but continue processing
     Halt,
 
-    /// End parsing because the last Token was processed
+    /// Finish the Iterator (let it return None)
     End,
 }
 
