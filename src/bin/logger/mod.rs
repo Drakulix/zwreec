@@ -40,6 +40,7 @@ pub trait SharedLogger: Log {
     /// println!("{}", logger.level());
     /// '''
     fn level(&self) -> LogLevelFilter;
-    
+
+    /// Returns the logger as a Log trait
     fn as_log(self: Box<Self>) -> Box<Log>;
 }

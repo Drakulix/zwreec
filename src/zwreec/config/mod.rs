@@ -1,6 +1,6 @@
 //! Configuration for the zwreec compiler.
 //!
-//! Uses the `getopts` library to append a `getopts::Options` with compiler 
+//! Uses the `getopts` library to append a `getopts::Options` with compiler
 //! specific flags and then creates a `Config` struct from `getopts::Matches`.
 //!
 //! # Usage
@@ -20,7 +20,7 @@
 //!
 //! use zwreec::config;
 //! use zwreec::config::Config;
-//! 
+//!
 //!
 //! fn main() {
 //!     let args: Vec<String> = std::env::args().collect();
@@ -37,7 +37,7 @@
 //!
 //! # Appending this module (Development)
 //!
-//! To add new compiler flags for the compiler, you need to change three parts 
+//! To add new compiler flags for the compiler, you need to change three parts
 //! in this module.
 //!
 //! 1. Appending the Struct
@@ -45,21 +45,30 @@
 //!     To store your new setting, you need to add it as a field to the `Config` struct. Here we
 //!     add a new boolean `pub italics: bool` to control *italics*. Always add a field-comment.
 //!
-//!     ```ignore
+//!     ```
 //!     pub struct Config {
 //!         /// Add easter egg to compiler
 //!         pub easter_egg: bool,
 //!         /// Instruct compiler to run these test-cases
-//!         pub test_cases: Vec<TestCase>,
-//!         /// Enables or disalbes Italics
+//!         pub test_cases: Vec<String>,
+//!         /// Enables or disables Italics
 //!         pub italics: bool,
 //!     }
+//! #   fn main() {}
 //!     ```
 //!
 //!     Now you also need to change `Config::default_config()` to provide the
 //!     default value for your new field:
 //!
-//!     ```ignore
+//!     ```
+//! #   pub struct Config {
+//! #       /// Add easter egg to compiler
+//! #       pub easter_egg: bool,
+//! #       /// Instruct compiler to run these test-cases
+//! #       pub test_cases: Vec<String>,
+//! #       /// Enables or disables Italics
+//! #       pub italics: bool,
+//! #   }
 //!     pub fn default_config() -> Config {
 //!         Config{
 //!             easter_egg: true,
@@ -67,6 +76,7 @@
 //!             italics: true,
 //!         }
 //!     }
+//! #   fn main() { let cfg = default_config(); }
 //!     ```
 //!
 //! 2. Parse your flag in `from_matches()`
@@ -124,7 +134,7 @@
 //!     opts.optflag("e", "generate-sample-zcode", "writes out a sample zcode file, input file is not used and can be omitted");
 //!
 //!     opts.optopt("n", "notaflag", "notaflag", "SOMETHING");
-//! 
+//!
 //!     opts
 //! }
 //!     ```
@@ -146,7 +156,7 @@ use std::vec::Vec;
 
 /// Represents the configuration for the compiler.
 ///
-/// This struct is created using either `config::default_config()` or 
+/// This struct is created using either `config::default_config()` or
 /// `config::parse_matches(matches: &getopts::Matches)`. It contains a series
 /// of fields that can be used to control the behaviour of the compiler.
 ///
@@ -162,15 +172,25 @@ use std::vec::Vec;
 /// ```
 #[derive(Clone)]
 pub struct Config {
-    /// force a bright background and dark text
+    /// Force a bright background and dark text
     pub bright_mode: bool,
+
     /// Add easter egg to compiler
     pub easter_egg: bool,
+
     /// Force compilation despite errors
     pub force: bool,
+
+    /// Force generation of print_uncode opcodes
     pub force_unicode: bool,
+
+    /// Divide memory usage by 2
     pub half_memory: bool,
+
+    /// Disable colours
     pub no_colours: bool,
+
+    /// Disable unicode support
     pub no_unicode: bool,
 
     /// Instruct compiler to run these test-cases
@@ -201,8 +221,8 @@ impl Config {
 
     /// Returns a `Config` struct by using `getopts::Matches` to set the fields.
     ///
-    /// This method analyses a `getopts::Matches` for fields provided by 
-    /// `zwreec_options()`. 
+    /// This method analyses a `getopts::Matches` for fields provided by
+    /// `zwreec_options()`.
     ///
     /// # Example
     ///
@@ -301,23 +321,23 @@ impl Config {
 }
 
 // TODO: If this stays only one Test Case, enum should be removed
-/// The Type used to define backend tests for the compiler
+/// The Type used to define backend tests for the compiler.
 #[derive(PartialEq,Clone)]
 pub enum TestCase {
-    /// Skips the normal compiler chain and builds an example zcode file by 
+    /// Skips the normal compiler chain and builds an example zcode file by
     /// using every opcode.
     ZcodeBackend,
 }
 
 
-/// Appends a `getopts::Options` with compiler specific flags
+/// Appends a `getopts::Options` with compiler specific flags.
 ///
 /// The method `Config::from_matches()` looks for very specific `getopts::Matches`.
-/// This function takes an `getopts::Options` to append it with Options required 
+/// This function takes a `getopts::Options` to append it with Options required
 /// by `from_matches`. It currently adds three fields:
 ///
 /// ```ignore
-/// opts.optmulti("F", "feature", "", "FEAT"); 
+/// opts.optmulti("F", "feature", "", "FEAT");
 /// opts.optmulti("N", "no-feature", "enable or disable a feature (can occur multiple times).
 ///                     List of supported features (default):
 ///                         easter-egg (enabled)", "FEAT");
@@ -334,7 +354,7 @@ pub enum TestCase {
 ///
 /// let mut opts = getopts::Options::new();
 /// opts.optflag("h", "help", "print this message");
-/// 
+///
 /// let opts = zwreec::config::zwreec_options(opts);
 /// ```
 ///
@@ -349,7 +369,7 @@ pub enum TestCase {
 ///     let mut opts = getopts::Options::new();
 ///     opts.optflag("h", "help", "display this help and exit");
 ///     opts.optflag("V", "version", "display version");
-/// 
+///
 ///     opts
 /// }
 ///
@@ -395,23 +415,27 @@ pub fn zwreec_usage(verbose: bool, mut opts: getopts::Options, brief: &str) -> S
     let features_usage = if verbose {
         "List of supported features (default value in parenthesis)
     bright-mode (disabled)
-        Enables a bright background and a dark textcolor
-    easter-egg (enabled) 
+        Enables a bright background and a dark text color
+    easter-egg (enabled)
         Enables the generation of easter egg code. Enter the secret combination
-        in your Z-Machine interpreter to activate the easter egg
+        in your Z-Machine interpreter to activate the easter egg. This requires
+        some extra space - disable this if your output file is getting too large
     force-unicode (disabled)
-        Force the generation of unicode print opcodes every time a unicode
+        Force the generation of print_unicode opcodes every time a unicode
         character is encountered. This disables the generation of the unicode
         translation table
-    no-colours (disabled)
-        Suppress generation of set_colour and set_text_style opcodes and disable the
-        colour bit in the second byte of the header - needed for DZIP on DOS/Atari
     half-memory (disabled)
         Cut down space for static variable strings and heap in order to have
         binaries probably smaller than 64kB as only DZIP32.exe on DOS can handle
-        larger files, but DZIP.exe has a limit on 64kB
+        larger files, but DZIP.exe has a limit on 64kB. If your file is still
+        large, consider disabling the easter-egg flag
+    no-colours (disabled)
+        Suppress generation of set_colour and set_text_style opcodes and disable
+        the colour bit in the second byte of the header - this is required for
+        some old interpreters like for DZIP on DOS/Atari
     no-unicode (disabled)
-        Replaces opcode print_unicode with print_char to let it run on JZIP"
+        Replaces opcode print_unicode with print_char to let it run on
+        interpreters without unicode support like JZIP"
     } else {
         "Additional help:
     --help -v           Print the full set of options zwreec accepts"

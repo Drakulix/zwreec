@@ -1,3 +1,7 @@
+//! The `bin` crate contains a reference binary implementation that uses the zwreec library to
+//! create a twee to z-code command line compiler
+#![warn(missing_docs)]
+
 extern crate zwreec;
 extern crate getopts;
 extern crate libc;

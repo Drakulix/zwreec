@@ -32,18 +32,28 @@ use config::Config;
 
 use self::Token::*;
 
+/// The errors that can occur in the lexer.
+#[allow(missing_docs)]
 pub enum LexerError {
+    /// The character is not expected in this state
     UnexpectedCharacter { character: char, location: (u64, u64) }
 }
 
-/// Stores the state for the custom iterator `scan_filter()`
+/// Stores the state for the custom iterator `scan_filter()`.
 ///
 /// The `zwreec::utils::extensions` module defines a new iterator `FilteringScan`.
 /// This struct stores the state for this iterator.
 pub struct ScanState {
+    /// The zwreec config
     cfg: Config,
+
+    /// The current text while merging TokText
     current_text: String,
+
+    /// The beginning of the current text segment
     current_text_location: (u64, u64),
+
+    /// Skip the next Token while post-processing the Tokens
     skip_next: bool,
 }
 
@@ -123,9 +133,10 @@ pub fn lex<R: Read>(cfg: Config, input: R) -> FilteringScan<Peeking<TweeLexer<Bu
 /// The resulting Tokens that are returned by the `lex` function.
 ///
 /// These Tokens are matched by our lexical analyser. Every Token but
-/// `TokExpression` store their original location inside the analysed input.
+/// `TokExpression` stores their original location inside the analysed input.
 /// Some Tokens also use other fields to store additional information.
 #[derive(PartialEq,Debug,Clone)]
+#[allow(missing_docs)]
 pub enum Token {
     TokPassage                {location: (u64, u64), name: String},
     TokTagStart               {location: (u64, u64)},
@@ -259,9 +270,11 @@ impl Token {
     }
 }
 
-//we re-create tokens with location {0,0} in the parser.
-//so comparing also works this way
 impl Token {
+    /// Tests is two tokens are of the same type.
+    ///
+    /// We re-create tokens with location {0,0} in the parser
+    /// Thus comparing also works by ignoring the content of the token.
     pub fn is_same_token(&self, other: &Token) -> bool {
         match (self, other) {
             (&TokPassage{..}, &TokPassage{..}) => true,
@@ -335,6 +348,7 @@ impl Token {
 
 include!(concat!(env!("OUT_DIR"), "/rustlex.rs"));
 
+/// Unescapes a string.
 fn unescape(s: String) -> String {
 
     // strip the quotes from strings
@@ -359,7 +373,7 @@ fn unescape(s: String) -> String {
 
 
 // ================================
-// test functions
+// Test functions
 #[cfg(test)]
 mod tests {
     use std::io::Cursor;

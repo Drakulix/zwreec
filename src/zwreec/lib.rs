@@ -12,19 +12,19 @@
 //!
 //! # Requirements and Usage
 //!
-//! The library uses a [fork of rustlex](https://github.com/Drakulix/rustlex)
-//! to do lexical analysis.
-//! You can install Rust stable or nightly as you like via the
-//! [provided binaries](http://www.rust-lang.org/install.html)
-//! or the rustup script:
+//! To build Zwreec from Source, you will need to have both Rust 1.1.0 and Cargo installed on your
+//! system. You can download the Rust binarys on their
+//! [website](http://www.rust-lang.org/install.html), by using your system's package manager or by
+//! running this in your shell:
 //!
 //! ```sh
-//! $ curl -s https://static.rust-lang.org/rustup.sh | sh -s -- --channel=nightly --date=2015-06-02
+//! $ curl -sSf https://static.rust-lang.org/rustup.sh | sh
 //! ```
 //!
-//! Or install the Ubuntu/Debian Packages for
-//! [Rust](http://ppa.launchpad.net/hansjorg/rust/ubuntu/pool/main/r/rust-nightly/) and
-//! [Cargo](http://ppa.launchpad.net/hansjorg/rust/ubuntu/pool/main/c/cargo-nightly/).
+//! Cargo should be installed alongside current Rust binaries.
+//!
+//! The library uses a [fork of rustlex](https://github.com/Drakulix/rustlex)
+//! to do lexical analysis.
 //!
 //! To use zwreec in your project you can add it as a dependency to your `Cargo.toml`.
 //!
@@ -38,11 +38,6 @@
 //! ```rust
 //! extern crate zwreec;
 //! ```
-//!
-//! # Features
-//!
-//! Only rudimentary Twee features are supported right now. This is about to change in the upcoming weeks.
-//! Check the github issues for more information on the currently supported features.
 //!
 //! # Example
 //!
@@ -82,7 +77,7 @@
 //! reference binary implementation that uses this library and provides a simple
 //! command line interface to compile Twee files.
 //!
-//! To build the binary, you need the rust version as outlined in [Requirements and
+//! To build the binary, you need the Rust version as outlined in [Requirements and
 //! Usage](#requirements-and-usage). Then you can build the binary using
 //!
 //! ```sh
@@ -94,8 +89,11 @@
 //! # Logging
 //!
 //! Zwreec uses the logging facade provided by
-//! [log](../log/index.html). The reference binary implementation of zwreec also includes an
+//! [log](../log/index.html). The reference binary implementation of Zwreec also includes an
 //! implementation of the `Log` trait.
+
+// Warn if documentation is missing
+#![warn(missing_docs)]
 
 extern crate rustlex_codegen as rustlex;
 #[macro_use] extern crate log;
