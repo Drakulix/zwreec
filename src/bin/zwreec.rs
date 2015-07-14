@@ -242,6 +242,10 @@ fn parse_output(matches: &getopts::Matches, path: Option<String>) -> Option<Box<
     }
 }
 
+enum MainError {
+    NoInput,
+    NoOutput,
+}
 
 fn main() {
     // handle command line parameters
@@ -267,25 +271,39 @@ fn main() {
             // unwrap input and output
             let mut _input = match input {
                 Some(i) => i,
-                None => panic!("Missing input file! Compile aborted")
+                None => panic!(MainError::NoInput)
             };
             let mut _output = match output {
                 Some(o) => o,
-                None => panic!("Missing output file! Compile aborted")
+                None => panic!(MainError::NoOutput)
             };
             zwreec::compile(cfg, &mut _input, &mut _output);
         }
     }).join() {
-        Err(_) => {
+        Err(x) => {
             error!("Compiler failed");
-            match path {
-                Some(path) => {
-                    match std::fs::remove_file(Path::new(&path)) {
-                        Err(_) => warn!("Failed to removed unfinished output file"),
-                        _ => {},
+            match x.downcast_ref::<MainError>() {
+                Some(err) => {
+                    match err {
+                        &MainError::NoOutput => {
+                            error!("Missing output!");
+                        },
+                        &MainError::NoInput => {
+                            error!("Missing input!");
+                        }
                     }
+                },
+                None => {
+                    match path {
+                        Some(path) => {
+                            match std::fs::remove_file(Path::new(&path)) {
+                                Err(_) => warn!("Failed to removed unfinished output file"),
+                                _ => {},
+                            }
+                        }
+                        _ => {},
+                    };
                 }
-                _ => {},
             };
             1
         },
