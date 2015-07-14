@@ -1,32 +1,53 @@
 //! The `expressionparser` module parses every expression
-//! to an AST (abstract syntax tree).
+//! to an [AST (abstract syntax tree)](../ast/index.html).
 //! The idea is explained here: http://programmers.stackexchange.com/questions/254074/
 
-//use frontend::ast::*;
 use config::Config;
 use frontend::ast::{ASTNode, NodeDefault};
 use frontend::lexer::Token;
 use frontend::lexer::Token::*;
 
+/// The errors that can occur in the ExpressionParser.
 #[derive(Debug)]
+#[allow(missing_docs)]
 pub enum ExpressionParserError {
+    /// The operator stack is empty
     OperStackIsEmpty,
+
+    /// The sub-expression is not parseable
     NoParseableSubExpression,
+
+    /// There can't be more than one expression root
     MoreThanOneRootExpression { count: usize, stack: Vec<ASTNode> },
+
+    /// Stack underflow
     NotEnoughElementsOnStack,
+
+    /// Missing a Node
     MissingNodeForBinaryNode,
+
+    /// Operator is unkown / invalid
     DisallowedOperator { op: Token },
+
+    /// Operator is not implemented
     NotImplementedOperator { op: String },
 }
 
+/// Parses an expression and ASTNodes.
 pub struct ExpressionParser<'a> {
+    /// The stack for the expressions
     expr_stack: Vec<ASTNode>,
+
+    /// The stack for the operators for precedence
     oper_stack: Vec<Token>,
+
+    /// The zwreec Config
     cfg: &'a Config,
 }
 
 impl<'a> ExpressionParser<'a> {
-    /// gets node (with an expression) and starts the parsing
+
+    /// Gets node (with an expression) and starts the parsing.
     pub fn parse(node: &mut NodeDefault, cfg: &'a Config) {
         let mut expr_parser = ExpressionParser {
             expr_stack: Vec::new(),
@@ -36,7 +57,7 @@ impl<'a> ExpressionParser<'a> {
         expr_parser.parse_expressions(node);
     }
 
-    /// parse the expression node and creates mutliple ast nodes
+    /// Parse the expression node and creates mutliple ast nodes.
     fn parse_expressions(&mut self, node: &mut NodeDefault) {
         node.childs.reverse();
         while let Some(top) = node.childs.pop() {
@@ -101,32 +122,35 @@ impl<'a> ExpressionParser<'a> {
                 _ => ()
             }
         }
-        // parse the last elements of the stacks
-        // to avoid endless loop we try max stack.len()
+
+        // Parse the last elements of the stacks.
+        // To avoid an endless loop we try max until stack.len()
         for _ in 0..self.expr_stack.len() {
             if self.expr_stack.len() > 0 {
                 self.new_operator_node();
             }
         }
-        // multiple operators could be on the stack becouse if the unary ops
+
+        // Multiple operators could be on the stack because of the unary operators
         for _ in 0..self.oper_stack.len() {
             if self.oper_stack.len() > 0 {
                 self.new_operator_node();
             }
         }
 
-        // finished. so add the root of the expressions as child.
         if self.expr_stack.len() != 1 {
             error_panic!(self.cfg => ExpressionParserError::MoreThanOneRootExpression { count: self.expr_stack.len(),
                 stack: self.expr_stack.clone() });
         }
 
+        // We are finished parsing the expression
+        // Add the root of the expressions as child to the AST
         if let Some(root) = self.expr_stack.pop() {
             node.childs.push(root);
         }
     }
 
-    /// creates a node with an operator on top
+    /// Creates a node with an operator as the root.
     fn new_operator_node(&mut self) {
         if let Some(top_op) = self.oper_stack.pop() {
 
@@ -172,9 +196,10 @@ impl<'a> ExpressionParser<'a> {
         }
     }
 
-    /// checks the operatores of two tokens returns true if operator of token1
-    /// is more important then operator of token2
-    /// the ranking is set in "operator_precedence"
+    /// Checks the operator precedence of two Tokens.
+    ///
+    /// Returns true if the operator of token1 is stronger than operator of token2.
+    /// The ranking is specified in the function `operator_rank`.
     fn is_ranking_not_higher(&self, token1: Token, token2: Token) -> bool {
         let op1: String = match token1 {
             TokUnaryMinus{ .. } => "_".to_string(),
@@ -202,23 +227,17 @@ impl<'a> ExpressionParser<'a> {
         };
 
 
-        // special handling for the unary operators (two unary operators in a row)
-        //let op1_copy: &str = op1.as_slice();
+        // Special handling for the unary operators (two unary operators in a row)
         if (op1 == "_" || op1 == "not" || op1 == "!") &&
             self.operator_rank(op1.clone()) == self.operator_rank(op2.clone()) {
 
             return false
         }
 
-        //
-        if self.operator_rank(op1) >= self.operator_rank(op2) {
-            return true
-        }
-
-        false
+        self.operator_rank(op1) >= self.operator_rank(op2)
     }
 
-    /// ranking of the operators
+    /// Specifies the ranking of the operators.
     fn operator_rank(&self, op: String) -> u8 {
         match op.as_ref() {
             "or" | "||"         => 1,

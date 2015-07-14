@@ -1,9 +1,10 @@
-//! Extensions to existing Types used in the Zwreec Compiler
+//! Extensions to existing types used in the zwreec compiler
 //!
-//! Currently this contains only Extensions to the Iterator Trait yielding new Iterator Types
+//! Currently this contains only extensions to the Iterator trait yielding new Iterator types
 //! that wrap certain functionality, that is used to filter/construct/lookahead all objects
 //! passed and iterated upon in the compiler, making it possible to have most of the compiler
-//! chain to be lazy_evaluated and even multi-threaded
+//! chain to be lazy_evaluated and even multi-threaded.
+
 use std::iter::Peekable;
 use std::sync::mpsc;
 use std::thread;
@@ -44,7 +45,10 @@ impl<I, A> Iterator for Peeking<I, A> where
     }
 }
 
+/// An extension for sized Iterators that specifies a function that returns a Peeking Iterator
 pub trait PeekingExt {
+
+    /// Consumes this Iterator and returns a Peeking Iterator
     fn peeking(self) -> Peeking<Self, Self::Item>
         where Self: Sized+Iterator,
               Self::Item: Clone;
@@ -93,7 +97,10 @@ impl<B, I, St, F> Iterator for FilteringScan<I, St, F> where
     }
 }
 
+/// An extension to sized Iterators that specifies a function that returns a FilteringScan Iterator
 pub trait FilteringScanExt {
+
+    /// Consumes this Iterator and returns a FilteringScan Iterator
     fn scan_filter<St, B, F>(self, initial_state: St, f: F) -> FilteringScan<Self, St, F>
         where Self: Sized+Iterator, F: FnMut(&mut St, Self::Item) -> Option<B>;
 }
@@ -106,11 +113,16 @@ impl<I: Sized+Iterator> FilteringScanExt for I {
     }
 }
 
-
+/// The result of a parsing operation
 #[derive(Clone)]
 pub enum ParseResult {
+    /// Continue with the next underlying Iterator Element (or None, if it is empty)
     Continue,
+
+    /// Do not advance the underlying Iterator, but continue processing
     Halt,
+
+    /// Finish the Iterator (let it return None)
     End,
 }
 
@@ -163,7 +175,10 @@ impl<B, I, St, F, A> Iterator for Parser<I, A, St, F> where
     }
 }
 
+/// An extension to sized Iterators that specifies a function that returns a Parser Iterator
 pub trait ParserExt {
+
+    /// Consumes this Iterator and returns a FilteringScan Iterator
     fn parsing<St, B, F>(self, initial_state: St, f: F) -> Parser<Self, Self::Item, St, F>
         where Self: Sized+Iterator, Self::Item: Clone, F: Fn(&mut St, Option<Self::Item>) -> (ParseResult, Option<B>);
 }
@@ -227,7 +242,10 @@ impl<I, St, B, F> Iterator for Constructor<I, St, B, F> where
     }
 }
 
+/// An extension to sized Iterators that specifies a function that returns a Constructor Iterator
 pub trait ConstructorExt {
+
+    /// Consumes this Iterator and returns a Constructor Iterator
     fn construct_state<St, B, F>(self, state: St, f: F) -> Constructor<Self, St, B, F>
         where Self: Sized+Iterator, B: Clone, F: Fn(&mut St, &mut Option<B>, Self::Item) -> Option<B>;
 }
@@ -240,7 +258,7 @@ impl<I: Sized+Iterator>ConstructorExt for I {
     }
 }
 
-// An iterator that performs all iteration in a seperate therad and caches them
+/// An Iterator that performs all iteration in a seperate therad and caches them
 pub struct Cached<A: Send> {
     rx: mpsc::Receiver<A>
 }
@@ -264,121 +282,128 @@ pub fn cached<A: Send + 'static, I: Sized + Iterator<Item=A>, F: FnOnce() -> I +
     (Cached { rx: rx }, handle)
 }
 
-#[test]
-fn peeking_test() {
-    let test = vec!["first", "second", "third"];
-    let mut index = 0;
-    for (elem, peek) in test.into_iter().peeking() {
-        match elem {
-            "first" => {
-                assert_eq!(peek, Some("second"));
-                index += 1;
-            },
-            "second" => {
-                assert_eq!(peek, Some("third"));
-                index += 1;
-            },
-            "third" => {
-                assert_eq!(peek, None);
-                index += 1;
-            },
-            _ => assert!(false),
-        }
-    }
-    assert_eq!(index, 3);
-}
+// ================================
+// Test functions
+#[cfg(test)]
+mod tests {
+    use super::*;
 
-#[test]
-fn filtering_scan_test() {
-    let test = vec![1, 3, 1, 3];
-    let index = 0;
-    let mut sum = 0;
-    for elem in test.into_iter().scan_filter(index, |index, x| {
-        *index += 1;
-        if (*index % 2) == 1 {
-            Some(x)
-        } else {
-            None
-        }
-    }) {
-        sum += elem;
-    }
-    assert_eq!(sum, 2);
-}
-
-#[test]
-fn parsing_test() {
-
-    struct ParseState {
-        one_halt_test: u32,
-        two_counter: u32,
-        one_more_test: bool,
-    }
-
-    let mut result = vec![];
-
-    let test = vec![1, 2, 2, 3];
-    for elem in test.into_iter().parsing(
-        ParseState {
-            one_halt_test: 3,
-            two_counter: 1,
-            one_more_test: true,
-        },
-        |state, elem| {
+    #[test]
+    fn peeking_test() {
+        let test = vec!["first", "second", "third"];
+        let mut index = 0;
+        for (elem, peek) in test.into_iter().peeking() {
             match elem {
-                Some(1) => {
-                    state.one_halt_test -= 1;
-                    if state.one_halt_test == 0 {
-                        (ParseResult::Continue, Some(1))
-                    } else {
-                        (ParseResult::Halt, None)
-                    }
+                "first" => {
+                    assert_eq!(peek, Some("second"));
+                    index += 1;
                 },
-                Some(2) => {
-                    state.two_counter += 1;
-                    (ParseResult::Continue, Some(state.two_counter))
+                "second" => {
+                    assert_eq!(peek, Some("third"));
+                    index += 1;
                 },
-                Some(3) => {
-                    (ParseResult::Continue, Some(4))
+                "third" => {
+                    assert_eq!(peek, None);
+                    index += 1;
                 },
-                Some(_) => { panic!("found a bug in rust") },
-                None => {
-                    if state.one_more_test {
-                        state.one_more_test = false;
-                        (ParseResult::Continue, Some(5))
-                    } else {
-                        (ParseResult::End, None)
+                _ => assert!(false),
+            }
+        }
+        assert_eq!(index, 3);
+    }
+
+    #[test]
+    fn filtering_scan_test() {
+        let test = vec![1, 3, 1, 3];
+        let index = 0;
+        let mut sum = 0;
+        for elem in test.into_iter().scan_filter(index, |index, x| {
+            *index += 1;
+            if (*index % 2) == 1 {
+                Some(x)
+            } else {
+                None
+            }
+        }) {
+            sum += elem;
+        }
+        assert_eq!(sum, 2);
+    }
+
+    #[test]
+    fn parsing_test() {
+
+        struct ParseState {
+            one_halt_test: u32,
+            two_counter: u32,
+            one_more_test: bool,
+        }
+
+        let mut result = vec![];
+
+        let test = vec![1, 2, 2, 3];
+        for elem in test.into_iter().parsing(
+            ParseState {
+                one_halt_test: 3,
+                two_counter: 1,
+                one_more_test: true,
+            },
+            |state, elem| {
+                match elem {
+                    Some(1) => {
+                        state.one_halt_test -= 1;
+                        if state.one_halt_test == 0 {
+                            (ParseResult::Continue, Some(1))
+                        } else {
+                            (ParseResult::Halt, None)
+                        }
+                    },
+                    Some(2) => {
+                        state.two_counter += 1;
+                        (ParseResult::Continue, Some(state.two_counter))
+                    },
+                    Some(3) => {
+                        (ParseResult::Continue, Some(4))
+                    },
+                    Some(_) => { panic!("found a bug in rust") },
+                    None => {
+                        if state.one_more_test {
+                            state.one_more_test = false;
+                            (ParseResult::Continue, Some(5))
+                        } else {
+                            (ParseResult::End, None)
+                        }
                     }
                 }
             }
+        ) {
+            result.push(elem);
         }
-    ) {
-        result.push(elem);
+
+        assert_eq!(result, vec![1, 2, 3, 4, 5]);
     }
 
-    assert_eq!(result, vec![1, 2, 3, 4, 5]);
-}
+    #[test]
+    fn construct_test() {
+        use std::cell::Cell;
 
-#[test]
-fn construct_test() {
-    use std::cell::Cell;
+        let test: Vec<u8> = vec![3, 3, 3, 2, 4, 5, 2];
 
-    let test: Vec<u8> = vec![3, 3, 3, 2, 4, 5, 2];
+        let result : Vec<u8> = test.into_iter().construct_state(0, |ref mut _state, ref mut value, i| {
+            if value.is_none() {
+                return Some(Cell::new(i)); //first value
+            }
 
-    let result : Vec<u8> = test.into_iter().construct_state(0, |ref mut _state, ref mut value, i| {
-        if value.is_none() {
-            return Some(Cell::new(i)); //first value
-        }
+            let old_val = value.as_ref().unwrap().get();
+            value.as_ref().unwrap().set(old_val + i);
 
-        let old_val = value.as_ref().unwrap().get();
-        value.as_ref().unwrap().set(old_val + i);
+            if value.as_ref().unwrap().get() >= 5 {
+                Some(Cell::new(0)) //new value
+            } else {
+                None //continue constucting
+            }
+        }).map(|x| { x.get() % 5 }).collect();
 
-        if value.as_ref().unwrap().get() >= 5 {
-            Some(Cell::new(0)) //new value
-        } else {
-            None //continue constucting
-        }
-    }).map(|x| { x.get() % 5 }).collect();
-
-    assert_eq!(result, vec![1, 0, 4, 2]);
+        assert_eq!(result, vec![1, 0, 4, 2]);
+    }
 }

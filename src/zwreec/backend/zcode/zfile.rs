@@ -1,69 +1,114 @@
-//! The `zfile` module contains functionality to create a zcode file
-//! 
+//! The `zfile` module contains functionality to create a Z-Code file.
+//!
+//! This contains all code related to operand handling, Z-Code instruction generation (except for
+//! most op-codes) and all of shared structs and code used by codegen and other modules.
+
 pub use super::zbytes::Bytes;
 pub use super::ztext;
 pub use super::ee::routine_easteregg;
 pub use super::op;
 use config::Config;
 
+/// A variable type.
 #[derive(Clone, PartialEq, Debug)]
 #[allow(dead_code)]
 pub enum Type {
+    /// This type is not valid
     None = 0,
+
+    /// This is a boolean type
     Bool = 1,
+
+    /// This is an integer
     Integer = 2,
+
+    /// This is a string
     String = 3,
 }
 
+/// A variable.
+#[derive(Debug,Clone)]
+pub struct Variable {
+    /// The identifier of the variable. Identifiers 15 or below are local variables.
+    pub id: u8,
+
+    /// The type of the variable
+    pub vartype: Type
+}
+
+/// An integer constant.
+#[derive(Debug,Clone)]
+pub struct Constant {
+    /// The value of the constant
+    pub value: u8
+}
+
+/// A signed 16-bit integer constant.
+#[derive(Debug,Clone)]
+pub struct LargeConstant {
+    /// The value of the constant
+    pub value: i16
+}
+
+/// There are three Operands in Z-Code:
+/// Variables, SmallConsts and LargeConsts.
 ///
-#[derive(Debug,Clone)]
-pub struct Variable { pub id: u8, pub vartype: Type}
-
-/// 
-#[derive(Debug,Clone)]
-pub struct Constant { pub value: u8 }
-
-///
-#[derive(Debug,Clone)]
-pub struct LargeConstant { pub value: i16 }
-
-/// There are three Operands in Zcode:
-/// Variables, SmallConsts, LargeConsts
-/// The other Operands are for a better code-readability
+/// The other Operands are for a better code-readability.
 #[derive(Debug,Clone)]
 pub enum Operand {
+    /// A variable
     Var(Variable),
-    Const(Constant) ,
+
+    /// A small constant
+    Const(Constant),
+
+    /// A large constant
     LargeConst(LargeConstant),
+
+    /// A string reference
+    ///
+    /// This is internally stored as a large constant containing the string address
     StringRef(LargeConstant),
+
+    /// A boolean constant (stored as a small integer constant)
     BoolConst(Constant),
 }
 
 impl Operand {
+    /// Creates a new constant with the specified value.
     pub fn new_const(value: u8) -> Operand {
         Operand::Const(Constant { value: value })
     }
 
+    /// Creates a new large constant.
     pub fn new_large_const(value: i16) -> Operand {
         Operand::LargeConst(LargeConstant { value: value })
     }
 
+    /// Creates a new string reference.
     pub fn new_string_ref(value: i16) -> Operand {
         Operand::StringRef(LargeConstant { value: value })
     }
 
+    /// Creates a new variable.
     pub fn new_var(id: u8) -> Operand {
         Operand::Var(Variable::new(id))
     }
 
+    /// Creates a new string reference variable.
     pub fn new_var_string(id: u8) -> Operand {
         Operand::Var(Variable::new_string(id))
     }
 
+    /// Creates a new bool reference variable
     pub fn new_var_bool(id: u8) -> Operand {
         Operand::Var(Variable::new_bool(id))
     }
 
+    /// Returns the value of the underlying constant.
+    ///
+    /// # Panics
+    /// Panics if the Operand is not a constant.
     pub fn const_value(&self) -> i16 {
         match self {
             &Operand::Const(ref constant) => constant.value as i16,
@@ -73,6 +118,7 @@ impl Operand {
         }
     }
 
+    /// Returns whether the Operand is a constant.
     pub fn is_const(&self) -> bool {
         match self {
             &Operand::Const(_) | &Operand::LargeConst(_) | &Operand::BoolConst(_) => true,
@@ -82,172 +128,403 @@ impl Operand {
 }
 
 impl Variable {
+    /// Returns a new integer variable.
     pub fn new(id: u8) -> Variable {
         Variable { id: id, vartype: Type::Integer }
     }
+
+    /// Returns a new string variable.
     pub fn new_string(id: u8) -> Variable {
         Variable { id: id, vartype: Type::String }
     }
+
+    /// Returns a new bool variable.
     pub fn new_bool(id: u8) -> Variable {
         Variable { id: id, vartype: Type::Bool }
     }
+
+    /// Returns a new variable of the Type specified by `vartype`.
     pub fn new_type(id: u8, vartype: Type) -> Variable {
         Variable { id: id, vartype: vartype }
     }
 }
 
+/// ZOP: Z-Code op code and pseudo op-code representation.
+///
+/// These structs contain instructions to generate Z-Machine op-codes.
+/// To generate the op-codes see `backend::zcode::zfile::Zfile::emit`.
 #[derive(Debug)]
+#[allow(missing_docs)]
 pub enum ZOP {
-  PrintUnicode{c: u16},
-  PrintUnicodeVar{var: Variable}, // var contains one character number
-  PrintUnicodeStr{address: Operand},
-  PrintChar{var: Variable},
-  Print{text: String},
-  PrintNumVar{variable: Variable},
-  PrintVar{variable: Variable},
-  PrintPaddr{address: Operand},  // packed address
-  PrintAddr{address: Operand},
-  PrintOps{text: String},
-  Call1N{jump_to_label: String},
-  Call2NWithAddress{jump_to_label: String, address: String},
-  Call2NWithArg{jump_to_label: String, arg: Operand},
-  Call1NVar{variable: u8},
-  Call2S{jump_to_label: String, arg: Operand, result: Variable},
-  CallVNA2{jump_to_label: String, arg1: Operand, arg2: Operand},
-  CallVNA3{jump_to_label: String, arg1: Operand, arg2: Operand, arg3: Operand},
-  CallVSA2{jump_to_label: String, arg1: Operand, arg2: Operand, result: Variable},
-  CallVSA3{jump_to_label: String, arg1: Operand, arg2: Operand, arg3: Operand, result: Variable},
-  CallVS2A5{jump_to_label: String, arg1: Operand, arg2: Operand, arg3: Operand, arg4: Operand, arg5: Operand, result: Variable},
-  Routine{name: String, count_variables: u8},
-  Label{name: String},
-  Newline,
-  SetColor{foreground: u8, background: u8},
-  SetColorVar{foreground: u8, background: u8},
-  SetTextStyle{bold: bool, reverse: bool, monospace: bool, italic: bool},
-  StoreVariable{variable: Variable, value: Operand},
-  StoreVariableID{variable: Variable, value: Operand},
-  StoreW{array_address: Operand, index: Variable, variable: Variable},
-  StoreB{array_address: Operand, index: Variable, variable: Variable},
-  StoreBOperand{array_address: Operand, index: Operand, operand: Operand},
-  LoadBOperand{array_address: Operand, index: Operand, variable: Variable},
-  PushVar{variable: Variable},
-  PullVar{variable: Variable},
-  Inc{variable: u8},
-  Ret{value: Operand},
-  JE{operand1: Operand, operand2: Operand, jump_to_label: String},
-  JNE{operand1: Operand, operand2: Operand, jump_to_label: String},
-  JL{operand1: Operand, operand2: Operand, jump_to_label: String},
-  JLE{operand1: Operand, operand2: Operand, jump_to_label: String},
-  JG{operand1: Operand, operand2: Operand, jump_to_label: String},
-  JGE{operand1: Operand, operand2: Operand, jump_to_label: String},
-  Random{range: Operand, variable: Variable},
-  ReadChar{local_var_id: u8},
-  ReadCharTimer{local_var_id: u8, timer: u8, routine: String},
-  AddTypes{operand1: Operand, operand2: Operand, tmp1: Variable, tmp2: Variable, save_variable: Variable},
-  Add{operand1: Operand, operand2: Operand, save_variable: Variable},
-  Sub{operand1: Operand, operand2: Operand, save_variable: Variable},
-  Mul{operand1: Operand, operand2: Operand, save_variable: Variable},
-  Div{operand1: Operand, operand2: Operand, save_variable: Variable},
-  Mod{operand1: Operand, operand2: Operand, save_variable: Variable},
-  Or{operand1: Operand, operand2: Operand, save_variable: Variable},
-  And{operand1: Operand, operand2: Operand, save_variable: Variable},
-  Not{operand: Operand, result: Variable},
-  Jump{jump_to_label: String},
-  Dec{variable: u8},
-  LoadW{array_address: Operand, index: Variable, variable: Variable},
-  SetCursor{line: u8, col: u8},
-  SetCursorOperand{row: Operand, col: Operand},
-  UpdateCursorPos,
-  GetCursor{store_addr: Operand},
-  EraseWindow{value: i8},
-  EraseLine,
-  SetVarType{variable: Variable, vartype: Type},
-  CopyVarType{variable: Variable, from: Operand},
-  GetVarType{variable: Variable, result: Variable},
-  Quit,
+    /// Prints a unicode character.
+    PrintUnicode{c: u16},
+
+    /// Prints the unicode character in the specified variable.
+    /// `var` contains a 16 bit variable that contains the character.
+    PrintUnicodeVar{var: Variable},
+
+    /// Prints the unicode string at the address specified.
+    PrintUnicodeStr{address: Operand},
+
+    /// Print a ZSCII character.
+    PrintChar{var: Variable},
+
+    /// Print a ZSCII string.
+    Print{text: String},
+
+    /// Print a numeric variable.
+    PrintNumVar{variable: Variable},
+
+    /// Print a variable.
+    PrintVar{variable: Variable},
+
+    /// Print the ZSCII string at the packed address `address`.
+    PrintPaddr{address: Operand},
+
+    /// Print the ZSCII string at the large address specified.
+    PrintAddr{address: Operand},
+
+    /// Generate print op-codes for the specified string.
+    ///
+    /// This generates ZSCII op-codes for the supported characters and prints unicode characters
+    /// separately.
+    PrintOps{text: String},
+
+    /// 1OP: Call a routine with one argument.
+    Call1N{jump_to_label: String},
+
+    /// 2OP: Call a routine with one argument (at the specified label) and throws the result away.
+    Call2NWithAddress{jump_to_label: String, address: String},
+
+    /// 2OP: Call a routine with one argument and store the result in `arg`.
+    Call2NWithArg{jump_to_label: String, arg: Operand},
+
+    /// 1OP: Call a routine with one variable argument.
+    Call1NVar{variable: u8},
+
+    /// 2OP: Call a routine with one argument and store the return value in `result`.
+    Call2S{jump_to_label: String, arg: Operand, result: Variable},
+
+    /// VAROP: Call a routine with two arguments and throw result away.
+    CallVNA2{jump_to_label: String, arg1: Operand, arg2: Operand},
+
+    /// VAROP: Call a routine with three arguments and throw result away.
+    CallVNA3{jump_to_label: String, arg1: Operand, arg2: Operand, arg3: Operand},
+
+    /// VAROP: Call a routine with two arguments and store result in `result`.
+    CallVSA2{jump_to_label: String, arg1: Operand, arg2: Operand, result: Variable},
+
+    /// VAROP: Call a routine with three arguments and store result in `result`.
+    CallVSA3{jump_to_label: String, arg1: Operand, arg2: Operand, arg3: Operand, result: Variable},
+
+    /// VAROP with types-byte: Call a routine with five arguments and store the return value in `result`.
+    CallVS2A5{jump_to_label: String, arg1: Operand, arg2: Operand, arg3: Operand, arg4: Operand, arg5: Operand, result: Variable},
+
+    /// Declares a Z-Routine
+    Routine{name: String, count_variables: u8},
+
+    /// Declares a label.
+    ///
+    /// This is only used internally to reference different parts of the generated file.
+    Label{name: String},
+
+    /// Prints a newline.
+    Newline,
+
+    /// Sets the foreground and background color to constants specified.
+    SetColor{foreground: u8, background: u8},
+
+    /// Sets the foreground and background color to the variables with the IDs specified.
+    SetColorVar{foreground: u8, background: u8},
+
+    /// Set text style to `bold`, `reverse` (inverse colors), `monospace` and `italic`.
+    SetTextStyle{bold: bool, reverse: bool, monospace: bool, italic: bool},
+
+    /// Store the value in `value` to the variable.
+    StoreVariable{variable: Variable, value: Operand},
+
+    /// Store the word in `variable` at `array_address + index`.
+    StoreW{array_address: Operand, index: Variable, variable: Variable},
+
+    /// Store the byte in `variable` at `array_address + index`.
+    StoreB{array_address: Operand, index: Variable, variable: Variable},
+
+    /// Store the byte in `operand` at `array_address + index`.
+    StoreBOperand{array_address: Operand, index: Operand, operand: Operand},
+
+    /// Load the byte at `array_address + index` into `variable`.
+    LoadBOperand{array_address: Operand, index: Operand, variable: Variable},
+
+    /// Push a variable on the stack.
+    PushVar{variable: Variable},
+
+    /// Pull a variable from the stack.
+    PullVar{variable: Variable},
+
+    /// Increment a variable by 1: `variable += 1`.
+    Inc{variable: u8},
+
+    /// Decrement a variable by 1: `variable -= 1`.
+    Dec{variable: u8},
+
+    /// Return from the Z-Routine with the value in the specified Operand.
+    Ret{value: Operand},
+
+    /// Jump if `operand1 == operand2`.
+    JE{operand1: Operand, operand2: Operand, jump_to_label: String},
+
+    /// Jump if `operand1 != operand2`.
+    JNE{operand1: Operand, operand2: Operand, jump_to_label: String},
+
+    /// Jump if `operand1 < operand2`.
+    JL{operand1: Operand, operand2: Operand, jump_to_label: String},
+
+    /// Jump if `operand1 <= operand2`.
+    JLE{operand1: Operand, operand2: Operand, jump_to_label: String},
+
+    /// Jump if `operand1 > operand2`.
+    JG{operand1: Operand, operand2: Operand, jump_to_label: String},
+
+    /// Jump if `operand1 >= operand2`.
+    JGE{operand1: Operand, operand2: Operand, jump_to_label: String},
+
+    /// Store a random number between 1 and `range` in `variable`.
+    Random{range: Operand, variable: Variable},
+
+    /// Read a character from standard input in the variable.
+    ReadChar{local_var_id: u8},
+
+    /// Read a character from standard input in the variable or time out after `timer / 10` seconds elapsed.
+    ReadCharTimer{local_var_id: u8, timer: u8, routine: String},
+
+    /// Helper function to add two values according to their types.
+    AddTypes{operand1: Operand, operand2: Operand, tmp1: Variable, tmp2: Variable, save_variable: Variable},
+
+    /// Add two values: `save_variable = operand1 + operand2`.
+    Add{operand1: Operand, operand2: Operand, save_variable: Variable},
+
+    /// Subtract two values: `save_variable = operand1 - operand2`.
+    Sub{operand1: Operand, operand2: Operand, save_variable: Variable},
+
+    /// Multiply two values: `save_variable = operand1 * operand2`.
+    Mul{operand1: Operand, operand2: Operand, save_variable: Variable},
+
+    /// Divide two values: `save_variable = operand1 / operand2`.
+    Div{operand1: Operand, operand2: Operand, save_variable: Variable},
+
+    /// Modulo operation: `save_variable = operand1 % operand2`.
+    Mod{operand1: Operand, operand2: Operand, save_variable: Variable},
+
+    /// Bitwise OR: `save_variable = operand1 | operand2`.
+    Or{operand1: Operand, operand2: Operand, save_variable: Variable},
+
+    /// Bitwise AND: `save_variable = operand1 & operand2`.
+    And{operand1: Operand, operand2: Operand, save_variable: Variable},
+
+    /// Bitwise NOT: `result = ~operand`.
+    Not{operand: Operand, result: Variable},
+
+    /// Jump to a label.
+    Jump{jump_to_label: String},
+
+    /// Loads a word: `variable = array_address[index]`.
+    LoadW{array_address: Operand, index: Variable, variable: Variable},
+
+    /// Positions the cursor at the specified `line` and `column`.
+    SetCursor{line: u8, col: u8},
+
+    /// Positions the cursor at the `line` and `column` in the given Operands.
+    SetCursorOperand{row: Operand, col: Operand},
+
+    /// Update the cursor position variable with current data.
+    UpdateCursorPos,
+
+    /// Store the current cursor position at `store_addr`.
+    GetCursor{store_addr: Operand},
+
+    /// Erase the entire window with the specified id.
+    EraseWindow{value: i8},
+
+    /// Erase the current line starting from the cursor.
+    EraseLine,
+
+    /// Changes the variable type of the specified variable.
+    SetVarType{variable: Variable, vartype: Type},
+
+    /// Copies the variable type of `from` to `variable`.
+    CopyVarType{variable: Variable, from: Operand},
+
+    /// Stores the variable type of `variable` in `result`.
+    GetVarType{variable: Variable, result: Variable},
+
+    /// Quits the Z-Machine interpreter immediately.
+    Quit,
 }
 
 /// Zcode has the jump-types:
-/// jumps (to a label)
-/// branches (to a label, from a compare-op like je, ...)
+///
+/// jumps (to a label),
+/// branches (to a label, from a compare-op like je, ...),
 /// routine (to a routine-address)
 #[derive(Debug, PartialEq, Clone)]
 pub enum JumpType {
+    /// Jump to a label (address)
     Jump,
+
+    /// Conditionally jump to a label (with compare op-codes like JE)
     Branch,
+
+    /// Call a routine
     Routine
 }
 
-/// types of possible arguments
+/// Types of possible arguments.
 pub enum ArgType {
+    /// Large constant
     LargeConst,
+
+    /// Small constant
     SmallConst,
+
+    /// Variable
     Variable,
+
+    /// Pointer to a string
     Reference,
+
+    /// No argument
     Nothing
 }
 
+/// The definition of a Z-Code file.
 pub struct Zfile {
+    /// The output data
     pub data: Bytes,
+
+    /// The unicode translation table
     unicode_table: Vec<u16>,
+
+    /// A list of all jumps
     jumps: Vec<Zjump>,
+
+    /// A list of all labels
     labels: Vec<Zlabel>,
+
+    /// A list of all strings (used to find duplicate strings)
     strings: Vec<Zstring>,
+
+    /// The beginning of executable code
     program_addr: u16,
+
+    /// The address of the unicode translation table
     unicode_table_addr: u16,
+
+    /// The address of the global variables
     global_addr: u16,
+
+    /// Base of static memory
     static_addr: u16,
+
+    /// Location of object table
     pub object_addr: u16,
+
+    /// Location of the last write in static memory
     last_static_written: u16,
+
+    /// Location of the type storage
     pub type_store: u16,
+
+    /// Location of the cursor position
     pub cursor_pos: u16,
+
+    /// Start of dynamic memory
     pub heap_start: u16,
+
+    /// Flag to enable black font on white background
     pub bright_mode: bool,
+
+    /// Force print_unicode op-code generation and omit unicode-translation table generation
     pub force_unicode: bool,
+
+    /// Enable the easter-egg
     pub easter_egg: bool,
+
+    /// Disable colours
     pub no_colours: bool,
+
+    /// Disable unicode completely
     pub no_unicode: bool,
 }
 
+/// A jump.
 #[derive(Debug, PartialEq, Clone)]
 pub struct Zjump {
+    /// The address the jump location should be stored at
     pub from_addr: u32,
+
+    /// The label of the jump
     pub name: String,
+
+    /// The type of jump
     pub jump_type: JumpType
 }
 
+/// A string.
 #[derive(Debug, PartialEq, Clone)]
 pub struct Zstring {
+    /// the address where the string address should be stored at
     pub from_addr: u32,
-    pub chars: Vec<u8>,  // contains either ztext or [length:u16, utf16char:u16, …]
+
+    /// The character data
+    /// Contains either ztext or [length: u16, utf16char:u16, …]
+    pub chars: Vec<u8>,
+
+    /// The original string
     pub orig: String,
+
+    /// Contains whether the string is a unicode string or ZSCII
     pub unicode: bool,
+
+    /// If the string data was already written to a location this is the address
     pub written_addr: u32,
 }
 
+/// A label.
 #[derive(Debug, PartialEq, Clone)]
 pub struct Zlabel {
+    /// The address of the label
     pub to_addr: u32,
+
+    /// The name of the label
     pub name: String
 }
 
-/// zfile supports 4 formating possibilites: bold, mono, italic and inverted
+/// A formatting type.
+///
+/// zfile supports 4 formating possibilites: bold, mono, italic and inverted.
 #[derive(Debug, Copy, Clone)]
 pub struct FormattingState {
+    /// Bold text
     pub bold: bool,
+
+    /// Monospace text
     pub mono: bool,
+
+    /// Italic text
     pub italic: bool,
+
+    /// Inverted foreground and background colour
     pub inverted: bool
 }
 
 
 impl Zfile {
-
-    /// creates a new zfile
+    /// Creates a new zfile with default options.
     pub fn new() -> Zfile {
         Zfile::new_with_options(false, false, false, false, false, false)
     }
 
+    /// Creates a new zfile with the specified options.
     pub fn new_with_options(bright_mode: bool, force_unicode: bool, easter_egg: bool, no_colours: bool, half_memory: bool, no_unicode: bool) -> Zfile {
         Zfile {
             data: Bytes{bytes: Vec::new()},
@@ -272,13 +549,13 @@ impl Zfile {
         }
     }
 
+    /// Creates a new zfile with the specified config.
     pub fn new_with_cfg(cfg: &Config) -> Zfile {
         Zfile::new_with_options(cfg.bright_mode, cfg.force_unicode, cfg.easter_egg, cfg.no_colours, cfg.half_memory, cfg.no_unicode)
     }
 
-    /// creates the header of a zfile
+    /// Creates the header of a zfile.
     pub fn create_header(&mut self) {
-        
         assert!(self.data.len() == 0, "create_header should run at the beginning of the op-codes");
 
         let alpha_addr: u16 = 0x40;
@@ -297,11 +574,11 @@ impl Zfile {
         // version
         self.data.write_byte(8, 0x00);
 
-        // flag1 (from right to left)
-        // 0: colours availabe
-        // 1: picture
-        // 2: bold
-        // 3: italic
+        // flag1 (from right to left):
+        // 0: colours available,
+        // 1: picture,
+        // 2: bold,
+        // 3: italic,
         // 4: fixed
         self.data.write_byte(if self.no_colours { 0x1c } else { 0x1d } , 0x01);
 
@@ -350,7 +627,7 @@ impl Zfile {
         // ...
     }
 
-    /// writes the alphabet to index
+    /// Writes the alphabet to index.
     fn write_alphabet(&mut self, index: usize) {
         // TODO: is it possible to do this with map?
         let mut alpha_tmp: [u8; 78] = [0; 78];
@@ -360,7 +637,7 @@ impl Zfile {
         self.data.write_bytes(&alpha_tmp, index);
     }
 
-    /// writes the unicode table to the address unicode_table_addr
+    /// Writes the unicode translation table to the address unicode_table_addr.
     fn write_unicode_table(&mut self) {
         self.data.write_byte(self.unicode_table.len() as u8, self.unicode_table_addr as usize);
 
@@ -370,9 +647,10 @@ impl Zfile {
 
     }
 
-    /// saves the addresses of the labels to the positions of the jump-ops
-    /// goes through all jumps and labels, if they have the same name:
-    ///  write the "where to jump"-adress of the label to the position of the jump
+    /// Saves the addresses of the labels to the positions of the jump-ops.
+    ///
+    /// This iterates through all jumps and labels and if they have the same name
+    /// it writes the "where to jump"-adress of the label to the position of the jump.
     fn write_jumps(&mut self) {
         for jump in self.jumps.iter_mut() {
             let mut label_found = false;
@@ -405,6 +683,7 @@ impl Zfile {
         }
     }
 
+    /// Saves the string to high memory.
     pub fn write_string(&mut self, newstring: &str) -> u16 {
         self.write_strings();
         for string in self.strings.iter_mut() {
@@ -432,8 +711,8 @@ impl Zfile {
         str_addr
     }
 
-    /// saves the zstrings to high mem and writes the resulting address to the
-    /// print_paddr arguments which referencing the string
+    /// Saves the zstrings to high memory and writes the resulting address to the
+    /// print_paddr arguments which referencing the string.
     fn write_strings(&mut self) {
         let mut prev_strings: Vec<(Zstring, u32)> = vec![];
         for string in self.strings.iter_mut() {
@@ -479,7 +758,7 @@ impl Zfile {
         }
     }
 
-    /// adds jump to write the jump-addresses after reading all commands
+    /// Adds a jump to write the jump-addresses after reading all commands.
     pub fn add_jump(&mut self, name: String, jump_type: JumpType) {
         let from_addr: u32 = self.data.bytes.len() as u32;
         let jump: Zjump = Zjump{ from_addr: from_addr, name: name, jump_type: jump_type};
@@ -489,7 +768,7 @@ impl Zfile {
         self.data.write_u16(0x0000, from_addr as usize);
     }
 
-    /// adds label to the labels-vector. we need them later
+    /// Adds a label to the labels-vector. we need them later.
     fn add_label(&mut self, name: String, to_addr: u32) {
         let label: Zlabel = Zlabel{ name: name, to_addr: to_addr };
         for other_label in self.labels.iter() {
@@ -500,7 +779,7 @@ impl Zfile {
         self.labels.push(label);
     }
 
-    /// write out respective byte stream of opcodes to file
+    /// Write out the ZOP instructions to the data.
     pub fn emit(&mut self, code: Vec<ZOP>) {
         for instr in &code {
             let addr = self.data.bytes.len();
@@ -511,8 +790,8 @@ impl Zfile {
         }
     }
 
-    /// write opcodes to file but also return written bytes for testing purposes
-    /// as well as the resulting new labels and jumps
+    /// Write opcodes to data array but also return written bytes for testing purposes as well as
+    /// the resulting new labels and jumps.
     pub fn write_zop(&mut self, instr: &ZOP, return_new_jumps: bool) -> (Vec<Zlabel>, Vec<Zjump>, Vec<u8>){
         let beginning = self.data.bytes.len();
         let old_labels: Vec<Zlabel> = if return_new_jumps {
@@ -542,7 +821,6 @@ impl Zfile {
             &ZOP::Mod{ref operand1, ref operand2, ref save_variable} => op::op_mod(operand1, operand2, save_variable),
             &ZOP::Not{ref operand, ref result} => op::op_not(operand, result),
             &ZOP::StoreVariable{ref variable, ref value} => op::op_store_var(variable, value),
-            &ZOP::StoreVariableID{ref variable, ref value} => op::op_store_var_id(variable, value),
             &ZOP::Ret{ref value} => op::op_ret(value),
             &ZOP::PrintAddr{ref address} => op::op_print_addr(address),
             &ZOP::PrintPaddr{ref address} => op::op_print_paddr(address),
@@ -605,7 +883,7 @@ impl Zfile {
         }
         let mut new_jumps: Vec<Zjump> = vec![];
         let mut new_labels: Vec<Zlabel> = vec![];
-        
+
         if return_new_jumps {
             for label in self.labels.iter() {
                 if !old_labels.contains(&label) {
@@ -618,12 +896,12 @@ impl Zfile {
                 }
             }
         }
-        
+
         (new_labels, new_jumps, self.data.bytes[beginning..self.data.bytes.len()].to_vec())
     }
 
-    /// generates normal print opcodes for ASCII characters and unicode print
-    /// opcodes for unicode characters
+    /// Generates normal print opcodes for ASCII characters and unicode print opcodes for unicode
+    /// characters. Adds new characters to the unicode translation table if there is still space.
     pub fn gen_print_ops(&mut self, text: &str) {
         let mut current_text: String = String::new();
         let mut current_utf16: String = String::new();
@@ -643,7 +921,7 @@ impl Zfile {
                 if self.force_unicode == false && ztext::pos_in_unicode(character as u16, &self.unicode_table) != -1 {
                     self.gen_write_out_unicode(current_utf16.to_string());  // write out utf16 string
                     current_utf16.clear();
-                    // unicode exist in table
+                    // unicode exists in table
                     current_text.push(character);
                 } else if self.force_unicode == false && self.unicode_table.len() < 96 {
                     self.gen_write_out_unicode(current_utf16.to_string());  // write out utf16 string
@@ -666,6 +944,7 @@ impl Zfile {
         self.gen_write_out_zstring(current_text);  // order does not matter
     }
 
+    /// Generates print_unicode opcodes for a given string.
     fn gen_write_out_unicode(&mut self, current_utf16: String) {
         if current_utf16.len() > 0 {
             if current_utf16.len() > 1 {
@@ -690,6 +969,8 @@ impl Zfile {
         }
     }
 
+    /// Writes a zstring to high memory or, if three bytes or smaller, directly after the
+    /// instruction. Generates a print opcode at the current position.
     fn gen_write_out_zstring(&mut self, current_text: String) {
         if current_text.len() > 0 {
             if current_text.len() > 3 {  // write string to high mem
@@ -700,20 +981,31 @@ impl Zfile {
         }
     }
 
+    /// Writes a zstring to high memory and generates a print instruction.
     fn gen_high_mem_zprint(&mut self, text: &str) {
         self.emit(vec![ZOP::PrintPaddr{address: Operand::new_large_const(0)}]);  // dummy addr
         let mut text_bytes: Bytes = Bytes{bytes: Vec::new()};
         ztext::encode(&mut text_bytes, text, &self.unicode_table);
         self.strings.push(
-            Zstring{chars: text_bytes.bytes, orig: text.to_string(), from_addr: (self.data.len()-2) as u32, unicode: false, written_addr: 0});
+            Zstring{
+                chars: text_bytes.bytes,
+                orig: text.to_string(),
+                from_addr: (self.data.len()-2) as u32,
+                unicode: false,
+                written_addr: 0
+            }
+        );
     }
 
     // ================================
     // no op-commands
 
-    /// start of an zcode programm
-    /// fills everying < program_addr with zeros
-    /// should called as the first commend
+    /// Start of a zcode program.
+    ///
+    /// Fills everything < program_addr with zeros.
+    ///
+    /// # Caution
+    /// This should be called as the first command.
     pub fn start(&mut self) {
         self.create_header();
         self.data.write_zero_until(self.program_addr as usize);
@@ -733,8 +1025,10 @@ impl Zfile {
         ]);
     }
 
-    /// writes all stuff that couldn't written directly
-    /// should be called as the last commend
+    /// Writes all stuff that couldn't be written directly.
+    ///
+    /// # Caution
+    /// This should be called as the last command.
     pub fn end(&mut self) {
         self.write_unicode_table();
         self.routine_check_links();
@@ -757,10 +1051,10 @@ impl Zfile {
         self.write_strings();
     }
 
-    /// command to create a routine
-    pub fn routine(&mut self, name: &str, count_variables: u8) {    
+    /// Command to create a Z-Routine.
+    pub fn routine(&mut self, name: &str, count_variables: u8) {
         let index: u32 = routine_address(self.data.bytes.len() as u32);
-        
+
         assert!(count_variables <= 15, "only 15 local variables are allowed");
         assert!(index % 8 == 0, "adress of a routine must start at address % 8 == 0");
 
@@ -768,7 +1062,7 @@ impl Zfile {
         self.data.write_byte(count_variables, index as usize);
     }
 
-    /// command to create a label
+    /// Command to create a label.
     pub fn label(&mut self, name: &str) {
         let index: usize = self.data.bytes.len();
         self.add_label(name.to_string(), index as u32);
@@ -777,7 +1071,7 @@ impl Zfile {
     // ================================
     // zcode routines
 
-    /// routine to add the address of a passage-link
+    /// Routine to add the address of a passage-link.
     pub fn routine_add_link(&mut self) {
         let save_at_addr: u16 = 1 + self.object_addr;
         self.emit(vec![
@@ -792,18 +1086,22 @@ impl Zfile {
         ]);
     }
 
-    /// exits the program
+    /// Exits the program immediately.
+    ///
     /// quit is 0OP
     pub fn op_quit(&mut self) {
         self.op_0(0x0a);
     }
 
 
-    /// checks all stored links and make them choiceable with the keyboard
-    /// the routine checks if there are if there are < 10 links or more:
-    /// if < 10: key 1-9 are supported, jumps immediately
-    /// if >=10: 99 links are supported, on the first position is no 0 allowed
-    ///          to jump to a < 10 link you have to press enter
+    /// Checks all stored links and make them selectable with the keyboard.
+    ///
+    /// The routine checks if there are < 10 links or more:
+    ///
+    /// if < 10: number keys 1-9 are supported, jumps immediately.
+    ///
+    /// if >=10: 99 links are supported, leading zeroes are not allowed.
+    /// To jump to a link with a number smaller than 10 you have to press enter.
     pub fn routine_check_links(&mut self) {
         let save_at_addr: u16 = 1 + self.object_addr;
         self.emit(vec![
@@ -912,7 +1210,7 @@ impl Zfile {
         ]);
     }
 
-    /// easter-egg, with konami-code to start
+    /// Easter-egg, with konami-code to start.
     pub fn routine_check_more(&mut self) {
         if self.easter_egg {
             self.emit(vec![
@@ -973,10 +1271,11 @@ impl Zfile {
         }
     }
 
-    /// print UTF-16 string from addr
-    /// expects an address as argument where first the length (as u16)
-    /// of the string is written (number of u16 chars), followed by the string to print.
-    /// only works if the string is within the address space up to 0xffff
+    /// Print UTF-16 string at addr.
+    ///
+    /// Expects an address as argument where the first u16 stored is the length of the string as the
+    /// number of u16 chars, followed by the string to print.
+    /// This only works if the string is within the address space up to 0xffff.
     pub fn routine_print_unicode(&mut self) {
         self.emit(vec![
             ZOP::Routine{name: "print_unicode".to_string(), count_variables: 4},
@@ -1003,12 +1302,14 @@ impl Zfile {
         ]);
     }
 
+    /// Update the cursor position in the global cursor_pos variable.
     pub fn update_cursor_pos(&mut self) {
         let cursor_pos = self.cursor_pos;
         self.emit(vec![ZOP::GetCursor{store_addr: Operand::new_large_const(cursor_pos as i16)}]);
     }
 
-    /// needed to simulate JS browser input dialog, receives prompt message and default value as string arguments
+    /// Needed to simulate a javascript browser input dialog, receives a prompt message and a
+    /// default value as string arguments.
     pub fn routine_prompt(&mut self) {
         let msg = Variable::new(1); // arg1  displayed message
         let msg_op = Operand::new_var(msg.id);
@@ -1090,9 +1391,11 @@ impl Zfile {
         ]);
     }
 
-    /// malloc
-    /// argument: amount of u16 to allocate
-    /// after receiving the address you are requested to write down the
+    /// malloc Z-Routine: Allocate a specified number of words of dynamic memory.
+    ///
+    /// `argument`: amount of u16 to allocate
+    ///
+    /// After receiving the address you are requested to write down the
     /// number of u16 you are actually using in the first u16 and then
     /// if you ever want to decrease this, you have to write -1i16 at
     /// the 'freed' u16s at the end. increasing it is not allowed.
@@ -1175,10 +1478,11 @@ impl Zfile {
         ]);
     }
 
-    /// strcpy
+    /// strcpy Z-Routine: Copy a string.
+    ///
     /// first argument is pointer to utf16 string containing length at first u16
     /// second the the destination address in memory where the string is copied to,
-    /// while the first length u16 is not copied
+    /// while the first length u16 is not copied.
     pub fn routine_strcpy(&mut self) {
         self.emit(vec![
             ZOP::Routine{name: "strcpy".to_string(), count_variables: 15},
@@ -1200,8 +1504,9 @@ impl Zfile {
         ]);
     }
 
-    /// strcat
-    /// returns a reference to a string concatenation of the first and second string parameters
+    /// strcat Z-Routine: Concatenate two strings.
+    ///
+    /// returns a reference to a string concatenation of the first and second string parameters.
     pub fn routine_strcat(&mut self) {
         let addr1 = Variable::new(1);
         let addr2 = Variable::new(2);
@@ -1245,9 +1550,10 @@ impl Zfile {
         ]);
     }
 
-    /// strcmp
+    /// strcmp Z-Routine: Compare two strings.
+    ///
     /// returns 0 if both given strings are equal and -1 if the first is
-    /// alphabetically smaller than the second and +1 vice versa
+    /// alphabetically smaller than the second and +1 vice versa.
     pub fn routine_strcmp(&mut self) {
         let addr1 = Variable::new(1);
         let addr2 = Variable::new(2);
@@ -1295,7 +1601,7 @@ impl Zfile {
         ]);
     }
 
-    /// malloc_init
+    /// malloc_init Z-Routine: Initialize the dynamic memory.
     pub fn routine_malloc_init(&mut self) {
         let heap_start = self.heap_start;
         let static_addr = self.static_addr - 2;  // store last alloc upper bound as u16 before static_addr
@@ -1317,7 +1623,9 @@ impl Zfile {
         ]);
     }
 
-    /// mem_free as a tracing garbage collection
+    /// mem_free Z-Routine: Free unused dynamic memory.
+    ///
+    /// This is implemented as a simple tracing garbage collector.
     pub fn routine_mem_free(&mut self) {
         let heap_start = self.heap_start;
         let static_addr = self.static_addr - 2;  // the last u16 contains the highest addr of allocated space
@@ -1400,7 +1708,8 @@ impl Zfile {
         ]);
     }
 
-    /// manual free call to erase used heap memory if you can not wait for the GC
+    /// manual_free Z-Routine: manual free call to erase used heap memory if you can not wait for
+    /// the GC.
     pub fn routine_manual_free(&mut self) {
         let addr_op = Operand::new_var(1);
         let index = Variable::new(2);
@@ -1421,8 +1730,9 @@ impl Zfile {
         ]);
     }
 
-    /// itoa
-    /// convert from number at arg1 to string at base of 10, returns the str addr
+    /// itoa Z-Routine: Convert an int to a string.
+    ///
+    /// convert from number at arg1 to string at base of 10, returns the str addr.
     pub fn routine_itoa(&mut self) {
         let number = Variable::new(1);  // var1 is the given number
         let stra = Variable::new(2);  // the result string
@@ -1468,7 +1778,7 @@ impl Zfile {
         ]);
     }
 
-    /// helper function to print out the content of a variable according to the type of it
+    /// helper function to print out the content of a variable according to its type.
     pub fn routine_print_var(&mut self) {
         let varid = Variable::new(1);  // first argument
         let varcontent = Variable::new(2);  // second argument
@@ -1497,12 +1807,14 @@ impl Zfile {
         ]);
     }
 
+    /// Print a variable.
     fn print_var(&mut self, variable: &Variable) {
         self.emit(vec![
             ZOP::CallVNA2{jump_to_label: "print_var".to_string(), arg1: Operand::new_const(variable.id), arg2: Operand::new_var(variable.id)},
         ]);
     }
 
+    /// Changes the variable type.
     fn set_var_type(&mut self, variable: &Variable, vartype: &Type) {
         let type_store = self.type_store;
         self.emit(vec![
@@ -1510,6 +1822,7 @@ impl Zfile {
         ]);
     }
 
+    /// Copies the variable type of the Operand in `from` to the variable.
     fn copy_var_type(&mut self, variable: &Variable, from: &Operand) {
         let type_store = self.type_store;
         match from {
@@ -1533,6 +1846,7 @@ impl Zfile {
         };
     }
 
+    /// Stores the variable type of `variable` in the `result` variable.
     fn get_var_type(&mut self, variable: &Variable, result: &Variable) {
         let type_store = self.type_store;
         self.emit(vec![
@@ -1540,7 +1854,8 @@ impl Zfile {
         ]);
     }
 
-    /// helper function to add two values according to the types of them and saves type of savevarid to the global type-store and returns the result
+    /// Helper function to add two values according to the types of them and saves type of savevarid
+    /// to the global type-store and returns the result.
     pub fn routine_add_types(&mut self) {
         let type_store = self.type_store;
         let val1 = Variable::new(1);  // first argument
@@ -1596,6 +1911,7 @@ impl Zfile {
         ]);
     }
 
+    /// Helper function to add two values according to their types.
     fn add_types(&mut self, operand1: &Operand, operand2: &Operand, tmp1: &Variable, tmp2: &Variable, save_variable: &Variable) {
         let type1op = match operand1 {
             &Operand::StringRef(_) => Operand::new_const(Type::String as u8),
@@ -1623,7 +1939,7 @@ impl Zfile {
         ]);
     }
 
-    /// print one zscii character given as argument
+    /// Print one zscii character given as argument.
     pub fn routine_print_char(&mut self) {
         self.emit(vec![
             ZOP::Routine{name: "print_char".to_string(), count_variables: 3},
@@ -1641,8 +1957,9 @@ impl Zfile {
     // ================================
     // specific ops
 
-    /// print strings
-    /// print is 0OP
+    /// Print strings.
+    ///
+    /// print is 0OP.
     fn op_print(&mut self, content: &str) {
         let index: usize = self.data.bytes.len();
         self.op_0(0x02);
@@ -1652,7 +1969,7 @@ impl Zfile {
         self.data.write_bytes(&text_bytes.bytes, index + 1);
     }
 
-    /// jumps to a label
+    /// Jumps to a label.
     pub fn op_jump(&mut self, jump_to_label: &str) {
         self.op_1(0x0c, ArgType::LargeConst);
         self.add_jump(jump_to_label.to_string(), JumpType::Jump);
@@ -1660,18 +1977,20 @@ impl Zfile {
 
 
 
-    /// calls a routine
-    /// call_1n is 1OP
+    /// Calls a routine.
+    ///
+    /// call_1n is 1OP.
     pub fn op_call_1n(&mut self, jump_to_label: &str) {
         self.op_1(0x0f, ArgType::LargeConst);
         self.add_jump(jump_to_label.to_string(), JumpType::Routine);
     }
 
 
-    /// calls a routine with an argument(variable) an throws result away
-    /// becouse the value isn't known until all routines are set, it
-    /// inserts a pseudo routoune_address
-    /// call_2n is 2OP
+    /// Calls a routine with an argument(variable) and throws result away
+    /// because the value isn't known until all routines are set, it
+    /// inserts a pseudo routoune_address.
+    ///
+    /// call_2n is 2OP.
     pub fn op_call_2n_with_address(&mut self, jump_to_label: &str, address: &str) {
         let args: Vec<ArgType> = vec![ArgType::LargeConst, ArgType::LargeConst];
         self.op_2(0x1a, args);
@@ -1683,8 +2002,9 @@ impl Zfile {
         self.add_jump(address.to_string(), JumpType::Routine);
     }
 
-    /// calls a routine with one argument an throws result away
-    /// call_2n is 2OP
+    /// Calls a routine with one argument an throws result away.
+    ///
+    /// call_2n is 2OP.
     pub fn op_call_2n_with_arg(&mut self, jump_to_label: &str, arg: &Operand) {
         let args: Vec<ArgType> = vec![ArgType::LargeConst, op::arg_type(&arg)];
         self.op_2(0x1a, args);
@@ -1695,8 +2015,9 @@ impl Zfile {
         op::write_argument(arg, &mut self.data.bytes);  // just one argument
     }
 
-    /// calls a routine with one argument and stores return value in result
-    /// call_2s is 2OP
+    /// Calls a routine with one argument and stores return value in result.
+    ///
+    /// call_2s is 2OP.
     pub fn op_call_2s(&mut self, jump_to_label: &str, arg: &Operand, result: &Variable) {
         let args: Vec<ArgType> = vec![ArgType::LargeConst, op::arg_type(&arg), ArgType::Variable];
         self.op_2(0x19, args);
@@ -1708,8 +2029,9 @@ impl Zfile {
         self.data.append_byte(result.id);
     }
 
-    /// calls a routine with two arguments and throws result away
-    /// call_vn is VAROP
+    /// Calls a routine with two arguments and throws result away.
+    ///
+    /// call_vn is VAROP.
     pub fn op_call_vn_a2(&mut self, jump_to_label: &str, arg1: &Operand, arg2: &Operand) {
         let args: Vec<ArgType> = vec![ArgType::LargeConst, op::arg_type(&arg1), op::arg_type(&arg2), ArgType::Nothing];
         self.op_var(0x19, args);
@@ -1721,8 +2043,9 @@ impl Zfile {
         op::write_argument(arg2, &mut self.data.bytes);
     }
 
-    /// calls a routine with three arguments and throws result away
-    /// call_vn is VAROP
+    /// Calls a routine with three arguments and throws result away.
+    ///
+    /// call_vn is VAROP.
     pub fn op_call_vn_a3(&mut self, jump_to_label: &str, arg1: &Operand, arg2: &Operand, arg3: &Operand) {
         let args: Vec<ArgType> = vec![ArgType::LargeConst, op::arg_type(&arg1), op::arg_type(&arg2), op::arg_type(&arg3)];
         self.op_var(0x19, args);
@@ -1735,8 +2058,9 @@ impl Zfile {
         op::write_argument(arg3, &mut self.data.bytes);
     }
 
-    /// calls a routine with two arguments and stores return value in result
-    /// call_vs is VAROP
+    /// Calls a routine with two arguments and stores return value in result.
+    ///
+    /// call_vs is VAROP.
     pub fn op_call_vs_a2(&mut self, jump_to_label: &str, arg1: &Operand, arg2: &Operand, result: &Variable) {
         let args: Vec<ArgType> = vec![ArgType::LargeConst, op::arg_type(&arg1), op::arg_type(&arg2), ArgType::Nothing];
         self.op_var(0x0, args);
@@ -1749,8 +2073,9 @@ impl Zfile {
         self.data.append_byte(result.id);
     }
 
-    /// calls a routine with three arguments and stores return value in result
-    /// call_vs is VAROP
+    /// Calls a routine with three arguments and stores return value in result.
+    ///
+    /// call_vs is VAROP.
     pub fn op_call_vs_a3(&mut self, jump_to_label: &str, arg1: &Operand, arg2: &Operand, arg3: &Operand, result: &Variable) {
         let args: Vec<ArgType> = vec![ArgType::LargeConst, op::arg_type(&arg1), op::arg_type(&arg2), op::arg_type(&arg3)];
         self.op_var(0x0, args);
@@ -1764,8 +2089,9 @@ impl Zfile {
         self.data.append_byte(result.id);
     }
 
-    /// calls a routine with five arguments and stores the return value
-    /// call_vs2 is VAROP with additional types-byte
+    /// Calls a routine with five arguments and stores the return value.
+    ///
+    /// call_vs2 is VAROP with additional types-byte.
     pub fn op_call_vs2_a5(&mut self, jump_to_label: &str, arg1: &Operand, arg2: &Operand, arg3: &Operand, arg4: &Operand, arg5: &Operand, result: &Variable) {
         let args1: Vec<ArgType> = vec![ArgType::LargeConst, op::arg_type(&arg1), op::arg_type(&arg2), op::arg_type(&arg3)];
         let args2: Vec<ArgType> = vec![op::arg_type(&arg4), op::arg_type(&arg5), ArgType::Nothing, ArgType::Nothing];
@@ -1782,12 +2108,12 @@ impl Zfile {
         self.data.append_byte(result.id);
     }
 
-    /// jumps to a label if the value of operand1 is equal to operand2
+    /// Jumps to a label if the value of operand1 is equal to operand2.
     pub fn op_je(&mut self, operand1: &Operand, operand2: &Operand, jump_to_label: &str) {
 
         let args: Vec<ArgType> = vec![op::arg_type(operand1), op::arg_type(operand2)];
         self.op_2(0x01, args);
-        
+
         op::write_argument(operand1, &mut self.data.bytes);
         op::write_argument(operand2, &mut self.data.bytes);
 
@@ -1795,7 +2121,7 @@ impl Zfile {
         self.add_jump(jump_to_label.to_string(), JumpType::Branch);
     }
 
-    /// jumps to a label if the value of operand1 is not equal to operand2
+    /// Jumps to a label if the value of operand1 is not equal to operand2.
     pub fn op_jne(&mut self, operand1: &Operand, operand2: &Operand, jump_to_label: &str) {
         self.emit(vec![
             ZOP::JL{operand1: operand1.clone(), operand2: operand2.clone(), jump_to_label: jump_to_label.to_string()},
@@ -1803,7 +2129,7 @@ impl Zfile {
             ]);
     }
 
-    /// jumps to a label if the value of operand1 is lower than operand2 (compared as i16)
+    /// Jumps to a label if the value of operand1 is lower than operand2 (compared as i16).
     pub fn op_jl(&mut self, operand1: &Operand, operand2: &Operand, jump_to_label: &str) {
 
         let args: Vec<ArgType> = vec![op::arg_type(operand1), op::arg_type(operand2)];
@@ -1816,7 +2142,7 @@ impl Zfile {
         self.add_jump(jump_to_label.to_string(), JumpType::Branch);
     }
 
-    /// jumps to a label if the value of operand1 is lower than or equal operand2 (compared as i16)
+    /// Jumps to a label if the value of operand1 is lower than or equal operand2 (compared as i16).
     pub fn op_jle(&mut self, operand1: &Operand, operand2: &Operand, jump_to_label: &str) {
         self.emit(vec![
             ZOP::JL{operand1: operand1.clone(), operand2: operand2.clone(), jump_to_label: jump_to_label.to_string()},
@@ -1824,7 +2150,7 @@ impl Zfile {
             ]);
     }
 
-    /// jumps to a label if the value of operand1 is greater than or equal operand2 (compared as i16)
+    /// Jumps to a label if the value of operand1 is greater than or equal operand2 (compared as i16).
     pub fn op_jge(&mut self, operand1: &Operand, operand2: &Operand, jump_to_label: &str) {
         self.emit(vec![
             ZOP::JG{operand1: operand1.clone(), operand2: operand2.clone(), jump_to_label: jump_to_label.to_string()},
@@ -1832,7 +2158,7 @@ impl Zfile {
             ]);
     }
 
-    /// jumps to a label if the value of operand1 is greater than operand2
+    /// Jumps to a label if the value of operand1 is greater than operand2.
     pub fn op_jg(&mut self, operand1: &Operand, operand2: &Operand, jump_to_label: &str) {
 
         let args: Vec<ArgType> = vec![op::arg_type(operand1), op::arg_type(operand2)];
@@ -1845,8 +2171,9 @@ impl Zfile {
         self.add_jump(jump_to_label.to_string(), JumpType::Branch);
     }
 
-    /// reads keys from the keyboard and saves the asci-value in local_var_id
-    /// read_char is VAROP
+    /// Reads keys from the keyboard and saves the asci-value in local_var_id.
+    ///
+    /// read_char is VAROP.
     pub fn op_read_char_timer(&mut self, local_var_id: u8, timer: u8, routine: &str) {
         let args: Vec<ArgType> = vec![ArgType::SmallConst, ArgType::SmallConst, ArgType::LargeConst, ArgType::Nothing];
         self.op_var(0x16, args);
@@ -1865,7 +2192,7 @@ impl Zfile {
     }
 
 
-    /// prints an unicode char to the current stream
+    /// Prints a unicode char to the current stream.
     pub fn op_print_unicode_char(&mut self, character: u16) {
 
         self.op_1(0xbe, ArgType::SmallConst);
@@ -1876,7 +2203,7 @@ impl Zfile {
         self.data.append_u16(character);
     }
 
-    /// prints variable with unicode char to the current stream
+    /// Prints variable with unicode char to the current stream.
     pub fn op_print_unicode_var(&mut self, variable: &Variable) {
 
         self.op_1(0xbe, ArgType::SmallConst);
@@ -1887,11 +2214,12 @@ impl Zfile {
         self.data.append_byte(variable.id);
     }
 
+    /// Prints a unicode string to the current output stream.
     pub fn op_print_unicode_str(&mut self, address: &Operand) {
         self.emit(vec![ZOP::Call2NWithArg{jump_to_label: "print_unicode".to_string(), arg: address.clone()}]);
     }
 
-    // print zscii character
+    /// Prints a ZSCII character.
     pub fn op_print_char(&mut self, variable: &Variable) {
         let args: Vec<ArgType> = vec![ArgType::Variable, ArgType::Nothing, ArgType::Nothing, ArgType::Nothing];
         self.op_var(0x5, args);
@@ -1901,307 +2229,314 @@ impl Zfile {
     // ================================
     // general ops
 
-    /// op-codes with 0 operators
+    /// Binary representation for op-codes with 0 operators.
     fn op_0(&mut self, value: u8) {
         self.data.append_bytes(&op::op_0(value));
     }
-    
-    /// op-codes with 1 operator
+
+    /// Binary representation for op-codes with 1 operator.
     fn op_1(&mut self, value: u8, arg_type: ArgType) {
         self.data.append_bytes(&op::op_1(value, arg_type));
     }
 
-    /// op-codes with 1 operator
+    /// Binary representation for op-codes with 1 operator.
     fn op_2(&mut self, value: u8, arg_types: Vec<ArgType>) {
         self.data.append_bytes(&op::op_2(value, arg_types));
     }
 
+    /// Binary representation for a variable.
     fn op_var(&mut self, value: u8, arg_types: Vec<ArgType>) {
         self.data.append_bytes(&op::op_var(value, arg_types));
     }
 }
 
-/// align the address to the given align-parameter
+/// Align the address to the given align-parameter.
 fn align_address(address: u32, align: u32) -> u32 {
     address + (align - (address % align)) % align
 }
 
-/// returns the routine address, should be adress % 8 == 0 (becouse its an packed address)
+/// Returns the routine address, should be `adress % 8 == 0` (because its a packed address).
 fn routine_address(address: u32) -> u32 {
     return align_address(address, 8);
 }
 
 // ================================
-// test functions
+// Test functions
 
-#[test]
-fn test_align_address() {
-    assert_eq!(align_address(0xf, 8), 0x10);
-    assert_eq!(align_address(0x7, 8), 0x8);
-    assert_eq!(align_address(0x8, 8), 0x8);
-    assert_eq!(align_address(0x9, 8), 0x10);
-    assert_eq!(align_address(0x10, 16), 0x10);
-    assert_eq!(align_address(0x1f, 32), 0x20);
-    assert_eq!(align_address(0x20, 32), 0x20);
-    assert_eq!(align_address(0x21, 32), 0x40);
-}
+#[cfg(test)]
+mod tests {
+    use super::{routine_address, align_address};
+    use super::*;
 
-#[test]
-fn test_routine_address() {
-    assert_eq!(routine_address(8), 8);
-    assert_eq!(routine_address(9), 16);
-    assert_eq!(routine_address(10), 16);
-    assert_eq!(routine_address(15), 16);
-    assert_eq!(routine_address(17), 24);
-}
+    #[test]
+    fn test_align_address() {
+        assert_eq!(align_address(0xf, 8), 0x10);
+        assert_eq!(align_address(0x7, 8), 0x8);
+        assert_eq!(align_address(0x8, 8), 0x8);
+        assert_eq!(align_address(0x9, 8), 0x10);
+        assert_eq!(align_address(0x10, 16), 0x10);
+        assert_eq!(align_address(0x1f, 32), 0x20);
+        assert_eq!(align_address(0x20, 32), 0x20);
+        assert_eq!(align_address(0x21, 32), 0x40);
+    }
 
-#[test]
-fn test_zfile_write_jumps_length() {
-    let mut zfile: Zfile = Zfile::new();
-    zfile.write_jumps();
-    assert_eq!(zfile.data.len(), 0);
-    
-    zfile.op_jump("labename");
-    assert_eq!(zfile.data.len(), 3);
+    #[test]
+    fn test_routine_address() {
+        assert_eq!(routine_address(8), 8);
+        assert_eq!(routine_address(9), 16);
+        assert_eq!(routine_address(10), 16);
+        assert_eq!(routine_address(15), 16);
+        assert_eq!(routine_address(17), 24);
+    }
 
-    zfile.label("labename");
-    zfile.write_jumps();
-    assert_eq!(zfile.data.len(), 3);
-}
+    #[test]
+    fn test_zfile_write_jumps_length() {
+        let mut zfile: Zfile = Zfile::new();
+        zfile.write_jumps();
+        assert_eq!(zfile.data.len(), 0);
 
-#[test]
-fn test_zfile_general_op_length() {
-    let mut zfile: Zfile = Zfile::new();
-    zfile.op_0(0x00);
-    assert_eq!(zfile.data.len(), 1);
-    zfile.op_1(0x00, ArgType::SmallConst);
-    assert_eq!(zfile.data.len(), 2);
-    zfile.op_1(0x00, ArgType::Reference);
-    assert_eq!(zfile.data.len(), 3);
-    let args: Vec<ArgType> = vec![ArgType::SmallConst, ArgType::Nothing, ArgType::Nothing, ArgType::Nothing];
-    zfile.data.append_bytes(&op::op_var(0x00, args));
-    assert_eq!(zfile.data.len(), 5);
-}
+        zfile.op_jump("labelname");
+        assert_eq!(zfile.data.len(), 3);
 
-#[test]
-fn test_zfile_label_and_jump_loop() {
-    let mut zfile: Zfile = Zfile::new();
-    zfile.start();
-    let (labels, jumps1, bytes1) =  zfile.write_zop(&ZOP::Label{name: "Start".to_string()}, true);
-    assert_eq!(jumps1.len() + bytes1.len(), 0);
-    assert_eq!(labels.len(), 1);
-    let (labels2, jumps, bytes) =  zfile.write_zop(&ZOP::Jump{jump_to_label: "Start".to_string()}, true);
-    assert_eq!(labels2.len(), 0);
-    assert_eq!(jumps.len(), 1);
-    assert_eq!(bytes.len(), 3);
-    let pos = zfile.data.len() - bytes.len();  // start position of written bytes
-    zfile.end();
-    // in this example we have the following data:
-    //[Zlabel { to_addr: 2055, name: "Start" }] [] []
-    //[] [Zjump { from_addr: 2056, name: "Start", jump_type: Jump }] [140, 255, 255]
-    // 0xffff is -1 as i16 because we have a relative jump
-    assert_eq!(zfile.data.bytes[pos], bytes[0]);  // jump op
-    let rel_addr: i16 = (zfile.data.bytes[pos+1] as u16 * 256 + zfile.data.bytes[pos+2] as u16) as i16;
-    assert_eq!((labels[0].to_addr as i32 - jumps[0].from_addr as i32) as i16, rel_addr);  // specified as in write_jumps()
-    assert_eq!(-1 as i16, rel_addr);  // this is the expected result, jump one address back
-}
+        zfile.label("labelname");
+        zfile.write_jumps();
+        assert_eq!(zfile.data.len(), 3);
+    }
 
-#[test]
-fn test_op_inc() {
-    assert_eq!(op::op_inc(1),vec![0x95,0x01]);
-}
+    #[test]
+    fn test_zfile_general_op_length() {
+        let mut zfile: Zfile = Zfile::new();
+        zfile.op_0(0x00);
+        assert_eq!(zfile.data.len(), 1);
+        zfile.op_1(0x00, ArgType::SmallConst);
+        assert_eq!(zfile.data.len(), 2);
+        zfile.op_1(0x00, ArgType::Reference);
+        assert_eq!(zfile.data.len(), 3);
+        let args: Vec<ArgType> = vec![ArgType::SmallConst, ArgType::Nothing, ArgType::Nothing, ArgType::Nothing];
+        zfile.data.append_bytes(&op::op_var(0x00, args));
+        assert_eq!(zfile.data.len(), 5);
+    }
 
-#[test]
-fn test_op_dec() {
-    assert_eq!(op::op_dec(1),vec![0x96,0x01]);
-}
+    #[test]
+    fn test_zfile_label_and_jump_loop() {
+        let mut zfile: Zfile = Zfile::new();
+        zfile.start();
+        let (labels, jumps1, bytes1) =  zfile.write_zop(&ZOP::Label{name: "Start".to_string()}, true);
+        assert_eq!(jumps1.len() + bytes1.len(), 0);
+        assert_eq!(labels.len(), 1);
+        let (labels2, jumps, bytes) =  zfile.write_zop(&ZOP::Jump{jump_to_label: "Start".to_string()}, true);
+        assert_eq!(labels2.len(), 0);
+        assert_eq!(jumps.len(), 1);
+        assert_eq!(bytes.len(), 3);
+        let pos = zfile.data.len() - bytes.len();  // start position of written bytes
+        zfile.end();
+        // in this example we have the following data:
+        //[Zlabel { to_addr: 2055, name: "Start" }] [] []
+        //[] [Zjump { from_addr: 2056, name: "Start", jump_type: Jump }] [140, 255, 255]
+        // 0xffff is -1 as i16 because we have a relative jump
+        assert_eq!(zfile.data.bytes[pos], bytes[0]);  // jump op
+        let rel_addr: i16 = (zfile.data.bytes[pos+1] as u16 * 256 + zfile.data.bytes[pos+2] as u16) as i16;
+        assert_eq!((labels[0].to_addr as i32 - jumps[0].from_addr as i32) as i16, rel_addr);  // specified as in write_jumps()
+        assert_eq!(-1 as i16, rel_addr);  // this is the expected result, jump one address back
+    }
 
-#[test]
-fn test_op_newline() {
-    assert_eq!(op::op_newline(),vec![0xbb]);
-}
+    #[test]
+    fn test_op_inc() {
+        assert_eq!(op::op_inc(1),vec![0x95,0x01]);
+    }
 
-#[test]
-fn test_op_quit() {
-    assert_eq!(op::quit(),vec![0xba]);
-}
+    #[test]
+    fn test_op_dec() {
+        assert_eq!(op::op_dec(1),vec![0x96,0x01]);
+    }
 
-#[test]
-fn test_op_add() {
-    assert_eq!(op::op_add(&Operand::new_var(1),&Operand::new_var(2),&Variable::new(3)),vec![0x74,0x01,0x02,0x03]);
-}
-#[test]
-fn test_op_sub() {
-    assert_eq!(op::op_sub(&Operand::new_var(1),&Operand::new_var(2),&Variable::new(3)),vec![0x75,0x01,0x02,0x03]);
-}
+    #[test]
+    fn test_op_newline() {
+        assert_eq!(op::op_newline(),vec![0xbb]);
+    }
 
-#[test]
-fn test_op_mul() {
-    assert_eq!(op::op_mul(&Operand::new_var(1),&Operand::new_var(2),&Variable::new(3)),vec![0x76,0x01,0x02,0x03]);
-}
+    #[test]
+    fn test_op_quit() {
+        assert_eq!(op::quit(),vec![0xba]);
+    }
 
-#[test]
-fn test_op_div() {
-    assert_eq!(op::op_div(&Operand::new_var(1),&Operand::new_var(2),&Variable::new(3)),vec![0x77,0x01,0x02,0x03]);
-}
+    #[test]
+    fn test_op_add() {
+        assert_eq!(op::op_add(&Operand::new_var(1),&Operand::new_var(2),&Variable::new(3)),vec![0x74,0x01,0x02,0x03]);
+    }
+    #[test]
+    fn test_op_sub() {
+        assert_eq!(op::op_sub(&Operand::new_var(1),&Operand::new_var(2),&Variable::new(3)),vec![0x75,0x01,0x02,0x03]);
+    }
 
-#[test]
-fn test_op_mod() {
-    assert_eq!(op::op_mod(&Operand::new_var(1),&Operand::new_var(2),&Variable::new(3)),vec![0x78,0x01,0x02,0x03]);
-}
+    #[test]
+    fn test_op_mul() {
+        assert_eq!(op::op_mul(&Operand::new_var(1),&Operand::new_var(2),&Variable::new(3)),vec![0x76,0x01,0x02,0x03]);
+    }
 
-#[test]
-fn test_op_and() {
-    assert_eq!(op::op_and(&Operand::new_var(1),&Operand::new_var(2),&Variable::new(3)),vec![0x69,0x01,0x02,0x03]);
-}
+    #[test]
+    fn test_op_div() {
+        assert_eq!(op::op_div(&Operand::new_var(1),&Operand::new_var(2),&Variable::new(3)),vec![0x77,0x01,0x02,0x03]);
+    }
 
-#[test]
-fn test_op_or() {
-    assert_eq!(op::op_or(&Operand::new_var(1),&Operand::new_var(2),&Variable::new(3)),vec![0x68,0x01,0x02,0x03]);
-}
+    #[test]
+    fn test_op_mod() {
+        assert_eq!(op::op_mod(&Operand::new_var(1),&Operand::new_var(2),&Variable::new(3)),vec![0x78,0x01,0x02,0x03]);
+    }
 
-#[test]
-fn test_op_set_color() {
-    assert_eq!(op::op_set_color(0x15,0x20),vec![0x1B,0x15,0x20]);
-}
+    #[test]
+    fn test_op_and() {
+        assert_eq!(op::op_and(&Operand::new_var(1),&Operand::new_var(2),&Variable::new(3)),vec![0x69,0x01,0x02,0x03]);
+    }
 
-#[test]
-fn test_op_set_color_var() {
-    assert_eq!(op::op_set_color_var(0x01,0x02),vec![0x7B,0x01,0x02]);
-}
+    #[test]
+    fn test_op_or() {
+        assert_eq!(op::op_or(&Operand::new_var(1),&Operand::new_var(2),&Variable::new(3)),vec![0x68,0x01,0x02,0x03]);
+    }
 
-#[test]
-fn test_op_push_u16() {
-    assert_eq!(op::op_push_u16(0x0101),vec![0xE8,0x3F,0x01,0x01]);
-}
+    #[test]
+    fn test_op_set_color() {
+        assert_eq!(op::op_set_color(0x15,0x20),vec![0x1B,0x15,0x20]);
+    }
 
-#[test]
-fn test_op_pull() {
-    assert_eq!(op::op_pull(0x01),vec![0xE9,0x7F,0x01]);
-}
+    #[test]
+    fn test_op_set_color_var() {
+        assert_eq!(op::op_set_color_var(0x01,0x02),vec![0x7B,0x01,0x02]);
+    }
 
-#[test]
-fn test_op_random() {
-    assert_eq!(op::op_random(&Operand::new_var(10),&Variable::new(3)),vec![0xE7,0xBF,0x0a,0x03]);
-}
+    #[test]
+    fn test_op_push_u16() {
+        assert_eq!(op::op_push_u16(0x0101),vec![0xE8,0x3F,0x01,0x01]);
+    }
 
-#[test]
-fn test_op_print_num_var() {
-    assert_eq!(op::op_print_num_var(&Variable::new(3)),vec![0xE6,0xBF,0x03]);
-}
+    #[test]
+    fn test_op_pull() {
+        assert_eq!(op::op_pull(0x01),vec![0xE9,0x7F,0x01]);
+    }
 
-#[test]
-fn test_op_set_text_style() {
-    assert_eq!(op::op_set_text_style(true,true,true,true),vec![0xF1,0x7F,0x0F]);
-    assert_eq!(op::op_set_text_style(true,false,false,false),vec![0xF1,0x7F,0x02]);
-    assert_eq!(op::op_set_text_style(false,true,false,false),vec![0xF1,0x7F,0x01]);
-    assert_eq!(op::op_set_text_style(false,false,true,false),vec![0xF1,0x7F,0x08]);
-    assert_eq!(op::op_set_text_style(false,false,false,true),vec![0xF1,0x7F,0x04]);
-    assert_eq!(op::op_set_text_style(false,false,false,false),vec![0xF1,0x7F,0x00]);
-}
+    #[test]
+    fn test_op_random() {
+        assert_eq!(op::op_random(&Operand::new_var(10),&Variable::new(3)),vec![0xE7,0xBF,0x0a,0x03]);
+    }
 
-#[test]
-fn test_op_read_char() {
-    assert_eq!(op::op_read_char(0x01),vec![0xF6,0x7F,0x01,0x01]);
-}
+    #[test]
+    fn test_op_print_num_var() {
+        assert_eq!(op::op_print_num_var(&Variable::new(3)),vec![0xE6,0xBF,0x03]);
+    }
 
-#[test]
-fn test_op_loadw() {
-    assert_eq!(op::op_loadw(&Operand::new_var(1),&Variable::new(2),&Variable::new(3)),vec![0x6F,0x01,0x02,0x03]);
-}
+    #[test]
+    fn test_op_set_text_style() {
+        assert_eq!(op::op_set_text_style(true,true,true,true),vec![0xF1,0x7F,0x0F]);
+        assert_eq!(op::op_set_text_style(true,false,false,false),vec![0xF1,0x7F,0x02]);
+        assert_eq!(op::op_set_text_style(false,true,false,false),vec![0xF1,0x7F,0x01]);
+        assert_eq!(op::op_set_text_style(false,false,true,false),vec![0xF1,0x7F,0x08]);
+        assert_eq!(op::op_set_text_style(false,false,false,true),vec![0xF1,0x7F,0x04]);
+        assert_eq!(op::op_set_text_style(false,false,false,false),vec![0xF1,0x7F,0x00]);
+    }
 
-#[test]
-fn test_op_storew() {
-    assert_eq!(op::op_storew(&Operand::new_var(1),&Variable::new(2),&Variable::new(3)),vec![0xE1,0xAB,0x01,0x02,0x03]);
-}
+    #[test]
+    fn test_op_read_char() {
+        assert_eq!(op::op_read_char(0x01),vec![0xF6,0x7F,0x01,0x01]);
+    }
 
-#[test]
-fn test_op_erase_window() {
-    assert_eq!(op::op_erase_window(0x01),vec![0xED,0x3F,0x00,0x01]);
-}
+    #[test]
+    fn test_op_loadw() {
+        assert_eq!(op::op_loadw(&Operand::new_var(1),&Variable::new(2),&Variable::new(3)),vec![0x6F,0x01,0x02,0x03]);
+    }
 
-#[test]
-fn test_op_call_1n_var() {
-    assert_eq!(op::op_call_1n_var(0x01),vec![0xAF,0x01]);
-}
+    #[test]
+    fn test_op_storew() {
+        assert_eq!(op::op_storew(&Operand::new_var(1),&Variable::new(2),&Variable::new(3)),vec![0xE1,0xAB,0x01,0x02,0x03]);
+    }
 
-#[test]
-fn test_op_print_paddr() {
-    assert_eq!(op::op_print_paddr(&Operand::new_var(10)),vec![0xAD,0x0a]);
-}
+    #[test]
+    fn test_op_erase_window() {
+        assert_eq!(op::op_erase_window(0x01),vec![0xED,0x3F,0x00,0x01]);
+    }
 
-#[test]
-fn test_op_print_addr() {
-    assert_eq!(op::op_print_addr(&Operand::new_var(10)),vec![0xA7,0x0a]);
-}
+    #[test]
+    fn test_op_call_1n_var() {
+        assert_eq!(op::op_call_1n_var(0x01),vec![0xAF,0x01]);
+    }
 
-#[test]
-fn test_op_ret() {
-    assert_eq!(op::op_ret(&Operand::new_large_const(0x0101 as i16)),vec![0x8B,0x01,0x01]);
-}
+    #[test]
+    fn test_op_print_paddr() {
+        assert_eq!(op::op_print_paddr(&Operand::new_var(10)),vec![0xAD,0x0a]);
+    }
 
-#[test]
-fn test_op_store_var() {
-    assert_eq!(op::op_store_var(&Variable::new(2),&Operand::new_var(10)),vec![0x2d,0x02,0x0a]);
-}
+    #[test]
+    fn test_op_print_addr() {
+        assert_eq!(op::op_print_addr(&Operand::new_var(10)),vec![0xA7,0x0a]);
+    }
 
-#[test]
-fn test_encode_variable_arguments() {
-    assert_eq!(op::encode_variable_arguments(vec![ArgType::Variable]),0x80);
-    assert_eq!(op::encode_variable_arguments(vec![ArgType::SmallConst]),0x40);
-    assert_eq!(op::encode_variable_arguments(vec![ArgType::LargeConst]),0x00);
-    assert_eq!(op::encode_variable_arguments(vec![ArgType::Nothing]),0xc0);
-    assert_eq!(op::encode_variable_arguments(vec![ArgType::Reference]),0x40);
-}
+    #[test]
+    fn test_op_ret() {
+        assert_eq!(op::op_ret(&Operand::new_large_const(0x0101 as i16)),vec![0x8B,0x01,0x01]);
+    }
 
-#[test]
-fn test_op_2() {
-    assert_eq!(op::op_2(0x02,vec![ArgType::Variable]),vec![0x42]);
-    assert_eq!(op::op_2(0x02,vec![ArgType::LargeConst]),vec![0xc2,0x0f]);
-    assert_eq!(op::op_2(0x02,vec![ArgType::SmallConst]),vec![0x02]);
-    assert_eq!(op::op_2(0x02,vec![ArgType::Reference]),vec![0x02]);
-}
+    #[test]
+    fn test_op_store_var() {
+        assert_eq!(op::op_store_var(&Variable::new(2),&Operand::new_var(10)),vec![0x2d,0x02,0x0a]);
+    }
 
-#[test]
-fn test_op_1() {
-    assert_eq!(op::op_1(0x02,ArgType::Variable),vec![0xa2]);
-    assert_eq!(op::op_1(0x02,ArgType::LargeConst),vec![0x82]);
-    assert_eq!(op::op_1(0x02,ArgType::SmallConst),vec![0x92]);
-    assert_eq!(op::op_1(0x02,ArgType::Reference),vec![0x92]);
-}
+    #[test]
+    fn test_encode_variable_arguments() {
+        assert_eq!(op::encode_variable_arguments(vec![ArgType::Variable]),0x80);
+        assert_eq!(op::encode_variable_arguments(vec![ArgType::SmallConst]),0x40);
+        assert_eq!(op::encode_variable_arguments(vec![ArgType::LargeConst]),0x00);
+        assert_eq!(op::encode_variable_arguments(vec![ArgType::Nothing]),0xc0);
+        assert_eq!(op::encode_variable_arguments(vec![ArgType::Reference]),0x40);
+    }
 
-#[test]
-fn test_op_var() {
-    assert_eq!(op::op_var(0x02,vec![ArgType::Variable]),vec![0xe2,0x80]);
-    assert_eq!(op::op_var(0x02,vec![ArgType::LargeConst]),vec![0xe2,0x00]);
-    assert_eq!(op::op_var(0x02,vec![ArgType::SmallConst]),vec![0xe2,0x40]);
-    assert_eq!(op::op_var(0x02,vec![ArgType::Reference]),vec![0xe2,0x40]);
-}
+    #[test]
+    fn test_op_2() {
+        assert_eq!(op::op_2(0x02,vec![ArgType::Variable]),vec![0x42]);
+        assert_eq!(op::op_2(0x02,vec![ArgType::LargeConst]),vec![0xc2,0x0f]);
+        assert_eq!(op::op_2(0x02,vec![ArgType::SmallConst]),vec![0x02]);
+        assert_eq!(op::op_2(0x02,vec![ArgType::Reference]),vec![0x02]);
+    }
 
-#[test]
-fn test_op_0() {
-    assert_eq!(op::op_0(0x02),vec![0xb2]);
-    assert_eq!(op::op_0(0x04),vec![0xb4]);
-    assert_eq!(op::op_0(0x08),vec![0xb8]);
-    assert_eq!(op::op_0(0x03),vec![0xb3]);
-}
+    #[test]
+    fn test_op_1() {
+        assert_eq!(op::op_1(0x02,ArgType::Variable),vec![0xa2]);
+        assert_eq!(op::op_1(0x02,ArgType::LargeConst),vec![0x82]);
+        assert_eq!(op::op_1(0x02,ArgType::SmallConst),vec![0x92]);
+        assert_eq!(op::op_1(0x02,ArgType::Reference),vec![0x92]);
+    }
 
-#[test]
-fn test_op_not() {
-        assert_eq!(op::op_not(&Operand::new_var(1),&Variable::new(2)),vec![0xf8,0xbf,0x01,0x02]);
-}
+    #[test]
+    fn test_op_var() {
+        assert_eq!(op::op_var(0x02,vec![ArgType::Variable]),vec![0xe2,0x80]);
+        assert_eq!(op::op_var(0x02,vec![ArgType::LargeConst]),vec![0xe2,0x00]);
+        assert_eq!(op::op_var(0x02,vec![ArgType::SmallConst]),vec![0xe2,0x40]);
+        assert_eq!(op::op_var(0x02,vec![ArgType::Reference]),vec![0xe2,0x40]);
+    }
 
-#[test]
-fn test_op_get_cursor() {
-        assert_eq!(op::op_get_cursor(&Operand::new_var(1)),vec![0xf0,0xbf,0x01]);
-}
+    #[test]
+    fn test_op_0() {
+        assert_eq!(op::op_0(0x02),vec![0xb2]);
+        assert_eq!(op::op_0(0x04),vec![0xb4]);
+        assert_eq!(op::op_0(0x08),vec![0xb8]);
+        assert_eq!(op::op_0(0x03),vec![0xb3]);
+    }
 
-#[test]
-fn test_op_set_cursor_operand() {
-        assert_eq!(op::op_set_cursor_operand(&Operand::new_var(1), &Operand::new_var(2)),vec![0xef,0xaf,0x01,0x02]);
-}
+    #[test]
+    fn test_op_not() {
+            assert_eq!(op::op_not(&Operand::new_var(1),&Variable::new(2)),vec![0xf8,0xbf,0x01,0x02]);
+    }
 
-#[test]
-fn test_op_erase_line() {
-        assert_eq!(op::op_erase_line(),vec![0xee,0x7f,0x01]);
+    #[test]
+    fn test_op_get_cursor() {
+            assert_eq!(op::op_get_cursor(&Operand::new_var(1)),vec![0xf0,0xbf,0x01]);
+    }
+
+    #[test]
+    fn test_op_set_cursor_operand() {
+            assert_eq!(op::op_set_cursor_operand(&Operand::new_var(1), &Operand::new_var(2)),vec![0xef,0xaf,0x01,0x02]);
+    }
+
+    #[test]
+    fn test_op_erase_line() {
+            assert_eq!(op::op_erase_line(),vec![0xee,0x7f,0x01]);
+    }
 }

@@ -1,5 +1,11 @@
-//! The `zcode` module contains a lot of useful functionality
-//! to deal with all the zcode related stuff
+//! The `zcode` module contains all functionality to deal with the Z-Code related stuff.
+//!
+//! See the [module level documentation](../index.html) for an example to use code generation.
+//!
+//! It is split into multiple parts: The [zfile](./zfile/index.html) module contains all high-level
+//! features to generate Z-Code files. [zbytes](./zbytes/index.html) and [op](./op/index.html)
+//! contain the code that deals with low-level encodings
+//! and op-codes. [ee](./ee/index.html) contains an easter egg.
 
 pub mod op;
 pub mod zbytes;
@@ -14,8 +20,8 @@ use std::io::Write;
 use self::zfile::{Zfile, Operand, Variable, ZOP, Type};
 
 
-/// an example to show the current status of the z-code implementation
-/// zcode playground function
+/// An example to show the current status of the z-code implementation,
+/// zcode playground function.
 pub fn temp_create_zcode_example<W: Write>(output: &mut W) {
 
     let mut zfile: Zfile = zfile::Zfile::new();

@@ -16,11 +16,11 @@
 //! system. You can download the Rust binarys on their
 //! [website](http://www.rust-lang.org/install.html), by using your system's package manager or by
 //! running this in your shell:
-//! 
+//!
 //! ```sh
 //! $ curl -sSf https://static.rust-lang.org/rustup.sh | sh
 //! ```
-//! 
+//!
 //! Cargo should be installed alongside current Rust binaries.
 //!
 //! The library uses a [fork of rustlex](https://github.com/Drakulix/rustlex)
@@ -91,6 +91,9 @@
 //! Zwreec uses the logging facade provided by
 //! [log](../log/index.html). The reference binary implementation of Zwreec also includes an
 //! implementation of the `Log` trait.
+
+// Warn if documentation is missing
+#![warn(missing_docs)]
 
 extern crate rustlex_codegen as rustlex;
 #[macro_use] extern crate log;

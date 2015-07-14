@@ -119,7 +119,7 @@ rustlex! TweeLexer {
     // when matched by a certain regex. If needed, matched regex' switch the state
     // of the lexer. Collections are used to bundle related regex.
 
-    // Collection of regex, that manage most of passage content.
+    // Collection of regexes that manage most of passage content.
     I_PASSAGE_CONTENT {
         LINK_SIMPLE => |lexer:&mut TweeLexer<R>| {
             lexer.in_link = true;
@@ -208,7 +208,7 @@ rustlex! TweeLexer {
                     => |_    :&mut TweeLexer<R>| -> Option<Token> { None }
     }
 
-    // Collection of regex, that ignore newlines and whitespace.
+    // Collection of regexes that ignore newlines and whitespace.
     I_IGNORE_NEWLINE {
         NEWLINE     => |_    :&mut TweeLexer<R>| -> Option<Token> { None }
     }
@@ -216,7 +216,7 @@ rustlex! TweeLexer {
         WHITESPACE  => |_    :&mut TweeLexer<R>| -> Option<Token> { None }
     }
 
-    // Collection of regex, that manage expressions. Functions are part of expressions.
+    // Collection of regexes that manage expressions. Functions are part of expressions.
     I_OPERANDS {
         VARIABLE    => |lexer:&mut TweeLexer<R>| Some(TokVariable{location: lexer.yylloc(), name: lexer.yystr()})
         ARRAY_ACCESS

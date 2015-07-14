@@ -1,46 +1,67 @@
 //! The `evaluate_expressions` module evaluates expressions from
-//! the AST and compiles them into zCode.
+//! the AST and compiles them into Z-Code.
 //!
 //! This module takes the root node of an expression and traverses
 //! the contained subtree. It analyses if a sub-expression only
 //! contains constants and if so, evaluates them while compiling.
-//! Otherwise it translates the expressions into zCode. The module uses
-//! a finite amount of local variables in zCode to evaluate the
+//! Otherwise it translates the expressions into Z-Code. The module uses
+//! a finite amount of local variables in Z-Code to evaluate the
 //! expressions. Hence only expressions with limited size are
 //! supported.
 
 use backend::zcode::zfile::{ZOP, Operand, Variable, Constant, LargeConstant, Zfile, Type};
 use backend::codegen;
-use backend::codegen::{CodeGenManager};
+use backend::codegen::CodeGenManager;
 use frontend::ast::{ASTNode};
 use frontend::lexer::Token;
 use frontend::lexer::Token::{TokNumOp, TokCompOp, TokLogOp, TokInt, TokBoolean, TokVariable, TokArrayLength, TokArrayAccess, TokFunction, TokString, TokUnaryMinus};
 #[allow(unused_imports)] use config::Config;
 
+/// All the possible errors that can occur during parsing.
 #[derive(Debug)]
+#[allow(missing_docs)]
 pub enum EvaluateExpressionError {
+    /// Some unexpected Node in the AST
     InvalidAST,
+
+    /// A numerical operator always needs two arguments
     NumericOperatorNeedsTwoArguments { op_name: String, location: (u64, u64) },
+
+    /// Unsupported Token
     UnhandledToken { token: Token },
+
+    /// Unsupported operator
     UnsupportedOperator { op_name: String, location: (u64, u64) },
+
+    /// Unsupported function
     UnsupportedFunction { name: String, location: (u64, u64) },
+
+    /// The count of the function args is wrong / unexpected
     UnsupportedFunctionArgsLen { name: String, location: (u64, u64), expected: u64 },
+
+    /// The type of the function arg is wrong / unexpected
     UnsupportedFunctionArgType { name: String, index: u64, location: (u64, u64) },
+
+    /// Expression is too complex
     NoTempIdLeftOnStack,
 }
 
 /// This functions evaluates an expression from the AST and returns an `Operand` containing the result.
+///
 /// # Arguments
 /// `node` is the root node of the expression. Mostly the child of `TokExpression` is what you want to give here.
-/// `code` is the vector where the zCode shall be written to.
+///
+/// `code` is the vector where the Z-Code shall be written to.
+///
 /// `manager` is the manager from `codegen`. It is required for the symbol table and label ids.
+///
 /// `out` is the `ZFile` compiling to. It is required for storing strings.
 pub fn evaluate_expression(node: ASTNode, code: &mut Vec<ZOP>, mut manager: &mut CodeGenManager, mut out: &mut Zfile) -> Operand {
     let mut temp_ids = CodeGenManager::new_temp_var_vec();
     evaluate_expression_internal(node, code, &mut temp_ids, manager, &mut out)
 }
 
-/// Evaluates an expression node to zCode.
+/// Evaluates an expression node to Z-code.
 fn evaluate_expression_internal(node: ASTNode, code: &mut Vec<ZOP>,
         temp_ids: &mut Vec<u8>, mut manager: &mut CodeGenManager, mut out: &mut Zfile) -> Operand {
     let n = node.clone().as_default();
@@ -293,6 +314,7 @@ fn evaluate_expression_internal(node: ASTNode, code: &mut Vec<ZOP>,
     }
 }
 
+/// Evaluates a numerical operator to Z-Code.
 fn eval_num_op(eval0: &Operand, eval1: &Operand, op_name: &str, location: (u64, u64), code: &mut Vec<ZOP>, temp_ids: &mut Vec<u8>, manager: &CodeGenManager) -> Operand {
     if count_constants(eval0, eval1) == 2 {
         return direct_eval_num_op(eval0, eval1, op_name, location, manager);
@@ -337,8 +359,7 @@ fn eval_num_op(eval0: &Operand, eval1: &Operand, op_name: &str, location: (u64, 
     Operand::Var(save_var)
 }
 
-
-
+/// Directly evaluates constants.
 fn direct_eval_num_op(eval0: &Operand, eval1: &Operand, op_name: &str, location: (u64, u64), manager: &CodeGenManager) -> Operand {
     let mut out_large = false;
     let val0 = eval0.const_value();
@@ -374,7 +395,7 @@ fn direct_eval_num_op(eval0: &Operand, eval1: &Operand, op_name: &str, location:
     }
 }
 
-
+/// Evaluates comparison operators to Z-Code.
 fn eval_comp_op(eval0: &Operand, eval1: &Operand, op_name: &str, location: (u64, u64), code: &mut Vec<ZOP>,
         temp_ids: &mut Vec<u8>, mut manager: &mut CodeGenManager) -> Operand {
     if count_constants(eval0, eval1) == 2 {
@@ -389,8 +410,10 @@ fn eval_comp_op(eval0: &Operand, eval1: &Operand, op_name: &str, location: (u64,
     let label = format!("expr_{}", manager.ids_expr.start_next()); // label return
     let const_true = Operand::new_const(1);
     let const_false = Operand::new_const(0);
-    // test for type bool and string
-    // we only take the first operand's type for this. if it is not a string, but the second, then count both as integers anyway as it make now sense, but does not harm
+
+    // Test for type bool and string
+    // We only take the first operand's type for this. if it is not a string, but the second one is
+    // then count both as integers anyway. This make no sense, but does not harm
     match eval0 {
         &Operand::StringRef(_) => { code.push(ZOP::StoreVariable{variable: save_var.clone(), value: Operand::new_const(Type::String as u8)}); },
         &Operand::Var(ref var) => { code.push(ZOP::GetVarType{variable: var.clone(), result: save_var.clone()}); },
@@ -399,7 +422,8 @@ fn eval_comp_op(eval0: &Operand, eval1: &Operand, op_name: &str, location: (u64,
     };
     code.push(ZOP::JE{operand1: Operand::new_var(save_var.id), operand2: Operand::new_const(Type::String as u8), jump_to_label: label_is_string.to_string()});
     code.push(ZOP::JE{operand1: Operand::new_var(save_var.id), operand2: Operand::new_const(Type::Bool as u8), jump_to_label: label_is_bool.to_string()});
-    // compare as numbers
+
+    // Compare the operands as numbers
     match op_name {
         "is" | "==" | "eq" => {
             code.push(ZOP::StoreVariable{ variable: save_var.clone(), value: const_true.clone()});
@@ -439,7 +463,9 @@ fn eval_comp_op(eval0: &Operand, eval1: &Operand, op_name: &str, location: (u64,
     };
     code.push(ZOP::Jump{jump_to_label: label.to_string()});
     code.push(ZOP::Label {name: label_is_bool.to_string()});
-    // @TODO: compare as bool regarding that e.g. -31 should be seen as true
+
+    // Compare the operands as booleans
+    // @TODO: Compare bools regarding that e.g. -31 should be seen as true
     match op_name {
         "is" | "==" | "eq" => {
             code.push(ZOP::StoreVariable{ variable: save_var.clone(), value: const_true.clone()});
@@ -479,28 +505,34 @@ fn eval_comp_op(eval0: &Operand, eval1: &Operand, op_name: &str, location: (u64,
     };
     code.push(ZOP::Jump{jump_to_label: label.to_string()});
     code.push(ZOP::Label {name: label_is_string.to_string()});
-    // compare as strings
+
+    // Compare the operands as strings
     code.push(ZOP::CallVSA2{jump_to_label: "strcmp".to_string(), arg1: eval0.clone(), arg2: eval1.clone(), result: save_var.clone()},);
     match op_name {
-        "is" | "==" | "eq" => { // we only want true if the result is not 0
-            // so first we make 0 to ffff while -1 and 1 will lose their last bit. and then we AND the last bit
+        "is" | "==" | "eq" => {
+            // We only want true if the result is not 0
+            // So first we make 0 to ffff while -1 and 1 will lose their last bit. And then we AND the last bit
             code.push(ZOP::Not{operand: Operand::new_var(save_var.id), result: save_var.clone()});
             code.push(ZOP::And{operand1: Operand::new_var(save_var.id), operand2: Operand::new_large_const(1i16), save_variable: save_var.clone()});
         },
         "!=" | "neq" => {},  // we can leave the result as it is
-        "<" | "lt" =>  {  // we want only true if the result was -1,
-            // so for 0 and 1 we AND with every bit on except the last bit off which is then gone
+        "<" | "lt" =>  {
+            // We only want true if the result was -1,
+            // So for 0 and 1 we AND with every bit on except the last bit off which is then gone
             // and the result is 0. for -1 this does not make it 0 as there are more bits left
             code.push(ZOP::And{operand1: Operand::new_var(save_var.id), operand2: Operand::new_large_const(-2i16), save_variable: save_var.clone()});
         },
-        "<=" | "lte" => {  // we do not want true for 1, so we make 0 out of it by decreasing
+        "<=" | "lte" => {
+            // We do not want true for 1, so we make 0 out of it by decreasing
             code.push(ZOP::Dec{variable: save_var.id});
         },
-        ">=" | "gte" => {  // we do not want true for -1, so we make 0 out of it by increasing
+        ">=" | "gte" => {
+            // We do not want true for -1, so we make 0 out of it by increasing
             code.push(ZOP::Inc{variable: save_var.id});
         },
-        ">" | "gt" => { // we want only true if the result was 1. so we increase it to 2 and AND with 2,
-            // so only the second bit survives
+        ">" | "gt" => {
+            // We only want true if the result was 1 so we increase it to 2 and AND with 2,
+            // thus only the second bit survives
             code.push(ZOP::Inc{variable: save_var.id});
             code.push(ZOP::And{operand1: Operand::new_var(save_var.id), operand2: Operand::new_large_const(2), save_variable: save_var.clone()});
         },
@@ -542,7 +574,7 @@ fn direct_eval_comp_op(eval0: &Operand, eval1: &Operand, op_name: &str, location
     }
 }
 
-
+/// Evaluates both operands and applies an OR operation to them.
 fn eval_and_or(eval0: &Operand, eval1: &Operand, op_name: &str, code: &mut Vec<ZOP>,
         temp_ids: &mut Vec<u8>) -> Operand {
     if count_constants(&eval0, &eval1) == 2 {
@@ -567,7 +599,7 @@ fn eval_and_or(eval0: &Operand, eval1: &Operand, op_name: &str, code: &mut Vec<Z
     Operand::new_var_bool(save_var.id)
 }
 
-
+/// Evaluates the operand and applies a NOT operation.
 fn eval_not(eval: &Operand, code: &mut Vec<ZOP>,
         temp_ids: &mut Vec<u8>, mut manager: &mut CodeGenManager) -> Operand {
     if eval.is_const() {
@@ -589,7 +621,7 @@ fn eval_not(eval: &Operand, code: &mut Vec<ZOP>,
     Operand::Var(save_var)
 }
 
-
+/// Evaluates the operand and applies a unary minus operation.
 fn eval_unary_minus(eval: &Operand, code: &mut Vec<ZOP>, temp_ids: &mut Vec<u8>) -> Operand {
     if eval.is_const() {
         let large = match eval { &Operand::LargeConst(_) => { true }, _ => { false } };
@@ -716,7 +748,7 @@ fn count_constants(operand1: &Operand, operand2: &Operand) -> u8 {
     const_count
 }
 
-/// Converts a boolean string to an integer constant operand
+/// Converts a boolean string to an integer constant operand.
 fn boolstr_to_const(string: &str) -> Operand {
     match string {
         "true" => Operand::BoolConst(Constant { value: 1 }),
@@ -725,109 +757,121 @@ fn boolstr_to_const(string: &str) -> Operand {
 }
 
 
-#[test]
-fn test_and_or(){
-    let mut vec2: Vec<ZOP> = Vec::new();
-    let mut vec: Vec<u8> = Vec::new();
-    vec.push(1);
-    vec.push(2);
-    vec.push(3);
-    vec.push(10);
-    assert_eq!(eval_and_or(&Operand::new_large_const(0), &Operand::new_large_const(1), "or", &mut vec2, &mut vec).const_value(),1 as i16);
-    assert_eq!(eval_and_or(&Operand::new_large_const(0), &Operand::new_large_const(1), "and", &mut vec2, &mut vec).const_value(),0 as i16);
-    assert_eq!(eval_and_or(&Operand::new_large_const(0), &Operand::new_large_const(0), "or", &mut vec2, &mut vec).const_value(),0 as i16);
-    assert_eq!(eval_and_or(&Operand::new_large_const(1), &Operand::new_large_const(1), "and", &mut vec2, &mut vec).const_value(),1 as i16);
-}
+// ================================
+// Test functions
+#[cfg(test)]
+mod tests {
+    use backend::zcode::zfile::{Operand, Type, ZOP};
+    use backend::codegen::CodeGenManager;
+    use config::Config;
 
-#[test]
-fn test_eval_not(){
-    let cfg = Config::default_config();
-    let mut manager = CodeGenManager::new(&cfg);
-    let mut vec2: Vec<ZOP> = Vec::new();
-    let mut vec: Vec<u8> = Vec::new();
-    vec.push(1);
-    vec.push(2);
-    vec.push(3);
-    vec.push(10);
-    assert_eq!(eval_not(&Operand::new_large_const(10), &mut vec2, &mut vec, &mut manager).const_value(),0);
-    assert_eq!(eval_not(&Operand::new_const(0), &mut vec2, &mut vec, &mut manager).const_value(),1);
-}
+    use super::{boolstr_to_const, count_constants, determine_save_var, direct_eval_comp_op,
+                direct_eval_num_op, eval_and_or, eval_not, eval_unary_minus};
 
-#[test]
-fn test_eval_unary_minus(){
-    let mut vec2: Vec<ZOP> = Vec::new();
-    let mut vec: Vec<u8> = Vec::new();
-    vec.push(1);
-    vec.push(2);
-    vec.push(3);
-    vec.push(10);
-    assert_eq!(eval_unary_minus(&Operand::new_large_const(10), &mut vec2, &mut vec).const_value(),-10);
-    assert_eq!(eval_unary_minus(&Operand::new_const(10), &mut vec2, &mut vec).const_value(),246);
-}
+    #[test]
+    fn test_and_or(){
+        let mut vec2: Vec<ZOP> = Vec::new();
+        let mut vec: Vec<u8> = Vec::new();
+        vec.push(1);
+        vec.push(2);
+        vec.push(3);
+        vec.push(10);
+        assert_eq!(eval_and_or(&Operand::new_large_const(0), &Operand::new_large_const(1), "or", &mut vec2, &mut vec).const_value(),1 as i16);
+        assert_eq!(eval_and_or(&Operand::new_large_const(0), &Operand::new_large_const(1), "and", &mut vec2, &mut vec).const_value(),0 as i16);
+        assert_eq!(eval_and_or(&Operand::new_large_const(0), &Operand::new_large_const(0), "or", &mut vec2, &mut vec).const_value(),0 as i16);
+        assert_eq!(eval_and_or(&Operand::new_large_const(1), &Operand::new_large_const(1), "and", &mut vec2, &mut vec).const_value(),1 as i16);
+    }
 
-#[test]
-fn test_determine_save_var (){
-    let mut vec: Vec<u8> = Vec::new();
-    vec.push(1);
-    vec.push(2);
-    vec.push(3);
-    vec.push(4);
-    let var = determine_save_var(&Operand::new_var(10), &Operand::new_var(10), &mut vec);
-    assert_eq!(var.id,10);
-    assert_eq!(var.vartype,Type::Integer);
-}
+    #[test]
+    fn test_eval_not(){
+        let cfg = Config::default_config();
+        let mut manager = CodeGenManager::new(&cfg);
+        let mut vec2: Vec<ZOP> = Vec::new();
+        let mut vec: Vec<u8> = Vec::new();
+        vec.push(1);
+        vec.push(2);
+        vec.push(3);
+        vec.push(10);
+        assert_eq!(eval_not(&Operand::new_large_const(10), &mut vec2, &mut vec, &mut manager).const_value(),0);
+        assert_eq!(eval_not(&Operand::new_const(0), &mut vec2, &mut vec, &mut manager).const_value(),1);
+    }
 
-#[test]
-fn test_count_constants(){
-    assert_eq!(count_constants(&Operand::new_large_const(10),&Operand::new_large_const(10)),2);
-    assert_eq!(count_constants(&Operand::new_var(10),&Operand::new_large_const(10)),1);
-    assert_eq!(count_constants(&Operand::new_large_const(10),&Operand::new_var(10)),1);
-    assert_eq!(count_constants(&Operand::new_var(10),&Operand::new_var(10)),0);
-}
+    #[test]
+    fn test_eval_unary_minus(){
+        let mut vec2: Vec<ZOP> = Vec::new();
+        let mut vec: Vec<u8> = Vec::new();
+        vec.push(1);
+        vec.push(2);
+        vec.push(3);
+        vec.push(10);
+        assert_eq!(eval_unary_minus(&Operand::new_large_const(10), &mut vec2, &mut vec).const_value(),-10);
+        assert_eq!(eval_unary_minus(&Operand::new_const(10), &mut vec2, &mut vec).const_value(),246);
+    }
 
-#[test]
-fn test_boolstr_to_const(){
-    assert_eq!(boolstr_to_const("true").const_value(),1);
-    assert_eq!(boolstr_to_const("false").const_value(),0);
-}
+    #[test]
+    fn test_determine_save_var (){
+        let mut vec: Vec<u8> = Vec::new();
+        vec.push(1);
+        vec.push(2);
+        vec.push(3);
+        vec.push(4);
+        let var = determine_save_var(&Operand::new_var(10), &Operand::new_var(10), &mut vec);
+        assert_eq!(var.id,10);
+        assert_eq!(var.vartype,Type::Integer);
+    }
 
-#[test]
-fn test_direct_eval_num_op(){
-    let cfg = Config::default_config();
-    let manager = CodeGenManager::new(&cfg);
-    assert_eq!(direct_eval_num_op(&Operand::new_large_const(10), &Operand::new_large_const(20), "+", (0x0000000000000000, 0x0000000000000000), &manager).const_value(),30 as i16);
-    assert_eq!(direct_eval_num_op(&Operand::new_large_const(66), &Operand::new_large_const(74), "-", (0x0000000000000000, 0x0000000000000000), &manager).const_value(),-8 as i16);
-    assert_eq!(direct_eval_num_op(&Operand::new_large_const(45), &Operand::new_large_const(10), "*", (0x0000000000000000, 0x0000000000000000), &manager).const_value(),450 as i16);
-    assert_eq!(direct_eval_num_op(&Operand::new_large_const(99), &Operand::new_large_const(3), "/", (0x0000000000000000, 0x0000000000000000), &manager).const_value(),33 as i16);
-    assert_eq!(direct_eval_num_op(&Operand::new_large_const(90), &Operand::new_large_const(2), "%", (0x0000000000000000, 0x0000000000000000), &manager).const_value(),0 as i16);
-}
+    #[test]
+    fn test_count_constants(){
+        assert_eq!(count_constants(&Operand::new_large_const(10),&Operand::new_large_const(10)),2);
+        assert_eq!(count_constants(&Operand::new_var(10),&Operand::new_large_const(10)),1);
+        assert_eq!(count_constants(&Operand::new_large_const(10),&Operand::new_var(10)),1);
+        assert_eq!(count_constants(&Operand::new_var(10),&Operand::new_var(10)),0);
+    }
 
-#[test]
-fn test_direct_eval_comp_op(){
-    let cfg = Config::default_config();
-    let manager = CodeGenManager::new(&cfg);
-    assert_eq!(direct_eval_comp_op(&Operand::new_large_const(20), &Operand::new_large_const(20), "is", (0x0000000000000000, 0x0000000000000000), &manager).const_value(),1 as i16);
-    assert_eq!(direct_eval_comp_op(&Operand::new_large_const(15), &Operand::new_large_const(15), "==", (0x0000000000000000, 0x0000000000000000), &manager).const_value(),1 as i16);
-    assert_eq!(direct_eval_comp_op(&Operand::new_large_const(4), &Operand::new_large_const(4), "eq", (0x0000000000000000, 0x0000000000000000), &manager).const_value(),1 as i16);
-    assert_eq!(direct_eval_comp_op(&Operand::new_large_const(66), &Operand::new_large_const(74), "neq", (0x0000000000000000, 0x0000000000000000), &manager).const_value(),1 as i16);
-    assert_eq!(direct_eval_comp_op(&Operand::new_large_const(2), &Operand::new_large_const(10), "<", (0x0000000000000000, 0x0000000000000000), &manager).const_value(),1 as i16);
-    assert_eq!(direct_eval_comp_op(&Operand::new_large_const(5), &Operand::new_large_const(6), "lt", (0x0000000000000000, 0x0000000000000000), &manager).const_value(),1 as i16);
-    assert_eq!(direct_eval_comp_op(&Operand::new_large_const(5), &Operand::new_large_const(5), "<=", (0x0000000000000000, 0x0000000000000000), &manager).const_value(),1 as i16);
-    assert_eq!(direct_eval_comp_op(&Operand::new_large_const(2), &Operand::new_large_const(5), "lte", (0x0000000000000000, 0x0000000000000000), &manager).const_value(),1 as i16);
-    assert_eq!(direct_eval_comp_op(&Operand::new_large_const(6), &Operand::new_large_const(6), ">=", (0x0000000000000000, 0x0000000000000000), &manager).const_value(),1 as i16);
-    assert_eq!(direct_eval_comp_op(&Operand::new_large_const(6), &Operand::new_large_const(5), "gte", (0x0000000000000000, 0x0000000000000000), &manager).const_value(),1 as i16);
-    assert_eq!(direct_eval_comp_op(&Operand::new_large_const(4), &Operand::new_large_const(3), ">", (0x0000000000000000, 0x0000000000000000), &manager).const_value(),1 as i16);
-    assert_eq!(direct_eval_comp_op(&Operand::new_large_const(1), &Operand::new_large_const(0), "gt", (0x0000000000000000, 0x0000000000000000), &manager).const_value(),1 as i16);
-    assert_eq!(direct_eval_comp_op(&Operand::new_large_const(0), &Operand::new_large_const(20), "is", (0x0000000000000000, 0x0000000000000000), &manager).const_value(),0 as i16);
-    assert_eq!(direct_eval_comp_op(&Operand::new_large_const(1), &Operand::new_large_const(15), "==", (0x0000000000000000, 0x0000000000000000), &manager).const_value(),0 as i16);
-    assert_eq!(direct_eval_comp_op(&Operand::new_large_const(43), &Operand::new_large_const(4), "eq", (0x0000000000000000, 0x0000000000000000), &manager).const_value(),0 as i16);
-    assert_eq!(direct_eval_comp_op(&Operand::new_large_const(74), &Operand::new_large_const(74), "neq", (0x0000000000000000, 0x0000000000000000), &manager).const_value(),0 as i16);
-    assert_eq!(direct_eval_comp_op(&Operand::new_large_const(12), &Operand::new_large_const(10), "<", (0x0000000000000000, 0x0000000000000000), &manager).const_value(),0 as i16);
-    assert_eq!(direct_eval_comp_op(&Operand::new_large_const(15), &Operand::new_large_const(6), "lt", (0x0000000000000000, 0x0000000000000000), &manager).const_value(),0 as i16);
-    assert_eq!(direct_eval_comp_op(&Operand::new_large_const(6), &Operand::new_large_const(5), "<=", (0x0000000000000000, 0x0000000000000000), &manager).const_value(),0 as i16);
-    assert_eq!(direct_eval_comp_op(&Operand::new_large_const(7), &Operand::new_large_const(5), "lte", (0x0000000000000000, 0x0000000000000000), &manager).const_value(),0 as i16);
-    assert_eq!(direct_eval_comp_op(&Operand::new_large_const(5), &Operand::new_large_const(6), ">=", (0x0000000000000000, 0x0000000000000000), &manager).const_value(),0 as i16);
-    assert_eq!(direct_eval_comp_op(&Operand::new_large_const(3), &Operand::new_large_const(5), "gte", (0x0000000000000000, 0x0000000000000000), &manager).const_value(),0 as i16);
-    assert_eq!(direct_eval_comp_op(&Operand::new_large_const(2), &Operand::new_large_const(3), ">", (0x0000000000000000, 0x0000000000000000), &manager).const_value(),0 as i16);
-    assert_eq!(direct_eval_comp_op(&Operand::new_large_const(0), &Operand::new_large_const(0), "gt", (0x0000000000000000, 0x0000000000000000), &manager).const_value(),0 as i16);
+    #[test]
+    fn test_boolstr_to_const(){
+        assert_eq!(boolstr_to_const("true").const_value(),1);
+        assert_eq!(boolstr_to_const("false").const_value(),0);
+    }
+
+    #[test]
+    fn test_direct_eval_num_op(){
+        let cfg = Config::default_config();
+        let manager = CodeGenManager::new(&cfg);
+        assert_eq!(direct_eval_num_op(&Operand::new_large_const(10), &Operand::new_large_const(20), "+", (0x0000000000000000, 0x0000000000000000), &manager).const_value(),30 as i16);
+        assert_eq!(direct_eval_num_op(&Operand::new_large_const(66), &Operand::new_large_const(74), "-", (0x0000000000000000, 0x0000000000000000), &manager).const_value(),-8 as i16);
+        assert_eq!(direct_eval_num_op(&Operand::new_large_const(45), &Operand::new_large_const(10), "*", (0x0000000000000000, 0x0000000000000000), &manager).const_value(),450 as i16);
+        assert_eq!(direct_eval_num_op(&Operand::new_large_const(99), &Operand::new_large_const(3), "/", (0x0000000000000000, 0x0000000000000000), &manager).const_value(),33 as i16);
+        assert_eq!(direct_eval_num_op(&Operand::new_large_const(90), &Operand::new_large_const(2), "%", (0x0000000000000000, 0x0000000000000000), &manager).const_value(),0 as i16);
+    }
+
+    #[test]
+    fn test_direct_eval_comp_op(){
+        let cfg = Config::default_config();
+        let manager = CodeGenManager::new(&cfg);
+        assert_eq!(direct_eval_comp_op(&Operand::new_large_const(20), &Operand::new_large_const(20), "is", (0x0000000000000000, 0x0000000000000000), &manager).const_value(),1 as i16);
+        assert_eq!(direct_eval_comp_op(&Operand::new_large_const(15), &Operand::new_large_const(15), "==", (0x0000000000000000, 0x0000000000000000), &manager).const_value(),1 as i16);
+        assert_eq!(direct_eval_comp_op(&Operand::new_large_const(4), &Operand::new_large_const(4), "eq", (0x0000000000000000, 0x0000000000000000), &manager).const_value(),1 as i16);
+        assert_eq!(direct_eval_comp_op(&Operand::new_large_const(66), &Operand::new_large_const(74), "neq", (0x0000000000000000, 0x0000000000000000), &manager).const_value(),1 as i16);
+        assert_eq!(direct_eval_comp_op(&Operand::new_large_const(2), &Operand::new_large_const(10), "<", (0x0000000000000000, 0x0000000000000000), &manager).const_value(),1 as i16);
+        assert_eq!(direct_eval_comp_op(&Operand::new_large_const(5), &Operand::new_large_const(6), "lt", (0x0000000000000000, 0x0000000000000000), &manager).const_value(),1 as i16);
+        assert_eq!(direct_eval_comp_op(&Operand::new_large_const(5), &Operand::new_large_const(5), "<=", (0x0000000000000000, 0x0000000000000000), &manager).const_value(),1 as i16);
+        assert_eq!(direct_eval_comp_op(&Operand::new_large_const(2), &Operand::new_large_const(5), "lte", (0x0000000000000000, 0x0000000000000000), &manager).const_value(),1 as i16);
+        assert_eq!(direct_eval_comp_op(&Operand::new_large_const(6), &Operand::new_large_const(6), ">=", (0x0000000000000000, 0x0000000000000000), &manager).const_value(),1 as i16);
+        assert_eq!(direct_eval_comp_op(&Operand::new_large_const(6), &Operand::new_large_const(5), "gte", (0x0000000000000000, 0x0000000000000000), &manager).const_value(),1 as i16);
+        assert_eq!(direct_eval_comp_op(&Operand::new_large_const(4), &Operand::new_large_const(3), ">", (0x0000000000000000, 0x0000000000000000), &manager).const_value(),1 as i16);
+        assert_eq!(direct_eval_comp_op(&Operand::new_large_const(1), &Operand::new_large_const(0), "gt", (0x0000000000000000, 0x0000000000000000), &manager).const_value(),1 as i16);
+        assert_eq!(direct_eval_comp_op(&Operand::new_large_const(0), &Operand::new_large_const(20), "is", (0x0000000000000000, 0x0000000000000000), &manager).const_value(),0 as i16);
+        assert_eq!(direct_eval_comp_op(&Operand::new_large_const(1), &Operand::new_large_const(15), "==", (0x0000000000000000, 0x0000000000000000), &manager).const_value(),0 as i16);
+        assert_eq!(direct_eval_comp_op(&Operand::new_large_const(43), &Operand::new_large_const(4), "eq", (0x0000000000000000, 0x0000000000000000), &manager).const_value(),0 as i16);
+        assert_eq!(direct_eval_comp_op(&Operand::new_large_const(74), &Operand::new_large_const(74), "neq", (0x0000000000000000, 0x0000000000000000), &manager).const_value(),0 as i16);
+        assert_eq!(direct_eval_comp_op(&Operand::new_large_const(12), &Operand::new_large_const(10), "<", (0x0000000000000000, 0x0000000000000000), &manager).const_value(),0 as i16);
+        assert_eq!(direct_eval_comp_op(&Operand::new_large_const(15), &Operand::new_large_const(6), "lt", (0x0000000000000000, 0x0000000000000000), &manager).const_value(),0 as i16);
+        assert_eq!(direct_eval_comp_op(&Operand::new_large_const(6), &Operand::new_large_const(5), "<=", (0x0000000000000000, 0x0000000000000000), &manager).const_value(),0 as i16);
+        assert_eq!(direct_eval_comp_op(&Operand::new_large_const(7), &Operand::new_large_const(5), "lte", (0x0000000000000000, 0x0000000000000000), &manager).const_value(),0 as i16);
+        assert_eq!(direct_eval_comp_op(&Operand::new_large_const(5), &Operand::new_large_const(6), ">=", (0x0000000000000000, 0x0000000000000000), &manager).const_value(),0 as i16);
+        assert_eq!(direct_eval_comp_op(&Operand::new_large_const(3), &Operand::new_large_const(5), "gte", (0x0000000000000000, 0x0000000000000000), &manager).const_value(),0 as i16);
+        assert_eq!(direct_eval_comp_op(&Operand::new_large_const(2), &Operand::new_large_const(3), ">", (0x0000000000000000, 0x0000000000000000), &manager).const_value(),0 as i16);
+        assert_eq!(direct_eval_comp_op(&Operand::new_large_const(0), &Operand::new_large_const(0), "gt", (0x0000000000000000, 0x0000000000000000), &manager).const_value(),0 as i16);
+    }
 }
