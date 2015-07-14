@@ -290,6 +290,7 @@ fn main() {
                         },
                         &MainError::NoInput => {
                             error!("Missing input!");
+                            usage(false);
                         }
                     }
                 },
