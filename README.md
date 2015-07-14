@@ -15,7 +15,7 @@ You can [download](https://github.com/Drakulix/zwreec/releases) a prebuilt versi
 
 ### Compiling from Source
 
-To build zwreec from source, you will need to have both Rust 1.1.0 and Cargo installed on your system. You can download the Rust binarys on their [website](http://www.rust-lang.org/install.html), by using your system's package manager or by running this in your shell:
+To build zwreec from source, you will need to have both Rust 1.1.0 and Cargo installed on your system. You can download the Rust binaries on their [website](http://www.rust-lang.org/install.html), by using your system's package manager or by running this in your shell:
 
 ```sh
 $ curl -sSf https://static.rust-lang.org/rustup.sh | sh
