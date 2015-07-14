@@ -1,4 +1,4 @@
-/// Integration tests for the whole project
+//! Integration tests for the whole project
 
 extern crate zwreec;
 use std::path::Path;
@@ -7,9 +7,13 @@ use std::error::Error;
 use std::io::Cursor;
 use std::vec::Vec;
 
+/// The folder where integration tests are stored that should work
 static TESTFOLDER_PASS: &'static str = "./tests/integration/should-compile/";
+
+/// The folder where integration tests are stored that should fail
 static TESTFOLDER_FAIL: &'static str = "./tests/integration/should-fail/";
 
+/// Compile a file into a buffer and checks if the compilation finished without any errors
 fn test_compile(input_filename: String) {
     let path = Path::new(&input_filename);
     let mut input = match File::open(path) {

@@ -1,9 +1,8 @@
-//! The `ztext` module contains encoding functions to encode text in z-ascii characters.
-//! 
+//! The `ztext` module contains encoding functions to encode text in Z-ASCII characters.
 
 use super::zbytes::Bytes;
 
-/// the ascii-alphabet with the 3 parts:
+/// The ASCII-alphabet with the 3 parts:
 /// lower-case, upper-case and numbers / special characters
 pub static ALPHABET: [char; 78] = [
     'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
@@ -16,9 +15,9 @@ pub static ALPHABET: [char; 78] = [
     ',', '!', '?', '_', '#', '\'','"', '/', '\\','-', ':', '(', ')'];
 
 
-/// encodes an string to z-characters
-/// and returns the length of the used bytes
-/// TODO: Only works with lower case letters
+/// Encodes a string to z-characters
+/// and returns the length of the used bytes.
+/// TODO: Only works with lower case letters.
 ///
 /// # Examples
 ///
@@ -63,7 +62,7 @@ pub fn encode(data: &mut Bytes, content: &str, unicode_table: &Vec<u16>) -> u16 
     data.bytes.len() as u16
 }
 
-/// reads the content and converts it to a zasci vector
+/// Reads the content and converts it to a Z-ASCII vector.
 fn string_to_zchar(content: &str, unicode_table: &Vec<u16>) -> Vec<u8> {
     //let string_bytes = content.to_string().into_bytes();
     let mut zchars: Vec<u8> = Vec::new();
@@ -121,25 +120,25 @@ fn string_to_zchar(content: &str, unicode_table: &Vec<u16>) -> Vec<u8> {
     zchars
 }
 
-/// shifts the z-char in a 2 bytes-array to the right position
-/// shift_length has 3 possibilities: 10, 5, 0
-/// an z-char use 5 bytes
+/// Shifts the z-char in a 2 bytes-array to the right position.
+///
+/// shift_length has 3 possibilities: 10, 5, 0.
+/// a z-char use 5 bytes.
 /// look into two bytes:
+/// ```ignore
 /// ____byte one____ ____byte two____
 /// 1 2 3 4 5 6  7 8 1 2 3  4 5 6 7 8
 ///   ^          ^          1
 ///   1 2 3 4 5  1 2 3 4 5  1 2 3 4 5
-///   1. zchar   2. zchar   3. zchar 
+///   1. zchar   2. zchar   3. zchar
 ///   10         5          0
+/// ```
 fn shift(zchar: u16, position: usize) -> u16 {
     let shift_length = 10 - (position % 3) as u16 * 5;
     zchar << shift_length
 }
 
-/// Returns the location of the character of the specified index in the zcode character array
-///  
-/// # Examples
-///
+/// Returns the location of the character of the specified index in the zcode character array.
 fn pos_in_alpha(letter: u8) -> i8 {
     for i in 0..ALPHABET.len() {
         if ALPHABET[i] as u8 == letter {
@@ -150,7 +149,7 @@ fn pos_in_alpha(letter: u8) -> i8 {
     return -1
 }
 
-/// returns the position in the unicode-table
+/// Returns the position in the unicode-table
 pub fn pos_in_unicode(letter: u16, unicode_table: &Vec<u16>) -> i8 {
     for (i, character) in unicode_table.iter().enumerate() {
         if *character == letter {
@@ -161,9 +160,12 @@ pub fn pos_in_unicode(letter: u16, unicode_table: &Vec<u16>) -> i8 {
     return -1
 }
 
-/// position in the vector from the position of an character in the string
-/// every 3 zchars encode() writes 2 bytes
-/// for example "helloworld" 
+/// Position in the vector from the position of a character in the string.
+///
+/// every 3 zchars encode() writes 2 bytes.
+///
+/// for example "helloworld":
+///
 /// "h": nothing
 /// "e": nothing
 /// "l": write 2 bytes to position 0   (2 * 2/3))
@@ -171,38 +173,43 @@ pub fn pos_in_unicode(letter: u16, unicode_table: &Vec<u16>) -> i8 {
 /// "o": nothing
 /// "w": write 2 bytes to position 2   (2 * 5/3))
 /// ...
-///
-/// # Examples
-///
 fn pos_to_index(position: usize) -> usize {
     2 * (position / 3)
 }
 
-#[test]
-fn test_pos_in_alpha() {
-    assert_eq!(pos_in_alpha('a' as u8), 0);
-    assert_eq!(pos_in_alpha('b' as u8), 1);
-    assert_eq!(pos_in_alpha('c' as u8), 2);
-    assert_eq!(pos_in_alpha('A' as u8), 26);
-    assert_eq!(pos_in_alpha('B' as u8), 27);
-    assert_eq!(pos_in_alpha('C' as u8), 28);
-}
+// ================================
+// Test functions
 
-#[test]
-fn test_pos_to_index() {
-    assert_eq!(pos_to_index(5), 2);
-}
+#[cfg(test)]
+mod tests {
+    use super::{pos_in_alpha, pos_to_index, shift, string_to_zchar};
 
-#[test]
-fn test_shift() {
-    assert_eq!(shift(6,2), 6);
-    assert_eq!(shift(26,5), 26);
-}
+    #[test]
+    fn test_pos_in_alpha() {
+        assert_eq!(pos_in_alpha('a' as u8), 0);
+        assert_eq!(pos_in_alpha('b' as u8), 1);
+        assert_eq!(pos_in_alpha('c' as u8), 2);
+        assert_eq!(pos_in_alpha('A' as u8), 26);
+        assert_eq!(pos_in_alpha('B' as u8), 27);
+        assert_eq!(pos_in_alpha('C' as u8), 28);
+    }
 
-#[test]
-fn test_string_to_zchar() {
-    let mut vec: Vec<u16> = Vec::new();
-    assert_eq!(string_to_zchar("i am a string, please test me, no unicode",&vec), vec![14, 0, 6, 18, 0, 6, 0, 24, 25, 23, 14, 19, 12, 5, 19, 0, 21, 17, 10, 6, 24, 10, 0, 25, 10, 24, 25, 0, 18, 10, 5, 19, 0, 19, 20, 0, 26, 19, 14, 8, 20, 9, 10]);
-    vec.push('€' as u16);
-    assert_eq!(string_to_zchar("nasty char: €",&vec), vec![19, 6, 24, 25, 30, 0, 8, 13, 6, 23, 5, 29, 0, 5, 6, 4, 27]);
+    #[test]
+    fn test_pos_to_index() {
+        assert_eq!(pos_to_index(5), 2);
+    }
+
+    #[test]
+    fn test_shift() {
+        assert_eq!(shift(6,2), 6);
+        assert_eq!(shift(26,5), 26);
+    }
+
+    #[test]
+    fn test_string_to_zchar() {
+        let mut vec: Vec<u16> = Vec::new();
+        assert_eq!(string_to_zchar("i am a string, please test me, no unicode",&vec), vec![14, 0, 6, 18, 0, 6, 0, 24, 25, 23, 14, 19, 12, 5, 19, 0, 21, 17, 10, 6, 24, 10, 0, 25, 10, 24, 25, 0, 18, 10, 5, 19, 0, 19, 20, 0, 26, 19, 14, 8, 20, 9, 10]);
+        vec.push('€' as u16);
+        assert_eq!(string_to_zchar("nasty char: €",&vec), vec![19, 6, 24, 25, 30, 0, 8, 13, 6, 23, 5, 29, 0, 5, 6, 4, 27]);
+    }
 }
