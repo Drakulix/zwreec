@@ -1394,6 +1394,8 @@ impl Zfile {
             // ZOP::LoadW{array_address: Operand::new_large_const(cursor_pos as i16), index: t.clone(), variable: a.clone()},
             // ZOP::SetCursorOperand{row: a_op.clone(), col: Operand::new_const(1)},
             // ZOP::EraseLine,
+            ZOP::EraseWindow{value: -1},
+            ZOP::PrintUnicodeStr{address: msg_op.clone()},
             ZOP::Newline,
             ZOP::Print{text: "> ".to_string()},
             ZOP::PrintUnicodeStr{address: val_op.clone()},
