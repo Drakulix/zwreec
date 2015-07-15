@@ -134,7 +134,7 @@ pub fn gen_zcode(node: ASTNode, mut out: &mut Zfile, mut manager: &mut CodeGenMa
                     } else {
                         vec![]
                     }
-                    
+
                 },
                 TokFormatHorizontalLine { .. } => {
                     if !manager.is_silent && !manager.is_nobr {
@@ -200,7 +200,7 @@ pub fn gen_zcode(node: ASTNode, mut out: &mut Zfile, mut manager: &mut CodeGenMa
                 },
                 TokFormatUnderStart { .. } => {
                     let mut code: Vec<ZOP> = vec![];
-                    if !manager.is_silent {
+                    if !manager.is_silent && cfg.unsupported_formatting {
                         code.push(ZOP::PrintOps{text: "____".to_string()});
                     }
                     for child in t.childs.clone().into_iter() {
@@ -208,14 +208,14 @@ pub fn gen_zcode(node: ASTNode, mut out: &mut Zfile, mut manager: &mut CodeGenMa
                             code.push(instr);
                         }
                     }
-                    if !manager.is_silent {
+                    if !manager.is_silent && cfg.unsupported_formatting {
                         code.push(ZOP::PrintOps{text: "____".to_string()});
                     }
                     code
                 },
                 TokFormatStrikeStart { .. } => {
                     let mut code: Vec<ZOP> = vec![];
-                    if !manager.is_silent {
+                    if !manager.is_silent && cfg.unsupported_formatting {
                         code.push(ZOP::PrintOps{text: "====".to_string()});
                     }
                     for child in t.childs.clone().into_iter() {
@@ -223,12 +223,14 @@ pub fn gen_zcode(node: ASTNode, mut out: &mut Zfile, mut manager: &mut CodeGenMa
                             code.push(instr);
                         }
                     }
-                    code.push(ZOP::PrintOps{text: "====".to_string()});
+                    if !manager.is_silent && cfg.unsupported_formatting {
+                        code.push(ZOP::PrintOps{text: "====".to_string()});
+                    }
                     code
                 },
                 TokFormatSubStart { .. } => {
                     let mut code: Vec<ZOP> = vec![];
-                    if !manager.is_silent {
+                    if !manager.is_silent && cfg.unsupported_formatting {
                         code.push(ZOP::PrintOps{text: "_{".to_string()});
                     }
                     for child in t.childs.clone().into_iter() {
@@ -236,14 +238,14 @@ pub fn gen_zcode(node: ASTNode, mut out: &mut Zfile, mut manager: &mut CodeGenMa
                             code.push(instr);
                         }
                     }
-                    if !manager.is_silent {
+                    if !manager.is_silent && cfg.unsupported_formatting {
                         code.push(ZOP::PrintOps{text: "}".to_string()});
                     }
                     code
                 },
                 TokFormatSupStart { .. } => {
                     let mut code: Vec<ZOP> = vec![];
-                    if !manager.is_silent {
+                    if !manager.is_silent && cfg.unsupported_formatting {
                         code.push(ZOP::PrintOps{text: "^{".to_string()});
                     }
                     for child in t.childs.clone().into_iter() {
@@ -251,7 +253,7 @@ pub fn gen_zcode(node: ASTNode, mut out: &mut Zfile, mut manager: &mut CodeGenMa
                             code.push(instr);
                         }
                     }
-                    if !manager.is_silent {
+                    if !manager.is_silent && cfg.unsupported_formatting {
                         code.push(ZOP::PrintOps{text: "}".to_string()});
                     }
                     code
