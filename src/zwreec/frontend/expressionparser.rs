@@ -173,7 +173,7 @@ impl<'a> ExpressionParser<'a> {
                     }
                 };
 
-                let mut new_node: ASTNode;
+                let new_node: ASTNode;
 
                 if is_unary {
                     new_node = ASTNode::Default(NodeDefault { category: top_op.clone(), childs: vec![e2] });
