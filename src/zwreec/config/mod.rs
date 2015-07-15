@@ -430,7 +430,7 @@ pub fn zwreec_usage(verbose: bool, mut opts: getopts::Options, brief: &str) -> S
         Enables a bright background and a dark text color
     easter-egg (enabled)
         Enables the generation of easter egg code. Enter the secret combination
-        in your Z-Machine interpreter to activate the easter egg. This requires
+        in your Z-machine interpreter to activate the easter egg. This requires
         some extra space - disable this if your output file is getting too large
     force-unicode (disabled)
         Force the generation of print_unicode opcodes every time a unicode
@@ -449,9 +449,10 @@ pub fn zwreec_usage(verbose: bool, mut opts: getopts::Options, brief: &str) -> S
         Replaces opcode print_unicode with print_char to let it run on
         interpreters without unicode support like JZIP
     unsupported-formatting (disabled)
-        Tries to simulate formatting, that in no available in the Z-Machine like
-        Underscore, Strikethrough as well as Sub- and Suptext by adding Indicators
-        around them. By default those get simply ignored.
+        Tries to simulate formatting that is not available in the Z-machine like
+        underscore, strikethrough as well as sub- and superscript by adding
+        indicators around them. The default behavior is to discard those
+        characters.
     "
     } else {
         "Additional help:
