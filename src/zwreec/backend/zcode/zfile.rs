@@ -556,6 +556,7 @@ impl Zfile {
 
     /// Creates the header of a zfile.
     pub fn create_header(&mut self) {
+        info!("Creating Z-Code header");
         assert!(self.data.len() == 0, "create_header should run at the beginning of the op-codes");
 
         let alpha_addr: u16 = 0x40;
@@ -1030,7 +1031,13 @@ impl Zfile {
     /// # Caution
     /// This should be called as the last command.
     pub fn end(&mut self) {
+        if self.unicode_table.len() > 0 {
+            info!("Writing unicode translation table");
+        }
+
         self.write_unicode_table();
+
+        info!("Writing predefined routines");
         self.routine_check_links();
         self.routine_add_link();
         self.routine_check_more();
@@ -1047,8 +1054,14 @@ impl Zfile {
         self.routine_print_var();
         self.routine_print_char();
         self.routine_add_types();
+
+        info!("Writing jump addresses");
         self.write_jumps();
+
+        info!("Writing strings to high memory");
         self.write_strings();
+
+        info!("Finished writing Z-Code data");
     }
 
     /// Command to create a Z-Routine.

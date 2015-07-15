@@ -146,6 +146,8 @@ impl Parser {
         let mut stack: Vec<Elem> = Vec::new();
         stack.push(NonTerminal(S));
 
+        info!("Started to parse token stream");
+
         //create Iterator
         tokens.parsing(
             ParseState {
@@ -179,7 +181,10 @@ impl Parser {
                                 error_panic!(state.cfg => ParserError::TokenDoNotMatch{token: token, stack: stack_token});
                                 (ParseResult::Continue, None)
                             },
-                            None => (ParseResult::End, None),
+                            None => {
+                                info!("Finished parsing token stream");
+                                (ParseResult::End, None)
+                            },
                         }
                     }
                 }

@@ -9,7 +9,7 @@ use frontend::expressionparser;
 use frontend::lexer::Token;
 use frontend::lexer::Token::{TokMacroIf, TokMacroElseIf, TokExpression};
 
-use ::utils::extensions::{Constructor, ConstructorExt};
+use ::utils::extensions::{Constructor, ConstructorExt, Peeking, PeekingExt};
 
 /// This is the state of the AST building operation.
 pub struct ASTBuilder {
@@ -18,6 +18,7 @@ pub struct ASTBuilder {
 }
 
 /// The [parser](../parser/index.html) uses these ASTOperations to create the AST.
+#[derive(Clone)]
 pub enum ASTOperation {
     /// Adds a passage to the path in the ast.
     AddPassage(Token),
@@ -61,15 +62,23 @@ impl ASTBuilder {
     ///
     // This has a concrete return type because of optimization reasons. Read and use it as "Iterator<ASTNode>".
     pub fn build<I: Iterator<Item=ASTOperation>>(cfg: Config, ops: I)
-        -> Scan<Constructor<I, ASTBuilder, ASTNode, fn(&mut ASTBuilder, &mut Option<ASTNode>, ASTOperation) -> Option<ASTNode>>, Config, fn(&mut Config, ASTNode) -> Option<ASTNode>>
+        -> Scan<Constructor<Peeking<I, ASTOperation>, ASTBuilder, ASTNode, fn(&mut ASTBuilder, &mut Option<ASTNode>, (ASTOperation, Option<ASTOperation>)) -> Option<ASTNode>>, Config, fn(&mut Config, ASTNode) -> Option<ASTNode>>
     {
-        ops.construct_state(ASTBuilder::new(),
+        info!("Started to build AST");
+
+        ops.peeking().construct_state(ASTBuilder::new(),
         {
-            fn construct(builder: &mut ASTBuilder, passage: &mut Option<ASTNode>, op: ASTOperation) -> Option<ASTNode>
+            fn construct(builder: &mut ASTBuilder, passage: &mut Option<ASTNode>, op_peek: (ASTOperation, Option<ASTOperation>)) -> Option<ASTNode>
             {
-                builder.operation(passage, op)
+                let op_node = builder.operation(passage, op_peek.0);
+
+                if op_peek.1.is_none() {
+                    info!("Finished building AST");
+                }
+
+                op_node
             }
-            construct as fn(&mut ASTBuilder, &mut Option<ASTNode>, ASTOperation) -> Option<ASTNode> //necessary cast is a known bug
+            construct as fn(&mut ASTBuilder, &mut Option<ASTNode>, (ASTOperation, Option<ASTOperation>)) -> Option<ASTNode> //necessary cast is a known bug
         }).scan(cfg,
             {
                 fn scan(cfg: &mut Config, x: ASTNode) -> Option<ASTNode>
