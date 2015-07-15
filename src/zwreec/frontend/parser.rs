@@ -65,6 +65,10 @@ pub enum NonTerminalType {
     Formating,
     BoldFormatting,
     ItalicFormatting,
+    UnderlineFormatting,
+    StrikeFormatting,
+    SubFormatting,
+    SupFormatting,
     MonoFormatting,
     MonoContent,
     Link,
@@ -272,7 +276,11 @@ impl Parser {
                 },
                 (PassageContent, TokFormatBoldStart   { .. }) |
                 (PassageContent, TokFormatItalicStart { .. }) |
-                (PassageContent, TokFormatMonoStart   { .. }) => {
+                (PassageContent, TokFormatMonoStart   { .. }) |
+                (PassageContent, TokFormatUnderStart  { .. }) |
+                (PassageContent, TokFormatStrikeStart { .. }) |
+                (PassageContent, TokFormatSubStart    { .. }) |
+                (PassageContent, TokFormatSupStart    { .. }) => {
                     stack.push(NonTerminal(PassageContent));
                     stack.push(NonTerminal(Formating));
 
@@ -290,6 +298,12 @@ impl Parser {
                     stack.push(NonTerminal(Link));
 
                     None
+                },
+                (PassageContent, tok @ TokFormatHorizontalLine { .. } ) => {
+                    stack.push(NonTerminal(PassageContent));
+                    stack.push(Terminal(tok.clone()));
+
+                    Some(AddChild(tok))
                 },
                 (PassageContent, tok @ TokNewLine { .. }) => {
                     stack.push(NonTerminal(PassageContent));
@@ -319,7 +333,12 @@ impl Parser {
                     Some(UpChild(tok))
                 },
                 (PassageContent, TokFormatBoldEnd    { .. } ) |
-                (PassageContent, TokFormatItalicEnd  { .. } ) => {
+                (PassageContent, TokFormatItalicEnd  { .. } ) |
+                (PassageContent, TokFormatUnderEnd   { .. } ) |
+                (PassageContent, TokFormatStrikeEnd  { .. } ) |
+                (PassageContent, TokFormatSubEnd     { .. } ) |
+                (PassageContent, TokFormatSupEnd     { .. } ) |
+                (PassageContent, TokFormatMonoEnd    { .. } ) => {
                     // jump one ast-level higher
                     Some(Up)
                 },
@@ -343,6 +362,26 @@ impl Parser {
 
                     None
                 },
+                (Formating, TokFormatUnderStart { .. } ) => {
+                    stack.push(NonTerminal(UnderlineFormatting));
+
+                    None
+                },
+                (Formating, TokFormatStrikeStart { .. } ) => {
+                    stack.push(NonTerminal(StrikeFormatting));
+
+                    None
+                },
+                (Formating, TokFormatSubStart { .. } ) => {
+                    stack.push(NonTerminal(SubFormatting));
+
+                    None
+                },
+                (Formating, TokFormatSupStart { .. } ) => {
+                    stack.push(NonTerminal(SupFormatting));
+
+                    None
+                },
                 (Formating, TokFormatMonoStart { .. } ) => {
                     stack.push(NonTerminal(MonoFormatting));
 
@@ -361,6 +400,42 @@ impl Parser {
                 // ItalicFormatting
                 (ItalicFormatting, tok @ TokFormatItalicStart { .. } ) => {
                     stack.push(Terminal(TokFormatItalicEnd {location: (0, 0)} ));
+                    stack.push(NonTerminal(PassageContent));
+                    stack.push(Terminal(tok.clone()));
+
+                    Some(ChildDown(tok))
+                },
+
+                // UnderlineFormatting
+                (UnderlineFormatting, tok @ TokFormatUnderStart { .. } ) => {
+                    stack.push(Terminal(TokFormatUnderEnd {location: (0, 0)} ));
+                    stack.push(NonTerminal(PassageContent));
+                    stack.push(Terminal(tok.clone()));
+
+                    Some(ChildDown(tok))
+                },
+
+                // StrikeFormatting
+                (StrikeFormatting, tok @ TokFormatStrikeStart { .. } ) => {
+                    stack.push(Terminal(TokFormatStrikeEnd {location: (0, 0)} ));
+                    stack.push(NonTerminal(PassageContent));
+                    stack.push(Terminal(tok.clone()));
+
+                    Some(ChildDown(tok))
+                },
+
+                // SubFormatting
+                (SubFormatting, tok @ TokFormatSubStart { .. } ) => {
+                    stack.push(Terminal(TokFormatSubEnd {location: (0, 0)} ));
+                    stack.push(NonTerminal(PassageContent));
+                    stack.push(Terminal(tok.clone()));
+
+                    Some(ChildDown(tok))
+                },
+
+                // SupFormatting
+                (SupFormatting, tok @ TokFormatSupStart { .. } ) => {
+                    stack.push(Terminal(TokFormatSupEnd {location: (0, 0)} ));
                     stack.push(NonTerminal(PassageContent));
                     stack.push(Terminal(tok.clone()));
 

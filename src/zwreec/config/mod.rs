@@ -193,6 +193,9 @@ pub struct Config {
     /// Disable unicode support
     pub no_unicode: bool,
 
+    /// Enable Formatting Simulation
+    pub unsupported_formatting: bool,
+
     /// Instruct compiler to run these test-cases
     pub test_cases: Vec<TestCase>,
 }
@@ -215,6 +218,7 @@ impl Config {
             half_memory: false,
             no_colours: false,
             no_unicode: false,
+            unsupported_formatting: false,
             test_cases: Vec::new(),
         }
     }
@@ -278,6 +282,10 @@ impl Config {
                      cfg.no_unicode = true;
                      debug!("enabled no-unicode");
                 },
+                "unsupported-formatting" => {
+                    cfg.unsupported_formatting = true;
+                    debug!("enabled unsupported-formatting");
+                },
                 _ => {
                     error!("Cannot enable feature {} - feature not known.", s);
                 }
@@ -310,6 +318,10 @@ impl Config {
                      cfg.no_unicode = false;
                      debug!("disabled no-unicode");
                 },
+                "unsupported-formatting" => {
+                    cfg.unsupported_formatting = false;
+                    debug!("disabled unsupported-formatting");
+                }
                 _ => {
                     error!("Cannot disable feature {} - feature not known.", s);
                 }
@@ -418,7 +430,7 @@ pub fn zwreec_usage(verbose: bool, mut opts: getopts::Options, brief: &str) -> S
         Enables a bright background and a dark text color
     easter-egg (enabled)
         Enables the generation of easter egg code. Enter the secret combination
-        in your Z-Machine interpreter to activate the easter egg. This requires
+        in your Z-machine interpreter to activate the easter egg. This requires
         some extra space - disable this if your output file is getting too large
     force-unicode (disabled)
         Force the generation of print_unicode opcodes every time a unicode
@@ -435,7 +447,13 @@ pub fn zwreec_usage(verbose: bool, mut opts: getopts::Options, brief: &str) -> S
         some old interpreters like for DZIP on DOS/Atari
     no-unicode (disabled)
         Replaces opcode print_unicode with print_char to let it run on
-        interpreters without unicode support like JZIP"
+        interpreters without unicode support like JZIP
+    unsupported-formatting (disabled)
+        Tries to simulate formatting that is not available in the Z-machine like
+        underscore, strikethrough as well as sub- and superscript by adding
+        indicators around them. The default behavior is to discard those
+        characters.
+    "
     } else {
         "Additional help:
     --help -v           Print the full set of options zwreec accepts"

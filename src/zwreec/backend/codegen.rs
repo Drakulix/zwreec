@@ -165,7 +165,6 @@ pub fn gen_zcode(node: ASTNode, mut out: &mut Zfile, mut manager: &mut CodeGenMa
         ASTNode::Default(t) => {
             let mut code: Vec<ZOP> = match t.category {
                 TokText {ref text, .. } => {
-
                     if !manager.is_silent {
                         vec![ZOP::PrintOps{text: text.to_string()}]
                     } else {
@@ -178,7 +177,18 @@ pub fn gen_zcode(node: ASTNode, mut out: &mut Zfile, mut manager: &mut CodeGenMa
                     } else {
                         vec![]
                     }
+
                 },
+                TokFormatHorizontalLine { .. } => {
+                    if !manager.is_silent && !manager.is_nobr {
+                        vec![
+                            ZOP::PrintOps{text: "----------".to_string()},
+                            ZOP::Newline
+                        ]
+                    } else {
+                        vec![]
+                    }
+                }
                 TokFormatHeading {ref rank, ref text, .. } => {
                     if !manager.is_silent && !manager.is_nobr {
                         if *rank <= 2 {
@@ -230,6 +240,66 @@ pub fn gen_zcode(node: ASTNode, mut out: &mut Zfile, mut manager: &mut CodeGenMa
                     state_copy.italic = true;
                     set_formatting = true;
                     vec![ZOP::SetTextStyle{bold: state_copy.bold, reverse: state_copy.inverted, monospace: state_copy.mono, italic: state_copy.italic}]
+                },
+                TokFormatUnderStart { .. } => {
+                    let mut code: Vec<ZOP> = vec![];
+                    if !manager.is_silent && cfg.unsupported_formatting {
+                        code.push(ZOP::PrintOps{text: "____".to_string()});
+                    }
+                    for child in t.childs.clone().into_iter() {
+                        for instr in gen_zcode(child, out, manager) {
+                            code.push(instr);
+                        }
+                    }
+                    if !manager.is_silent && cfg.unsupported_formatting {
+                        code.push(ZOP::PrintOps{text: "____".to_string()});
+                    }
+                    code
+                },
+                TokFormatStrikeStart { .. } => {
+                    let mut code: Vec<ZOP> = vec![];
+                    if !manager.is_silent && cfg.unsupported_formatting {
+                        code.push(ZOP::PrintOps{text: "====".to_string()});
+                    }
+                    for child in t.childs.clone().into_iter() {
+                        for instr in gen_zcode(child, out, manager) {
+                            code.push(instr);
+                        }
+                    }
+                    if !manager.is_silent && cfg.unsupported_formatting {
+                        code.push(ZOP::PrintOps{text: "====".to_string()});
+                    }
+                    code
+                },
+                TokFormatSubStart { .. } => {
+                    let mut code: Vec<ZOP> = vec![];
+                    if !manager.is_silent && cfg.unsupported_formatting {
+                        code.push(ZOP::PrintOps{text: "_{".to_string()});
+                    }
+                    for child in t.childs.clone().into_iter() {
+                        for instr in gen_zcode(child, out, manager) {
+                            code.push(instr);
+                        }
+                    }
+                    if !manager.is_silent && cfg.unsupported_formatting {
+                        code.push(ZOP::PrintOps{text: "}".to_string()});
+                    }
+                    code
+                },
+                TokFormatSupStart { .. } => {
+                    let mut code: Vec<ZOP> = vec![];
+                    if !manager.is_silent && cfg.unsupported_formatting {
+                        code.push(ZOP::PrintOps{text: "^{".to_string()});
+                    }
+                    for child in t.childs.clone().into_iter() {
+                        for instr in gen_zcode(child, out, manager) {
+                            code.push(instr);
+                        }
+                    }
+                    if !manager.is_silent && cfg.unsupported_formatting {
+                        code.push(ZOP::PrintOps{text: "}".to_string()});
+                    }
+                    code
                 },
                 TokMacroSilently { .. } => {
                     manager.is_silent = true;
