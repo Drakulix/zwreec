@@ -1,8 +1,9 @@
-//! Implementation of Error Logging thrown in the compiler
+//! Implementation of error logging for errors thrown in the compiler
 //!
-//! This Module contains Display Implementations for the Errors defined in the core modules (frontend/backend),
+//! This module contains Display implementations for the errors defined in the core modules (frontend/backend),
 //! allowing to log them easily. Also contains macros to log and panic - depending on the Config module - because of an error,
-//! making the actual Error Handling Code in the other modules much shorter and easier to use.
+//! making the actual error handling code in the other modules much shorter and easier to use.
+
 use std::fmt::{Display, Formatter, Result, Write};
 
 use frontend::lexer::Token;
@@ -12,6 +13,33 @@ use frontend::expressionparser::ExpressionParserError;
 use frontend::evaluate_expression::EvaluateExpressionError;
 use backend::codegen::CodeGenError;
 
+/// Report an error
+///
+/// Parses the config and reports an error
+/// If the config specifies the `force` option we continue on our way
+/// The calling function is expeced to circumvent the error in some reasonable way
+///
+/// # Syntax
+///
+/// `error_panic!(cfg => MyError)`
+///
+/// # Example
+///
+/// ```should_panic
+/// # #[macro_use] extern crate zwreec;
+/// # #[macro_use] extern crate log;
+/// # use zwreec::frontend::expressionparser::ExpressionParserError;
+/// # fn main() {
+/// let cfg = zwreec::config::Config::default_config();
+/// error_panic!(cfg => ExpressionParserError::OperStackIsEmpty);
+/// // Recovery code
+/// # }
+/// ```
+///
+/// # Panics
+///
+/// If the config does not specify the `force` option a panic is generated
+#[macro_export]
 macro_rules! error_panic(
     ($cfg:expr => $($arg:tt)+) => (
         {
@@ -25,6 +53,27 @@ macro_rules! error_panic(
     )
 );
 
+/// Report an error and panic in any case
+///
+/// # Syntax
+///
+/// `error_panic!(MyError)`
+///
+/// # Example
+///
+/// ```should_panic
+/// # #[macro_use] extern crate zwreec;
+/// # #[macro_use] extern crate log;
+/// # use zwreec::frontend::expressionparser::ExpressionParserError;
+/// # fn main() {
+/// let cfg = zwreec::config::Config::default_config();
+/// error_force_panic!(ExpressionParserError::OperStackIsEmpty);
+/// # }
+/// ```
+/// # Panics
+///
+/// This macro panics and does not return
+#[macro_export]
 macro_rules! error_force_panic(
     ($($arg:tt)+) => (
         {
@@ -140,11 +189,11 @@ impl Display for CodeGenError {
             &CodeGenError::IdentifierStackEmpty => {
                 try!(f.write_str("Identifier stack is empty. Operation wasn't possible."))
             },
-            &CodeGenError::SymbolMapEmpty => {
-                try!(f.write_str("Symbol map is empty. Operation wasn't possible."))
+            &CodeGenError::SymbolNotFound { ref name } => {
+                try!(f.write_fmt(format_args!("Symbol map is does not contain symbol '{}'. Operation wasn't possible.", name)))
             },
-            &CodeGenError::CouldNotFindSymbolId => {
-                try!(f.write_str("Could not find symbol ID in symbol table. Report a bug."))
+            &CodeGenError::CouldNotFindSymbolId { id } => {
+                try!(f.write_fmt(format_args!("Could not find symbol ID '{}' in symbol table. Report a bug.", id)))
             }
         };
         Ok(())

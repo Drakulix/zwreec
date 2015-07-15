@@ -9,29 +9,48 @@ use frontend::expressionparser;
 use frontend::lexer::Token;
 use frontend::lexer::Token::{TokMacroIf, TokMacroElseIf, TokExpression};
 
-use ::utils::extensions::{Constructor, ConstructorExt};
-//==============================
-// ast
+use ::utils::extensions::{Constructor, ConstructorExt, Peeking, PeekingExt};
 
+/// This is the state of the AST building operation.
 pub struct ASTBuilder {
     path: Vec<usize>,
     is_in_if_expression: bool
 }
 
-/// the parser use these ASTOperations to create the ast
+/// The [parser](../parser/index.html) uses these ASTOperations to create the AST.
+#[derive(Clone)]
 pub enum ASTOperation {
+    /// Adds a passage to the path in the ast.
     AddPassage(Token),
+
+    /// Adds a child to the path in the ast.
     AddChild(Token),
+
+    /// Adds a child and adds the child to the current path.
     ChildDown(Token),
+
+    /// Adds a child and goes one level up.
     ChildUp(Token),
+
+    /// Goes two levels up.
     TwoUp,
+
+    /// Goes one level up in the path.
     Up,
+
+    /// Goes one level up and adds a child.
     UpChild(Token),
+
+    /// Goes one level up, adds a child and adds the added child to the path.
     UpChildDown(Token),
+
+    /// This goes one level up or goes out of an if-expression if possible.
     UpSpecial,
 }
 
 impl ASTBuilder {
+
+    /// Creates a new ASTBuilder.
     fn new() -> ASTBuilder {
         ASTBuilder {
             path: Vec::new(),
@@ -39,18 +58,27 @@ impl ASTBuilder {
         }
     }
 
-    ///constructs Iterator over all Passages
+    /// Constructs an iterator over all passages.
+    ///
+    // This has a concrete return type because of optimization reasons. Read and use it as "Iterator<ASTNode>".
     pub fn build<I: Iterator<Item=ASTOperation>>(cfg: Config, ops: I)
-        -> Scan<Constructor<I, ASTBuilder, ASTNode, fn(&mut ASTBuilder, &mut Option<ASTNode>, ASTOperation) -> Option<ASTNode>>, Config, fn(&mut Config, ASTNode) -> Option<ASTNode>>
-        //concrete return type because of optimization reasons. Read and use it as "Iterator<ASTNode>"
+        -> Scan<Constructor<Peeking<I, ASTOperation>, ASTBuilder, ASTNode, fn(&mut ASTBuilder, &mut Option<ASTNode>, (ASTOperation, Option<ASTOperation>)) -> Option<ASTNode>>, Config, fn(&mut Config, ASTNode) -> Option<ASTNode>>
     {
-        ops.construct_state(ASTBuilder::new(),
+        info!("Started to build AST");
+
+        ops.peeking().construct_state(ASTBuilder::new(),
         {
-            fn construct(builder: &mut ASTBuilder, passage: &mut Option<ASTNode>, op: ASTOperation) -> Option<ASTNode>
+            fn construct(builder: &mut ASTBuilder, passage: &mut Option<ASTNode>, op_peek: (ASTOperation, Option<ASTOperation>)) -> Option<ASTNode>
             {
-                builder.operation(passage, op)
+                let op_node = builder.operation(passage, op_peek.0);
+
+                if op_peek.1.is_none() {
+                    info!("Finished building AST");
+                }
+
+                op_node
             }
-            construct as fn(&mut ASTBuilder, &mut Option<ASTNode>, ASTOperation) -> Option<ASTNode> //necessary cast is a known bug
+            construct as fn(&mut ASTBuilder, &mut Option<ASTNode>, (ASTOperation, Option<ASTOperation>)) -> Option<ASTNode> //necessary cast is a known bug
         }).scan(cfg,
             {
                 fn scan(cfg: &mut Config, x: ASTNode) -> Option<ASTNode>
@@ -64,7 +92,7 @@ impl ASTBuilder {
         )
     }
 
-    /// calls the matching function to a given ASTOperation
+    /// Calls the matching function to a given ASTOperation.
     pub fn operation(&mut self, current_passage: &mut Option<ASTNode>, op: ASTOperation) -> Option<ASTNode> {
         use self::ASTOperation::*;
         match op {
@@ -80,7 +108,7 @@ impl ASTBuilder {
         }
     }
 
-    /// counts the childs of the path in the asts
+    /// Counts the childs of the path in the AST.
     pub fn count_childs(&self, current_passage: &mut Option<ASTNode>, path: Vec<usize>) -> usize {
         if let Some(_) = path.first() {
             current_passage.as_ref().unwrap().count_childs(path.to_vec())
@@ -89,13 +117,13 @@ impl ASTBuilder {
         }
     }
 
-    /// adds a passage to the path in the ast
+    /// Adds a passage to the path in the AST.
     pub fn add_passage(&mut self, token: Token) -> Option<ASTNode> {
         self.path.clear();
         Some(ASTNode::Passage(NodePassage { category: token, childs: Vec::new() }))
     }
 
-    /// adds a child to the path in the ast
+    /// Adds a child to the path in the AST.
     pub fn add_child(&mut self, current_passage_opt: &mut Option<ASTNode>, token: Token) -> Option<ASTNode> {
         if let Some(ref mut current_passage) = current_passage_opt.as_mut() {
             current_passage.add_child(self.path.to_vec(), token);
@@ -105,9 +133,8 @@ impl ASTBuilder {
         }
     }
 
-    /// adds a child an goees one child down
+    /// Adds a child and adds the child to the current path.
     pub fn child_down(&mut self, current_passage: &mut Option<ASTNode>, token: Token) -> Option<ASTNode> {
-        //
         if token.clone().is_same_token(&TokMacroIf { location: (0, 0) }) ||
            token.clone().is_same_token(&TokMacroElseIf { location: (0, 0) }) {
             self.is_in_if_expression = true;
@@ -119,7 +146,7 @@ impl ASTBuilder {
         result
     }
 
-    /// adds one child and goes down. adds snd child and goes down.
+    /// Adds one child and goes down. Adds a second child and goes down.
     pub fn two_childs_down(&mut self, current_passage: &mut Option<ASTNode>, child1: Token, child2: Token) -> Option<ASTNode> {
         match self.child_down(current_passage, child1) {
             Some(new_passage) => {
@@ -133,13 +160,13 @@ impl ASTBuilder {
 
     }
 
-    /// goes one lvl up
+    /// Goes one level up in the path.
     pub fn up(&mut self) -> Option<ASTNode> {
         self.path.pop();
         None
     }
 
-    /// special up of the if-expression
+    /// This goes one level up or goes out of an if-expression if possible.
     pub fn up_special(&mut self) -> Option<ASTNode> {
         if !self.is_in_if_expression {
             self.path.pop();
@@ -149,26 +176,26 @@ impl ASTBuilder {
         None
     }
 
-    /// adds a child and goes one lvl up
+    /// Adds a child and goes one level up.
     pub fn child_up(&mut self, current_passage: &mut Option<ASTNode>, token: Token) -> Option<ASTNode> {
         let result = self.add_child(current_passage, token);
         self.up();
         result
     }
 
-    /// goes one lvl up and adds and child
+    /// Goes one level up and adds a child.
     pub fn up_child(&mut self, current_passage: &mut Option<ASTNode>, token: Token) -> Option<ASTNode> {
         self.up();
         self.add_child(current_passage, token)
     }
 
-    /// goes one lvl up, adds an child and goes one lvl down
+    /// Goes one level up, adds a child and adds the added child to the path.
     pub fn up_child_down(&mut self, current_passage: &mut Option<ASTNode>, token: Token) -> Option<ASTNode> {
         self.up();
         self.child_down(current_passage, token)
     }
 
-    /// goes two lvl up
+    /// Goes two levels up.
     pub fn two_up(&mut self) -> Option<ASTNode> {
         self.up();
         self.up();
@@ -178,28 +205,47 @@ impl ASTBuilder {
 
 // ================================
 // node types
+
+/// This is a generic node.
+///
+/// It can either be a standard node or a passage node.
 #[derive(Clone)]
 pub enum ASTNode {
+    /// A standard node
     Default (NodeDefault),
+
+    /// Passage node
     Passage (NodePassage)
 }
 
+/// This is a passage node.
+///
+/// Passage nodes may only appear as root objects, they
+/// are, by convention, never children of other nodes.
 #[derive(Clone)]
 pub struct NodePassage {
+    /// The Token of the node
     pub category: Token,
+
+    /// A list of all the childs of the node
     pub childs: Vec<ASTNode>,
     /*tags: Vec<ASTNode>*/
 }
 
+/// This is a default node.
 #[derive(Clone)]
 pub struct NodeDefault {
+    /// The Token of the node
     pub category: Token,
+
+    /// A list of all the childs of the node
     pub childs: Vec<ASTNode>
 }
 
-/// the implementation of a node
+/// The implementation of a node.
 impl ASTNode {
-    /// adds an child to the path in the ast
+
+    /// Adds a child to the path in the AST
     pub fn add_child(&mut self, path: Vec<usize>, token: Token) {
         if let Some(index) = path.first() {
             let mut new_path: Vec<usize> = path.to_vec();
@@ -217,7 +263,7 @@ impl ASTNode {
         }
     }
 
-    /// counts the childs of the current path in the ast
+    /// Counts the childs of the current path in the AST.
     pub fn count_childs(&self, path: Vec<usize>) -> usize {
         if let Some(index) = path.first() {
             let mut new_path: Vec<usize> = path.to_vec();
@@ -235,7 +281,7 @@ impl ASTNode {
         }
     }
 
-    /// checks the current path if there is the token "token"
+    /// Checks the current path if there is the token specified by `token`.
     pub fn is_specific_token(&self, token: Token, path: Vec<usize>) -> bool {
         if let Some(index) = path.first() {
             let mut new_path: Vec<usize> = path.to_vec();
@@ -257,7 +303,7 @@ impl ASTNode {
         }
     }
 
-    /// returns the current category of a node
+    /// Returns the current category (Token) of a node.
     pub fn category(&self) -> Token {
         match self {
             &ASTNode::Passage(ref t) => {
@@ -269,7 +315,7 @@ impl ASTNode {
         }
     }
 
-    /// returns all childs of a node
+    /// Returns all child trees of a node.
     pub fn childs(&self) -> &Vec<ASTNode> {
         match self {
             &ASTNode::Passage(ref t) => {
@@ -281,7 +327,7 @@ impl ASTNode {
         }
     }
 
-    /// for nice ast-printing
+    /// Formats an ASTNode with the specified `indent` for debug printing.
     fn fmt_node(&self, f: &mut Formatter, indent: usize) -> Result {
         let mut spaces = "".to_string();
         for _ in 0..indent {
@@ -296,7 +342,10 @@ impl ASTNode {
         Ok(())
     }
 
-    /// wraps the ASTNode to NodeDefault
+    /// Unwraps the ASTNode as NodeDefault.
+    ///
+    /// # Panics
+    /// Panics if the ASTNode is not a NodeDefault.
     pub fn as_default(self) -> NodeDefault {
         match self {
             ASTNode::Default(def) => def,
@@ -304,7 +353,7 @@ impl ASTNode {
         }
     }
 
-    /// goes through the whole tree and parse the expressions
+    /// Goes through the whole tree and parses the expressions.
     fn parse_expressions(&mut self, cfg: &Config) {
         match self {
             &mut ASTNode::Passage(ref mut node) => {
@@ -346,7 +395,7 @@ mod tests {
     use frontend::lexer::Token::*;
     use config::Config;
 
-    /// creates an ast from the inputs str
+    /// Creates an AST from the input str by lexing and parsing it.
     fn test_ast(input: &str) -> Vec<ASTNode> {
         let cfg = Config::default_config();
         let mut cursor: Cursor<Vec<u8>> = Cursor::new(input.to_string().into_bytes());
@@ -360,7 +409,9 @@ mod tests {
         ast.collect()
     }
 
-    /// checks expected
+    /// Checks if the expected AST matched the provided AST.
+    ///
+    /// Panics otherwise.
     fn test_expected(expected: Vec<(Vec<usize>, Token)>, ast: Vec<ASTNode>) {
         for item in expected.iter() {
             /// checks in the ast if there is the token "token"

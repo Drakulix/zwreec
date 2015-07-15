@@ -1,4 +1,8 @@
-//! The `codegen` module is for the creating of zcode from an ast
+//! The `codegen` module is for the creation of Z-Code from an [AST](../frontend/ast/index.html).
+//! The [generate_zcode](./fn.generate_zcode.html) function traverses the AST and emits Z-Code along
+//! the way by using the functions provided by the [Z-Code backend module](../zcode/index.html). The
+//! Z-Code data is then written to the output. See the [module level documentation](../index.html)
+//! for more information on how to use the backend.
 
 use std::collections::{HashMap, HashSet};
 use std::error::Error;
@@ -11,24 +15,59 @@ use frontend::evaluate_expression::{evaluate_expression, EvaluateExpressionError
 use frontend::lexer::Token;
 use frontend::lexer::Token::*;
 
+/// All the errors that can occur during code generation.
 #[derive(Debug)]
+#[allow(missing_docs)]
 pub enum CodeGenError {
+    /// Output file/pipe is not writable
     CouldNotWriteToOutput { why: String },
+
+    /// Internal AST error
     InvalidAST,
+
+    /// Token does not have any codegen action specified
     NoMatch { token: Token },
+
+    /// Start passage does not exist
     NoStartPassage,
+
+    /// Unkown passage was referenced
     PassageDoesNotExist { name: String },
+
+    /// Expression not supported
     UnsupportedExpression { token: Token },
+
+    /// If-Expression not supported
     UnsupportedIfExpression { token: Token },
+
+    /// Else-If-Expression not supported
     UnsupportedElseIfExpression { token: Token },
+
+    /// Expression type is unsupported
     UnsupportedExpressionType { name: String },
+
+    /// Can't have any expression, just variables
     UnsupportedLongExpression { name: String, token: Token },
+
+    /// ID stack underflow
     IdentifierStackEmpty,
-    SymbolMapEmpty,
-    CouldNotFindSymbolId,
+
+    /// Symbol map invalid
+    SymbolNotFound { name: String },
+
+    /// Symbol could not be found in symbol table
+    CouldNotFindSymbolId { id: u8 },
 }
 
+/// Create Codegen state and generate Z-Code from the specified AST passage iterator.
+///
+/// # Panics
+/// This panics when an error occurs and the `force` option in the config is not set.
+/// It also panics even when that option is set for invalid expressions, missing passages and other
+/// unrecoverable errors.
 pub fn generate_zcode<W: Write, I: Iterator<Item=ASTNode>>(cfg: &Config, ast: I, output: &mut W) {
+    info!("Started code generation");
+
     let mut codegenerator = Codegen::new(cfg);
     codegenerator.start_codegen(ast);
     match output.write_all(&(*codegenerator.zfile_bytes())) {
@@ -36,18 +75,23 @@ pub fn generate_zcode<W: Write, I: Iterator<Item=ASTNode>>(cfg: &Config, ast: I,
             error_panic!(cfg => CodeGenError::CouldNotWriteToOutput { why: Error::description(&why).to_string() } );
         },
         Ok(_) => {
-            info!("Wrote zcode to output");
+            info!("Wrote Z-Code to output");
         }
     };
 }
 
+/// Code generator state.
 #[allow(dead_code)]
 struct Codegen<'a> {
+    /// The zwreec config
     cfg: &'a Config,
+
+    /// The output file
     zfile: Zfile
 }
 
 impl<'a> Codegen<'a> {
+    /// Create a new Codegen object with the specified config.
     pub fn new(cfg: &'a Config) -> Codegen<'a> {
         Codegen {
             cfg: cfg,
@@ -55,11 +99,9 @@ impl<'a> Codegen<'a> {
         }
     }
 
-    /// starts the code-generation
+    /// Starts the code-generation.
     pub fn start_codegen<I: Iterator<Item=ASTNode>>(&mut self, ast: I) {
         self.zfile.start();
-        //self.zfile.op_quit();
-        //self.zfile.routine("main", 0);
 
         self.ast_to_zcode(ast);
 
@@ -68,11 +110,12 @@ impl<'a> Codegen<'a> {
         self.zfile.end();
     }
 
+    /// Returns a `&Vec<u8>` with the bytes in the output file.
     pub fn zfile_bytes(&self) -> &Vec<u8> {
         &self.zfile.data.bytes
     }
 
-    /// convert ast to zcode
+    /// Convert AST to Z-Code.
     pub fn ast_to_zcode<I: Iterator<Item=ASTNode>>(&mut self, ast: I) {
         let mut manager = CodeGenManager::new(self.cfg);
 
@@ -89,7 +132,7 @@ impl<'a> Codegen<'a> {
 }
 
 
-/// add zcode based on tokens
+/// Generate Z-Code based on the ASTNode and its children.
 pub fn gen_zcode(node: ASTNode, mut out: &mut Zfile, mut manager: &mut CodeGenManager) -> Vec<ZOP> {
     let mut state_copy = manager.format_state.clone();
     let mut set_formatting = false;
@@ -538,7 +581,7 @@ pub fn gen_zcode(node: ASTNode, mut out: &mut Zfile, mut manager: &mut CodeGenMa
     }
 }
 
-/// random(from, to) -> zcode op_random(0, range)
+/// This generates code for the function `random(from, to) -> zcode op_random(0, range)`.
 pub fn function_random(manager: &CodeGenManager, arg_from: &Operand, arg_to: &Operand,
         code: &mut Vec<ZOP>, temp_ids: &mut Vec<u8>, location: (u64, u64)) -> Operand {
 
@@ -619,31 +662,59 @@ pub fn function_random(manager: &CodeGenManager, arg_from: &Operand, arg_to: &Op
     Operand::new_var(var.id)
 }
 
-
+/// The manager that contains a lot of state for the code generation.
 pub struct CodeGenManager<'a> {
+    /// The zwreec config
     pub cfg: &'a Config,
+
+    /// The ID provider for if labels
     pub ids_if: IdentifierProvider,
+
+    /// The ID provider for expressions
     pub ids_expr: IdentifierProvider,
+
+    /// The ID provider for set variable operations
     pub ids_link_var_set: IdentifierProvider,
+
+    /// The passages already processed by Codegen
     pub visited_passages: HashSet<String>,
+
+    /// All passages that are linked to (including Start)
     pub required_passages: Vec<String>,
+
+    /// The symbol table
     pub symbol_table: SymbolTable,
+
+    /// The current formatting options
     pub format_state: FormattingState,
+
+    /// Is this inside a silent tag? (no output)
     pub is_silent: bool,
+
+    /// Is this inside a nobr tag? (no line breaks)
     pub is_nobr: bool
 }
 
+/// A generator for unique IDs.
 pub struct IdentifierProvider {
+    /// The next to be issued ID
     current_id: u32,
+
+    /// The current stack with available IDs
     id_stack: Vec<u32>
 }
 
+/// The symbol table.
 pub struct SymbolTable {
+    /// The ID of the last symbol
     current_id: u8,
+
+    /// A map of all variables and their type
     symbol_map: HashMap<String, (Variable, Type)>
 }
 
 impl <'a> CodeGenManager<'a> {
+    /// Creates a new CodeGenManager.
     pub fn new(cfg: &'a Config) -> CodeGenManager<'a> {
         CodeGenManager {
             cfg: cfg,
@@ -659,14 +730,18 @@ impl <'a> CodeGenManager<'a> {
         }
     }
 
+    /// Creates a vector with 13 temporary IDs (15 is the count of allowed max local variables in
+    /// Z-Code and two variables are reserved for other purposes).
     pub fn new_temp_var_vec() -> Vec<u8> {
         (2..15).collect()
     }
 
+    /// Tells whether a variable is a temporary (true) or global variable (false).
     pub fn is_temp_var(var: &Variable) -> bool{
         var.id > 1 && var.id < 16
     }
 
+    /// Checks for Twee invariants (Start passage must exist, all linked passages must exist).
     pub fn validate_passages(&self) {
         if !self.visited_passages.contains(&("Start".to_string())) {
             error_force_panic!(CodeGenError::NoStartPassage);
@@ -680,6 +755,7 @@ impl <'a> CodeGenManager<'a> {
 }
 
 impl IdentifierProvider {
+    /// Creates a new ID provider.
     pub fn new() -> IdentifierProvider {
         IdentifierProvider {
             current_id: 0,
@@ -687,7 +763,7 @@ impl IdentifierProvider {
         }
     }
 
-    // Returns a new id and pushes it onto the stack
+    /// Returns a new id and pushes it onto the stack.
     pub fn start_next(&mut self) -> u32 {
         let id = self.current_id;
         self.current_id += 1;
@@ -695,7 +771,7 @@ impl IdentifierProvider {
         id
     }
 
-    // Returns the last id from the stack (but retains it)
+    /// Returns the last id from the stack (but retains it).
     pub fn peek(&mut self) -> u32 {
         if let Some(temp) = self.id_stack.last() {
             return temp.clone()
@@ -704,7 +780,7 @@ impl IdentifierProvider {
         error_force_panic!(CodeGenError::IdentifierStackEmpty);
     }
 
-    // Pops the last id from the stack
+    /// Pops the last id from the stack.
     pub fn pop_id(&mut self) -> u32 {
         if let Some(temp) = self.id_stack.pop() {
             return temp.clone()
@@ -715,6 +791,7 @@ impl IdentifierProvider {
 }
 
 impl SymbolTable {
+    /// Creates a new symbol table.
     pub fn new() -> SymbolTable {
         SymbolTable {
             current_id: 25,
@@ -722,30 +799,33 @@ impl SymbolTable {
         }
     }
 
-    // Inserts a symbol into the table, assigning a new id
+    /// Inserts a symbol into the table, assigning a new id.
     pub fn insert_new_symbol(&mut self, symbol: String, t: Type) {
         debug!("Assigned id {} to variable {}", self.current_id, symbol);
         self.symbol_map.insert(symbol, (Variable{id: self.current_id, vartype: t.clone()}, t));
         self.current_id += 1;
     }
 
-    // Checks if the symbol is already existent in the table
+    /// Checks if the symbol is already existent in the table.
     pub fn is_known_symbol(&self, symbol: &String) -> bool {
         self.symbol_map.contains_key(symbol)
     }
 
-    // Returns the id for a given symbol
-    // (check if is_known_symbol, otherwise panics)
+    /// Returns the id for a given symbol.
+    ///
+    /// # Panics
+    /// This panics when the symbol is unkown.
     pub fn get_symbol_id(&self, symbol: &String) -> Variable {
         if let Some(temp) = self.symbol_map.get(symbol) {
             return temp.0.clone()
         }
 
-        error_force_panic!(CodeGenError::SymbolMapEmpty)
+        error_force_panic!(CodeGenError::SymbolNotFound { name: symbol.clone() })
     }
 
-    // Returns the id for a given symbol
-    // (check if is_known_symbol, otherwise adds it silently as type None)
+    /// Returns the id for a given symbol.
+    ///
+    /// Checks is the symbol is known, otherwise adds it silently as type None.
     pub fn get_and_add_symbol_id(&mut self, symbol: String) -> Variable {
         if !self.symbol_map.contains_key(&symbol) {
             self.insert_new_symbol(symbol.clone(), Type::None);
@@ -753,41 +833,44 @@ impl SymbolTable {
         if let Some(temp) = self.symbol_map.get(&symbol) {
             return temp.0.clone()
         }
-        error_force_panic!(CodeGenError::SymbolMapEmpty)
+        error_force_panic!(CodeGenError::SymbolNotFound { name: symbol.clone() })
     }
 
+    /// Returns the Type of the specified symbol.
+    ///
+    /// # Panics
+    /// This panics when the symbol map does not contain the symbol.
     pub fn get_symbol_type(&self, symbol: &String) -> Type {
         if let Some(temp) = self.symbol_map.get(symbol) {
             return temp.1.clone()
         }
 
-        error_force_panic!(CodeGenError::SymbolMapEmpty)
+        error_force_panic!(CodeGenError::SymbolNotFound { name: symbol.clone() })
     }
 
+    /// Checks if the symbol table contains a variable with the specified id.
     pub fn has_var_id(&self, id: u8) -> bool {
         for name in self.symbol_map.keys() {
-            if let Some(temp) = self.symbol_map.get(name) {
-                if temp.0.clone().id == id {
-                    return true;
-                }
-            } else {
-                error_force_panic!(CodeGenError::SymbolMapEmpty)
+            if self.symbol_map.get(name).unwrap().0.clone().id == id {
+                return true;
             }
         }
+
         false
     }
 
+    /// Returns the Type of the symbol specified by the id.
+    ///
+    /// # Panics
+    /// This panics if the symbol table does not contain the symbol id.
     pub fn get_symbol_type_by_id(&self, id: u8) -> Type {
         for name in self.symbol_map.keys() {
-            if let Some(temp) = self.symbol_map.get(name) {
-                if temp.0.clone().id == id {
-                    return temp.1.clone();
-                }
-            } else {
-                error_force_panic!(CodeGenError::SymbolMapEmpty)
+            let symbol = self.symbol_map.get(name).unwrap();
+            if symbol.0.clone().id == id {
+                return symbol.1.clone();
             }
         }
 
-        error_force_panic!(CodeGenError::CouldNotFindSymbolId)
+        error_force_panic!(CodeGenError::CouldNotFindSymbolId { id: id });
     }
 }

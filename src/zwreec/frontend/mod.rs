@@ -1,8 +1,13 @@
 //! Processes Twee files and builds an abstract syntax tree.
 //!
-//! The Frontend is responsible for processing a Twee file by
+//! The frontend is responsible for processing a Twee file by
 //! generating a Token Stream from the input and parsing this stream to build
 //! an Abstract Syntax Tree.
+//!
+//! The first stage in generating the AST is the [lexer](lexer/index.html). The tokens generated
+//! by the lexer are then fed to the [parser](parser/index.html). The parser generates a
+//! sequence of operations that are then used to generate the [AST](ast/index.html). The AST can
+//! then be parsed to generate code in the [backend](../backend/index.html).
 //!
 //! # Example
 //!

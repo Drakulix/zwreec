@@ -1,12 +1,12 @@
-16a17,19
+17a18,20
 >     part_one(file);
 >     part_two(file);
 > }
-18c21
+19c22
 < 
 ---
 > fn part_one(file: &mut Zfile) {
-3185a3189,3191
+3186a3190,3192
 > }
 > 
 > fn part_two(file: &mut Zfile) {

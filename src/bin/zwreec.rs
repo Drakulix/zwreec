@@ -1,3 +1,7 @@
+//! The `bin` crate contains a reference binary implementation that uses the zwreec library to
+//! create a twee to z-code command line compiler
+#![warn(missing_docs)]
+
 extern crate zwreec;
 extern crate getopts;
 extern crate libc;
@@ -10,6 +14,7 @@ use std::vec::Vec;
 use std::error::Error;
 use std::fs::File;
 use std::io::{Read,Write};
+use std::thread;
 use std::path::Path;
 use std::process::exit;
 
@@ -179,57 +184,72 @@ fn parse_input(matches: &getopts::Matches) -> Option<Box<Read>> {
     }
 }
 
-fn parse_output(matches: &getopts::Matches) -> Option<Box<Write>> {
+fn parse_path<'a>(matches: &'a getopts::Matches) -> Option<String> {
     let name = matches.opt_str("o").unwrap_or("a.z8".to_string());
 
     if name == "-" {
-        // tty requested
-        if unsafe { libc::isatty(libc::STDOUT_FILENO as i32)  } == 0 {
-            // Not connected to a terminal, assuming safe to write to stdin
-            // NOTE: this should be considered unsafe, as the library is *not*
-            // guaranteed to only print to stderr
-            warn!("Writing to stdout can lead to unusable output!");
-            warn!("You should specify an output name using -o 'FILE'");
-            info!("Writing output to stdout");
-            Some(Box::new(std::io::stdout()))
-        } else {
-            error!("stdout is connected to a terminal.");
-            error!("Zcode is a binary format and should not be printed to a tty.");
-            None
-        }
+        None
     } else {
-        // opening file
-        let path = Path::new(&name);
+        Some(name)
+    }
+}
 
-        if name == "a.z8" {
-            debug!("No output file specified, using {}", path.display());
-        }
-
-        // Check if FILE exists and issue warning.
-        if File::open(path).is_ok() {
-            if !matches.opt_present("w") {
-                error!("Output file {} already exists. Use '-o NAME' to use a different name or '-w' to overwrite!",
-                       path.display());
-                return None;
+fn parse_output(matches: &getopts::Matches, path: Option<String>) -> Option<Box<Write>> {
+    match path {
+        None => {
+            // tty requested
+            if unsafe { libc::isatty(libc::STDOUT_FILENO as i32)  } == 0 {
+                // Not connected to a terminal, assuming safe to write to stdin
+                // NOTE: this should be considered unsafe, as the library is *not*
+                // guaranteed to only print to stderr
+                warn!("Writing to stdout can lead to unusable output!");
+                warn!("You should specify an output name using -o 'FILE'");
+                info!("Writing output to stdout");
+                Some(Box::new(std::io::stdout()))
             } else {
-                warn!("Overwriting output file {}", path.display());
-            }
-        }
-
-        match File::create(path) {
-            Err(why) => {
-                error!("Couldn't open {}: {}",
-                       path.display(), Error::description(&why));
+                error!("stdout is connected to a terminal.");
+                error!("Zcode is a binary format and should not be printed to a tty.");
                 None
-            },
-            Ok(file) => {
-                info!("Opened output: {}", path.display());
-                Some(Box::new(file))
+            }
+        },
+        Some(path) => {
+            let path = Path::new(&path);
+
+            // opening file
+            if path.to_str().unwrap_or("") == "a.z8" {
+                debug!("No output file specified, using {}", path.display());
+            }
+
+            // Check if FILE exists and issue warning.
+            if File::open(path).is_ok() {
+                if !matches.opt_present("w") {
+                    error!("Output file {} already exists. Use '-o NAME' to use a different name or '-w' to overwrite!",
+                           path.display());
+                    return None;
+                } else {
+                    warn!("Overwriting output file {}", path.display());
+                }
+            }
+
+            match File::create(path) {
+                Err(why) => {
+                    error!("Couldn't open {}: {}",
+                           path.display(), Error::description(&why));
+                    None
+                },
+                Ok(file) => {
+                    info!("Opened output: {}", path.display());
+                    Some(Box::new(file))
+                }
             }
         }
     }
 }
 
+enum MainError {
+    NoInput,
+    NoOutput,
+}
 
 fn main() {
     // handle command line parameters
@@ -238,27 +258,65 @@ fn main() {
         config::zwreec_options(short_options())
     );
 
-    let mut input = parse_input(&matches);
-    let mut output = parse_output(&matches);
+    let path = parse_path(&matches);
 
-    debug!("Parsed command line options");
-    info!("Main started");
+    let path_copy = path.clone();
+    let code = match thread::spawn(move || {
+        let mut input = parse_input(&matches);
+        let mut output = parse_output(&matches, path_copy);
 
-    // call library
-    if !cfg.test_cases.is_empty() {
-        zwreec::test_library(cfg, &mut input, &mut output);
-    } else {
-        // unwrap input and output
-        let mut _input = match input {
-            Some(i) => i,
-            None => panic!("Missing input file! Compile aborted")
-        };
-        let mut _output = match output {
-            Some(o) => o,
-            None => panic!("Missing output file! Compile aborted")
-        };
-        zwreec::compile(cfg, &mut _input, &mut _output);
-    }
+        debug!("Parsed command line options");
+        info!("Compiler started");
 
-    info!("Main finished");
+        // call library
+        if !cfg.test_cases.is_empty() {
+            zwreec::test_library(cfg, &mut input, &mut output);
+        } else {
+            // unwrap input and output
+            let mut _input = match input {
+                Some(i) => i,
+                None => panic!(MainError::NoInput)
+            };
+            let mut _output = match output {
+                Some(o) => o,
+                None => panic!(MainError::NoOutput)
+            };
+            zwreec::compile(cfg, &mut _input, &mut _output);
+        }
+    }).join() {
+        Err(x) => {
+            error!("Compiler failed");
+            match x.downcast_ref::<MainError>() {
+                Some(err) => {
+                    match err {
+                        &MainError::NoOutput => {
+                            error!("Missing output!");
+                        },
+                        &MainError::NoInput => {
+                            error!("Missing input!");
+                            usage(false);
+                        }
+                    }
+                },
+                None => {
+                    match path {
+                        Some(path) => {
+                            match std::fs::remove_file(Path::new(&path)) {
+                                Err(_) => warn!("Failed to removed unfinished output file"),
+                                _ => {},
+                            }
+                        }
+                        _ => {},
+                    };
+                }
+            };
+            1
+        },
+        _ => {
+            info!("Compiler finished");
+            0
+        }
+    };
+
+    std::process::exit(code);
 }

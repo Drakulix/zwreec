@@ -45,21 +45,30 @@
 //!     To store your new setting, you need to add it as a field to the `Config` struct. Here we
 //!     add a new boolean `pub italics: bool` to control *italics*. Always add a field-comment.
 //!
-//!     ```ignore
+//!     ```
 //!     pub struct Config {
 //!         /// Add easter egg to compiler
 //!         pub easter_egg: bool,
 //!         /// Instruct compiler to run these test-cases
-//!         pub test_cases: Vec<TestCase>,
-//!         /// Enables or disalbes Italics
+//!         pub test_cases: Vec<String>,
+//!         /// Enables or disables Italics
 //!         pub italics: bool,
 //!     }
+//! #   fn main() {}
 //!     ```
 //!
 //!     Now you also need to change `Config::default_config()` to provide the
 //!     default value for your new field:
 //!
-//!     ```ignore
+//!     ```
+//! #   pub struct Config {
+//! #       /// Add easter egg to compiler
+//! #       pub easter_egg: bool,
+//! #       /// Instruct compiler to run these test-cases
+//! #       pub test_cases: Vec<String>,
+//! #       /// Enables or disables Italics
+//! #       pub italics: bool,
+//! #   }
 //!     pub fn default_config() -> Config {
 //!         Config{
 //!             easter_egg: true,
@@ -67,6 +76,7 @@
 //!             italics: true,
 //!         }
 //!     }
+//! #   fn main() { let cfg = default_config(); }
 //!     ```
 //!
 //! 2. Parse your flag in `from_matches()`
@@ -162,16 +172,28 @@ use std::vec::Vec;
 /// ```
 #[derive(Clone)]
 pub struct Config {
-    /// force a bright background and dark text
+    /// Force a bright background and dark text
     pub bright_mode: bool,
+
     /// Add easter egg to compiler
     pub easter_egg: bool,
+
     /// Force compilation despite errors
     pub force: bool,
+
+    /// Force generation of print_uncode opcodes
     pub force_unicode: bool,
+
+    /// Divide memory usage by 2
     pub half_memory: bool,
+
+    /// Disable colours
     pub no_colours: bool,
+
+    /// Disable unicode support
     pub no_unicode: bool,
+
+    /// Enable Formatting Simulation
     pub unsupported_formatting: bool,
 
     /// Instruct compiler to run these test-cases
@@ -311,7 +333,7 @@ impl Config {
 }
 
 // TODO: If this stays only one Test Case, enum should be removed
-/// The Type used to define backend tests for the compiler
+/// The Type used to define backend tests for the compiler.
 #[derive(PartialEq,Clone)]
 pub enum TestCase {
     /// Skips the normal compiler chain and builds an example zcode file by
@@ -320,10 +342,10 @@ pub enum TestCase {
 }
 
 
-/// Appends a `getopts::Options` with compiler specific flags
+/// Appends a `getopts::Options` with compiler specific flags.
 ///
 /// The method `Config::from_matches()` looks for very specific `getopts::Matches`.
-/// This function takes an `getopts::Options` to append it with Options required
+/// This function takes a `getopts::Options` to append it with Options required
 /// by `from_matches`. It currently adds three fields:
 ///
 /// ```ignore

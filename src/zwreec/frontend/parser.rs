@@ -1,7 +1,7 @@
 //! Constructs a parsing iterator for a twee token iterator.
 //!
-//! This is a predictive parser for a twee token stream. It takes an `Token`
-//! iterator (see [lexer](/zwreec/frontend/lexer/index.html)) and wraps it inside
+//! This is a predictive parser for a twee token stream. It takes a `Token`
+//! iterator (see [lexer](../index.html)) and wraps it inside
 //! a parsing iterator that returns operations to construct an abstract syntax
 //! tree.
 //!
@@ -30,11 +30,20 @@ use self::Elem::*;
 //=============================
 // error handling
 
+/// All the possible errors that can occur during parsing.
 #[derive(Debug)]
+#[allow(missing_docs)]
 pub enum ParserError {
+    /// Token does not match the token on the stack
     TokenDoNotMatch { token: Option<Token>, stack: Token },
+
+    /// The stack is empty but there are still Tokens left
     StackIsEmpty { token: Token },
+
+    /// No projection exists for the current Token to the non-terminal on the stack
     NoProjection { token: Token, stack: NonTerminalType },
+
+    /// Ending at a non-terminal
     NonTerminalEnd { stack: NonTerminalType },
 }
 
@@ -43,6 +52,7 @@ pub enum ParserError {
 /// These are the nonterminals of the underlying LL(1) grammar. For the full grammar,
 /// take a look at Zwreec's [Wiki](https://github.com/Drakulix/zwreec/wiki/Underlying-Twee-Grammar#grammar).
 #[derive(Debug, Copy, Clone)]
+#[allow(missing_docs)]
 pub enum NonTerminalType {
     /// Start symbol
     S,
@@ -89,7 +99,7 @@ pub enum NonTerminalType {
     AssignVariable,
 }
 
-/// The Type that represents an element of the grammar
+/// The Type that represents an element of the grammar.
 ///
 /// This enum represents the lexical elements of a grammar. Nonterminals are defined by
 /// `NonTerminalType`, terminals use the lexical token as specification.
@@ -97,11 +107,14 @@ pub enum NonTerminalType {
 /// For the full grammar, take a look at Zwreec's
 /// [Wiki](https://github.com/Drakulix/zwreec/wiki/Underlying-Twee-Grammar#grammar).
 pub enum Elem {
+    /// A non-terminal element
     NonTerminal(NonTerminalType),
+
+    /// A terminal element
     Terminal(Token)
 }
 
-/// Stores the stack for the custom iterator `parsing()`
+/// Stores the stack for the custom iterator `parsing()`.
 ///
 /// The `zwreec::utils::extensions` module defines a new iterator `Parser`.
 /// This struct stores the state for this iterator.
@@ -114,24 +127,30 @@ pub struct ParseState {
 //==============================
 // parser
 
+/// The Parser parses the Token stream and generates AST operations.
 #[allow(dead_code)]
 pub struct Parser {
+    /// The zwreec config
     cfg: Config
 }
 
 impl Parser {
+    /// Creates a new parser.
     pub fn new(cfg: Config) -> Parser {
         Parser {
             cfg: cfg
         }
     }
 
+    /// Parse the input specified by the Token Iterator.
     pub fn parse<I: Iterator<Item=Token>>(self, tokens: I) ->
        ::utils::extensions::Parser<I, Token, ParseState, fn(&mut ParseState, Option<Token>) -> (ParseResult, Option<ASTOperation>)> {
 
         // prepare stack
         let mut stack: Vec<Elem> = Vec::new();
         stack.push(NonTerminal(S));
+
+        info!("Started to parse token stream");
 
         //create Iterator
         tokens.parsing(
@@ -141,7 +160,7 @@ impl Parser {
                 cfg: self.cfg,
             },
             {
-                /// the predictive stack ll(1) parsing routine
+                /// the predictive stack ll(1) parsing routine.
                 fn parse(state: &mut ParseState, token: Option<Token>) -> (ParseResult, Option<ASTOperation>) {
                     match token {
                         Some(token) => match state.stack.pop() {
@@ -166,7 +185,10 @@ impl Parser {
                                 error_panic!(state.cfg => ParserError::TokenDoNotMatch{token: token, stack: stack_token});
                                 (ParseResult::Continue, None)
                             },
-                            None => (ParseResult::End, None),
+                            None => {
+                                info!("Finished parsing token stream");
+                                (ParseResult::End, None)
+                            },
                         }
                     }
                 }
@@ -175,9 +197,9 @@ impl Parser {
         )
     }
 
-    /// apply the ll(1) grammar
-    /// the match-statement simulates the parsing-table behavior
+    /// Apply the LL(1) grammar.
     ///
+    /// The match-statement simulates the parsing-table behavior.
     fn apply_grammar(cfg: &Config, top: NonTerminalType, maybe_token: Option<Token>, stack: &mut Vec<Elem>) -> Option<ASTOperation> {
         if let Some(token) = maybe_token {
 
