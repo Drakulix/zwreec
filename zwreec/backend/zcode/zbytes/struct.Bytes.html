@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `Bytes` struct in crate `zwreec`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, Bytes">
+
+    <title>zwreec::backend::zcode::zbytes::Bytes - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../../../../main.css">
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <section class="sidebar">
+        <a href='../../../../zwreec/index.html'><img src='https://dl.dropboxusercontent.com/u/70410095/zwreec/logo.png' alt='' width='100'></a>
+        <p class='location'><a href='../../../index.html'>zwreec</a>::<wbr><a href='../../index.html'>backend</a>::<wbr><a href='../index.html'>zcode</a>::<wbr><a href='index.html'>zbytes</a></p><script>window.sidebarCurrent = {name: 'Bytes', ty: 'struct', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+    </section>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press 'S' to search, '?' for more options..."
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content struct">
+<h1 class='fqn'><span class='in-band'>Struct <a href='../../../index.html'>zwreec</a>::<wbr><a href='../../index.html'>backend</a>::<wbr><a href='../index.html'>zcode</a>::<wbr><a href='index.html'>zbytes</a>::<wbr><a class='struct' href=''>Bytes</a></span><span class='out-of-band'><span id='render-detail'>
+            <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                [<span class='inner'>&#x2212;</span>]
+            </a>
+        </span><a id='src-5173' class='srclink' href='../../../../src/zwreec/backend/zcode/zbytes.rs.html#5-8' title='goto source code'>[src]</a></span></h1>
+<pre class='rust struct'>pub struct Bytes {
+    pub bytes: <a class='struct' href='http://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;<a href='http://doc.rust-lang.org/nightly/std/primitive.u8.html'>u8</a>&gt;,
+}</pre><div class='docblock'><p>A struct that holds an array of bytes and provides some convenience functions.</p>
+</div><h2 class='fields'>Fields</h2>
+<table><tr class='stab '>
+                                  <td id='structfield.bytes'><code>bytes</code></td><td><div class='docblock'><p>The underlying data</p>
+</div></td></tr></table><h2 id='methods'>Methods</h2><h3 class='impl'><code>impl <a class='struct' href='../../../../zwreec/backend/zcode/zbytes/struct.Bytes.html' title='zwreec::backend::zcode::zbytes::Bytes'>Bytes</a></code></h3><div class='impl-items'><h4 id='method.len' class='method'><code>fn <a href='#method.len' class='fnname'>len</a>(&amp;self) -&gt; <a href='http://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a></code></h4>
+<div class='docblock'><p>Returns the length of the byte array.</p>
+</div><h4 id='method.write_byte' class='method'><code>fn <a href='#method.write_byte' class='fnname'>write_byte</a>(&amp;mut self, byte: <a href='http://doc.rust-lang.org/nightly/std/primitive.u8.html'>u8</a>, index: <a href='http://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a>)</code></h4>
+<div class='docblock'><p>Writes the byte (u8) to the index specified.</p>
+
+<p>If the vector isn&#39;t large enough it fills everything up to the index with zeros.</p>
+</div><h4 id='method.append_byte' class='method'><code>fn <a href='#method.append_byte' class='fnname'>append_byte</a>(&amp;mut self, byte: <a href='http://doc.rust-lang.org/nightly/std/primitive.u8.html'>u8</a>)</code></h4>
+<div class='docblock'><p>Appends a byte to the end of the data.</p>
+</div><h4 id='method.write_u16' class='method'><code>fn <a href='#method.write_u16' class='fnname'>write_u16</a>(&amp;mut self, value: <a href='http://doc.rust-lang.org/nightly/std/primitive.u16.html'>u16</a>, index: <a href='http://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a>)</code></h4>
+<div class='docblock'><p>Writes a u16 in two bytes with the correct byte-order for the Z-Machine at the specified
+index.</p>
+</div><h4 id='method.append_u16' class='method'><code>fn <a href='#method.append_u16' class='fnname'>append_u16</a>(&amp;mut self, value: <a href='http://doc.rust-lang.org/nightly/std/primitive.u16.html'>u16</a>)</code></h4>
+<div class='docblock'><p>Appends a u16 to the end of the data.</p>
+</div><h4 id='method.write_bytes' class='method'><code>fn <a href='#method.write_bytes' class='fnname'>write_bytes</a>(&amp;mut self, bytes: <a href='http://doc.rust-lang.org/nightly/std/primitive.slice.html'>&amp;[</a><a href='http://doc.rust-lang.org/nightly/std/primitive.u8.html'>u8</a><a href='http://doc.rust-lang.org/nightly/std/primitive.slice.html'>]</a>, to_index: <a href='http://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a>)</code></h4>
+<div class='docblock'><p>Writes multiple bytes at the specified index.</p>
+</div><h4 id='method.append_bytes' class='method'><code>fn <a href='#method.append_bytes' class='fnname'>append_bytes</a>(&amp;mut self, bytes: <a href='http://doc.rust-lang.org/nightly/std/primitive.slice.html'>&amp;[</a><a href='http://doc.rust-lang.org/nightly/std/primitive.u8.html'>u8</a><a href='http://doc.rust-lang.org/nightly/std/primitive.slice.html'>]</a>)</code></h4>
+<div class='docblock'><p>Appends an array of bytes at the end of the data.</p>
+</div><h4 id='method.write_zero_until' class='method'><code>fn <a href='#method.write_zero_until' class='fnname'>write_zero_until</a>(&amp;mut self, index: <a href='http://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a>)</code></h4>
+<div class='docblock'><p>Fills everything with zeros until but not including the index.</p>
+
+<p><code>=&gt; [index-1] == 0; [index] == nil;</code></p>
+</div><h4 id='method.print' class='method'><code>fn <a href='#method.print' class='fnname'>print</a>(&amp;self)</code></h4>
+<div class='docblock'><p>Prints the underlying byte array</p>
+</div></div></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <div id="help" class="hidden">
+        <div class="shortcuts">
+            <h1>Keyboard shortcuts</h1>
+            <dl>
+                <dt>?</dt>
+                <dd>Show this help dialog</dd>
+                <dt>S</dt>
+                <dd>Focus the search field</dd>
+                <dt>&larrb;</dt>
+                <dd>Move up in search results</dd>
+                <dt>&rarrb;</dt>
+                <dd>Move down in search results</dd>
+                <dt>&#9166;</dt>
+                <dd>Go to active search result</dd>
+            </dl>
+        </div>
+        <div class="infos">
+            <h1>Search tricks</h1>
+            <p>
+                Prefix searches with a type followed by a colon (e.g.
+                <code>fn:</code>) to restrict the search to a given type.
+            </p>
+            <p>
+                Accepted types are: <code>fn</code>, <code>mod</code>,
+                <code>struct</code>, <code>enum</code>,
+                <code>trait</code>, <code>typedef</code> (or
+                <code>tdef</code>).
+            </p>
+            <p>
+                Search functions by type signature (e.g.
+                <code>vec -> usize</code>)
+            </p>
+        </div>
+    </div>
+
+    
+
+    <script>
+        window.rootPath = "../../../../";
+        window.currentCrate = "zwreec";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../../../../jquery.js"></script>
+    <script src="../../../../main.js"></script>
+    
+    <script async src="../../../../search-index.js"></script>
+</body>
+</html>

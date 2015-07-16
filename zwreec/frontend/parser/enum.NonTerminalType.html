@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `NonTerminalType` enum in crate `zwreec`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, NonTerminalType">
+
+    <title>zwreec::frontend::parser::NonTerminalType - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../../../main.css">
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <section class="sidebar">
+        <a href='../../../zwreec/index.html'><img src='https://dl.dropboxusercontent.com/u/70410095/zwreec/logo.png' alt='' width='100'></a>
+        <p class='location'><a href='../../index.html'>zwreec</a>::<wbr><a href='../index.html'>frontend</a>::<wbr><a href='index.html'>parser</a></p><script>window.sidebarCurrent = {name: 'NonTerminalType', ty: 'enum', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+    </section>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press 'S' to search, '?' for more options..."
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content enum">
+<h1 class='fqn'><span class='in-band'>Enum <a href='../../index.html'>zwreec</a>::<wbr><a href='../index.html'>frontend</a>::<wbr><a href='index.html'>parser</a>::<wbr><a class='enum' href=''>NonTerminalType</a></span><span class='out-of-band'><span id='render-detail'>
+            <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                [<span class='inner'>&#x2212;</span>]
+            </a>
+        </span><a id='src-375519' class='srclink' href='../../../src/zwreec/frontend/parser.rs.html#56-100' title='goto source code'>[src]</a></span></h1>
+<pre class='rust enum'>pub enum NonTerminalType {
+    S,
+    Sf,
+    Passage,
+    Passagef,
+    PassageContent,
+    Tags,
+    Tagsf,
+    Formating,
+    BoldFormatting,
+    ItalicFormatting,
+    UnderlineFormatting,
+    StrikeFormatting,
+    SubFormatting,
+    SupFormatting,
+    MonoFormatting,
+    MonoContent,
+    Link,
+    Linkf,
+    Macro,
+    ElseIf,
+    EndIf,
+    Function,
+    Functionf,
+    Arguments,
+    Argumentsf,
+    ExpressionList,
+    ExpressionListf,
+    Expression,
+    E,
+    E2,
+    T,
+    T2,
+    B,
+    B2,
+    F,
+    F2,
+    G,
+    G2,
+    H,
+    DataType,
+    AssignVariable,
+}</pre><div class='docblock'><p>The Type of nonterminal encountered by the parser.</p>
+
+<p>These are the nonterminals of the underlying LL(1) grammar. For the full grammar,
+take a look at Zwreec&#39;s <a href="https://github.com/Drakulix/zwreec/wiki/Underlying-Twee-Grammar#grammar">Wiki</a>.</p>
+</div><h2 class='variants'>Variants</h2>
+<table><tr><td id='variant.S'><code>S</code></td><td><div class='docblock'><p>Start symbol</p>
+</div></td></tr><tr><td id='variant.Sf'><code>Sf</code></td><td></td></tr><tr><td id='variant.Passage'><code>Passage</code></td><td></td></tr><tr><td id='variant.Passagef'><code>Passagef</code></td><td></td></tr><tr><td id='variant.PassageContent'><code>PassageContent</code></td><td></td></tr><tr><td id='variant.Tags'><code>Tags</code></td><td></td></tr><tr><td id='variant.Tagsf'><code>Tagsf</code></td><td></td></tr><tr><td id='variant.Formating'><code>Formating</code></td><td></td></tr><tr><td id='variant.BoldFormatting'><code>BoldFormatting</code></td><td></td></tr><tr><td id='variant.ItalicFormatting'><code>ItalicFormatting</code></td><td></td></tr><tr><td id='variant.UnderlineFormatting'><code>UnderlineFormatting</code></td><td></td></tr><tr><td id='variant.StrikeFormatting'><code>StrikeFormatting</code></td><td></td></tr><tr><td id='variant.SubFormatting'><code>SubFormatting</code></td><td></td></tr><tr><td id='variant.SupFormatting'><code>SupFormatting</code></td><td></td></tr><tr><td id='variant.MonoFormatting'><code>MonoFormatting</code></td><td></td></tr><tr><td id='variant.MonoContent'><code>MonoContent</code></td><td></td></tr><tr><td id='variant.Link'><code>Link</code></td><td></td></tr><tr><td id='variant.Linkf'><code>Linkf</code></td><td></td></tr><tr><td id='variant.Macro'><code>Macro</code></td><td></td></tr><tr><td id='variant.ElseIf'><code>ElseIf</code></td><td></td></tr><tr><td id='variant.EndIf'><code>EndIf</code></td><td></td></tr><tr><td id='variant.Function'><code>Function</code></td><td></td></tr><tr><td id='variant.Functionf'><code>Functionf</code></td><td></td></tr><tr><td id='variant.Arguments'><code>Arguments</code></td><td></td></tr><tr><td id='variant.Argumentsf'><code>Argumentsf</code></td><td></td></tr><tr><td id='variant.ExpressionList'><code>ExpressionList</code></td><td></td></tr><tr><td id='variant.ExpressionListf'><code>ExpressionListf</code></td><td></td></tr><tr><td id='variant.Expression'><code>Expression</code></td><td></td></tr><tr><td id='variant.E'><code>E</code></td><td><div class='docblock'><p>Start of the expression definition</p>
+</div></td></tr><tr><td id='variant.E2'><code>E2</code></td><td></td></tr><tr><td id='variant.T'><code>T</code></td><td></td></tr><tr><td id='variant.T2'><code>T2</code></td><td></td></tr><tr><td id='variant.B'><code>B</code></td><td></td></tr><tr><td id='variant.B2'><code>B2</code></td><td></td></tr><tr><td id='variant.F'><code>F</code></td><td></td></tr><tr><td id='variant.F2'><code>F2</code></td><td></td></tr><tr><td id='variant.G'><code>G</code></td><td></td></tr><tr><td id='variant.G2'><code>G2</code></td><td></td></tr><tr><td id='variant.H'><code>H</code></td><td></td></tr><tr><td id='variant.DataType'><code>DataType</code></td><td></td></tr><tr><td id='variant.AssignVariable'><code>AssignVariable</code></td><td></td></tr></table><h2 id='implementations'>Trait Implementations</h2><h3 id='derived_implementations'>Derived Implementations </h3><h3 class='impl'><code>impl <a class='trait' href='http://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a> for <a class='enum' href='../../../zwreec/frontend/parser/enum.NonTerminalType.html' title='zwreec::frontend::parser::NonTerminalType'>NonTerminalType</a></code></h3><div class='impl-items'><h4 id='method.clone' class='method'><code>fn <a href='http://doc.rust-lang.org/nightly/core/clone/trait.Clone.html#method.clone' class='fnname'>clone</a>(&amp;self) -&gt; <a class='enum' href='../../../zwreec/frontend/parser/enum.NonTerminalType.html' title='zwreec::frontend::parser::NonTerminalType'>NonTerminalType</a></code></h4>
+<h4 id='method.clone_from' class='method'><code>fn <a href='http://doc.rust-lang.org/nightly/core/clone/trait.Clone.html#method.clone_from' class='fnname'>clone_from</a>(&amp;mut self, source: &amp;Self)</code></h4>
+</div><h3 class='impl'><code>impl <a class='trait' href='http://doc.rust-lang.org/nightly/core/marker/trait.Copy.html' title='core::marker::Copy'>Copy</a> for <a class='enum' href='../../../zwreec/frontend/parser/enum.NonTerminalType.html' title='zwreec::frontend::parser::NonTerminalType'>NonTerminalType</a></code></h3><div class='impl-items'></div><h3 class='impl'><code>impl <a class='trait' href='http://doc.rust-lang.org/nightly/core/fmt/trait.Debug.html' title='core::fmt::Debug'>Debug</a> for <a class='enum' href='../../../zwreec/frontend/parser/enum.NonTerminalType.html' title='zwreec::frontend::parser::NonTerminalType'>NonTerminalType</a></code></h3><div class='impl-items'><h4 id='method.fmt' class='method'><code>fn <a href='http://doc.rust-lang.org/nightly/core/fmt/trait.Debug.html#method.fmt' class='fnname'>fmt</a>(&amp;self, __arg_0: &amp;mut <a class='struct' href='http://doc.rust-lang.org/nightly/core/fmt/struct.Formatter.html' title='core::fmt::Formatter'>Formatter</a>) -&gt; <a class='type' href='http://doc.rust-lang.org/nightly/core/fmt/type.Result.html' title='core::fmt::Result'>Result</a></code></h4>
+</div></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <div id="help" class="hidden">
+        <div class="shortcuts">
+            <h1>Keyboard shortcuts</h1>
+            <dl>
+                <dt>?</dt>
+                <dd>Show this help dialog</dd>
+                <dt>S</dt>
+                <dd>Focus the search field</dd>
+                <dt>&larrb;</dt>
+                <dd>Move up in search results</dd>
+                <dt>&rarrb;</dt>
+                <dd>Move down in search results</dd>
+                <dt>&#9166;</dt>
+                <dd>Go to active search result</dd>
+            </dl>
+        </div>
+        <div class="infos">
+            <h1>Search tricks</h1>
+            <p>
+                Prefix searches with a type followed by a colon (e.g.
+                <code>fn:</code>) to restrict the search to a given type.
+            </p>
+            <p>
+                Accepted types are: <code>fn</code>, <code>mod</code>,
+                <code>struct</code>, <code>enum</code>,
+                <code>trait</code>, <code>typedef</code> (or
+                <code>tdef</code>).
+            </p>
+            <p>
+                Search functions by type signature (e.g.
+                <code>vec -> usize</code>)
+            </p>
+        </div>
+    </div>
+
+    
+
+    <script>
+        window.rootPath = "../../../";
+        window.currentCrate = "zwreec";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../../../jquery.js"></script>
+    <script src="../../../main.js"></script>
+    
+    <script async src="../../../search-index.js"></script>
+</body>
+</html>

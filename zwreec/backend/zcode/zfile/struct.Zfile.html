@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `Zfile` struct in crate `zwreec`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, Zfile">
+
+    <title>zwreec::backend::zcode::zfile::Zfile - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../../../../main.css">
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <section class="sidebar">
+        <a href='../../../../zwreec/index.html'><img src='https://dl.dropboxusercontent.com/u/70410095/zwreec/logo.png' alt='' width='100'></a>
+        <p class='location'><a href='../../../index.html'>zwreec</a>::<wbr><a href='../../index.html'>backend</a>::<wbr><a href='../index.html'>zcode</a>::<wbr><a href='index.html'>zfile</a></p><script>window.sidebarCurrent = {name: 'Zfile', ty: 'struct', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+    </section>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press 'S' to search, '?' for more options..."
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content struct">
+<h1 class='fqn'><span class='in-band'>Struct <a href='../../../index.html'>zwreec</a>::<wbr><a href='../../index.html'>backend</a>::<wbr><a href='../index.html'>zcode</a>::<wbr><a href='index.html'>zfile</a>::<wbr><a class='struct' href=''>Zfile</a></span><span class='out-of-band'><span id='render-detail'>
+            <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                [<span class='inner'>&#x2212;</span>]
+            </a>
+        </span><a id='src-8307' class='srclink' href='../../../../src/zwreec/backend/zcode/zfile.rs.html#400-457' title='goto source code'>[src]</a></span></h1>
+<pre class='rust struct'>pub struct Zfile {
+    pub data: <a class='struct' href='../../../../zwreec/backend/zcode/zbytes/struct.Bytes.html' title='zwreec::backend::zcode::zbytes::Bytes'>Bytes</a>,
+    pub object_addr: <a href='http://doc.rust-lang.org/nightly/std/primitive.u16.html'>u16</a>,
+    pub type_store: <a href='http://doc.rust-lang.org/nightly/std/primitive.u16.html'>u16</a>,
+    pub cursor_pos: <a href='http://doc.rust-lang.org/nightly/std/primitive.u16.html'>u16</a>,
+    pub heap_start: <a href='http://doc.rust-lang.org/nightly/std/primitive.u16.html'>u16</a>,
+    pub bright_mode: <a href='http://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a>,
+    pub force_unicode: <a href='http://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a>,
+    pub easter_egg: <a href='http://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a>,
+    pub no_colours: <a href='http://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a>,
+    pub no_unicode: <a href='http://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a>,
+    // some fields omitted
+}</pre><div class='docblock'><p>The definition of a Z-Code file.</p>
+</div><h2 class='fields'>Fields</h2>
+<table><tr class='stab '>
+                                  <td id='structfield.data'><code>data</code></td><td><div class='docblock'><p>The output data</p>
+</div></td></tr><tr class='stab '>
+                                  <td id='structfield.object_addr'><code>object_addr</code></td><td><div class='docblock'><p>Location of object table</p>
+</div></td></tr><tr class='stab '>
+                                  <td id='structfield.type_store'><code>type_store</code></td><td><div class='docblock'><p>Location of the type storage</p>
+</div></td></tr><tr class='stab '>
+                                  <td id='structfield.cursor_pos'><code>cursor_pos</code></td><td><div class='docblock'><p>Location of the cursor position</p>
+</div></td></tr><tr class='stab '>
+                                  <td id='structfield.heap_start'><code>heap_start</code></td><td><div class='docblock'><p>Start of dynamic memory</p>
+</div></td></tr><tr class='stab '>
+                                  <td id='structfield.bright_mode'><code>bright_mode</code></td><td><div class='docblock'><p>Flag to enable black font on white background</p>
+</div></td></tr><tr class='stab '>
+                                  <td id='structfield.force_unicode'><code>force_unicode</code></td><td><div class='docblock'><p>Force print_unicode op-code generation and omit unicode-translation table generation</p>
+</div></td></tr><tr class='stab '>
+                                  <td id='structfield.easter_egg'><code>easter_egg</code></td><td><div class='docblock'><p>Enable the easter-egg</p>
+</div></td></tr><tr class='stab '>
+                                  <td id='structfield.no_colours'><code>no_colours</code></td><td><div class='docblock'><p>Disable colours</p>
+</div></td></tr><tr class='stab '>
+                                  <td id='structfield.no_unicode'><code>no_unicode</code></td><td><div class='docblock'><p>Disable unicode completely</p>
+</div></td></tr></table><h2 id='methods'>Methods</h2><h3 class='impl'><code>impl <a class='struct' href='../../../../zwreec/backend/zcode/zfile/struct.Zfile.html' title='zwreec::backend::zcode::zfile::Zfile'>Zfile</a></code></h3><div class='impl-items'><h4 id='method.new' class='method'><code>fn <a href='#method.new' class='fnname'>new</a>() -&gt; <a class='struct' href='../../../../zwreec/backend/zcode/zfile/struct.Zfile.html' title='zwreec::backend::zcode::zfile::Zfile'>Zfile</a></code></h4>
+<div class='docblock'><p>Creates a new zfile with default options.</p>
+</div><h4 id='method.new_with_options' class='method'><code>fn <a href='#method.new_with_options' class='fnname'>new_with_options</a>(bright_mode: <a href='http://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a>, force_unicode: <a href='http://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a>, easter_egg: <a href='http://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a>, no_colours: <a href='http://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a>, half_memory: <a href='http://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a>, no_unicode: <a href='http://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a>) -&gt; <a class='struct' href='../../../../zwreec/backend/zcode/zfile/struct.Zfile.html' title='zwreec::backend::zcode::zfile::Zfile'>Zfile</a></code></h4>
+<div class='docblock'><p>Creates a new zfile with the specified options.</p>
+</div><h4 id='method.new_with_cfg' class='method'><code>fn <a href='#method.new_with_cfg' class='fnname'>new_with_cfg</a>(cfg: &amp;<a class='struct' href='../../../../zwreec/config/struct.Config.html' title='zwreec::config::Config'>Config</a>) -&gt; <a class='struct' href='../../../../zwreec/backend/zcode/zfile/struct.Zfile.html' title='zwreec::backend::zcode::zfile::Zfile'>Zfile</a></code></h4>
+<div class='docblock'><p>Creates a new zfile with the specified config.</p>
+</div><h4 id='method.create_header' class='method'><code>fn <a href='#method.create_header' class='fnname'>create_header</a>(&amp;mut self)</code></h4>
+<div class='docblock'><p>Creates the header of a zfile.</p>
+</div><h4 id='method.write_string' class='method'><code>fn <a href='#method.write_string' class='fnname'>write_string</a>(&amp;mut self, newstring: &amp;<a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>) -&gt; <a href='http://doc.rust-lang.org/nightly/std/primitive.u16.html'>u16</a></code></h4>
+<div class='docblock'><p>Saves the string to high memory.</p>
+</div><h4 id='method.add_jump' class='method'><code>fn <a href='#method.add_jump' class='fnname'>add_jump</a>(&amp;mut self, name: <a class='struct' href='http://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>, jump_type: <a class='enum' href='../../../../zwreec/backend/zcode/zfile/enum.JumpType.html' title='zwreec::backend::zcode::zfile::JumpType'>JumpType</a>)</code></h4>
+<div class='docblock'><p>Adds a jump to write the jump-addresses after reading all commands.</p>
+</div><h4 id='method.emit' class='method'><code>fn <a href='#method.emit' class='fnname'>emit</a>(&amp;mut self, code: <a class='struct' href='http://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;<a class='enum' href='../../../../zwreec/backend/zcode/zfile/enum.ZOP.html' title='zwreec::backend::zcode::zfile::ZOP'>ZOP</a>&gt;)</code></h4>
+<div class='docblock'><p>Write out the ZOP instructions to the data.</p>
+</div><h4 id='method.write_zop' class='method'><code>fn <a href='#method.write_zop' class='fnname'>write_zop</a>(&amp;mut self, instr: &amp;<a class='enum' href='../../../../zwreec/backend/zcode/zfile/enum.ZOP.html' title='zwreec::backend::zcode::zfile::ZOP'>ZOP</a>, return_new_jumps: <a href='http://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a>) -&gt; <a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>(<a class='struct' href='http://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;<a class='struct' href='../../../../zwreec/backend/zcode/zfile/struct.Zlabel.html' title='zwreec::backend::zcode::zfile::Zlabel'>Zlabel</a>&gt;, <a class='struct' href='http://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;<a class='struct' href='../../../../zwreec/backend/zcode/zfile/struct.Zjump.html' title='zwreec::backend::zcode::zfile::Zjump'>Zjump</a>&gt;, <a class='struct' href='http://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;<a href='http://doc.rust-lang.org/nightly/std/primitive.u8.html'>u8</a>&gt;)</a></code></h4>
+<div class='docblock'><p>Write opcodes to data array but also return written bytes for testing purposes as well as
+the resulting new labels and jumps.</p>
+</div><h4 id='method.gen_print_ops' class='method'><code>fn <a href='#method.gen_print_ops' class='fnname'>gen_print_ops</a>(&amp;mut self, text: &amp;<a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>)</code></h4>
+<div class='docblock'><p>Generates normal print opcodes for ASCII characters and unicode print opcodes for unicode
+characters. Adds new characters to the unicode translation table if there is still space.</p>
+</div><h4 id='method.start' class='method'><code>fn <a href='#method.start' class='fnname'>start</a>(&amp;mut self)</code></h4>
+<div class='docblock'><p>Start of a zcode program.</p>
+
+<p>Fills everything &lt; program_addr with zeros.</p>
+
+<h1 id="caution" class='section-header'><a
+                           href="#caution">Caution</a></h1>
+<p>This should be called as the first command.</p>
+</div><h4 id='method.end' class='method'><code>fn <a href='#method.end' class='fnname'>end</a>(&amp;mut self)</code></h4>
+<div class='docblock'><p>Writes all stuff that couldn&#39;t be written directly.</p>
+
+<h1 id="caution" class='section-header'><a
+                           href="#caution">Caution</a></h1>
+<p>This should be called as the last command.</p>
+</div><h4 id='method.routine' class='method'><code>fn <a href='#method.routine' class='fnname'>routine</a>(&amp;mut self, name: &amp;<a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>, count_variables: <a href='http://doc.rust-lang.org/nightly/std/primitive.u8.html'>u8</a>)</code></h4>
+<div class='docblock'><p>Command to create a Z-Routine.</p>
+</div><h4 id='method.label' class='method'><code>fn <a href='#method.label' class='fnname'>label</a>(&amp;mut self, name: &amp;<a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>)</code></h4>
+<div class='docblock'><p>Command to create a label.</p>
+</div><h4 id='method.routine_add_link' class='method'><code>fn <a href='#method.routine_add_link' class='fnname'>routine_add_link</a>(&amp;mut self)</code></h4>
+<div class='docblock'><p>Routine to add the address of a passage-link.</p>
+</div><h4 id='method.op_quit' class='method'><code>fn <a href='#method.op_quit' class='fnname'>op_quit</a>(&amp;mut self)</code></h4>
+<div class='docblock'><p>Exits the program immediately.</p>
+
+<p>quit is 0OP</p>
+</div><h4 id='method.routine_check_links' class='method'><code>fn <a href='#method.routine_check_links' class='fnname'>routine_check_links</a>(&amp;mut self)</code></h4>
+<div class='docblock'><p>Checks all stored links and make them selectable with the keyboard.</p>
+
+<p>The routine checks if there are &lt; 10 links or more:</p>
+
+<p>if &lt; 10: number keys 1-9 are supported, jumps immediately.</p>
+
+<p>if &gt;=10: 99 links are supported, leading zeroes are not allowed.
+To jump to a link with a number smaller than 10 you have to press enter.</p>
+</div><h4 id='method.routine_check_more' class='method'><code>fn <a href='#method.routine_check_more' class='fnname'>routine_check_more</a>(&amp;mut self)</code></h4>
+<div class='docblock'><p>Easter-egg, with konami-code to start.</p>
+</div><h4 id='method.routine_print_unicode' class='method'><code>fn <a href='#method.routine_print_unicode' class='fnname'>routine_print_unicode</a>(&amp;mut self)</code></h4>
+<div class='docblock'><p>Print UTF-16 string at addr.</p>
+
+<p>Expects an address as argument where the first u16 stored is the length of the string as the
+number of u16 chars, followed by the string to print.
+This only works if the string is within the address space up to 0xffff.</p>
+</div><h4 id='method.update_cursor_pos' class='method'><code>fn <a href='#method.update_cursor_pos' class='fnname'>update_cursor_pos</a>(&amp;mut self)</code></h4>
+<div class='docblock'><p>Update the cursor position in the global cursor_pos variable.</p>
+</div><h4 id='method.routine_prompt' class='method'><code>fn <a href='#method.routine_prompt' class='fnname'>routine_prompt</a>(&amp;mut self)</code></h4>
+<div class='docblock'><p>Needed to simulate a javascript browser input dialog, receives a prompt message and a
+default value as string arguments.</p>
+</div><h4 id='method.routine_malloc' class='method'><code>fn <a href='#method.routine_malloc' class='fnname'>routine_malloc</a>(&amp;mut self)</code></h4>
+<div class='docblock'><p>malloc Z-Routine: Allocate a specified number of words of dynamic memory.</p>
+
+<p><code>argument</code>: amount of u16 to allocate</p>
+
+<p>After receiving the address you are requested to write down the
+number of u16 you are actually using in the first u16 and then
+if you ever want to decrease this, you have to write -1i16 at
+the &#39;freed&#39; u16s at the end. increasing it is not allowed.
+memory will be freed after each passage if there is no global
+variable pointing to it.</p>
+</div><h4 id='method.routine_strcpy' class='method'><code>fn <a href='#method.routine_strcpy' class='fnname'>routine_strcpy</a>(&amp;mut self)</code></h4>
+<div class='docblock'><p>strcpy Z-Routine: Copy a string.</p>
+
+<p>first argument is pointer to utf16 string containing length at first u16
+second the the destination address in memory where the string is copied to,
+while the first length u16 is not copied.</p>
+</div><h4 id='method.routine_strcat' class='method'><code>fn <a href='#method.routine_strcat' class='fnname'>routine_strcat</a>(&amp;mut self)</code></h4>
+<div class='docblock'><p>strcat Z-Routine: Concatenate two strings.</p>
+
+<p>returns a reference to a string concatenation of the first and second string parameters.</p>
+</div><h4 id='method.routine_strcmp' class='method'><code>fn <a href='#method.routine_strcmp' class='fnname'>routine_strcmp</a>(&amp;mut self)</code></h4>
+<div class='docblock'><p>strcmp Z-Routine: Compare two strings.</p>
+
+<p>returns 0 if both given strings are equal and -1 if the first is
+alphabetically smaller than the second and +1 vice versa.</p>
+</div><h4 id='method.routine_malloc_init' class='method'><code>fn <a href='#method.routine_malloc_init' class='fnname'>routine_malloc_init</a>(&amp;mut self)</code></h4>
+<div class='docblock'><p>malloc_init Z-Routine: Initialize the dynamic memory.</p>
+</div><h4 id='method.routine_mem_free' class='method'><code>fn <a href='#method.routine_mem_free' class='fnname'>routine_mem_free</a>(&amp;mut self)</code></h4>
+<div class='docblock'><p>mem_free Z-Routine: Free unused dynamic memory.</p>
+
+<p>This is implemented as a simple tracing garbage collector.</p>
+</div><h4 id='method.routine_manual_free' class='method'><code>fn <a href='#method.routine_manual_free' class='fnname'>routine_manual_free</a>(&amp;mut self)</code></h4>
+<div class='docblock'><p>manual_free Z-Routine: manual free call to erase used heap memory if you can not wait for
+the GC.</p>
+</div><h4 id='method.routine_itoa' class='method'><code>fn <a href='#method.routine_itoa' class='fnname'>routine_itoa</a>(&amp;mut self)</code></h4>
+<div class='docblock'><p>itoa Z-Routine: Convert an int to a string.</p>
+
+<p>convert from number at arg1 to string at base of 10, returns the str addr.</p>
+</div><h4 id='method.routine_print_var' class='method'><code>fn <a href='#method.routine_print_var' class='fnname'>routine_print_var</a>(&amp;mut self)</code></h4>
+<div class='docblock'><p>helper function to print out the content of a variable according to its type.</p>
+</div><h4 id='method.routine_add_types' class='method'><code>fn <a href='#method.routine_add_types' class='fnname'>routine_add_types</a>(&amp;mut self)</code></h4>
+<div class='docblock'><p>Helper function to add two values according to the types of them and saves type of savevarid
+to the global type-store and returns the result.</p>
+</div><h4 id='method.routine_print_char' class='method'><code>fn <a href='#method.routine_print_char' class='fnname'>routine_print_char</a>(&amp;mut self)</code></h4>
+<div class='docblock'><p>Print one zscii character given as argument.</p>
+</div><h4 id='method.op_jump' class='method'><code>fn <a href='#method.op_jump' class='fnname'>op_jump</a>(&amp;mut self, jump_to_label: &amp;<a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>)</code></h4>
+<div class='docblock'><p>Jumps to a label.</p>
+</div><h4 id='method.op_call_1n' class='method'><code>fn <a href='#method.op_call_1n' class='fnname'>op_call_1n</a>(&amp;mut self, jump_to_label: &amp;<a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>)</code></h4>
+<div class='docblock'><p>Calls a routine.</p>
+
+<p>call_1n is 1OP.</p>
+</div><h4 id='method.op_call_2n_with_address' class='method'><code>fn <a href='#method.op_call_2n_with_address' class='fnname'>op_call_2n_with_address</a>(&amp;mut self, jump_to_label: &amp;<a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>, address: &amp;<a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>)</code></h4>
+<div class='docblock'><p>Calls a routine with an argument(variable) and throws result away
+because the value isn&#39;t known until all routines are set, it
+inserts a pseudo routoune_address.</p>
+
+<p>call_2n is 2OP.</p>
+</div><h4 id='method.op_call_2n_with_arg' class='method'><code>fn <a href='#method.op_call_2n_with_arg' class='fnname'>op_call_2n_with_arg</a>(&amp;mut self, jump_to_label: &amp;<a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>, arg: &amp;<a class='enum' href='../../../../zwreec/backend/zcode/zfile/enum.Operand.html' title='zwreec::backend::zcode::zfile::Operand'>Operand</a>)</code></h4>
+<div class='docblock'><p>Calls a routine with one argument an throws result away.</p>
+
+<p>call_2n is 2OP.</p>
+</div><h4 id='method.op_call_2s' class='method'><code>fn <a href='#method.op_call_2s' class='fnname'>op_call_2s</a>(&amp;mut self, jump_to_label: &amp;<a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>, arg: &amp;<a class='enum' href='../../../../zwreec/backend/zcode/zfile/enum.Operand.html' title='zwreec::backend::zcode::zfile::Operand'>Operand</a>, result: &amp;<a class='struct' href='../../../../zwreec/backend/zcode/zfile/struct.Variable.html' title='zwreec::backend::zcode::zfile::Variable'>Variable</a>)</code></h4>
+<div class='docblock'><p>Calls a routine with one argument and stores return value in result.</p>
+
+<p>call_2s is 2OP.</p>
+</div><h4 id='method.op_call_vn_a2' class='method'><code>fn <a href='#method.op_call_vn_a2' class='fnname'>op_call_vn_a2</a>(&amp;mut self, jump_to_label: &amp;<a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>, arg1: &amp;<a class='enum' href='../../../../zwreec/backend/zcode/zfile/enum.Operand.html' title='zwreec::backend::zcode::zfile::Operand'>Operand</a>, arg2: &amp;<a class='enum' href='../../../../zwreec/backend/zcode/zfile/enum.Operand.html' title='zwreec::backend::zcode::zfile::Operand'>Operand</a>)</code></h4>
+<div class='docblock'><p>Calls a routine with two arguments and throws result away.</p>
+
+<p>call_vn is VAROP.</p>
+</div><h4 id='method.op_call_vn_a3' class='method'><code>fn <a href='#method.op_call_vn_a3' class='fnname'>op_call_vn_a3</a>(&amp;mut self, jump_to_label: &amp;<a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>, arg1: &amp;<a class='enum' href='../../../../zwreec/backend/zcode/zfile/enum.Operand.html' title='zwreec::backend::zcode::zfile::Operand'>Operand</a>, arg2: &amp;<a class='enum' href='../../../../zwreec/backend/zcode/zfile/enum.Operand.html' title='zwreec::backend::zcode::zfile::Operand'>Operand</a>, arg3: &amp;<a class='enum' href='../../../../zwreec/backend/zcode/zfile/enum.Operand.html' title='zwreec::backend::zcode::zfile::Operand'>Operand</a>)</code></h4>
+<div class='docblock'><p>Calls a routine with three arguments and throws result away.</p>
+
+<p>call_vn is VAROP.</p>
+</div><h4 id='method.op_call_vs_a2' class='method'><code>fn <a href='#method.op_call_vs_a2' class='fnname'>op_call_vs_a2</a>(&amp;mut self, jump_to_label: &amp;<a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>, arg1: &amp;<a class='enum' href='../../../../zwreec/backend/zcode/zfile/enum.Operand.html' title='zwreec::backend::zcode::zfile::Operand'>Operand</a>, arg2: &amp;<a class='enum' href='../../../../zwreec/backend/zcode/zfile/enum.Operand.html' title='zwreec::backend::zcode::zfile::Operand'>Operand</a>, result: &amp;<a class='struct' href='../../../../zwreec/backend/zcode/zfile/struct.Variable.html' title='zwreec::backend::zcode::zfile::Variable'>Variable</a>)</code></h4>
+<div class='docblock'><p>Calls a routine with two arguments and stores return value in result.</p>
+
+<p>call_vs is VAROP.</p>
+</div><h4 id='method.op_call_vs_a3' class='method'><code>fn <a href='#method.op_call_vs_a3' class='fnname'>op_call_vs_a3</a>(&amp;mut self, jump_to_label: &amp;<a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>, arg1: &amp;<a class='enum' href='../../../../zwreec/backend/zcode/zfile/enum.Operand.html' title='zwreec::backend::zcode::zfile::Operand'>Operand</a>, arg2: &amp;<a class='enum' href='../../../../zwreec/backend/zcode/zfile/enum.Operand.html' title='zwreec::backend::zcode::zfile::Operand'>Operand</a>, arg3: &amp;<a class='enum' href='../../../../zwreec/backend/zcode/zfile/enum.Operand.html' title='zwreec::backend::zcode::zfile::Operand'>Operand</a>, result: &amp;<a class='struct' href='../../../../zwreec/backend/zcode/zfile/struct.Variable.html' title='zwreec::backend::zcode::zfile::Variable'>Variable</a>)</code></h4>
+<div class='docblock'><p>Calls a routine with three arguments and stores return value in result.</p>
+
+<p>call_vs is VAROP.</p>
+</div><h4 id='method.op_call_vs2_a5' class='method'><code>fn <a href='#method.op_call_vs2_a5' class='fnname'>op_call_vs2_a5</a>(&amp;mut self, jump_to_label: &amp;<a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>, arg1: &amp;<a class='enum' href='../../../../zwreec/backend/zcode/zfile/enum.Operand.html' title='zwreec::backend::zcode::zfile::Operand'>Operand</a>, arg2: &amp;<a class='enum' href='../../../../zwreec/backend/zcode/zfile/enum.Operand.html' title='zwreec::backend::zcode::zfile::Operand'>Operand</a>, arg3: &amp;<a class='enum' href='../../../../zwreec/backend/zcode/zfile/enum.Operand.html' title='zwreec::backend::zcode::zfile::Operand'>Operand</a>, arg4: &amp;<a class='enum' href='../../../../zwreec/backend/zcode/zfile/enum.Operand.html' title='zwreec::backend::zcode::zfile::Operand'>Operand</a>, arg5: &amp;<a class='enum' href='../../../../zwreec/backend/zcode/zfile/enum.Operand.html' title='zwreec::backend::zcode::zfile::Operand'>Operand</a>, result: &amp;<a class='struct' href='../../../../zwreec/backend/zcode/zfile/struct.Variable.html' title='zwreec::backend::zcode::zfile::Variable'>Variable</a>)</code></h4>
+<div class='docblock'><p>Calls a routine with five arguments and stores the return value.</p>
+
+<p>call_vs2 is VAROP with additional types-byte.</p>
+</div><h4 id='method.op_je' class='method'><code>fn <a href='#method.op_je' class='fnname'>op_je</a>(&amp;mut self, operand1: &amp;<a class='enum' href='../../../../zwreec/backend/zcode/zfile/enum.Operand.html' title='zwreec::backend::zcode::zfile::Operand'>Operand</a>, operand2: &amp;<a class='enum' href='../../../../zwreec/backend/zcode/zfile/enum.Operand.html' title='zwreec::backend::zcode::zfile::Operand'>Operand</a>, jump_to_label: &amp;<a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>)</code></h4>
+<div class='docblock'><p>Jumps to a label if the value of operand1 is equal to operand2.</p>
+</div><h4 id='method.op_jne' class='method'><code>fn <a href='#method.op_jne' class='fnname'>op_jne</a>(&amp;mut self, operand1: &amp;<a class='enum' href='../../../../zwreec/backend/zcode/zfile/enum.Operand.html' title='zwreec::backend::zcode::zfile::Operand'>Operand</a>, operand2: &amp;<a class='enum' href='../../../../zwreec/backend/zcode/zfile/enum.Operand.html' title='zwreec::backend::zcode::zfile::Operand'>Operand</a>, jump_to_label: &amp;<a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>)</code></h4>
+<div class='docblock'><p>Jumps to a label if the value of operand1 is not equal to operand2.</p>
+</div><h4 id='method.op_jl' class='method'><code>fn <a href='#method.op_jl' class='fnname'>op_jl</a>(&amp;mut self, operand1: &amp;<a class='enum' href='../../../../zwreec/backend/zcode/zfile/enum.Operand.html' title='zwreec::backend::zcode::zfile::Operand'>Operand</a>, operand2: &amp;<a class='enum' href='../../../../zwreec/backend/zcode/zfile/enum.Operand.html' title='zwreec::backend::zcode::zfile::Operand'>Operand</a>, jump_to_label: &amp;<a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>)</code></h4>
+<div class='docblock'><p>Jumps to a label if the value of operand1 is lower than operand2 (compared as i16).</p>
+</div><h4 id='method.op_jle' class='method'><code>fn <a href='#method.op_jle' class='fnname'>op_jle</a>(&amp;mut self, operand1: &amp;<a class='enum' href='../../../../zwreec/backend/zcode/zfile/enum.Operand.html' title='zwreec::backend::zcode::zfile::Operand'>Operand</a>, operand2: &amp;<a class='enum' href='../../../../zwreec/backend/zcode/zfile/enum.Operand.html' title='zwreec::backend::zcode::zfile::Operand'>Operand</a>, jump_to_label: &amp;<a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>)</code></h4>
+<div class='docblock'><p>Jumps to a label if the value of operand1 is lower than or equal operand2 (compared as i16).</p>
+</div><h4 id='method.op_jge' class='method'><code>fn <a href='#method.op_jge' class='fnname'>op_jge</a>(&amp;mut self, operand1: &amp;<a class='enum' href='../../../../zwreec/backend/zcode/zfile/enum.Operand.html' title='zwreec::backend::zcode::zfile::Operand'>Operand</a>, operand2: &amp;<a class='enum' href='../../../../zwreec/backend/zcode/zfile/enum.Operand.html' title='zwreec::backend::zcode::zfile::Operand'>Operand</a>, jump_to_label: &amp;<a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>)</code></h4>
+<div class='docblock'><p>Jumps to a label if the value of operand1 is greater than or equal operand2 (compared as i16).</p>
+</div><h4 id='method.op_jg' class='method'><code>fn <a href='#method.op_jg' class='fnname'>op_jg</a>(&amp;mut self, operand1: &amp;<a class='enum' href='../../../../zwreec/backend/zcode/zfile/enum.Operand.html' title='zwreec::backend::zcode::zfile::Operand'>Operand</a>, operand2: &amp;<a class='enum' href='../../../../zwreec/backend/zcode/zfile/enum.Operand.html' title='zwreec::backend::zcode::zfile::Operand'>Operand</a>, jump_to_label: &amp;<a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>)</code></h4>
+<div class='docblock'><p>Jumps to a label if the value of operand1 is greater than operand2.</p>
+</div><h4 id='method.op_read_char_timer' class='method'><code>fn <a href='#method.op_read_char_timer' class='fnname'>op_read_char_timer</a>(&amp;mut self, local_var_id: <a href='http://doc.rust-lang.org/nightly/std/primitive.u8.html'>u8</a>, timer: <a href='http://doc.rust-lang.org/nightly/std/primitive.u8.html'>u8</a>, routine: &amp;<a href='http://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>)</code></h4>
+<div class='docblock'><p>Reads keys from the keyboard and saves the asci-value in local_var_id.</p>
+
+<p>read_char is VAROP.</p>
+</div><h4 id='method.op_print_unicode_char' class='method'><code>fn <a href='#method.op_print_unicode_char' class='fnname'>op_print_unicode_char</a>(&amp;mut self, character: <a href='http://doc.rust-lang.org/nightly/std/primitive.u16.html'>u16</a>)</code></h4>
+<div class='docblock'><p>Prints a unicode char to the current stream.</p>
+</div><h4 id='method.op_print_unicode_var' class='method'><code>fn <a href='#method.op_print_unicode_var' class='fnname'>op_print_unicode_var</a>(&amp;mut self, variable: &amp;<a class='struct' href='../../../../zwreec/backend/zcode/zfile/struct.Variable.html' title='zwreec::backend::zcode::zfile::Variable'>Variable</a>)</code></h4>
+<div class='docblock'><p>Prints variable with unicode char to the current stream.</p>
+</div><h4 id='method.op_print_unicode_str' class='method'><code>fn <a href='#method.op_print_unicode_str' class='fnname'>op_print_unicode_str</a>(&amp;mut self, address: &amp;<a class='enum' href='../../../../zwreec/backend/zcode/zfile/enum.Operand.html' title='zwreec::backend::zcode::zfile::Operand'>Operand</a>)</code></h4>
+<div class='docblock'><p>Prints a unicode string to the current output stream.</p>
+</div><h4 id='method.op_print_char' class='method'><code>fn <a href='#method.op_print_char' class='fnname'>op_print_char</a>(&amp;mut self, variable: &amp;<a class='struct' href='../../../../zwreec/backend/zcode/zfile/struct.Variable.html' title='zwreec::backend::zcode::zfile::Variable'>Variable</a>)</code></h4>
+<div class='docblock'><p>Prints a ZSCII character.</p>
+</div></div></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <div id="help" class="hidden">
+        <div class="shortcuts">
+            <h1>Keyboard shortcuts</h1>
+            <dl>
+                <dt>?</dt>
+                <dd>Show this help dialog</dd>
+                <dt>S</dt>
+                <dd>Focus the search field</dd>
+                <dt>&larrb;</dt>
+                <dd>Move up in search results</dd>
+                <dt>&rarrb;</dt>
+                <dd>Move down in search results</dd>
+                <dt>&#9166;</dt>
+                <dd>Go to active search result</dd>
+            </dl>
+        </div>
+        <div class="infos">
+            <h1>Search tricks</h1>
+            <p>
+                Prefix searches with a type followed by a colon (e.g.
+                <code>fn:</code>) to restrict the search to a given type.
+            </p>
+            <p>
+                Accepted types are: <code>fn</code>, <code>mod</code>,
+                <code>struct</code>, <code>enum</code>,
+                <code>trait</code>, <code>typedef</code> (or
+                <code>tdef</code>).
+            </p>
+            <p>
+                Search functions by type signature (e.g.
+                <code>vec -> usize</code>)
+            </p>
+        </div>
+    </div>
+
+    
+
+    <script>
+        window.rootPath = "../../../../";
+        window.currentCrate = "zwreec";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../../../../jquery.js"></script>
+    <script src="../../../../main.js"></script>
+    
+    <script async src="../../../../search-index.js"></script>
+</body>
+</html>

@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `op` mod in crate `zwreec`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, op">
+
+    <title>zwreec::backend::zcode::op - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../../../../main.css">
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <section class="sidebar">
+        <a href='../../../../zwreec/index.html'><img src='https://dl.dropboxusercontent.com/u/70410095/zwreec/logo.png' alt='' width='100'></a>
+        <p class='location'><a href='../../../index.html'>zwreec</a>::<wbr><a href='../../index.html'>backend</a>::<wbr><a href='../index.html'>zcode</a></p><script>window.sidebarCurrent = {name: 'op', ty: 'mod', relpath: '../'};</script><script defer src="../sidebar-items.js"></script>
+    </section>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press 'S' to search, '?' for more options..."
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content mod">
+<h1 class='fqn'><span class='in-band'>Module <a href='../../../index.html'>zwreec</a>::<wbr><a href='../../index.html'>backend</a>::<wbr><a href='../index.html'>zcode</a>::<wbr><a class='mod' href=''>op</a></span><span class='out-of-band'><span id='render-detail'>
+            <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                [<span class='inner'>&#x2212;</span>]
+            </a>
+        </span><a id='src-3070' class='srclink' href='../../../../src/zwreec/backend/zcode/op.rs.html#1-532' title='goto source code'>[src]</a></span></h1>
+<div class='docblock'><p>Contains most of the Z-Code opcodes (the opcodes that use jumps or labels
+are still in zfile)</p>
+</div><h2 id='reexports' class='section-header'><a href="#reexports">Reexports</a></h2>
+<table><tr><td><code>pub use super::zfile::<a class='enum' href='../../../../zwreec/backend/zcode/zfile/enum.ArgType.html' title='zwreec::backend::zcode::zfile::ArgType'>ArgType</a>;</code></td></tr><tr><td><code>pub use super::zfile::<a class='enum' href='../../../../zwreec/backend/zcode/zfile/enum.JumpType.html' title='zwreec::backend::zcode::zfile::JumpType'>JumpType</a>;</code></td></tr><tr><td><code>pub use super::zfile::<a class='struct' href='../../../../zwreec/backend/zcode/zfile/struct.Zjump.html' title='zwreec::backend::zcode::zfile::Zjump'>Zjump</a>;</code></td></tr><tr><td><code>pub use super::zfile::<a class='struct' href='../../../../zwreec/backend/zcode/zfile/struct.Zfile.html' title='zwreec::backend::zcode::zfile::Zfile'>Zfile</a>;</code></td></tr><tr><td><code>pub use super::zfile::{<a class='enum' href='../../../../zwreec/backend/zcode/zfile/enum.Operand.html' title='zwreec::backend::zcode::zfile::Operand'>Operand</a>, <a class='struct' href='../../../../zwreec/backend/zcode/zfile/struct.Variable.html' title='zwreec::backend::zcode::zfile::Variable'>Variable</a>, <a class='struct' href='../../../../zwreec/backend/zcode/zfile/struct.Constant.html' title='zwreec::backend::zcode::zfile::Constant'>Constant</a>, <a class='struct' href='../../../../zwreec/backend/zcode/zfile/struct.LargeConstant.html' title='zwreec::backend::zcode::zfile::LargeConstant'>LargeConstant</a>};</code></td></tr></table><h2 id='functions' class='section-header'><a href="#functions">Functions</a></h2>
+<table>
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.arg_type.html'
+                               title='zwreec::backend::zcode::op::arg_type'>arg_type</a></td>
+                        <td class='docblock short'>
+                             <p>Returns the argument type of <code>operand</code>.</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.encode_variable_arguments.html'
+                               title='zwreec::backend::zcode::op::encode_variable_arguments'>encode_variable_arguments</a></td>
+                        <td class='docblock short'>
+                             <p>Encode the variable arguments specified by <code>arg_types</code>.</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.op_0.html'
+                               title='zwreec::backend::zcode::op::op_0'>op_0</a></td>
+                        <td class='docblock short'>
+                             <p>Byte encoding for op-codes with 0 operators.</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.op_1.html'
+                               title='zwreec::backend::zcode::op::op_1'>op_1</a></td>
+                        <td class='docblock short'>
+                             <p>Byte encoding for op-codes with 1 operator.</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.op_2.html'
+                               title='zwreec::backend::zcode::op::op_2'>op_2</a></td>
+                        <td class='docblock short'>
+                             <p>Byte encoding for op-codes with 2 operators.</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.op_add.html'
+                               title='zwreec::backend::zcode::op::op_add'>op_add</a></td>
+                        <td class='docblock short'>
+                             <p>Addition:
+<code>save_variable = operand1 + operand2</code></p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.op_and.html'
+                               title='zwreec::backend::zcode::op::op_and'>op_and</a></td>
+                        <td class='docblock short'>
+                             <p>Bitwise AND:
+<code>save_variable = operand1 &amp; operand2</code></p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.op_call_1n_var.html'
+                               title='zwreec::backend::zcode::op::op_call_1n_var'>op_call_1n_var</a></td>
+                        <td class='docblock short'>
+                             <p>Calls a routine (the address is stored in a variable)</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.op_dec.html'
+                               title='zwreec::backend::zcode::op::op_dec'>op_dec</a></td>
+                        <td class='docblock short'>
+                             <p>Decrements the value of the variable:
+<code>variable -= 1</code></p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.op_div.html'
+                               title='zwreec::backend::zcode::op::op_div'>op_div</a></td>
+                        <td class='docblock short'>
+                             <p>Division:
+<code>save_variable = operand1 / operand2</code></p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.op_erase_line.html'
+                               title='zwreec::backend::zcode::op::op_erase_line'>op_erase_line</a></td>
+                        <td class='docblock short'>
+                             <p>Erases the rest of the current line starting from the cursor</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.op_erase_window.html'
+                               title='zwreec::backend::zcode::op::op_erase_window'>op_erase_window</a></td>
+                        <td class='docblock short'>
+                             <p>Clears specified window</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.op_get_cursor.html'
+                               title='zwreec::backend::zcode::op::op_get_cursor'>op_get_cursor</a></td>
+                        <td class='docblock short'>
+                             <p>Stores row and column as two u16 words to the given addr</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.op_inc.html'
+                               title='zwreec::backend::zcode::op::op_inc'>op_inc</a></td>
+                        <td class='docblock short'>
+                             <p>Increments the value of the variable:
+<code>variable += 1</code>.</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.op_loadb.html'
+                               title='zwreec::backend::zcode::op::op_loadb'>op_loadb</a></td>
+                        <td class='docblock short'>
+                             <p>Loads a byte from an array in a variable</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.op_loadw.html'
+                               title='zwreec::backend::zcode::op::op_loadw'>op_loadw</a></td>
+                        <td class='docblock short'>
+                             <p>Loads a word from an array in a variable</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.op_mod.html'
+                               title='zwreec::backend::zcode::op::op_mod'>op_mod</a></td>
+                        <td class='docblock short'>
+                             <p>Modulo:
+<code>save_variable = operand1 % operand2</code></p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.op_mul.html'
+                               title='zwreec::backend::zcode::op::op_mul'>op_mul</a></td>
+                        <td class='docblock short'>
+                             <p>Multiplikation:
+<code>save_variable = operand1 * operand2</code></p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.op_newline.html'
+                               title='zwreec::backend::zcode::op::op_newline'>op_newline</a></td>
+                        <td class='docblock short'>
+                             <p>Prints a newline character.</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.op_not.html'
+                               title='zwreec::backend::zcode::op::op_not'>op_not</a></td>
+                        <td class='docblock short'>
+                             <p>Bitwise NOT:
+<code>variable = ~arg</code></p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.op_or.html'
+                               title='zwreec::backend::zcode::op::op_or'>op_or</a></td>
+                        <td class='docblock short'>
+                             <p>Bitwise OR operation:
+<code>save_variable = operand1 | operand2</code></p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.op_print_addr.html'
+                               title='zwreec::backend::zcode::op::op_print_addr'>op_print_addr</a></td>
+                        <td class='docblock short'>
+                             <p>Prints string at given adress</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.op_print_num_var.html'
+                               title='zwreec::backend::zcode::op::op_print_num_var'>op_print_num_var</a></td>
+                        <td class='docblock short'>
+                             <p>Prints the value of an integer variable</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.op_print_paddr.html'
+                               title='zwreec::backend::zcode::op::op_print_paddr'>op_print_paddr</a></td>
+                        <td class='docblock short'>
+                             <p>Prints string at given packed address</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.op_pull.html'
+                               title='zwreec::backend::zcode::op::op_pull'>op_pull</a></td>
+                        <td class='docblock short'>
+                             <p>Pulls value off the stack to a variable</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.op_push_u16.html'
+                               title='zwreec::backend::zcode::op::op_push_u16'>op_push_u16</a></td>
+                        <td class='docblock short'>
+                             <p>Pushes a u16 value (for example an address) on the stack</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.op_push_var.html'
+                               title='zwreec::backend::zcode::op::op_push_var'>op_push_var</a></td>
+                        <td class='docblock short'>
+                             <p>Pushes a variable on the stack</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.op_random.html'
+                               title='zwreec::backend::zcode::op::op_random'>op_random</a></td>
+                        <td class='docblock short'>
+                             <p>Calculates a random number from 1 to range</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.op_read_char.html'
+                               title='zwreec::backend::zcode::op::op_read_char'>op_read_char</a></td>
+                        <td class='docblock short'>
+                             <p>Reads keys from the keyboard and saves the asci-value in <code>local_var_id</code></p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.op_ret.html'
+                               title='zwreec::backend::zcode::op::op_ret'>op_ret</a></td>
+                        <td class='docblock short'>
+                             <p>Returns a LargeConst</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.op_set_color.html'
+                               title='zwreec::backend::zcode::op::op_set_color'>op_set_color</a></td>
+                        <td class='docblock short'>
+                             <p>Sets the colors of the foreground (font) and background to the constants specified</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.op_set_color_var.html'
+                               title='zwreec::backend::zcode::op::op_set_color_var'>op_set_color_var</a></td>
+                        <td class='docblock short'>
+                             <p>Sets the colors of the foreground (font) and background to the values in the variables</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.op_set_cursor.html'
+                               title='zwreec::backend::zcode::op::op_set_cursor'>op_set_cursor</a></td>
+                        <td class='docblock short'>
+                             <p>Positions the cursor at the specified <code>line</code> and <code>column</code></p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.op_set_cursor_operand.html'
+                               title='zwreec::backend::zcode::op::op_set_cursor_operand'>op_set_cursor_operand</a></td>
+                        <td class='docblock short'>
+                             <p>Positions the cursor at the <code>line</code> and <code>column</code> in the given Operands</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.op_set_text_style.html'
+                               title='zwreec::backend::zcode::op::op_set_text_style'>op_set_text_style</a></td>
+                        <td class='docblock short'>
+                             <p>Set the style of the text to <code>bold</code>, <code>reverse</code> (inverse colors), <code>monospace</code> and <code>italic</code></p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.op_store_var.html'
+                               title='zwreec::backend::zcode::op::op_store_var'>op_store_var</a></td>
+                        <td class='docblock short'>
+                             <p>Saves an operand to the specified variable</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.op_storeb.html'
+                               title='zwreec::backend::zcode::op::op_storeb'>op_storeb</a></td>
+                        <td class='docblock short'>
+                             <p>Stores a value to an array</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.op_storeboperand.html'
+                               title='zwreec::backend::zcode::op::op_storeboperand'>op_storeboperand</a></td>
+                        <td class='docblock short'>
+                             <p>Stores a value to an array</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.op_storew.html'
+                               title='zwreec::backend::zcode::op::op_storew'>op_storew</a></td>
+                        <td class='docblock short'>
+                             <p>Stores a value to an array</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.op_sub.html'
+                               title='zwreec::backend::zcode::op::op_sub'>op_sub</a></td>
+                        <td class='docblock short'>
+                             <p>Subtraction operation:
+<code>save_variable = operand1 - operand2</code></p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.op_var.html'
+                               title='zwreec::backend::zcode::op::op_var'>op_var</a></td>
+                        <td class='docblock short'>
+                             <p>Byte encoding for op-codes with variable operators (up to 4 are possible).</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.quit.html'
+                               title='zwreec::backend::zcode::op::quit'>quit</a></td>
+                        <td class='docblock short'>
+                             <p>Quits the Z-Code program immediately.</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.write_argument.html'
+                               title='zwreec::backend::zcode::op::write_argument'>write_argument</a></td>
+                        <td class='docblock short'>
+                             <p>Writes the argument <code>operand</code> to the end of the output specified with <code>v</code>.</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.write_i16.html'
+                               title='zwreec::backend::zcode::op::write_i16'>write_i16</a></td>
+                        <td class='docblock short'>
+                             <p>Writes u16 to a vec<u8> with the correct byte-order for the Z-Machine.</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.write_u16.html'
+                               title='zwreec::backend::zcode::op::write_u16'>write_u16</a></td>
+                        <td class='docblock short'>
+                             <p>Writes u16 to a vec<u8> with the correct byte-order for the Z-Machine.</p>
+
+                        </td>
+                    </tr>
+                </table></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <div id="help" class="hidden">
+        <div class="shortcuts">
+            <h1>Keyboard shortcuts</h1>
+            <dl>
+                <dt>?</dt>
+                <dd>Show this help dialog</dd>
+                <dt>S</dt>
+                <dd>Focus the search field</dd>
+                <dt>&larrb;</dt>
+                <dd>Move up in search results</dd>
+                <dt>&rarrb;</dt>
+                <dd>Move down in search results</dd>
+                <dt>&#9166;</dt>
+                <dd>Go to active search result</dd>
+            </dl>
+        </div>
+        <div class="infos">
+            <h1>Search tricks</h1>
+            <p>
+                Prefix searches with a type followed by a colon (e.g.
+                <code>fn:</code>) to restrict the search to a given type.
+            </p>
+            <p>
+                Accepted types are: <code>fn</code>, <code>mod</code>,
+                <code>struct</code>, <code>enum</code>,
+                <code>trait</code>, <code>typedef</code> (or
+                <code>tdef</code>).
+            </p>
+            <p>
+                Search functions by type signature (e.g.
+                <code>vec -> usize</code>)
+            </p>
+        </div>
+    </div>
+
+    
+
+    <script>
+        window.rootPath = "../../../../";
+        window.currentCrate = "zwreec";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../../../../jquery.js"></script>
+    <script src="../../../../main.js"></script>
+    
+    <script async src="../../../../search-index.js"></script>
+</body>
+</html>

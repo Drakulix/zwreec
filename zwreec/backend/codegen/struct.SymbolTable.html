@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `SymbolTable` struct in crate `zwreec`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, SymbolTable">
+
+    <title>zwreec::backend::codegen::SymbolTable - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../../../main.css">
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <section class="sidebar">
+        <a href='../../../zwreec/index.html'><img src='https://dl.dropboxusercontent.com/u/70410095/zwreec/logo.png' alt='' width='100'></a>
+        <p class='location'><a href='../../index.html'>zwreec</a>::<wbr><a href='../index.html'>backend</a>::<wbr><a href='index.html'>codegen</a></p><script>window.sidebarCurrent = {name: 'SymbolTable', ty: 'struct', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+    </section>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press 'S' to search, '?' for more options..."
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content struct">
+<h1 class='fqn'><span class='in-band'>Struct <a href='../../index.html'>zwreec</a>::<wbr><a href='../index.html'>backend</a>::<wbr><a href='index.html'>codegen</a>::<wbr><a class='struct' href=''>SymbolTable</a></span><span class='out-of-band'><span id='render-detail'>
+            <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                [<span class='inner'>&#x2212;</span>]
+            </a>
+        </span><a id='src-72180' class='srclink' href='../../../src/zwreec/backend/codegen.rs.html#708-714' title='goto source code'>[src]</a></span></h1>
+<pre class='rust struct'>pub struct SymbolTable {
+    // some fields omitted
+}</pre><div class='docblock'><p>The symbol table.</p>
+</div><h2 id='methods'>Methods</h2><h3 class='impl'><code>impl <a class='struct' href='../../../zwreec/backend/codegen/struct.SymbolTable.html' title='zwreec::backend::codegen::SymbolTable'>SymbolTable</a></code></h3><div class='impl-items'><h4 id='method.new' class='method'><code>fn <a href='#method.new' class='fnname'>new</a>() -&gt; <a class='struct' href='../../../zwreec/backend/codegen/struct.SymbolTable.html' title='zwreec::backend::codegen::SymbolTable'>SymbolTable</a></code></h4>
+<div class='docblock'><p>Creates a new symbol table.</p>
+</div><h4 id='method.insert_new_symbol' class='method'><code>fn <a href='#method.insert_new_symbol' class='fnname'>insert_new_symbol</a>(&amp;mut self, symbol: <a class='struct' href='http://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>, t: <a class='enum' href='../../../zwreec/backend/zcode/zfile/enum.Type.html' title='zwreec::backend::zcode::zfile::Type'>Type</a>)</code></h4>
+<div class='docblock'><p>Inserts a symbol into the table, assigning a new id.</p>
+</div><h4 id='method.is_known_symbol' class='method'><code>fn <a href='#method.is_known_symbol' class='fnname'>is_known_symbol</a>(&amp;self, symbol: &amp;<a class='struct' href='http://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>) -&gt; <a href='http://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></h4>
+<div class='docblock'><p>Checks if the symbol is already existent in the table.</p>
+</div><h4 id='method.get_symbol_id' class='method'><code>fn <a href='#method.get_symbol_id' class='fnname'>get_symbol_id</a>(&amp;self, symbol: &amp;<a class='struct' href='http://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>) -&gt; <a class='struct' href='../../../zwreec/backend/zcode/zfile/struct.Variable.html' title='zwreec::backend::zcode::zfile::Variable'>Variable</a></code></h4>
+<div class='docblock'><p>Returns the id for a given symbol.</p>
+
+<h1 id="panics" class='section-header'><a
+                           href="#panics">Panics</a></h1>
+<p>This panics when the symbol is unkown.</p>
+</div><h4 id='method.get_and_add_symbol_id' class='method'><code>fn <a href='#method.get_and_add_symbol_id' class='fnname'>get_and_add_symbol_id</a>(&amp;mut self, symbol: <a class='struct' href='http://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>) -&gt; <a class='struct' href='../../../zwreec/backend/zcode/zfile/struct.Variable.html' title='zwreec::backend::zcode::zfile::Variable'>Variable</a></code></h4>
+<div class='docblock'><p>Returns the id for a given symbol.</p>
+
+<p>Checks is the symbol is known, otherwise adds it silently as type None.</p>
+</div><h4 id='method.get_symbol_type' class='method'><code>fn <a href='#method.get_symbol_type' class='fnname'>get_symbol_type</a>(&amp;self, symbol: &amp;<a class='struct' href='http://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>) -&gt; <a class='enum' href='../../../zwreec/backend/zcode/zfile/enum.Type.html' title='zwreec::backend::zcode::zfile::Type'>Type</a></code></h4>
+<div class='docblock'><p>Returns the Type of the specified symbol.</p>
+
+<h1 id="panics" class='section-header'><a
+                           href="#panics">Panics</a></h1>
+<p>This panics when the symbol map does not contain the symbol.</p>
+</div><h4 id='method.has_var_id' class='method'><code>fn <a href='#method.has_var_id' class='fnname'>has_var_id</a>(&amp;self, id: <a href='http://doc.rust-lang.org/nightly/std/primitive.u8.html'>u8</a>) -&gt; <a href='http://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></h4>
+<div class='docblock'><p>Checks if the symbol table contains a variable with the specified id.</p>
+</div><h4 id='method.get_symbol_type_by_id' class='method'><code>fn <a href='#method.get_symbol_type_by_id' class='fnname'>get_symbol_type_by_id</a>(&amp;self, id: <a href='http://doc.rust-lang.org/nightly/std/primitive.u8.html'>u8</a>) -&gt; <a class='enum' href='../../../zwreec/backend/zcode/zfile/enum.Type.html' title='zwreec::backend::zcode::zfile::Type'>Type</a></code></h4>
+<div class='docblock'><p>Returns the Type of the symbol specified by the id.</p>
+
+<h1 id="panics" class='section-header'><a
+                           href="#panics">Panics</a></h1>
+<p>This panics if the symbol table does not contain the symbol id.</p>
+</div></div></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <div id="help" class="hidden">
+        <div class="shortcuts">
+            <h1>Keyboard shortcuts</h1>
+            <dl>
+                <dt>?</dt>
+                <dd>Show this help dialog</dd>
+                <dt>S</dt>
+                <dd>Focus the search field</dd>
+                <dt>&larrb;</dt>
+                <dd>Move up in search results</dd>
+                <dt>&rarrb;</dt>
+                <dd>Move down in search results</dd>
+                <dt>&#9166;</dt>
+                <dd>Go to active search result</dd>
+            </dl>
+        </div>
+        <div class="infos">
+            <h1>Search tricks</h1>
+            <p>
+                Prefix searches with a type followed by a colon (e.g.
+                <code>fn:</code>) to restrict the search to a given type.
+            </p>
+            <p>
+                Accepted types are: <code>fn</code>, <code>mod</code>,
+                <code>struct</code>, <code>enum</code>,
+                <code>trait</code>, <code>typedef</code> (or
+                <code>tdef</code>).
+            </p>
+            <p>
+                Search functions by type signature (e.g.
+                <code>vec -> usize</code>)
+            </p>
+        </div>
+    </div>
+
+    
+
+    <script>
+        window.rootPath = "../../../";
+        window.currentCrate = "zwreec";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../../../jquery.js"></script>
+    <script src="../../../main.js"></script>
+    
+    <script async src="../../../search-index.js"></script>
+</body>
+</html>

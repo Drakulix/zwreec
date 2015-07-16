@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `ExpressionParserError` enum in crate `zwreec`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, ExpressionParserError">
+
+    <title>zwreec::frontend::expressionparser::ExpressionParserError - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../../../main.css">
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <section class="sidebar">
+        <a href='../../../zwreec/index.html'><img src='https://dl.dropboxusercontent.com/u/70410095/zwreec/logo.png' alt='' width='100'></a>
+        <p class='location'><a href='../../index.html'>zwreec</a>::<wbr><a href='../index.html'>frontend</a>::<wbr><a href='index.html'>expressionparser</a></p><script>window.sidebarCurrent = {name: 'ExpressionParserError', ty: 'enum', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+    </section>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press 'S' to search, '?' for more options..."
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content enum">
+<h1 class='fqn'><span class='in-band'>Enum <a href='../../index.html'>zwreec</a>::<wbr><a href='../index.html'>frontend</a>::<wbr><a href='index.html'>expressionparser</a>::<wbr><a class='enum' href=''>ExpressionParserError</a></span><span class='out-of-band'><span id='render-detail'>
+            <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                [<span class='inner'>&#x2212;</span>]
+            </a>
+        </span><a id='src-86551' class='srclink' href='../../../src/zwreec/frontend/expressionparser.rs.html#13-34' title='goto source code'>[src]</a></span></h1>
+<pre class='rust enum'>pub enum ExpressionParserError {
+    OperStackIsEmpty,
+    NoParseableSubExpression,
+    MoreThanOneRootExpression {
+        count: <a href='http://doc.rust-lang.org/nightly/std/primitive.usize.html'>usize</a>,
+        stack: <a class='struct' href='http://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;<a class='enum' href='../../../zwreec/frontend/ast/enum.ASTNode.html' title='zwreec::frontend::ast::ASTNode'>ASTNode</a>&gt;,
+    },
+    NotEnoughElementsOnStack,
+    MissingNodeForBinaryNode,
+    DisallowedOperator {
+        op: <a class='enum' href='../../../zwreec/frontend/lexer/enum.Token.html' title='zwreec::frontend::lexer::Token'>Token</a>,
+    },
+    NotImplementedOperator {
+        op: <a class='struct' href='http://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>,
+    },
+}</pre><div class='docblock'><p>The errors that can occur in the ExpressionParser.</p>
+</div><h2 class='variants'>Variants</h2>
+<table><tr><td id='variant.OperStackIsEmpty'><code>OperStackIsEmpty</code></td><td><div class='docblock'><p>The operator stack is empty</p>
+</div></td></tr><tr><td id='variant.NoParseableSubExpression'><code>NoParseableSubExpression</code></td><td><div class='docblock'><p>The sub-expression is not parseable</p>
+</div></td></tr><tr><td id='variant.MoreThanOneRootExpression'><code>MoreThanOneRootExpression</code></td><td><div class='docblock'><p>There can&#39;t be more than one expression root</p>
+</div><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.MoreThanOneRootExpression.field.count'><code>count</code></td><td></td></tr><tr><td id='variant.MoreThanOneRootExpression.field.stack'><code>stack</code></td><td></td></tr></table></td></tr><tr><td id='variant.NotEnoughElementsOnStack'><code>NotEnoughElementsOnStack</code></td><td><div class='docblock'><p>Stack underflow</p>
+</div></td></tr><tr><td id='variant.MissingNodeForBinaryNode'><code>MissingNodeForBinaryNode</code></td><td><div class='docblock'><p>Missing a Node</p>
+</div></td></tr><tr><td id='variant.DisallowedOperator'><code>DisallowedOperator</code></td><td><div class='docblock'><p>Operator is unkown / invalid</p>
+</div><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.DisallowedOperator.field.op'><code>op</code></td><td></td></tr></table></td></tr><tr><td id='variant.NotImplementedOperator'><code>NotImplementedOperator</code></td><td><div class='docblock'><p>Operator is not implemented</p>
+</div><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.NotImplementedOperator.field.op'><code>op</code></td><td></td></tr></table></td></tr></table><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><code>impl <a class='trait' href='http://doc.rust-lang.org/nightly/core/fmt/trait.Display.html' title='core::fmt::Display'>Display</a> for <a class='enum' href='../../../zwreec/frontend/expressionparser/enum.ExpressionParserError.html' title='zwreec::frontend::expressionparser::ExpressionParserError'>ExpressionParserError</a></code></h3><div class='impl-items'><h4 id='method.fmt' class='method'><code>fn <a href='http://doc.rust-lang.org/nightly/core/fmt/trait.Display.html#method.fmt' class='fnname'>fmt</a>(&amp;self, f: &amp;mut <a class='struct' href='http://doc.rust-lang.org/nightly/core/fmt/struct.Formatter.html' title='core::fmt::Formatter'>Formatter</a>) -&gt; <a class='type' href='http://doc.rust-lang.org/nightly/core/fmt/type.Result.html' title='core::fmt::Result'>Result</a></code></h4>
+</div><h3 id='derived_implementations'>Derived Implementations </h3><h3 class='impl'><code>impl <a class='trait' href='http://doc.rust-lang.org/nightly/core/fmt/trait.Debug.html' title='core::fmt::Debug'>Debug</a> for <a class='enum' href='../../../zwreec/frontend/expressionparser/enum.ExpressionParserError.html' title='zwreec::frontend::expressionparser::ExpressionParserError'>ExpressionParserError</a></code></h3><div class='impl-items'><h4 id='method.fmt' class='method'><code>fn <a href='http://doc.rust-lang.org/nightly/core/fmt/trait.Debug.html#method.fmt' class='fnname'>fmt</a>(&amp;self, __arg_0: &amp;mut <a class='struct' href='http://doc.rust-lang.org/nightly/core/fmt/struct.Formatter.html' title='core::fmt::Formatter'>Formatter</a>) -&gt; <a class='type' href='http://doc.rust-lang.org/nightly/core/fmt/type.Result.html' title='core::fmt::Result'>Result</a></code></h4>
+</div></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <div id="help" class="hidden">
+        <div class="shortcuts">
+            <h1>Keyboard shortcuts</h1>
+            <dl>
+                <dt>?</dt>
+                <dd>Show this help dialog</dd>
+                <dt>S</dt>
+                <dd>Focus the search field</dd>
+                <dt>&larrb;</dt>
+                <dd>Move up in search results</dd>
+                <dt>&rarrb;</dt>
+                <dd>Move down in search results</dd>
+                <dt>&#9166;</dt>
+                <dd>Go to active search result</dd>
+            </dl>
+        </div>
+        <div class="infos">
+            <h1>Search tricks</h1>
+            <p>
+                Prefix searches with a type followed by a colon (e.g.
+                <code>fn:</code>) to restrict the search to a given type.
+            </p>
+            <p>
+                Accepted types are: <code>fn</code>, <code>mod</code>,
+                <code>struct</code>, <code>enum</code>,
+                <code>trait</code>, <code>typedef</code> (or
+                <code>tdef</code>).
+            </p>
+            <p>
+                Search functions by type signature (e.g.
+                <code>vec -> usize</code>)
+            </p>
+        </div>
+    </div>
+
+    
+
+    <script>
+        window.rootPath = "../../../";
+        window.currentCrate = "zwreec";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../../../jquery.js"></script>
+    <script src="../../../main.js"></script>
+    
+    <script async src="../../../search-index.js"></script>
+</body>
+</html>

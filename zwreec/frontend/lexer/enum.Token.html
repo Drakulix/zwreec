@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `Token` enum in crate `zwreec`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, Token">
+
+    <title>zwreec::frontend::lexer::Token - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../../../main.css">
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <section class="sidebar">
+        <a href='../../../zwreec/index.html'><img src='https://dl.dropboxusercontent.com/u/70410095/zwreec/logo.png' alt='' width='100'></a>
+        <p class='location'><a href='../../index.html'>zwreec</a>::<wbr><a href='../index.html'>frontend</a>::<wbr><a href='index.html'>lexer</a></p><script>window.sidebarCurrent = {name: 'Token', ty: 'enum', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+    </section>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press 'S' to search, '?' for more options..."
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content enum">
+<h1 class='fqn'><span class='in-band'>Enum <a href='../../index.html'>zwreec</a>::<wbr><a href='../index.html'>frontend</a>::<wbr><a href='index.html'>lexer</a>::<wbr><a class='enum' href=''>Token</a></span><span class='out-of-band'><span id='render-detail'>
+            <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                [<span class='inner'>&#x2212;</span>]
+            </a>
+        </span><a id='src-89605' class='srclink' href='../../../src/zwreec/frontend/lexer.rs.html#150-208' title='goto source code'>[src]</a></span></h1>
+<pre class='rust enum'>pub enum Token {
+    TokPassage {
+        location: <a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>(<a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>, <a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>)</a>,
+        name: <a class='struct' href='http://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>,
+    },
+    TokTagStart {
+        location: <a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>(<a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>, <a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>)</a>,
+    },
+    TokTagEnd {
+        location: <a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>(<a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>, <a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>)</a>,
+    },
+    TokVarSetStart {
+        location: <a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>(<a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>, <a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>)</a>,
+    },
+    TokVarSetEnd {
+        location: <a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>(<a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>, <a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>)</a>,
+    },
+    TokPassageLink {
+        location: <a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>(<a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>, <a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>)</a>,
+        display_name: <a class='struct' href='http://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>,
+        passage_name: <a class='struct' href='http://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>,
+    },
+    TokTag {
+        location: <a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>(<a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>, <a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>)</a>,
+        tag_name: <a class='struct' href='http://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>,
+    },
+    TokText {
+        location: <a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>(<a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>, <a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>)</a>,
+        text: <a class='struct' href='http://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>,
+    },
+    TokFormatBoldStart {
+        location: <a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>(<a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>, <a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>)</a>,
+    },
+    TokFormatBoldEnd {
+        location: <a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>(<a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>, <a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>)</a>,
+    },
+    TokFormatItalicStart {
+        location: <a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>(<a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>, <a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>)</a>,
+    },
+    TokFormatItalicEnd {
+        location: <a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>(<a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>, <a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>)</a>,
+    },
+    TokFormatUnderStart {
+        location: <a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>(<a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>, <a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>)</a>,
+    },
+    TokFormatUnderEnd {
+        location: <a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>(<a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>, <a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>)</a>,
+    },
+    TokFormatStrikeStart {
+        location: <a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>(<a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>, <a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>)</a>,
+    },
+    TokFormatStrikeEnd {
+        location: <a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>(<a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>, <a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>)</a>,
+    },
+    TokFormatSubStart {
+        location: <a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>(<a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>, <a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>)</a>,
+    },
+    TokFormatSubEnd {
+        location: <a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>(<a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>, <a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>)</a>,
+    },
+    TokFormatSupStart {
+        location: <a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>(<a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>, <a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>)</a>,
+    },
+    TokFormatSupEnd {
+        location: <a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>(<a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>, <a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>)</a>,
+    },
+    TokFormatMonoStart {
+        location: <a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>(<a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>, <a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>)</a>,
+    },
+    TokFormatMonoEnd {
+        location: <a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>(<a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>, <a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>)</a>,
+    },
+    TokFormatBulList {
+        location: <a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>(<a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>, <a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>)</a>,
+    },
+    TokFormatNumbList {
+        location: <a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>(<a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>, <a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>)</a>,
+    },
+    TokFormatIndentBlock {
+        location: <a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>(<a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>, <a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>)</a>,
+    },
+    TokFormatHorizontalLine {
+        location: <a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>(<a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>, <a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>)</a>,
+    },
+    TokFormatHeading {
+        location: <a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>(<a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>, <a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>)</a>,
+        rank: <a href='http://doc.rust-lang.org/nightly/std/primitive.u8.html'>u8</a>,
+        text: <a class='struct' href='http://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>,
+    },
+    TokMacroStart {
+        location: <a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>(<a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>, <a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>)</a>,
+    },
+    TokMacroEnd {
+        location: <a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>(<a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>, <a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>)</a>,
+    },
+    TokMacroContentVar {
+        location: <a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>(<a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>, <a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>)</a>,
+        var_name: <a class='struct' href='http://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>,
+    },
+    TokMacroSet {
+        location: <a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>(<a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>, <a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>)</a>,
+    },
+    TokMacroIf {
+        location: <a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>(<a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>, <a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>)</a>,
+    },
+    TokMacroElse {
+        location: <a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>(<a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>, <a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>)</a>,
+    },
+    TokMacroElseIf {
+        location: <a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>(<a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>, <a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>)</a>,
+    },
+    TokMacroEndIf {
+        location: <a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>(<a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>, <a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>)</a>,
+    },
+    TokMacroPrint {
+        location: <a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>(<a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>, <a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>)</a>,
+    },
+    TokMacroDisplay {
+        location: <a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>(<a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>, <a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>)</a>,
+        passage_name: <a class='struct' href='http://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>,
+    },
+    TokMacroSilently {
+        location: <a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>(<a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>, <a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>)</a>,
+    },
+    TokMacroEndSilently {
+        location: <a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>(<a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>, <a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>)</a>,
+    },
+    TokMacroNoBr {
+        location: <a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>(<a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>, <a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>)</a>,
+    },
+    TokMacroEndNoBr {
+        location: <a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>(<a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>, <a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>)</a>,
+    },
+    TokParenOpen {
+        location: <a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>(<a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>, <a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>)</a>,
+    },
+    TokParenClose {
+        location: <a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>(<a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>, <a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>)</a>,
+    },
+    TokVariable {
+        location: <a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>(<a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>, <a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>)</a>,
+        name: <a class='struct' href='http://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>,
+    },
+    TokArrayAccess {
+        location: <a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>(<a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>, <a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>)</a>,
+        name: <a class='struct' href='http://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>,
+        index: <a class='struct' href='http://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>,
+    },
+    TokArrayLength {
+        location: <a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>(<a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>, <a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>)</a>,
+        name: <a class='struct' href='http://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>,
+    },
+    TokInt {
+        location: <a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>(<a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>, <a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>)</a>,
+        value: <a href='http://doc.rust-lang.org/nightly/std/primitive.i32.html'>i32</a>,
+    },
+    TokFloat {
+        location: <a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>(<a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>, <a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>)</a>,
+        value: <a href='http://doc.rust-lang.org/nightly/std/primitive.f32.html'>f32</a>,
+    },
+    TokString {
+        location: <a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>(<a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>, <a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>)</a>,
+        value: <a class='struct' href='http://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>,
+    },
+    TokBoolean {
+        location: <a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>(<a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>, <a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>)</a>,
+        value: <a class='struct' href='http://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>,
+    },
+    TokFunction {
+        location: <a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>(<a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>, <a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>)</a>,
+        name: <a class='struct' href='http://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>,
+    },
+    TokColon {
+        location: <a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>(<a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>, <a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>)</a>,
+    },
+    TokArgsEnd {
+        location: <a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>(<a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>, <a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>)</a>,
+    },
+    TokArrayStart {
+        location: <a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>(<a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>, <a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>)</a>,
+    },
+    TokArrayEnd {
+        location: <a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>(<a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>, <a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>)</a>,
+    },
+    TokAssign {
+        location: <a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>(<a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>, <a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>)</a>,
+        var_name: <a class='struct' href='http://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>,
+        op_name: <a class='struct' href='http://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>,
+    },
+    TokNumOp {
+        location: <a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>(<a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>, <a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>)</a>,
+        op_name: <a class='struct' href='http://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>,
+    },
+    TokCompOp {
+        location: <a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>(<a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>, <a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>)</a>,
+        op_name: <a class='struct' href='http://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>,
+    },
+    TokLogOp {
+        location: <a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>(<a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>, <a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>)</a>,
+        op_name: <a class='struct' href='http://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>,
+    },
+    TokSemiColon {
+        location: <a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>(<a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>, <a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>)</a>,
+    },
+    TokNewLine {
+        location: <a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>(<a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>, <a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>)</a>,
+    },
+    TokUnaryMinus {
+        location: <a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>(<a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>, <a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>)</a>,
+    },
+    TokExpression,
+    TokError {
+        location: <a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>(<a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>, <a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>)</a>,
+        message: <a class='struct' href='http://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>,
+    },
+}</pre><div class='docblock'><p>The resulting Tokens that are returned by the <code>lex</code> function.</p>
+
+<p>These Tokens are matched by our lexical analyser. Every Token but
+<code>TokExpression</code> stores their original location inside the analysed input.
+Some Tokens also use other fields to store additional information.</p>
+</div><h2 class='variants'>Variants</h2>
+<table><tr><td id='variant.TokPassage'><code>TokPassage</code></td><td><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.TokPassage.field.location'><code>location</code></td><td></td></tr><tr><td id='variant.TokPassage.field.name'><code>name</code></td><td></td></tr></table></td></tr><tr><td id='variant.TokTagStart'><code>TokTagStart</code></td><td><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.TokTagStart.field.location'><code>location</code></td><td></td></tr></table></td></tr><tr><td id='variant.TokTagEnd'><code>TokTagEnd</code></td><td><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.TokTagEnd.field.location'><code>location</code></td><td></td></tr></table></td></tr><tr><td id='variant.TokVarSetStart'><code>TokVarSetStart</code></td><td><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.TokVarSetStart.field.location'><code>location</code></td><td></td></tr></table></td></tr><tr><td id='variant.TokVarSetEnd'><code>TokVarSetEnd</code></td><td><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.TokVarSetEnd.field.location'><code>location</code></td><td></td></tr></table></td></tr><tr><td id='variant.TokPassageLink'><code>TokPassageLink</code></td><td><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.TokPassageLink.field.location'><code>location</code></td><td></td></tr><tr><td id='variant.TokPassageLink.field.display_name'><code>display_name</code></td><td></td></tr><tr><td id='variant.TokPassageLink.field.passage_name'><code>passage_name</code></td><td></td></tr></table></td></tr><tr><td id='variant.TokTag'><code>TokTag</code></td><td><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.TokTag.field.location'><code>location</code></td><td></td></tr><tr><td id='variant.TokTag.field.tag_name'><code>tag_name</code></td><td></td></tr></table></td></tr><tr><td id='variant.TokText'><code>TokText</code></td><td><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.TokText.field.location'><code>location</code></td><td></td></tr><tr><td id='variant.TokText.field.text'><code>text</code></td><td></td></tr></table></td></tr><tr><td id='variant.TokFormatBoldStart'><code>TokFormatBoldStart</code></td><td><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.TokFormatBoldStart.field.location'><code>location</code></td><td></td></tr></table></td></tr><tr><td id='variant.TokFormatBoldEnd'><code>TokFormatBoldEnd</code></td><td><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.TokFormatBoldEnd.field.location'><code>location</code></td><td></td></tr></table></td></tr><tr><td id='variant.TokFormatItalicStart'><code>TokFormatItalicStart</code></td><td><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.TokFormatItalicStart.field.location'><code>location</code></td><td></td></tr></table></td></tr><tr><td id='variant.TokFormatItalicEnd'><code>TokFormatItalicEnd</code></td><td><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.TokFormatItalicEnd.field.location'><code>location</code></td><td></td></tr></table></td></tr><tr><td id='variant.TokFormatUnderStart'><code>TokFormatUnderStart</code></td><td><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.TokFormatUnderStart.field.location'><code>location</code></td><td></td></tr></table></td></tr><tr><td id='variant.TokFormatUnderEnd'><code>TokFormatUnderEnd</code></td><td><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.TokFormatUnderEnd.field.location'><code>location</code></td><td></td></tr></table></td></tr><tr><td id='variant.TokFormatStrikeStart'><code>TokFormatStrikeStart</code></td><td><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.TokFormatStrikeStart.field.location'><code>location</code></td><td></td></tr></table></td></tr><tr><td id='variant.TokFormatStrikeEnd'><code>TokFormatStrikeEnd</code></td><td><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.TokFormatStrikeEnd.field.location'><code>location</code></td><td></td></tr></table></td></tr><tr><td id='variant.TokFormatSubStart'><code>TokFormatSubStart</code></td><td><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.TokFormatSubStart.field.location'><code>location</code></td><td></td></tr></table></td></tr><tr><td id='variant.TokFormatSubEnd'><code>TokFormatSubEnd</code></td><td><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.TokFormatSubEnd.field.location'><code>location</code></td><td></td></tr></table></td></tr><tr><td id='variant.TokFormatSupStart'><code>TokFormatSupStart</code></td><td><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.TokFormatSupStart.field.location'><code>location</code></td><td></td></tr></table></td></tr><tr><td id='variant.TokFormatSupEnd'><code>TokFormatSupEnd</code></td><td><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.TokFormatSupEnd.field.location'><code>location</code></td><td></td></tr></table></td></tr><tr><td id='variant.TokFormatMonoStart'><code>TokFormatMonoStart</code></td><td><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.TokFormatMonoStart.field.location'><code>location</code></td><td></td></tr></table></td></tr><tr><td id='variant.TokFormatMonoEnd'><code>TokFormatMonoEnd</code></td><td><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.TokFormatMonoEnd.field.location'><code>location</code></td><td></td></tr></table></td></tr><tr><td id='variant.TokFormatBulList'><code>TokFormatBulList</code></td><td><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.TokFormatBulList.field.location'><code>location</code></td><td></td></tr></table></td></tr><tr><td id='variant.TokFormatNumbList'><code>TokFormatNumbList</code></td><td><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.TokFormatNumbList.field.location'><code>location</code></td><td></td></tr></table></td></tr><tr><td id='variant.TokFormatIndentBlock'><code>TokFormatIndentBlock</code></td><td><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.TokFormatIndentBlock.field.location'><code>location</code></td><td></td></tr></table></td></tr><tr><td id='variant.TokFormatHorizontalLine'><code>TokFormatHorizontalLine</code></td><td><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.TokFormatHorizontalLine.field.location'><code>location</code></td><td></td></tr></table></td></tr><tr><td id='variant.TokFormatHeading'><code>TokFormatHeading</code></td><td><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.TokFormatHeading.field.location'><code>location</code></td><td></td></tr><tr><td id='variant.TokFormatHeading.field.rank'><code>rank</code></td><td></td></tr><tr><td id='variant.TokFormatHeading.field.text'><code>text</code></td><td></td></tr></table></td></tr><tr><td id='variant.TokMacroStart'><code>TokMacroStart</code></td><td><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.TokMacroStart.field.location'><code>location</code></td><td></td></tr></table></td></tr><tr><td id='variant.TokMacroEnd'><code>TokMacroEnd</code></td><td><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.TokMacroEnd.field.location'><code>location</code></td><td></td></tr></table></td></tr><tr><td id='variant.TokMacroContentVar'><code>TokMacroContentVar</code></td><td><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.TokMacroContentVar.field.location'><code>location</code></td><td></td></tr><tr><td id='variant.TokMacroContentVar.field.var_name'><code>var_name</code></td><td></td></tr></table></td></tr><tr><td id='variant.TokMacroSet'><code>TokMacroSet</code></td><td><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.TokMacroSet.field.location'><code>location</code></td><td></td></tr></table></td></tr><tr><td id='variant.TokMacroIf'><code>TokMacroIf</code></td><td><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.TokMacroIf.field.location'><code>location</code></td><td></td></tr></table></td></tr><tr><td id='variant.TokMacroElse'><code>TokMacroElse</code></td><td><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.TokMacroElse.field.location'><code>location</code></td><td></td></tr></table></td></tr><tr><td id='variant.TokMacroElseIf'><code>TokMacroElseIf</code></td><td><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.TokMacroElseIf.field.location'><code>location</code></td><td></td></tr></table></td></tr><tr><td id='variant.TokMacroEndIf'><code>TokMacroEndIf</code></td><td><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.TokMacroEndIf.field.location'><code>location</code></td><td></td></tr></table></td></tr><tr><td id='variant.TokMacroPrint'><code>TokMacroPrint</code></td><td><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.TokMacroPrint.field.location'><code>location</code></td><td></td></tr></table></td></tr><tr><td id='variant.TokMacroDisplay'><code>TokMacroDisplay</code></td><td><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.TokMacroDisplay.field.location'><code>location</code></td><td></td></tr><tr><td id='variant.TokMacroDisplay.field.passage_name'><code>passage_name</code></td><td></td></tr></table></td></tr><tr><td id='variant.TokMacroSilently'><code>TokMacroSilently</code></td><td><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.TokMacroSilently.field.location'><code>location</code></td><td></td></tr></table></td></tr><tr><td id='variant.TokMacroEndSilently'><code>TokMacroEndSilently</code></td><td><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.TokMacroEndSilently.field.location'><code>location</code></td><td></td></tr></table></td></tr><tr><td id='variant.TokMacroNoBr'><code>TokMacroNoBr</code></td><td><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.TokMacroNoBr.field.location'><code>location</code></td><td></td></tr></table></td></tr><tr><td id='variant.TokMacroEndNoBr'><code>TokMacroEndNoBr</code></td><td><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.TokMacroEndNoBr.field.location'><code>location</code></td><td></td></tr></table></td></tr><tr><td id='variant.TokParenOpen'><code>TokParenOpen</code></td><td><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.TokParenOpen.field.location'><code>location</code></td><td></td></tr></table></td></tr><tr><td id='variant.TokParenClose'><code>TokParenClose</code></td><td><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.TokParenClose.field.location'><code>location</code></td><td></td></tr></table></td></tr><tr><td id='variant.TokVariable'><code>TokVariable</code></td><td><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.TokVariable.field.location'><code>location</code></td><td></td></tr><tr><td id='variant.TokVariable.field.name'><code>name</code></td><td></td></tr></table></td></tr><tr><td id='variant.TokArrayAccess'><code>TokArrayAccess</code></td><td><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.TokArrayAccess.field.location'><code>location</code></td><td></td></tr><tr><td id='variant.TokArrayAccess.field.name'><code>name</code></td><td></td></tr><tr><td id='variant.TokArrayAccess.field.index'><code>index</code></td><td></td></tr></table></td></tr><tr><td id='variant.TokArrayLength'><code>TokArrayLength</code></td><td><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.TokArrayLength.field.location'><code>location</code></td><td></td></tr><tr><td id='variant.TokArrayLength.field.name'><code>name</code></td><td></td></tr></table></td></tr><tr><td id='variant.TokInt'><code>TokInt</code></td><td><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.TokInt.field.location'><code>location</code></td><td></td></tr><tr><td id='variant.TokInt.field.value'><code>value</code></td><td></td></tr></table></td></tr><tr><td id='variant.TokFloat'><code>TokFloat</code></td><td><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.TokFloat.field.location'><code>location</code></td><td></td></tr><tr><td id='variant.TokFloat.field.value'><code>value</code></td><td></td></tr></table></td></tr><tr><td id='variant.TokString'><code>TokString</code></td><td><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.TokString.field.location'><code>location</code></td><td></td></tr><tr><td id='variant.TokString.field.value'><code>value</code></td><td></td></tr></table></td></tr><tr><td id='variant.TokBoolean'><code>TokBoolean</code></td><td><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.TokBoolean.field.location'><code>location</code></td><td></td></tr><tr><td id='variant.TokBoolean.field.value'><code>value</code></td><td></td></tr></table></td></tr><tr><td id='variant.TokFunction'><code>TokFunction</code></td><td><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.TokFunction.field.location'><code>location</code></td><td></td></tr><tr><td id='variant.TokFunction.field.name'><code>name</code></td><td></td></tr></table></td></tr><tr><td id='variant.TokColon'><code>TokColon</code></td><td><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.TokColon.field.location'><code>location</code></td><td></td></tr></table></td></tr><tr><td id='variant.TokArgsEnd'><code>TokArgsEnd</code></td><td><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.TokArgsEnd.field.location'><code>location</code></td><td></td></tr></table></td></tr><tr><td id='variant.TokArrayStart'><code>TokArrayStart</code></td><td><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.TokArrayStart.field.location'><code>location</code></td><td></td></tr></table></td></tr><tr><td id='variant.TokArrayEnd'><code>TokArrayEnd</code></td><td><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.TokArrayEnd.field.location'><code>location</code></td><td></td></tr></table></td></tr><tr><td id='variant.TokAssign'><code>TokAssign</code></td><td><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.TokAssign.field.location'><code>location</code></td><td></td></tr><tr><td id='variant.TokAssign.field.var_name'><code>var_name</code></td><td></td></tr><tr><td id='variant.TokAssign.field.op_name'><code>op_name</code></td><td></td></tr></table></td></tr><tr><td id='variant.TokNumOp'><code>TokNumOp</code></td><td><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.TokNumOp.field.location'><code>location</code></td><td></td></tr><tr><td id='variant.TokNumOp.field.op_name'><code>op_name</code></td><td></td></tr></table></td></tr><tr><td id='variant.TokCompOp'><code>TokCompOp</code></td><td><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.TokCompOp.field.location'><code>location</code></td><td></td></tr><tr><td id='variant.TokCompOp.field.op_name'><code>op_name</code></td><td></td></tr></table></td></tr><tr><td id='variant.TokLogOp'><code>TokLogOp</code></td><td><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.TokLogOp.field.location'><code>location</code></td><td></td></tr><tr><td id='variant.TokLogOp.field.op_name'><code>op_name</code></td><td></td></tr></table></td></tr><tr><td id='variant.TokSemiColon'><code>TokSemiColon</code></td><td><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.TokSemiColon.field.location'><code>location</code></td><td></td></tr></table></td></tr><tr><td id='variant.TokNewLine'><code>TokNewLine</code></td><td><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.TokNewLine.field.location'><code>location</code></td><td></td></tr></table></td></tr><tr><td id='variant.TokUnaryMinus'><code>TokUnaryMinus</code></td><td><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.TokUnaryMinus.field.location'><code>location</code></td><td></td></tr></table></td></tr><tr><td id='variant.TokExpression'><code>TokExpression</code></td><td></td></tr><tr><td id='variant.TokError'><code>TokError</code></td><td><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.TokError.field.location'><code>location</code></td><td></td></tr><tr><td id='variant.TokError.field.message'><code>message</code></td><td></td></tr></table></td></tr></table><h2 id='methods'>Methods</h2><h3 class='impl'><code>impl <a class='enum' href='../../../zwreec/frontend/lexer/enum.Token.html' title='zwreec::frontend::lexer::Token'>Token</a></code></h3><div class='impl-items'><h4 id='method.location' class='method'><code>fn <a href='#method.location' class='fnname'>location</a>(&amp;self) -&gt; <a href='http://doc.rust-lang.org/nightly/std/primitive.tuple.html'>(<a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>, <a href='http://doc.rust-lang.org/nightly/std/primitive.u64.html'>u64</a>)</a></code></h4>
+<div class='docblock'><p>Returns the original location inside the twee input as <code>(line, column)</code>.</p>
+</div></div><h3 class='impl'><code>impl <a class='enum' href='../../../zwreec/frontend/lexer/enum.Token.html' title='zwreec::frontend::lexer::Token'>Token</a></code></h3><div class='impl-items'><h4 id='method.is_same_token' class='method'><code>fn <a href='#method.is_same_token' class='fnname'>is_same_token</a>(&amp;self, other: &amp;<a class='enum' href='../../../zwreec/frontend/lexer/enum.Token.html' title='zwreec::frontend::lexer::Token'>Token</a>) -&gt; <a href='http://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></h4>
+<div class='docblock'><p>Tests is two tokens are of the same type.</p>
+
+<p>We re-create tokens with location {0,0} in the parser
+Thus comparing also works by ignoring the content of the token.</p>
+</div></div><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><code>impl <a class='trait' href='http://doc.rust-lang.org/nightly/core/fmt/trait.Display.html' title='core::fmt::Display'>Display</a> for <a class='enum' href='../../../zwreec/frontend/lexer/enum.Token.html' title='zwreec::frontend::lexer::Token'>Token</a></code></h3><div class='impl-items'><h4 id='method.fmt' class='method'><code>fn <a href='http://doc.rust-lang.org/nightly/core/fmt/trait.Display.html#method.fmt' class='fnname'>fmt</a>(&amp;self, f: &amp;mut <a class='struct' href='http://doc.rust-lang.org/nightly/core/fmt/struct.Formatter.html' title='core::fmt::Formatter'>Formatter</a>) -&gt; <a class='type' href='http://doc.rust-lang.org/nightly/core/fmt/type.Result.html' title='core::fmt::Result'>Result</a></code></h4>
+</div><h3 id='derived_implementations'>Derived Implementations </h3><h3 class='impl'><code>impl <a class='trait' href='http://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a> for <a class='enum' href='../../../zwreec/frontend/lexer/enum.Token.html' title='zwreec::frontend::lexer::Token'>Token</a></code></h3><div class='impl-items'><h4 id='method.clone' class='method'><code>fn <a href='http://doc.rust-lang.org/nightly/core/clone/trait.Clone.html#method.clone' class='fnname'>clone</a>(&amp;self) -&gt; <a class='enum' href='../../../zwreec/frontend/lexer/enum.Token.html' title='zwreec::frontend::lexer::Token'>Token</a></code></h4>
+<h4 id='method.clone_from' class='method'><code>fn <a href='http://doc.rust-lang.org/nightly/core/clone/trait.Clone.html#method.clone_from' class='fnname'>clone_from</a>(&amp;mut self, source: &amp;Self)</code></h4>
+</div><h3 class='impl'><code>impl <a class='trait' href='http://doc.rust-lang.org/nightly/core/fmt/trait.Debug.html' title='core::fmt::Debug'>Debug</a> for <a class='enum' href='../../../zwreec/frontend/lexer/enum.Token.html' title='zwreec::frontend::lexer::Token'>Token</a></code></h3><div class='impl-items'><h4 id='method.fmt' class='method'><code>fn <a href='http://doc.rust-lang.org/nightly/core/fmt/trait.Debug.html#method.fmt' class='fnname'>fmt</a>(&amp;self, __arg_0: &amp;mut <a class='struct' href='http://doc.rust-lang.org/nightly/core/fmt/struct.Formatter.html' title='core::fmt::Formatter'>Formatter</a>) -&gt; <a class='type' href='http://doc.rust-lang.org/nightly/core/fmt/type.Result.html' title='core::fmt::Result'>Result</a></code></h4>
+</div><h3 class='impl'><code>impl <a class='trait' href='http://doc.rust-lang.org/nightly/core/cmp/trait.PartialEq.html' title='core::cmp::PartialEq'>PartialEq</a> for <a class='enum' href='../../../zwreec/frontend/lexer/enum.Token.html' title='zwreec::frontend::lexer::Token'>Token</a></code></h3><div class='impl-items'><h4 id='method.eq' class='method'><code>fn <a href='http://doc.rust-lang.org/nightly/core/cmp/trait.PartialEq.html#method.eq' class='fnname'>eq</a>(&amp;self, __arg_0: &amp;<a class='enum' href='../../../zwreec/frontend/lexer/enum.Token.html' title='zwreec::frontend::lexer::Token'>Token</a>) -&gt; <a href='http://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></h4>
+<h4 id='method.ne' class='method'><code>fn <a href='http://doc.rust-lang.org/nightly/core/cmp/trait.PartialEq.html#method.ne' class='fnname'>ne</a>(&amp;self, __arg_0: &amp;<a class='enum' href='../../../zwreec/frontend/lexer/enum.Token.html' title='zwreec::frontend::lexer::Token'>Token</a>) -&gt; <a href='http://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></h4>
+</div></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <div id="help" class="hidden">
+        <div class="shortcuts">
+            <h1>Keyboard shortcuts</h1>
+            <dl>
+                <dt>?</dt>
+                <dd>Show this help dialog</dd>
+                <dt>S</dt>
+                <dd>Focus the search field</dd>
+                <dt>&larrb;</dt>
+                <dd>Move up in search results</dd>
+                <dt>&rarrb;</dt>
+                <dd>Move down in search results</dd>
+                <dt>&#9166;</dt>
+                <dd>Go to active search result</dd>
+            </dl>
+        </div>
+        <div class="infos">
+            <h1>Search tricks</h1>
+            <p>
+                Prefix searches with a type followed by a colon (e.g.
+                <code>fn:</code>) to restrict the search to a given type.
+            </p>
+            <p>
+                Accepted types are: <code>fn</code>, <code>mod</code>,
+                <code>struct</code>, <code>enum</code>,
+                <code>trait</code>, <code>typedef</code> (or
+                <code>tdef</code>).
+            </p>
+            <p>
+                Search functions by type signature (e.g.
+                <code>vec -> usize</code>)
+            </p>
+        </div>
+    </div>
+
+    
+
+    <script>
+        window.rootPath = "../../../";
+        window.currentCrate = "zwreec";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../../../jquery.js"></script>
+    <script src="../../../main.js"></script>
+    
+    <script async src="../../../search-index.js"></script>
+</body>
+</html>

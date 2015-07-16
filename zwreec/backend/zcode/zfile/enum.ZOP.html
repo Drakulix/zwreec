@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `ZOP` enum in crate `zwreec`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, ZOP">
+
+    <title>zwreec::backend::zcode::zfile::ZOP - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../../../../main.css">
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <section class="sidebar">
+        <a href='../../../../zwreec/index.html'><img src='https://dl.dropboxusercontent.com/u/70410095/zwreec/logo.png' alt='' width='100'></a>
+        <p class='location'><a href='../../../index.html'>zwreec</a>::<wbr><a href='../../index.html'>backend</a>::<wbr><a href='../index.html'>zcode</a>::<wbr><a href='index.html'>zfile</a></p><script>window.sidebarCurrent = {name: 'ZOP', ty: 'enum', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+    </section>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press 'S' to search, '?' for more options..."
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content enum">
+<h1 class='fqn'><span class='in-band'>Enum <a href='../../../index.html'>zwreec</a>::<wbr><a href='../../index.html'>backend</a>::<wbr><a href='../index.html'>zcode</a>::<wbr><a href='index.html'>zfile</a>::<wbr><a class='enum' href=''>ZOP</a></span><span class='out-of-band'><span id='render-detail'>
+            <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                [<span class='inner'>&#x2212;</span>]
+            </a>
+        </span><a id='src-6282' class='srclink' href='../../../../src/zwreec/backend/zcode/zfile.rs.html#158-362' title='goto source code'>[src]</a></span></h1>
+<pre class='rust enum'>pub enum ZOP {
+    PrintUnicode {
+        c: <a href='http://doc.rust-lang.org/nightly/std/primitive.u16.html'>u16</a>,
+    },
+    PrintUnicodeVar {
+        var: <a class='struct' href='../../../../zwreec/backend/zcode/zfile/struct.Variable.html' title='zwreec::backend::zcode::zfile::Variable'>Variable</a>,
+    },
+    PrintUnicodeStr {
+        address: <a class='enum' href='../../../../zwreec/backend/zcode/zfile/enum.Operand.html' title='zwreec::backend::zcode::zfile::Operand'>Operand</a>,
+    },
+    PrintChar {
+        var: <a class='struct' href='../../../../zwreec/backend/zcode/zfile/struct.Variable.html' title='zwreec::backend::zcode::zfile::Variable'>Variable</a>,
+    },
+    Print {
+        text: <a class='struct' href='http://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>,
+    },
+    PrintNumVar {
+        variable: <a class='struct' href='../../../../zwreec/backend/zcode/zfile/struct.Variable.html' title='zwreec::backend::zcode::zfile::Variable'>Variable</a>,
+    },
+    PrintVar {
+        variable: <a class='struct' href='../../../../zwreec/backend/zcode/zfile/struct.Variable.html' title='zwreec::backend::zcode::zfile::Variable'>Variable</a>,
+    },
+    PrintPaddr {
+        address: <a class='enum' href='../../../../zwreec/backend/zcode/zfile/enum.Operand.html' title='zwreec::backend::zcode::zfile::Operand'>Operand</a>,
+    },
+    PrintAddr {
+        address: <a class='enum' href='../../../../zwreec/backend/zcode/zfile/enum.Operand.html' title='zwreec::backend::zcode::zfile::Operand'>Operand</a>,
+    },
+    PrintOps {
+        text: <a class='struct' href='http://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>,
+    },
+    Call1N {
+        jump_to_label: <a class='struct' href='http://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>,
+    },
+    Call2NWithAddress {
+        jump_to_label: <a class='struct' href='http://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>,
+        address: <a class='struct' href='http://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>,
+    },
+    Call2NWithArg {
+        jump_to_label: <a class='struct' href='http://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>,
+        arg: <a class='enum' href='../../../../zwreec/backend/zcode/zfile/enum.Operand.html' title='zwreec::backend::zcode::zfile::Operand'>Operand</a>,
+    },
+    Call1NVar {
+        variable: <a href='http://doc.rust-lang.org/nightly/std/primitive.u8.html'>u8</a>,
+    },
+    Call2S {
+        jump_to_label: <a class='struct' href='http://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>,
+        arg: <a class='enum' href='../../../../zwreec/backend/zcode/zfile/enum.Operand.html' title='zwreec::backend::zcode::zfile::Operand'>Operand</a>,
+        result: <a class='struct' href='../../../../zwreec/backend/zcode/zfile/struct.Variable.html' title='zwreec::backend::zcode::zfile::Variable'>Variable</a>,
+    },
+    CallVNA2 {
+        jump_to_label: <a class='struct' href='http://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>,
+        arg1: <a class='enum' href='../../../../zwreec/backend/zcode/zfile/enum.Operand.html' title='zwreec::backend::zcode::zfile::Operand'>Operand</a>,
+        arg2: <a class='enum' href='../../../../zwreec/backend/zcode/zfile/enum.Operand.html' title='zwreec::backend::zcode::zfile::Operand'>Operand</a>,
+    },
+    CallVNA3 {
+        jump_to_label: <a class='struct' href='http://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>,
+        arg1: <a class='enum' href='../../../../zwreec/backend/zcode/zfile/enum.Operand.html' title='zwreec::backend::zcode::zfile::Operand'>Operand</a>,
+        arg2: <a class='enum' href='../../../../zwreec/backend/zcode/zfile/enum.Operand.html' title='zwreec::backend::zcode::zfile::Operand'>Operand</a>,
+        arg3: <a class='enum' href='../../../../zwreec/backend/zcode/zfile/enum.Operand.html' title='zwreec::backend::zcode::zfile::Operand'>Operand</a>,
+    },
+    CallVSA2 {
+        jump_to_label: <a class='struct' href='http://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>,
+        arg1: <a class='enum' href='../../../../zwreec/backend/zcode/zfile/enum.Operand.html' title='zwreec::backend::zcode::zfile::Operand'>Operand</a>,
+        arg2: <a class='enum' href='../../../../zwreec/backend/zcode/zfile/enum.Operand.html' title='zwreec::backend::zcode::zfile::Operand'>Operand</a>,
+        result: <a class='struct' href='../../../../zwreec/backend/zcode/zfile/struct.Variable.html' title='zwreec::backend::zcode::zfile::Variable'>Variable</a>,
+    },
+    CallVSA3 {
+        jump_to_label: <a class='struct' href='http://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>,
+        arg1: <a class='enum' href='../../../../zwreec/backend/zcode/zfile/enum.Operand.html' title='zwreec::backend::zcode::zfile::Operand'>Operand</a>,
+        arg2: <a class='enum' href='../../../../zwreec/backend/zcode/zfile/enum.Operand.html' title='zwreec::backend::zcode::zfile::Operand'>Operand</a>,
+        arg3: <a class='enum' href='../../../../zwreec/backend/zcode/zfile/enum.Operand.html' title='zwreec::backend::zcode::zfile::Operand'>Operand</a>,
+        result: <a class='struct' href='../../../../zwreec/backend/zcode/zfile/struct.Variable.html' title='zwreec::backend::zcode::zfile::Variable'>Variable</a>,
+    },
+    CallVS2A5 {
+        jump_to_label: <a class='struct' href='http://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>,
+        arg1: <a class='enum' href='../../../../zwreec/backend/zcode/zfile/enum.Operand.html' title='zwreec::backend::zcode::zfile::Operand'>Operand</a>,
+        arg2: <a class='enum' href='../../../../zwreec/backend/zcode/zfile/enum.Operand.html' title='zwreec::backend::zcode::zfile::Operand'>Operand</a>,
+        arg3: <a class='enum' href='../../../../zwreec/backend/zcode/zfile/enum.Operand.html' title='zwreec::backend::zcode::zfile::Operand'>Operand</a>,
+        arg4: <a class='enum' href='../../../../zwreec/backend/zcode/zfile/enum.Operand.html' title='zwreec::backend::zcode::zfile::Operand'>Operand</a>,
+        arg5: <a class='enum' href='../../../../zwreec/backend/zcode/zfile/enum.Operand.html' title='zwreec::backend::zcode::zfile::Operand'>Operand</a>,
+        result: <a class='struct' href='../../../../zwreec/backend/zcode/zfile/struct.Variable.html' title='zwreec::backend::zcode::zfile::Variable'>Variable</a>,
+    },
+    Routine {
+        name: <a class='struct' href='http://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>,
+        count_variables: <a href='http://doc.rust-lang.org/nightly/std/primitive.u8.html'>u8</a>,
+    },
+    Label {
+        name: <a class='struct' href='http://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>,
+    },
+    Newline,
+    SetColor {
+        foreground: <a href='http://doc.rust-lang.org/nightly/std/primitive.u8.html'>u8</a>,
+        background: <a href='http://doc.rust-lang.org/nightly/std/primitive.u8.html'>u8</a>,
+    },
+    SetColorVar {
+        foreground: <a href='http://doc.rust-lang.org/nightly/std/primitive.u8.html'>u8</a>,
+        background: <a href='http://doc.rust-lang.org/nightly/std/primitive.u8.html'>u8</a>,
+    },
+    SetTextStyle {
+        bold: <a href='http://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a>,
+        reverse: <a href='http://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a>,
+        monospace: <a href='http://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a>,
+        italic: <a href='http://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a>,
+    },
+    StoreVariable {
+        variable: <a class='struct' href='../../../../zwreec/backend/zcode/zfile/struct.Variable.html' title='zwreec::backend::zcode::zfile::Variable'>Variable</a>,
+        value: <a class='enum' href='../../../../zwreec/backend/zcode/zfile/enum.Operand.html' title='zwreec::backend::zcode::zfile::Operand'>Operand</a>,
+    },
+    StoreW {
+        array_address: <a class='enum' href='../../../../zwreec/backend/zcode/zfile/enum.Operand.html' title='zwreec::backend::zcode::zfile::Operand'>Operand</a>,
+        index: <a class='struct' href='../../../../zwreec/backend/zcode/zfile/struct.Variable.html' title='zwreec::backend::zcode::zfile::Variable'>Variable</a>,
+        variable: <a class='struct' href='../../../../zwreec/backend/zcode/zfile/struct.Variable.html' title='zwreec::backend::zcode::zfile::Variable'>Variable</a>,
+    },
+    StoreB {
+        array_address: <a class='enum' href='../../../../zwreec/backend/zcode/zfile/enum.Operand.html' title='zwreec::backend::zcode::zfile::Operand'>Operand</a>,
+        index: <a class='struct' href='../../../../zwreec/backend/zcode/zfile/struct.Variable.html' title='zwreec::backend::zcode::zfile::Variable'>Variable</a>,
+        variable: <a class='struct' href='../../../../zwreec/backend/zcode/zfile/struct.Variable.html' title='zwreec::backend::zcode::zfile::Variable'>Variable</a>,
+    },
+    StoreBOperand {
+        array_address: <a class='enum' href='../../../../zwreec/backend/zcode/zfile/enum.Operand.html' title='zwreec::backend::zcode::zfile::Operand'>Operand</a>,
+        index: <a class='enum' href='../../../../zwreec/backend/zcode/zfile/enum.Operand.html' title='zwreec::backend::zcode::zfile::Operand'>Operand</a>,
+        operand: <a class='enum' href='../../../../zwreec/backend/zcode/zfile/enum.Operand.html' title='zwreec::backend::zcode::zfile::Operand'>Operand</a>,
+    },
+    LoadBOperand {
+        array_address: <a class='enum' href='../../../../zwreec/backend/zcode/zfile/enum.Operand.html' title='zwreec::backend::zcode::zfile::Operand'>Operand</a>,
+        index: <a class='enum' href='../../../../zwreec/backend/zcode/zfile/enum.Operand.html' title='zwreec::backend::zcode::zfile::Operand'>Operand</a>,
+        variable: <a class='struct' href='../../../../zwreec/backend/zcode/zfile/struct.Variable.html' title='zwreec::backend::zcode::zfile::Variable'>Variable</a>,
+    },
+    PushVar {
+        variable: <a class='struct' href='../../../../zwreec/backend/zcode/zfile/struct.Variable.html' title='zwreec::backend::zcode::zfile::Variable'>Variable</a>,
+    },
+    PullVar {
+        variable: <a class='struct' href='../../../../zwreec/backend/zcode/zfile/struct.Variable.html' title='zwreec::backend::zcode::zfile::Variable'>Variable</a>,
+    },
+    Inc {
+        variable: <a href='http://doc.rust-lang.org/nightly/std/primitive.u8.html'>u8</a>,
+    },
+    Dec {
+        variable: <a href='http://doc.rust-lang.org/nightly/std/primitive.u8.html'>u8</a>,
+    },
+    Ret {
+        value: <a class='enum' href='../../../../zwreec/backend/zcode/zfile/enum.Operand.html' title='zwreec::backend::zcode::zfile::Operand'>Operand</a>,
+    },
+    JE {
+        operand1: <a class='enum' href='../../../../zwreec/backend/zcode/zfile/enum.Operand.html' title='zwreec::backend::zcode::zfile::Operand'>Operand</a>,
+        operand2: <a class='enum' href='../../../../zwreec/backend/zcode/zfile/enum.Operand.html' title='zwreec::backend::zcode::zfile::Operand'>Operand</a>,
+        jump_to_label: <a class='struct' href='http://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>,
+    },
+    JNE {
+        operand1: <a class='enum' href='../../../../zwreec/backend/zcode/zfile/enum.Operand.html' title='zwreec::backend::zcode::zfile::Operand'>Operand</a>,
+        operand2: <a class='enum' href='../../../../zwreec/backend/zcode/zfile/enum.Operand.html' title='zwreec::backend::zcode::zfile::Operand'>Operand</a>,
+        jump_to_label: <a class='struct' href='http://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>,
+    },
+    JL {
+        operand1: <a class='enum' href='../../../../zwreec/backend/zcode/zfile/enum.Operand.html' title='zwreec::backend::zcode::zfile::Operand'>Operand</a>,
+        operand2: <a class='enum' href='../../../../zwreec/backend/zcode/zfile/enum.Operand.html' title='zwreec::backend::zcode::zfile::Operand'>Operand</a>,
+        jump_to_label: <a class='struct' href='http://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>,
+    },
+    JLE {
+        operand1: <a class='enum' href='../../../../zwreec/backend/zcode/zfile/enum.Operand.html' title='zwreec::backend::zcode::zfile::Operand'>Operand</a>,
+        operand2: <a class='enum' href='../../../../zwreec/backend/zcode/zfile/enum.Operand.html' title='zwreec::backend::zcode::zfile::Operand'>Operand</a>,
+        jump_to_label: <a class='struct' href='http://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>,
+    },
+    JG {
+        operand1: <a class='enum' href='../../../../zwreec/backend/zcode/zfile/enum.Operand.html' title='zwreec::backend::zcode::zfile::Operand'>Operand</a>,
+        operand2: <a class='enum' href='../../../../zwreec/backend/zcode/zfile/enum.Operand.html' title='zwreec::backend::zcode::zfile::Operand'>Operand</a>,
+        jump_to_label: <a class='struct' href='http://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>,
+    },
+    JGE {
+        operand1: <a class='enum' href='../../../../zwreec/backend/zcode/zfile/enum.Operand.html' title='zwreec::backend::zcode::zfile::Operand'>Operand</a>,
+        operand2: <a class='enum' href='../../../../zwreec/backend/zcode/zfile/enum.Operand.html' title='zwreec::backend::zcode::zfile::Operand'>Operand</a>,
+        jump_to_label: <a class='struct' href='http://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>,
+    },
+    Random {
+        range: <a class='enum' href='../../../../zwreec/backend/zcode/zfile/enum.Operand.html' title='zwreec::backend::zcode::zfile::Operand'>Operand</a>,
+        variable: <a class='struct' href='../../../../zwreec/backend/zcode/zfile/struct.Variable.html' title='zwreec::backend::zcode::zfile::Variable'>Variable</a>,
+    },
+    ReadChar {
+        local_var_id: <a href='http://doc.rust-lang.org/nightly/std/primitive.u8.html'>u8</a>,
+    },
+    ReadCharTimer {
+        local_var_id: <a href='http://doc.rust-lang.org/nightly/std/primitive.u8.html'>u8</a>,
+        timer: <a href='http://doc.rust-lang.org/nightly/std/primitive.u8.html'>u8</a>,
+        routine: <a class='struct' href='http://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>,
+    },
+    AddTypes {
+        operand1: <a class='enum' href='../../../../zwreec/backend/zcode/zfile/enum.Operand.html' title='zwreec::backend::zcode::zfile::Operand'>Operand</a>,
+        operand2: <a class='enum' href='../../../../zwreec/backend/zcode/zfile/enum.Operand.html' title='zwreec::backend::zcode::zfile::Operand'>Operand</a>,
+        tmp1: <a class='struct' href='../../../../zwreec/backend/zcode/zfile/struct.Variable.html' title='zwreec::backend::zcode::zfile::Variable'>Variable</a>,
+        tmp2: <a class='struct' href='../../../../zwreec/backend/zcode/zfile/struct.Variable.html' title='zwreec::backend::zcode::zfile::Variable'>Variable</a>,
+        save_variable: <a class='struct' href='../../../../zwreec/backend/zcode/zfile/struct.Variable.html' title='zwreec::backend::zcode::zfile::Variable'>Variable</a>,
+    },
+    Add {
+        operand1: <a class='enum' href='../../../../zwreec/backend/zcode/zfile/enum.Operand.html' title='zwreec::backend::zcode::zfile::Operand'>Operand</a>,
+        operand2: <a class='enum' href='../../../../zwreec/backend/zcode/zfile/enum.Operand.html' title='zwreec::backend::zcode::zfile::Operand'>Operand</a>,
+        save_variable: <a class='struct' href='../../../../zwreec/backend/zcode/zfile/struct.Variable.html' title='zwreec::backend::zcode::zfile::Variable'>Variable</a>,
+    },
+    Sub {
+        operand1: <a class='enum' href='../../../../zwreec/backend/zcode/zfile/enum.Operand.html' title='zwreec::backend::zcode::zfile::Operand'>Operand</a>,
+        operand2: <a class='enum' href='../../../../zwreec/backend/zcode/zfile/enum.Operand.html' title='zwreec::backend::zcode::zfile::Operand'>Operand</a>,
+        save_variable: <a class='struct' href='../../../../zwreec/backend/zcode/zfile/struct.Variable.html' title='zwreec::backend::zcode::zfile::Variable'>Variable</a>,
+    },
+    Mul {
+        operand1: <a class='enum' href='../../../../zwreec/backend/zcode/zfile/enum.Operand.html' title='zwreec::backend::zcode::zfile::Operand'>Operand</a>,
+        operand2: <a class='enum' href='../../../../zwreec/backend/zcode/zfile/enum.Operand.html' title='zwreec::backend::zcode::zfile::Operand'>Operand</a>,
+        save_variable: <a class='struct' href='../../../../zwreec/backend/zcode/zfile/struct.Variable.html' title='zwreec::backend::zcode::zfile::Variable'>Variable</a>,
+    },
+    Div {
+        operand1: <a class='enum' href='../../../../zwreec/backend/zcode/zfile/enum.Operand.html' title='zwreec::backend::zcode::zfile::Operand'>Operand</a>,
+        operand2: <a class='enum' href='../../../../zwreec/backend/zcode/zfile/enum.Operand.html' title='zwreec::backend::zcode::zfile::Operand'>Operand</a>,
+        save_variable: <a class='struct' href='../../../../zwreec/backend/zcode/zfile/struct.Variable.html' title='zwreec::backend::zcode::zfile::Variable'>Variable</a>,
+    },
+    Mod {
+        operand1: <a class='enum' href='../../../../zwreec/backend/zcode/zfile/enum.Operand.html' title='zwreec::backend::zcode::zfile::Operand'>Operand</a>,
+        operand2: <a class='enum' href='../../../../zwreec/backend/zcode/zfile/enum.Operand.html' title='zwreec::backend::zcode::zfile::Operand'>Operand</a>,
+        save_variable: <a class='struct' href='../../../../zwreec/backend/zcode/zfile/struct.Variable.html' title='zwreec::backend::zcode::zfile::Variable'>Variable</a>,
+    },
+    Or {
+        operand1: <a class='enum' href='../../../../zwreec/backend/zcode/zfile/enum.Operand.html' title='zwreec::backend::zcode::zfile::Operand'>Operand</a>,
+        operand2: <a class='enum' href='../../../../zwreec/backend/zcode/zfile/enum.Operand.html' title='zwreec::backend::zcode::zfile::Operand'>Operand</a>,
+        save_variable: <a class='struct' href='../../../../zwreec/backend/zcode/zfile/struct.Variable.html' title='zwreec::backend::zcode::zfile::Variable'>Variable</a>,
+    },
+    And {
+        operand1: <a class='enum' href='../../../../zwreec/backend/zcode/zfile/enum.Operand.html' title='zwreec::backend::zcode::zfile::Operand'>Operand</a>,
+        operand2: <a class='enum' href='../../../../zwreec/backend/zcode/zfile/enum.Operand.html' title='zwreec::backend::zcode::zfile::Operand'>Operand</a>,
+        save_variable: <a class='struct' href='../../../../zwreec/backend/zcode/zfile/struct.Variable.html' title='zwreec::backend::zcode::zfile::Variable'>Variable</a>,
+    },
+    Not {
+        operand: <a class='enum' href='../../../../zwreec/backend/zcode/zfile/enum.Operand.html' title='zwreec::backend::zcode::zfile::Operand'>Operand</a>,
+        result: <a class='struct' href='../../../../zwreec/backend/zcode/zfile/struct.Variable.html' title='zwreec::backend::zcode::zfile::Variable'>Variable</a>,
+    },
+    Jump {
+        jump_to_label: <a class='struct' href='http://doc.rust-lang.org/nightly/collections/string/struct.String.html' title='collections::string::String'>String</a>,
+    },
+    LoadW {
+        array_address: <a class='enum' href='../../../../zwreec/backend/zcode/zfile/enum.Operand.html' title='zwreec::backend::zcode::zfile::Operand'>Operand</a>,
+        index: <a class='struct' href='../../../../zwreec/backend/zcode/zfile/struct.Variable.html' title='zwreec::backend::zcode::zfile::Variable'>Variable</a>,
+        variable: <a class='struct' href='../../../../zwreec/backend/zcode/zfile/struct.Variable.html' title='zwreec::backend::zcode::zfile::Variable'>Variable</a>,
+    },
+    SetCursor {
+        line: <a href='http://doc.rust-lang.org/nightly/std/primitive.u8.html'>u8</a>,
+        col: <a href='http://doc.rust-lang.org/nightly/std/primitive.u8.html'>u8</a>,
+    },
+    SetCursorOperand {
+        row: <a class='enum' href='../../../../zwreec/backend/zcode/zfile/enum.Operand.html' title='zwreec::backend::zcode::zfile::Operand'>Operand</a>,
+        col: <a class='enum' href='../../../../zwreec/backend/zcode/zfile/enum.Operand.html' title='zwreec::backend::zcode::zfile::Operand'>Operand</a>,
+    },
+    UpdateCursorPos,
+    GetCursor {
+        store_addr: <a class='enum' href='../../../../zwreec/backend/zcode/zfile/enum.Operand.html' title='zwreec::backend::zcode::zfile::Operand'>Operand</a>,
+    },
+    EraseWindow {
+        value: <a href='http://doc.rust-lang.org/nightly/std/primitive.i8.html'>i8</a>,
+    },
+    EraseLine,
+    SetVarType {
+        variable: <a class='struct' href='../../../../zwreec/backend/zcode/zfile/struct.Variable.html' title='zwreec::backend::zcode::zfile::Variable'>Variable</a>,
+        vartype: <a class='enum' href='../../../../zwreec/backend/zcode/zfile/enum.Type.html' title='zwreec::backend::zcode::zfile::Type'>Type</a>,
+    },
+    CopyVarType {
+        variable: <a class='struct' href='../../../../zwreec/backend/zcode/zfile/struct.Variable.html' title='zwreec::backend::zcode::zfile::Variable'>Variable</a>,
+        from: <a class='enum' href='../../../../zwreec/backend/zcode/zfile/enum.Operand.html' title='zwreec::backend::zcode::zfile::Operand'>Operand</a>,
+    },
+    GetVarType {
+        variable: <a class='struct' href='../../../../zwreec/backend/zcode/zfile/struct.Variable.html' title='zwreec::backend::zcode::zfile::Variable'>Variable</a>,
+        result: <a class='struct' href='../../../../zwreec/backend/zcode/zfile/struct.Variable.html' title='zwreec::backend::zcode::zfile::Variable'>Variable</a>,
+    },
+    Quit,
+}</pre><div class='docblock'><p>ZOP: Z-Code op code and pseudo op-code representation.</p>
+
+<p>These structs contain instructions to generate Z-Machine op-codes.
+To generate the op-codes see <code>backend::zcode::zfile::Zfile::emit</code>.</p>
+</div><h2 class='variants'>Variants</h2>
+<table><tr><td id='variant.PrintUnicode'><code>PrintUnicode</code></td><td><div class='docblock'><p>Prints a unicode character.</p>
+</div><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.PrintUnicode.field.c'><code>c</code></td><td></td></tr></table></td></tr><tr><td id='variant.PrintUnicodeVar'><code>PrintUnicodeVar</code></td><td><div class='docblock'><p>Prints the unicode character in the specified variable.
+<code>var</code> contains a 16 bit variable that contains the character.</p>
+</div><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.PrintUnicodeVar.field.var'><code>var</code></td><td></td></tr></table></td></tr><tr><td id='variant.PrintUnicodeStr'><code>PrintUnicodeStr</code></td><td><div class='docblock'><p>Prints the unicode string at the address specified.</p>
+</div><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.PrintUnicodeStr.field.address'><code>address</code></td><td></td></tr></table></td></tr><tr><td id='variant.PrintChar'><code>PrintChar</code></td><td><div class='docblock'><p>Print a ZSCII character.</p>
+</div><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.PrintChar.field.var'><code>var</code></td><td></td></tr></table></td></tr><tr><td id='variant.Print'><code>Print</code></td><td><div class='docblock'><p>Print a ZSCII string.</p>
+</div><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.Print.field.text'><code>text</code></td><td></td></tr></table></td></tr><tr><td id='variant.PrintNumVar'><code>PrintNumVar</code></td><td><div class='docblock'><p>Print a numeric variable.</p>
+</div><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.PrintNumVar.field.variable'><code>variable</code></td><td></td></tr></table></td></tr><tr><td id='variant.PrintVar'><code>PrintVar</code></td><td><div class='docblock'><p>Print a variable.</p>
+</div><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.PrintVar.field.variable'><code>variable</code></td><td></td></tr></table></td></tr><tr><td id='variant.PrintPaddr'><code>PrintPaddr</code></td><td><div class='docblock'><p>Print the ZSCII string at the packed address <code>address</code>.</p>
+</div><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.PrintPaddr.field.address'><code>address</code></td><td></td></tr></table></td></tr><tr><td id='variant.PrintAddr'><code>PrintAddr</code></td><td><div class='docblock'><p>Print the ZSCII string at the large address specified.</p>
+</div><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.PrintAddr.field.address'><code>address</code></td><td></td></tr></table></td></tr><tr><td id='variant.PrintOps'><code>PrintOps</code></td><td><div class='docblock'><p>Generate print op-codes for the specified string.</p>
+
+<p>This generates ZSCII op-codes for the supported characters and prints unicode characters
+separately.</p>
+</div><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.PrintOps.field.text'><code>text</code></td><td></td></tr></table></td></tr><tr><td id='variant.Call1N'><code>Call1N</code></td><td><div class='docblock'><p>1OP: Call a routine with one argument.</p>
+</div><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.Call1N.field.jump_to_label'><code>jump_to_label</code></td><td></td></tr></table></td></tr><tr><td id='variant.Call2NWithAddress'><code>Call2NWithAddress</code></td><td><div class='docblock'><p>2OP: Call a routine with one argument (at the specified label) and throws the result away.</p>
+</div><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.Call2NWithAddress.field.jump_to_label'><code>jump_to_label</code></td><td></td></tr><tr><td id='variant.Call2NWithAddress.field.address'><code>address</code></td><td></td></tr></table></td></tr><tr><td id='variant.Call2NWithArg'><code>Call2NWithArg</code></td><td><div class='docblock'><p>2OP: Call a routine with one argument and store the result in <code>arg</code>.</p>
+</div><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.Call2NWithArg.field.jump_to_label'><code>jump_to_label</code></td><td></td></tr><tr><td id='variant.Call2NWithArg.field.arg'><code>arg</code></td><td></td></tr></table></td></tr><tr><td id='variant.Call1NVar'><code>Call1NVar</code></td><td><div class='docblock'><p>1OP: Call a routine with one variable argument.</p>
+</div><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.Call1NVar.field.variable'><code>variable</code></td><td></td></tr></table></td></tr><tr><td id='variant.Call2S'><code>Call2S</code></td><td><div class='docblock'><p>2OP: Call a routine with one argument and store the return value in <code>result</code>.</p>
+</div><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.Call2S.field.jump_to_label'><code>jump_to_label</code></td><td></td></tr><tr><td id='variant.Call2S.field.arg'><code>arg</code></td><td></td></tr><tr><td id='variant.Call2S.field.result'><code>result</code></td><td></td></tr></table></td></tr><tr><td id='variant.CallVNA2'><code>CallVNA2</code></td><td><div class='docblock'><p>VAROP: Call a routine with two arguments and throw result away.</p>
+</div><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.CallVNA2.field.jump_to_label'><code>jump_to_label</code></td><td></td></tr><tr><td id='variant.CallVNA2.field.arg1'><code>arg1</code></td><td></td></tr><tr><td id='variant.CallVNA2.field.arg2'><code>arg2</code></td><td></td></tr></table></td></tr><tr><td id='variant.CallVNA3'><code>CallVNA3</code></td><td><div class='docblock'><p>VAROP: Call a routine with three arguments and throw result away.</p>
+</div><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.CallVNA3.field.jump_to_label'><code>jump_to_label</code></td><td></td></tr><tr><td id='variant.CallVNA3.field.arg1'><code>arg1</code></td><td></td></tr><tr><td id='variant.CallVNA3.field.arg2'><code>arg2</code></td><td></td></tr><tr><td id='variant.CallVNA3.field.arg3'><code>arg3</code></td><td></td></tr></table></td></tr><tr><td id='variant.CallVSA2'><code>CallVSA2</code></td><td><div class='docblock'><p>VAROP: Call a routine with two arguments and store result in <code>result</code>.</p>
+</div><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.CallVSA2.field.jump_to_label'><code>jump_to_label</code></td><td></td></tr><tr><td id='variant.CallVSA2.field.arg1'><code>arg1</code></td><td></td></tr><tr><td id='variant.CallVSA2.field.arg2'><code>arg2</code></td><td></td></tr><tr><td id='variant.CallVSA2.field.result'><code>result</code></td><td></td></tr></table></td></tr><tr><td id='variant.CallVSA3'><code>CallVSA3</code></td><td><div class='docblock'><p>VAROP: Call a routine with three arguments and store result in <code>result</code>.</p>
+</div><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.CallVSA3.field.jump_to_label'><code>jump_to_label</code></td><td></td></tr><tr><td id='variant.CallVSA3.field.arg1'><code>arg1</code></td><td></td></tr><tr><td id='variant.CallVSA3.field.arg2'><code>arg2</code></td><td></td></tr><tr><td id='variant.CallVSA3.field.arg3'><code>arg3</code></td><td></td></tr><tr><td id='variant.CallVSA3.field.result'><code>result</code></td><td></td></tr></table></td></tr><tr><td id='variant.CallVS2A5'><code>CallVS2A5</code></td><td><div class='docblock'><p>VAROP with types-byte: Call a routine with five arguments and store the return value in <code>result</code>.</p>
+</div><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.CallVS2A5.field.jump_to_label'><code>jump_to_label</code></td><td></td></tr><tr><td id='variant.CallVS2A5.field.arg1'><code>arg1</code></td><td></td></tr><tr><td id='variant.CallVS2A5.field.arg2'><code>arg2</code></td><td></td></tr><tr><td id='variant.CallVS2A5.field.arg3'><code>arg3</code></td><td></td></tr><tr><td id='variant.CallVS2A5.field.arg4'><code>arg4</code></td><td></td></tr><tr><td id='variant.CallVS2A5.field.arg5'><code>arg5</code></td><td></td></tr><tr><td id='variant.CallVS2A5.field.result'><code>result</code></td><td></td></tr></table></td></tr><tr><td id='variant.Routine'><code>Routine</code></td><td><div class='docblock'><p>Declares a Z-Routine</p>
+</div><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.Routine.field.name'><code>name</code></td><td></td></tr><tr><td id='variant.Routine.field.count_variables'><code>count_variables</code></td><td></td></tr></table></td></tr><tr><td id='variant.Label'><code>Label</code></td><td><div class='docblock'><p>Declares a label.</p>
+
+<p>This is only used internally to reference different parts of the generated file.</p>
+</div><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.Label.field.name'><code>name</code></td><td></td></tr></table></td></tr><tr><td id='variant.Newline'><code>Newline</code></td><td><div class='docblock'><p>Prints a newline.</p>
+</div></td></tr><tr><td id='variant.SetColor'><code>SetColor</code></td><td><div class='docblock'><p>Sets the foreground and background color to constants specified.</p>
+</div><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.SetColor.field.foreground'><code>foreground</code></td><td></td></tr><tr><td id='variant.SetColor.field.background'><code>background</code></td><td></td></tr></table></td></tr><tr><td id='variant.SetColorVar'><code>SetColorVar</code></td><td><div class='docblock'><p>Sets the foreground and background color to the variables with the IDs specified.</p>
+</div><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.SetColorVar.field.foreground'><code>foreground</code></td><td></td></tr><tr><td id='variant.SetColorVar.field.background'><code>background</code></td><td></td></tr></table></td></tr><tr><td id='variant.SetTextStyle'><code>SetTextStyle</code></td><td><div class='docblock'><p>Set text style to <code>bold</code>, <code>reverse</code> (inverse colors), <code>monospace</code> and <code>italic</code>.</p>
+</div><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.SetTextStyle.field.bold'><code>bold</code></td><td></td></tr><tr><td id='variant.SetTextStyle.field.reverse'><code>reverse</code></td><td></td></tr><tr><td id='variant.SetTextStyle.field.monospace'><code>monospace</code></td><td></td></tr><tr><td id='variant.SetTextStyle.field.italic'><code>italic</code></td><td></td></tr></table></td></tr><tr><td id='variant.StoreVariable'><code>StoreVariable</code></td><td><div class='docblock'><p>Store the value in <code>value</code> to the variable.</p>
+</div><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.StoreVariable.field.variable'><code>variable</code></td><td></td></tr><tr><td id='variant.StoreVariable.field.value'><code>value</code></td><td></td></tr></table></td></tr><tr><td id='variant.StoreW'><code>StoreW</code></td><td><div class='docblock'><p>Store the word in <code>variable</code> at <code>array_address + index</code>.</p>
+</div><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.StoreW.field.array_address'><code>array_address</code></td><td></td></tr><tr><td id='variant.StoreW.field.index'><code>index</code></td><td></td></tr><tr><td id='variant.StoreW.field.variable'><code>variable</code></td><td></td></tr></table></td></tr><tr><td id='variant.StoreB'><code>StoreB</code></td><td><div class='docblock'><p>Store the byte in <code>variable</code> at <code>array_address + index</code>.</p>
+</div><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.StoreB.field.array_address'><code>array_address</code></td><td></td></tr><tr><td id='variant.StoreB.field.index'><code>index</code></td><td></td></tr><tr><td id='variant.StoreB.field.variable'><code>variable</code></td><td></td></tr></table></td></tr><tr><td id='variant.StoreBOperand'><code>StoreBOperand</code></td><td><div class='docblock'><p>Store the byte in <code>operand</code> at <code>array_address + index</code>.</p>
+</div><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.StoreBOperand.field.array_address'><code>array_address</code></td><td></td></tr><tr><td id='variant.StoreBOperand.field.index'><code>index</code></td><td></td></tr><tr><td id='variant.StoreBOperand.field.operand'><code>operand</code></td><td></td></tr></table></td></tr><tr><td id='variant.LoadBOperand'><code>LoadBOperand</code></td><td><div class='docblock'><p>Load the byte at <code>array_address + index</code> into <code>variable</code>.</p>
+</div><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.LoadBOperand.field.array_address'><code>array_address</code></td><td></td></tr><tr><td id='variant.LoadBOperand.field.index'><code>index</code></td><td></td></tr><tr><td id='variant.LoadBOperand.field.variable'><code>variable</code></td><td></td></tr></table></td></tr><tr><td id='variant.PushVar'><code>PushVar</code></td><td><div class='docblock'><p>Push a variable on the stack.</p>
+</div><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.PushVar.field.variable'><code>variable</code></td><td></td></tr></table></td></tr><tr><td id='variant.PullVar'><code>PullVar</code></td><td><div class='docblock'><p>Pull a variable from the stack.</p>
+</div><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.PullVar.field.variable'><code>variable</code></td><td></td></tr></table></td></tr><tr><td id='variant.Inc'><code>Inc</code></td><td><div class='docblock'><p>Increment a variable by 1: <code>variable += 1</code>.</p>
+</div><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.Inc.field.variable'><code>variable</code></td><td></td></tr></table></td></tr><tr><td id='variant.Dec'><code>Dec</code></td><td><div class='docblock'><p>Decrement a variable by 1: <code>variable -= 1</code>.</p>
+</div><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.Dec.field.variable'><code>variable</code></td><td></td></tr></table></td></tr><tr><td id='variant.Ret'><code>Ret</code></td><td><div class='docblock'><p>Return from the Z-Routine with the value in the specified Operand.</p>
+</div><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.Ret.field.value'><code>value</code></td><td></td></tr></table></td></tr><tr><td id='variant.JE'><code>JE</code></td><td><div class='docblock'><p>Jump if <code>operand1 == operand2</code>.</p>
+</div><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.JE.field.operand1'><code>operand1</code></td><td></td></tr><tr><td id='variant.JE.field.operand2'><code>operand2</code></td><td></td></tr><tr><td id='variant.JE.field.jump_to_label'><code>jump_to_label</code></td><td></td></tr></table></td></tr><tr><td id='variant.JNE'><code>JNE</code></td><td><div class='docblock'><p>Jump if <code>operand1 != operand2</code>.</p>
+</div><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.JNE.field.operand1'><code>operand1</code></td><td></td></tr><tr><td id='variant.JNE.field.operand2'><code>operand2</code></td><td></td></tr><tr><td id='variant.JNE.field.jump_to_label'><code>jump_to_label</code></td><td></td></tr></table></td></tr><tr><td id='variant.JL'><code>JL</code></td><td><div class='docblock'><p>Jump if <code>operand1 &lt; operand2</code>.</p>
+</div><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.JL.field.operand1'><code>operand1</code></td><td></td></tr><tr><td id='variant.JL.field.operand2'><code>operand2</code></td><td></td></tr><tr><td id='variant.JL.field.jump_to_label'><code>jump_to_label</code></td><td></td></tr></table></td></tr><tr><td id='variant.JLE'><code>JLE</code></td><td><div class='docblock'><p>Jump if <code>operand1 &lt;= operand2</code>.</p>
+</div><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.JLE.field.operand1'><code>operand1</code></td><td></td></tr><tr><td id='variant.JLE.field.operand2'><code>operand2</code></td><td></td></tr><tr><td id='variant.JLE.field.jump_to_label'><code>jump_to_label</code></td><td></td></tr></table></td></tr><tr><td id='variant.JG'><code>JG</code></td><td><div class='docblock'><p>Jump if <code>operand1 &gt; operand2</code>.</p>
+</div><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.JG.field.operand1'><code>operand1</code></td><td></td></tr><tr><td id='variant.JG.field.operand2'><code>operand2</code></td><td></td></tr><tr><td id='variant.JG.field.jump_to_label'><code>jump_to_label</code></td><td></td></tr></table></td></tr><tr><td id='variant.JGE'><code>JGE</code></td><td><div class='docblock'><p>Jump if <code>operand1 &gt;= operand2</code>.</p>
+</div><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.JGE.field.operand1'><code>operand1</code></td><td></td></tr><tr><td id='variant.JGE.field.operand2'><code>operand2</code></td><td></td></tr><tr><td id='variant.JGE.field.jump_to_label'><code>jump_to_label</code></td><td></td></tr></table></td></tr><tr><td id='variant.Random'><code>Random</code></td><td><div class='docblock'><p>Store a random number between 1 and <code>range</code> in <code>variable</code>.</p>
+</div><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.Random.field.range'><code>range</code></td><td></td></tr><tr><td id='variant.Random.field.variable'><code>variable</code></td><td></td></tr></table></td></tr><tr><td id='variant.ReadChar'><code>ReadChar</code></td><td><div class='docblock'><p>Read a character from standard input in the variable.</p>
+</div><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.ReadChar.field.local_var_id'><code>local_var_id</code></td><td></td></tr></table></td></tr><tr><td id='variant.ReadCharTimer'><code>ReadCharTimer</code></td><td><div class='docblock'><p>Read a character from standard input in the variable or time out after <code>timer / 10</code> seconds elapsed.</p>
+</div><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.ReadCharTimer.field.local_var_id'><code>local_var_id</code></td><td></td></tr><tr><td id='variant.ReadCharTimer.field.timer'><code>timer</code></td><td></td></tr><tr><td id='variant.ReadCharTimer.field.routine'><code>routine</code></td><td></td></tr></table></td></tr><tr><td id='variant.AddTypes'><code>AddTypes</code></td><td><div class='docblock'><p>Helper function to add two values according to their types.</p>
+</div><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.AddTypes.field.operand1'><code>operand1</code></td><td></td></tr><tr><td id='variant.AddTypes.field.operand2'><code>operand2</code></td><td></td></tr><tr><td id='variant.AddTypes.field.tmp1'><code>tmp1</code></td><td></td></tr><tr><td id='variant.AddTypes.field.tmp2'><code>tmp2</code></td><td></td></tr><tr><td id='variant.AddTypes.field.save_variable'><code>save_variable</code></td><td></td></tr></table></td></tr><tr><td id='variant.Add'><code>Add</code></td><td><div class='docblock'><p>Add two values: <code>save_variable = operand1 + operand2</code>.</p>
+</div><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.Add.field.operand1'><code>operand1</code></td><td></td></tr><tr><td id='variant.Add.field.operand2'><code>operand2</code></td><td></td></tr><tr><td id='variant.Add.field.save_variable'><code>save_variable</code></td><td></td></tr></table></td></tr><tr><td id='variant.Sub'><code>Sub</code></td><td><div class='docblock'><p>Subtract two values: <code>save_variable = operand1 - operand2</code>.</p>
+</div><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.Sub.field.operand1'><code>operand1</code></td><td></td></tr><tr><td id='variant.Sub.field.operand2'><code>operand2</code></td><td></td></tr><tr><td id='variant.Sub.field.save_variable'><code>save_variable</code></td><td></td></tr></table></td></tr><tr><td id='variant.Mul'><code>Mul</code></td><td><div class='docblock'><p>Multiply two values: <code>save_variable = operand1 * operand2</code>.</p>
+</div><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.Mul.field.operand1'><code>operand1</code></td><td></td></tr><tr><td id='variant.Mul.field.operand2'><code>operand2</code></td><td></td></tr><tr><td id='variant.Mul.field.save_variable'><code>save_variable</code></td><td></td></tr></table></td></tr><tr><td id='variant.Div'><code>Div</code></td><td><div class='docblock'><p>Divide two values: <code>save_variable = operand1 / operand2</code>.</p>
+</div><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.Div.field.operand1'><code>operand1</code></td><td></td></tr><tr><td id='variant.Div.field.operand2'><code>operand2</code></td><td></td></tr><tr><td id='variant.Div.field.save_variable'><code>save_variable</code></td><td></td></tr></table></td></tr><tr><td id='variant.Mod'><code>Mod</code></td><td><div class='docblock'><p>Modulo operation: <code>save_variable = operand1 % operand2</code>.</p>
+</div><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.Mod.field.operand1'><code>operand1</code></td><td></td></tr><tr><td id='variant.Mod.field.operand2'><code>operand2</code></td><td></td></tr><tr><td id='variant.Mod.field.save_variable'><code>save_variable</code></td><td></td></tr></table></td></tr><tr><td id='variant.Or'><code>Or</code></td><td><div class='docblock'><p>Bitwise OR: <code>save_variable = operand1 | operand2</code>.</p>
+</div><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.Or.field.operand1'><code>operand1</code></td><td></td></tr><tr><td id='variant.Or.field.operand2'><code>operand2</code></td><td></td></tr><tr><td id='variant.Or.field.save_variable'><code>save_variable</code></td><td></td></tr></table></td></tr><tr><td id='variant.And'><code>And</code></td><td><div class='docblock'><p>Bitwise AND: <code>save_variable = operand1 &amp; operand2</code>.</p>
+</div><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.And.field.operand1'><code>operand1</code></td><td></td></tr><tr><td id='variant.And.field.operand2'><code>operand2</code></td><td></td></tr><tr><td id='variant.And.field.save_variable'><code>save_variable</code></td><td></td></tr></table></td></tr><tr><td id='variant.Not'><code>Not</code></td><td><div class='docblock'><p>Bitwise NOT: <code>result = ~operand</code>.</p>
+</div><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.Not.field.operand'><code>operand</code></td><td></td></tr><tr><td id='variant.Not.field.result'><code>result</code></td><td></td></tr></table></td></tr><tr><td id='variant.Jump'><code>Jump</code></td><td><div class='docblock'><p>Jump to a label.</p>
+</div><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.Jump.field.jump_to_label'><code>jump_to_label</code></td><td></td></tr></table></td></tr><tr><td id='variant.LoadW'><code>LoadW</code></td><td><div class='docblock'><p>Loads a word: <code>variable = array_address[index]</code>.</p>
+</div><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.LoadW.field.array_address'><code>array_address</code></td><td></td></tr><tr><td id='variant.LoadW.field.index'><code>index</code></td><td></td></tr><tr><td id='variant.LoadW.field.variable'><code>variable</code></td><td></td></tr></table></td></tr><tr><td id='variant.SetCursor'><code>SetCursor</code></td><td><div class='docblock'><p>Positions the cursor at the specified <code>line</code> and <code>column</code>.</p>
+</div><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.SetCursor.field.line'><code>line</code></td><td></td></tr><tr><td id='variant.SetCursor.field.col'><code>col</code></td><td></td></tr></table></td></tr><tr><td id='variant.SetCursorOperand'><code>SetCursorOperand</code></td><td><div class='docblock'><p>Positions the cursor at the <code>line</code> and <code>column</code> in the given Operands.</p>
+</div><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.SetCursorOperand.field.row'><code>row</code></td><td></td></tr><tr><td id='variant.SetCursorOperand.field.col'><code>col</code></td><td></td></tr></table></td></tr><tr><td id='variant.UpdateCursorPos'><code>UpdateCursorPos</code></td><td><div class='docblock'><p>Update the cursor position variable with current data.</p>
+</div></td></tr><tr><td id='variant.GetCursor'><code>GetCursor</code></td><td><div class='docblock'><p>Store the current cursor position at <code>store_addr</code>.</p>
+</div><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.GetCursor.field.store_addr'><code>store_addr</code></td><td></td></tr></table></td></tr><tr><td id='variant.EraseWindow'><code>EraseWindow</code></td><td><div class='docblock'><p>Erase the entire window with the specified id.</p>
+</div><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.EraseWindow.field.value'><code>value</code></td><td></td></tr></table></td></tr><tr><td id='variant.EraseLine'><code>EraseLine</code></td><td><div class='docblock'><p>Erase the current line starting from the cursor.</p>
+</div></td></tr><tr><td id='variant.SetVarType'><code>SetVarType</code></td><td><div class='docblock'><p>Changes the variable type of the specified variable.</p>
+</div><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.SetVarType.field.variable'><code>variable</code></td><td></td></tr><tr><td id='variant.SetVarType.field.vartype'><code>vartype</code></td><td></td></tr></table></td></tr><tr><td id='variant.CopyVarType'><code>CopyVarType</code></td><td><div class='docblock'><p>Copies the variable type of <code>from</code> to <code>variable</code>.</p>
+</div><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.CopyVarType.field.variable'><code>variable</code></td><td></td></tr><tr><td id='variant.CopyVarType.field.from'><code>from</code></td><td></td></tr></table></td></tr><tr><td id='variant.GetVarType'><code>GetVarType</code></td><td><div class='docblock'><p>Stores the variable type of <code>variable</code> in <code>result</code>.</p>
+</div><h3 class='fields'>Fields</h3>
+
+                                              <table><tr><td id='variant.GetVarType.field.variable'><code>variable</code></td><td></td></tr><tr><td id='variant.GetVarType.field.result'><code>result</code></td><td></td></tr></table></td></tr><tr><td id='variant.Quit'><code>Quit</code></td><td><div class='docblock'><p>Quits the Z-Machine interpreter immediately.</p>
+</div></td></tr></table><h2 id='implementations'>Trait Implementations</h2><h3 id='derived_implementations'>Derived Implementations </h3><h3 class='impl'><code>impl <a class='trait' href='http://doc.rust-lang.org/nightly/core/fmt/trait.Debug.html' title='core::fmt::Debug'>Debug</a> for <a class='enum' href='../../../../zwreec/backend/zcode/zfile/enum.ZOP.html' title='zwreec::backend::zcode::zfile::ZOP'>ZOP</a></code></h3><div class='impl-items'><h4 id='method.fmt' class='method'><code>fn <a href='http://doc.rust-lang.org/nightly/core/fmt/trait.Debug.html#method.fmt' class='fnname'>fmt</a>(&amp;self, __arg_0: &amp;mut <a class='struct' href='http://doc.rust-lang.org/nightly/core/fmt/struct.Formatter.html' title='core::fmt::Formatter'>Formatter</a>) -&gt; <a class='type' href='http://doc.rust-lang.org/nightly/core/fmt/type.Result.html' title='core::fmt::Result'>Result</a></code></h4>
+</div></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <div id="help" class="hidden">
+        <div class="shortcuts">
+            <h1>Keyboard shortcuts</h1>
+            <dl>
+                <dt>?</dt>
+                <dd>Show this help dialog</dd>
+                <dt>S</dt>
+                <dd>Focus the search field</dd>
+                <dt>&larrb;</dt>
+                <dd>Move up in search results</dd>
+                <dt>&rarrb;</dt>
+                <dd>Move down in search results</dd>
+                <dt>&#9166;</dt>
+                <dd>Go to active search result</dd>
+            </dl>
+        </div>
+        <div class="infos">
+            <h1>Search tricks</h1>
+            <p>
+                Prefix searches with a type followed by a colon (e.g.
+                <code>fn:</code>) to restrict the search to a given type.
+            </p>
+            <p>
+                Accepted types are: <code>fn</code>, <code>mod</code>,
+                <code>struct</code>, <code>enum</code>,
+                <code>trait</code>, <code>typedef</code> (or
+                <code>tdef</code>).
+            </p>
+            <p>
+                Search functions by type signature (e.g.
+                <code>vec -> usize</code>)
+            </p>
+        </div>
+    </div>
+
+    
+
+    <script>
+        window.rootPath = "../../../../";
+        window.currentCrate = "zwreec";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../../../../jquery.js"></script>
+    <script src="../../../../main.js"></script>
+    
+    <script async src="../../../../search-index.js"></script>
+</body>
+</html>

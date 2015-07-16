@@ -1,0 +1,1 @@
+initSidebarItems({"fn":[["handle_bom_encoding","Checks for and removes a UTF-8 Byte Order Mark (BOM) from the input stream."]]});

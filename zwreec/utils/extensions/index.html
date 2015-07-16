@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `extensions` mod in crate `zwreec`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, extensions">
+
+    <title>zwreec::utils::extensions - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../../../main.css">
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <section class="sidebar">
+        <a href='../../../zwreec/index.html'><img src='https://dl.dropboxusercontent.com/u/70410095/zwreec/logo.png' alt='' width='100'></a>
+        <p class='location'><a href='../../index.html'>zwreec</a>::<wbr><a href='../index.html'>utils</a></p><script>window.sidebarCurrent = {name: 'extensions', ty: 'mod', relpath: '../'};</script><script defer src="../sidebar-items.js"></script>
+    </section>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press 'S' to search, '?' for more options..."
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content mod">
+<h1 class='fqn'><span class='in-band'>Module <a href='../../index.html'>zwreec</a>::<wbr><a href='../index.html'>utils</a>::<wbr><a class='mod' href=''>extensions</a></span><span class='out-of-band'><span id='render-detail'>
+            <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                [<span class='inner'>&#x2212;</span>]
+            </a>
+        </span><a id='src-1943' class='srclink' href='../../../src/zwreec/utils/extensions.rs.html#1-409' title='goto source code'>[src]</a></span></h1>
+<div class='docblock'><p>Extensions to existing types used in the zwreec compiler</p>
+
+<p>Currently this contains only extensions to the Iterator trait yielding new Iterator types
+that wrap certain functionality, that is used to filter/construct/lookahead all objects
+passed and iterated upon in the compiler, making it possible to have most of the compiler
+chain to be lazy_evaluated and even multi-threaded.</p>
+</div><h2 id='structs' class='section-header'><a href="#structs">Structs</a></h2>
+<table>
+                    <tr class=' module-item'>
+                        <td><a class='struct' href='struct.Cached.html'
+                               title='zwreec::utils::extensions::Cached'>Cached</a></td>
+                        <td class='docblock short'>
+                             <p>An Iterator that performs all iteration in a seperate therad and caches them</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='struct' href='struct.Constructor.html'
+                               title='zwreec::utils::extensions::Constructor'>Constructor</a></td>
+                        <td class='docblock short'>
+                             <p>An iterator to maintain state while iterating another iterator and allows to hold the currently active
+object to modify it (/construct it), until the next element is created</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='struct' href='struct.FilteringScan.html'
+                               title='zwreec::utils::extensions::FilteringScan'>FilteringScan</a></td>
+                        <td class='docblock short'>
+                             <p>An iterator to maintain state while iterating another iterator and allows filtering</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='struct' href='struct.Parser.html'
+                               title='zwreec::utils::extensions::Parser'>Parser</a></td>
+                        <td class='docblock short'>
+                             <p>An iterator to maintain state while iterating another iterator and allows more complex parsing</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='struct' href='struct.Peeking.html'
+                               title='zwreec::utils::extensions::Peeking'>Peeking</a></td>
+                        <td class='docblock short'>
+                             <p>An iterator that performs a lookahead of 1, utilizing the existing Peakable Iterator
+Can be stacked to perform an even greater lookahead</p>
+
+                        </td>
+                    </tr>
+                </table><h2 id='enums' class='section-header'><a href="#enums">Enums</a></h2>
+<table>
+                    <tr class=' module-item'>
+                        <td><a class='enum' href='enum.ParseResult.html'
+                               title='zwreec::utils::extensions::ParseResult'>ParseResult</a></td>
+                        <td class='docblock short'>
+                             <p>The result of a parsing operation</p>
+
+                        </td>
+                    </tr>
+                </table><h2 id='traits' class='section-header'><a href="#traits">Traits</a></h2>
+<table>
+                    <tr class=' module-item'>
+                        <td><a class='trait' href='trait.ConstructorExt.html'
+                               title='zwreec::utils::extensions::ConstructorExt'>ConstructorExt</a></td>
+                        <td class='docblock short'>
+                             <p>An extension to sized Iterators that specifies a function that returns a Constructor Iterator</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='trait' href='trait.FilteringScanExt.html'
+                               title='zwreec::utils::extensions::FilteringScanExt'>FilteringScanExt</a></td>
+                        <td class='docblock short'>
+                             <p>An extension to sized Iterators that specifies a function that returns a FilteringScan Iterator</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='trait' href='trait.ParserExt.html'
+                               title='zwreec::utils::extensions::ParserExt'>ParserExt</a></td>
+                        <td class='docblock short'>
+                             <p>An extension to sized Iterators that specifies a function that returns a Parser Iterator</p>
+
+                        </td>
+                    </tr>
+                
+                    <tr class=' module-item'>
+                        <td><a class='trait' href='trait.PeekingExt.html'
+                               title='zwreec::utils::extensions::PeekingExt'>PeekingExt</a></td>
+                        <td class='docblock short'>
+                             <p>An extension for sized Iterators that specifies a function that returns a Peeking Iterator</p>
+
+                        </td>
+                    </tr>
+                </table><h2 id='functions' class='section-header'><a href="#functions">Functions</a></h2>
+<table>
+                    <tr class=' module-item'>
+                        <td><a class='fn' href='fn.cached.html'
+                               title='zwreec::utils::extensions::cached'>cached</a></td>
+                        <td class='docblock short'>
+                             <p>A function to create a cached Iterator by passing the old Iterator by closure.
+If the underlying iterator does not support Send you can construct it in the closure</p>
+
+                        </td>
+                    </tr>
+                </table></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <div id="help" class="hidden">
+        <div class="shortcuts">
+            <h1>Keyboard shortcuts</h1>
+            <dl>
+                <dt>?</dt>
+                <dd>Show this help dialog</dd>
+                <dt>S</dt>
+                <dd>Focus the search field</dd>
+                <dt>&larrb;</dt>
+                <dd>Move up in search results</dd>
+                <dt>&rarrb;</dt>
+                <dd>Move down in search results</dd>
+                <dt>&#9166;</dt>
+                <dd>Go to active search result</dd>
+            </dl>
+        </div>
+        <div class="infos">
+            <h1>Search tricks</h1>
+            <p>
+                Prefix searches with a type followed by a colon (e.g.
+                <code>fn:</code>) to restrict the search to a given type.
+            </p>
+            <p>
+                Accepted types are: <code>fn</code>, <code>mod</code>,
+                <code>struct</code>, <code>enum</code>,
+                <code>trait</code>, <code>typedef</code> (or
+                <code>tdef</code>).
+            </p>
+            <p>
+                Search functions by type signature (e.g.
+                <code>vec -> usize</code>)
+            </p>
+        </div>
+    </div>
+
+    
+
+    <script>
+        window.rootPath = "../../../";
+        window.currentCrate = "zwreec";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../../../jquery.js"></script>
+    <script src="../../../main.js"></script>
+    
+    <script async src="../../../search-index.js"></script>
+</body>
+</html>

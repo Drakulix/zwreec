@@ -1,0 +1,1 @@
+initSidebarItems({"mod":[["error","Implementation of error logging for errors thrown in the compiler"],["extensions","Extensions to existing types used in the zwreec compiler"]]});

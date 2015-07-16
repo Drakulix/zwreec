@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `zwreec_options` fn in crate `zwreec`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, zwreec_options">
+
+    <title>zwreec::config::zwreec_options - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../../main.css">
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <section class="sidebar">
+        <a href='../../zwreec/index.html'><img src='https://dl.dropboxusercontent.com/u/70410095/zwreec/logo.png' alt='' width='100'></a>
+        <p class='location'><a href='../index.html'>zwreec</a>::<wbr><a href='index.html'>config</a></p><script>window.sidebarCurrent = {name: 'zwreec_options', ty: 'fn', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+    </section>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press 'S' to search, '?' for more options..."
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content fn">
+<h1 class='fqn'><span class='in-band'>Function <a href='../index.html'>zwreec</a>::<wbr><a href='index.html'>config</a>::<wbr><a class='fn' href=''>zwreec_options</a></span><span class='out-of-band'><span id='render-detail'>
+            <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                [<span class='inner'>&#x2212;</span>]
+            </a>
+        </span><a id='src-75400' class='srclink' href='../../src/zwreec/config/mod.rs.html#402-412' title='goto source code'>[src]</a></span></h1>
+<pre class='rust fn'>pub fn zwreec_options(opts: <a class='struct' href='../../getopts/struct.Options.html' title='getopts::Options'>Options</a>) -&gt; <a class='struct' href='../../getopts/struct.Options.html' title='getopts::Options'>Options</a></pre><div class='docblock'><p>Appends a <code>getopts::Options</code> with compiler specific flags.</p>
+
+<p>The method <code>Config::from_matches()</code> looks for very specific <code>getopts::Matches</code>.
+This function takes a <code>getopts::Options</code> to append it with Options required
+by <code>from_matches</code>. It currently adds three fields:</p>
+<pre id='rust-example-rendered' class='rust '>
+<span class='ident'>opts</span>.<span class='ident'>optmulti</span>(<span class='string'>&quot;F&quot;</span>, <span class='string'>&quot;feature&quot;</span>, <span class='string'>&quot;&quot;</span>, <span class='string'>&quot;FEAT&quot;</span>);
+<span class='ident'>opts</span>.<span class='ident'>optmulti</span>(<span class='string'>&quot;N&quot;</span>, <span class='string'>&quot;no-feature&quot;</span>, <span class='string'>&quot;enable or disable a feature (can occur multiple times).
+                    List of supported features (default):
+                        easter-egg (enabled)&quot;</span>, <span class='string'>&quot;FEAT&quot;</span>);
+<span class='ident'>opts</span>.<span class='ident'>optflag</span>(<span class='string'>&quot;e&quot;</span>, <span class='string'>&quot;generate-sample-zcode&quot;</span>, <span class='string'>&quot;writes out a sample zcode file, input file is not used and can be omitted&quot;</span>);
+</pre>
+
+<h1 id="example" class='section-header'><a
+                           href="#example">Example</a></h1>
+<p>You can use this function to append your <code>getopts::Options</code>.</p>
+<pre id='rust-example-rendered' class='rust '>
+
+<span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>opts</span> <span class='op'>=</span> <span class='ident'>getopts</span>::<span class='ident'>Options</span>::<span class='ident'>new</span>();
+<span class='ident'>opts</span>.<span class='ident'>optflag</span>(<span class='string'>&quot;h&quot;</span>, <span class='string'>&quot;help&quot;</span>, <span class='string'>&quot;print this message&quot;</span>);
+
+<span class='kw'>let</span> <span class='ident'>opts</span> <span class='op'>=</span> <span class='ident'>zwreec</span>::<span class='ident'>config</span>::<span class='ident'>zwreec_options</span>(<span class='ident'>opts</span>);
+</pre>
+
+<p>Another useful example is to use it to gernerate a more compact usage by
+having a function that only returns your options.</p>
+<pre id='rust-example-rendered' class='rust '>
+
+<span class='kw'>fn</span> <span class='ident'>options</span>() <span class='op'>-&gt;</span> <span class='ident'>getopts</span>::<span class='ident'>Options</span> {
+    <span class='kw'>let</span> <span class='kw-2'>mut</span> <span class='ident'>opts</span> <span class='op'>=</span> <span class='ident'>getopts</span>::<span class='ident'>Options</span>::<span class='ident'>new</span>();
+    <span class='ident'>opts</span>.<span class='ident'>optflag</span>(<span class='string'>&quot;h&quot;</span>, <span class='string'>&quot;help&quot;</span>, <span class='string'>&quot;display this help and exit&quot;</span>);
+    <span class='ident'>opts</span>.<span class='ident'>optflag</span>(<span class='string'>&quot;V&quot;</span>, <span class='string'>&quot;version&quot;</span>, <span class='string'>&quot;display version&quot;</span>);
+
+    <span class='ident'>opts</span>
+}
+
+<span class='kw'>fn</span> <span class='ident'>print_usage</span>(<span class='ident'>program</span>: <span class='kw-2'>&amp;</span><span class='ident'>str</span>, <span class='ident'>verbose</span>: <span class='ident'>bool</span>) {
+    <span class='kw'>let</span> <span class='ident'>brief</span> <span class='op'>=</span> <span class='macro'>format</span><span class='macro'>!</span>(<span class='string'>&quot;Usage: {} [options]&quot;</span>, <span class='ident'>program</span>);
+
+    <span class='kw'>let</span> <span class='ident'>opts</span> <span class='op'>=</span> <span class='kw'>if</span> <span class='ident'>verbose</span> {
+        <span class='ident'>zwreec</span>::<span class='ident'>config</span>::<span class='ident'>zwreec_options</span>(<span class='ident'>options</span>())
+    } <span class='kw'>else</span> {
+        <span class='ident'>options</span>()
+    };
+
+    <span class='macro'>print</span><span class='macro'>!</span>(<span class='string'>&quot;{}&quot;</span>, <span class='ident'>opts</span>.<span class='ident'>usage</span>(<span class='kw-2'>&amp;</span><span class='ident'>brief</span>));
+}
+</pre>
+
+<p>As you can see, <code>options()</code> returns your own command line options, which are then conditionally
+expanded by using <code>zwreec_options()</code>.</p>
+</div></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <div id="help" class="hidden">
+        <div class="shortcuts">
+            <h1>Keyboard shortcuts</h1>
+            <dl>
+                <dt>?</dt>
+                <dd>Show this help dialog</dd>
+                <dt>S</dt>
+                <dd>Focus the search field</dd>
+                <dt>&larrb;</dt>
+                <dd>Move up in search results</dd>
+                <dt>&rarrb;</dt>
+                <dd>Move down in search results</dd>
+                <dt>&#9166;</dt>
+                <dd>Go to active search result</dd>
+            </dl>
+        </div>
+        <div class="infos">
+            <h1>Search tricks</h1>
+            <p>
+                Prefix searches with a type followed by a colon (e.g.
+                <code>fn:</code>) to restrict the search to a given type.
+            </p>
+            <p>
+                Accepted types are: <code>fn</code>, <code>mod</code>,
+                <code>struct</code>, <code>enum</code>,
+                <code>trait</code>, <code>typedef</code> (or
+                <code>tdef</code>).
+            </p>
+            <p>
+                Search functions by type signature (e.g.
+                <code>vec -> usize</code>)
+            </p>
+        </div>
+    </div>
+
+    
+
+    <script>
+        window.rootPath = "../../";
+        window.currentCrate = "zwreec";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../../jquery.js"></script>
+    <script src="../../main.js"></script>
+    
+    <script async src="../../search-index.js"></script>
+</body>
+</html>
